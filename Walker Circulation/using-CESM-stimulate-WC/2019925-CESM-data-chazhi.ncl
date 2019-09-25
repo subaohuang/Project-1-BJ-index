@@ -32,14 +32,23 @@
     ;;------------------将sigma混合坐标系进行差值---------------------------------
     Unew = vinth2p (U(time|:,lev|:,lat|:,lon|:),hyam,hybm,pnew,f1->PS,1,P0mb,1,True)
 
+
     Vnew = vinth2p (V(time|:,lev|:,lat|:,lon|:),hyam,hybm,pnew,f1->PS,1,P0mb,1,True)
 
     Wnew = vinth2p (OMEGA(time|:,lev|:,lat|:,lon|:),hyam,hybm,pnew,f1->PS,1,P0mb,1,True)
-    
+
+    Unew!1 = "lev"
+    Unew&lev = lev 
+   
+    Vnew!1 = "lev"
+    Vnew&lev = lev 
+ 
+    Wnew!1 = "lev"
+    Wnew&lev = lev 
    
     ;;-----------------------写入nc文件---------------------------
     system("/bin/rm -f ~/lsh/CESM-data/f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc")   ; remove any pre-existing file
-    ncdf = addfile("~/lsh/CESM-data/f19_f19_FAMIP.cam.h0.197901-200611_chazhi" ,"c")  ; open output netCDF file
+    ncdf = addfile("~/lsh/CESM-data/f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc" ,"c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
    ;===================================================================
@@ -68,7 +77,7 @@
     ncdf->time = time
     ;;; 
        
- 
+    end 
  
 
 
