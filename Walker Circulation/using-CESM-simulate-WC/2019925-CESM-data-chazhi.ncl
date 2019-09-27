@@ -1,15 +1,21 @@
+
+undef("cesm_hybird2pre")
   ;;;************************************************************
   ;; 差值CESM混合坐标系，将其输出到标准气压坐标系上
   ;; vinth2p(datai, hbcofa, hbcofb, plevo, psfc, intyp, p0, ii, kxtrp)
   ;; CESM默认的P0 = 1000
   ;; 具体参数看ncl官网这个函数的介绍
+  ;;functions cesm_hybird2pre(infilepath,outfilepath)
+  ;; infilepath : absolute path of cesm data interpolated from hybrid to pressure level
+  ;; OUTPUT variable : U,V,OMEGA,PSL,PRECL
   ;; linshuheng 2019.9.25
   ;;;*********************************************************
+  function cesm_hybird2pre(infilepath,outfilepath)
   begin
-;;数据
-    diri="~/lsh/CESM-data/"
-    fils1=systemfunc("ls "+diri+"f19_f19_FAMIP.cam.h0.197901-200611.nc")
-    f1=addfile(fils1, "r")
+ ;;数据
+    
+    fils1 = infilepath
+    f1 = addfile(fils1, "r")
  
     hyam = f1->hyam                   ; read to memory [optional]
     hybm = f1->hybm
@@ -47,8 +53,8 @@
     Wnew&lev = lev 
    
     ;;-----------------------写入nc文件---------------------------
-    system("/bin/rm -f ~/lsh/CESM-data/f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc")   ; remove any pre-existing file
-    ncdf = addfile("~/lsh/CESM-data/f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc" ,"c")  ; open output netCDF file
+    system("/bin/rm -f" +"" + outfilepath +"")   ; remove any pre-existing file
+    ncdf = addfile(outfilepath ,"c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
    ;===================================================================
@@ -75,11 +81,25 @@
     ncdf->lon = lon 
     ncdf->lev = lev
     ncdf->time = time
-    ;;; 
-       
-    end 
- 
 
+    k= "插值处理完成"
+    print(k)
+    return(k)
+  end 
+
+;;***************************************************************************
+;;main program 
+;;*************************************************************************
+
+begin 
+   inpath = "~/lsh/CESM-data/f19_f19_FAMIP_rmindian/f19_f19_FAMIP_rmindian.cam.h0.197901-200611.nc"
+   outpath = "~/lsh/CESM-data/f19_f19_FAMIP_rmindian/f19_f19_FAMIP_rmindian.cam.h0.197901-200611_chazhi.nc"
+   m = cesm_hybird2pre(inpath,outpath)
+end 
+
+
+
+    
 
 
 
