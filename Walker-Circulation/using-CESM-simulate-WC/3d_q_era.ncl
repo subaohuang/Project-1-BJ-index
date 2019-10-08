@@ -1,5 +1,6 @@
 
 begin
+;test for 同步服务器上结果，是否可以用crontab
  diri="/mnt/f/share/era/data/data_series/"
  fils1=systemfunc("ls "+diri+"era_pre_global.nc")
  f1=addfile(fils1, "r")
