@@ -194,9 +194,9 @@ end
 begin
 
 ;function(path,filename,timestart,timeend,outpath,outputname)
-  path = "~/lsh/CESM-data/"
-  filename = "f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc"
-  m = get_msf(path,filename,197901,201212,"~/lsh/data/wc-reslut/","msf_f19-f19-FAMIP_1979-200611.nc")
+  ; path = "~/lsh/CESM-data/"
+  ; filename = "f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc"
+  m = get_msf(inpath,filename,197901,201212,"~/lsh/data/wc-reslut/","msf_f19-f19-FAMIP_1979-200611.nc")
 
 end 
 
