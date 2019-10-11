@@ -1,4 +1,0 @@
-;;测试是否在4点的时候成功上传文件到github上
-begin 
-print(path)
-end 

@@ -7,9 +7,9 @@
 
  ;;------------------read data---------------------------------
 	
-	fils1  =  "/home/ys17-19/lsh/CESM-data/f19_f19_FAMIP/f19_f19_FAMIP.cam.h0.197901-200611.nc"
+	fils1  =  "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY_1979-201212.nc"
  
-  fils2 = "/home/ys17-19/lsh/CESM-data/f19_f19_FAMIP_rmindian/f19_f19_FAMIP_rmindian.cam.h0.197901-200611.nc"
+  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmindian_197901-201212.nc"
 
   f1  =  addfile(fils1, "r")
   f2  =  addfile(fils2, "r")
@@ -19,7 +19,17 @@
 
   date  =  cd_calendar(time,1)
 
-  timeind  =  ind(date.le.200512.and.date.ge.197901)
+  timestart = 197901
+  timeend = 201212
+  
+  startyear_r = str_split_by_length(timestart, 4)
+  endyear_r = str_split_by_length(timeend, 4 )
+
+  startyear = stringtoint(startyear_r(0))
+  endyear = stringtoint(endyear_r(0))
+
+
+  timeind  =  ind(date.le.timeend.and.date.ge.timestart)
 
   msf_CT  =  f1->msf_time(timeind,:,:)
   msf_rmin  =  f2->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
@@ -35,14 +45,14 @@
     
      
 
-     dmsf_CT = dim_avg_n_Wrap(msf_CT_a(:,:,{150:210}), 2)
-     dmsf_rmin= dim_avg_n_Wrap(msf_rmin_a(:,:,{150:210}), 2)
+     dmsf_CT = dim_avg_n_Wrap(msf_CT_a(:,:,{150:210}), (/1,2/))
+     dmsf_rmin= dim_avg_n_Wrap(msf_rmin_a(:,:,{150:210}), (/1,2/))
  
      dmsf_CT_y  =  (/month_to_annual(dmsf_CT, 0)/)
      dmsf_rmin_y  =  (/month_to_annual(dmsf_rmin, 0)/)
      
      printVarSummary(dmsf_CT_y)
-     time_year = ispan(1979,2005,1)
+     time_year = ispan(startyear,endyear,1)
      printVarSummary(time_year)
 
 
@@ -57,12 +67,12 @@
 	resxy@gsnFrame = False
     
 	resxy@tmXBMode  =  "Explicit"
-	resxy@trXMaxF = 2005
-	resxy@trXMinF = 1979
-	resxy@tmXBValues = ispan(1979,2005,5)
-	resxy@tmXBLabels = ispan(1979,2005,5)
+	resxy@trXMaxF = endyear
+	resxy@trXMinF = startyear
+	resxy@tmXBValues = ispan(startyear,endyear,5)
+	resxy@tmXBLabels = ispan(startyear,endyear,5)
 	resxy@tmXBMinorOn = True
-	resxy@tmXBMinorValues = ispan(1979,2005,1)
+	resxy@tmXBMinorValues = ispan(startyear,endyear,1)
 
 	resxy@tmYLMinorOn = False
 
@@ -77,7 +87,7 @@
 	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN/"/)     ;加线的标注
 
 	
-     wks=gsn_open_wks("pdf", "~/lsh/CESM-dmsf-Compare-amip-amiprm")
+     wks=gsn_open_wks("pdf", "~/lsh/CESM-dmsf-Compare-F-PADY2-rmindian")
 
      plot = gsn_csm_xy(wks,time_year,(/dmsf_CT_y,dmsf_rmin_y/), resxy)
      draw(plot)

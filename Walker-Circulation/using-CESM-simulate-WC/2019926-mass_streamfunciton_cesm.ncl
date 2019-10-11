@@ -81,6 +81,7 @@ local a, g, pi ,dfi
         printVarSummary(ud)
         ud_new = ud(time|:,lat|latind2:latind1,lon|:,level|:)  
         delete(ud)
+       
 
         ; ud_new&lon = w&lon
         ; ud_new&lat = fspan(-5,5,dimsizes(w&lat))
@@ -88,6 +89,8 @@ local a, g, pi ,dfi
         ; ud_new&level = level
 
         copy_VarCoords(w(time|:,lat|:,lon|:,lev|:), ud_new)
+        printVarSummary(ud_new)
+        print(ud_new&lev)
     
         ud_avg = dim_avg_n_Wrap(ud_new,(/0,1/))    ;;; timemean and meridional mean 
         ud_avg_new = ud_avg(lev|0:dimsizes(levelw)-1,lon|:)  ;;
@@ -194,9 +197,12 @@ end
 begin
 
 ;function(path,filename,timestart,timeend,outpath,outputname)
-  ; path = "~/lsh/CESM-data/"
-  ; filename = "f19_f19_FAMIP.cam.h0.197901-200611_chazhi.nc"
-  m = get_msf(inpath,filename,197901,201212,"~/lsh/data/wc-reslut/","msf_f19-f19-FAMIP_1979-200611.nc")
+  
+       ; inpath="/home/ys17-19/lsh/CESM-data/F_1850-PDAY/"
+       ; filename="F_1850-PDAY.cam.h0.197901-201212_chazhi.nc"
+       ; outputpath="~/lsh/data/wc-reslut/"
+       ; outputname="msf_F_1850-PDAY_1979-201212.nc"
+  m = get_msf(inpath,filename,197901,201212,outputpath,outputname)
 
 end 
 
