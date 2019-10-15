@@ -58,25 +58,18 @@ begin
 
     time = f1->time
     date = cd_calendar(time, 1)
+    
 
     tind = ind(date.le.201612.and.date.ge.197901)
     msf_time = f1->msf_time(:,:,tind)
-
-   ;;;去趋势
-    msf_time = (/dtrend_msg_n(ispan(1,dimsizes(msf_time&time),1),msf_time,False,True,2)/)
-   ;;;
-   
     msf_inten = dim_avg_n_Wrap(msf_time(:,{150:240},:), (/0,1/))
-    msf_inten_month = annual_cycle(msf_inten)
+    msf_inten_month = msf_inten(ind(date.ge.199501.and.date.le.199512))
 
-
-
+    
     ud_time = f1->ud_time({1000},{150:240},tind)
-    ud_time = (/dtrend_msg_n(ispan(1,dimsizes(ud_time&time),1),ud_time,False,True,1)/)
-
     ud_inten = dim_avg_n_Wrap(ud_time, 0)
     ud_inten = (/-1*ud_inten/)
-    ud_inten_month = annual_cycle(ud_inten)
+    ud_inten_month = ud_inten(ind(date.ge.199501.and.date.le.199512))
 
     printVarSummary(ud_inten_month)
 
@@ -95,47 +88,17 @@ begin
     slp = short2flt(f3[:]->msl(tind,:,:))
     printVarSummary(u10)     
 
-    u10 = (/dtrend_msg_n(ispan(1,dimsizes(u10&time),1),u10,False,True,0)/)
-    slp = (/dtrend_msg_n(ispan(1,dimsizes(slp&time),1),slp,False,True,0)/)
 
     u10_inten = dim_avg_n_Wrap(u10(:,{-5:5},{150:240}),(/1,2/))
     u10_inten = (/-1*u10_inten/)
-    u10_inten_month = annual_cycle(u10_inten)
+    u10_inten_month = u10_inten(ind(date.ge.199501.and.date.le.199512))
 
     slp_inten = dim_avg_n_Wrap(slp(:,{-5:5},{200:280}),(/1,2/)) - \
                   dim_avg_n_Wrap(slp(:,{-5:5},{80:160}),(/1,2/))
     copy_VarCoords(slp(:,1,1), slp_inten)
                 
-    slp_inten_month = annual_cycle(slp_inten)
+    slp_inten_month = slp_inten(ind(date.ge.199501.and.date.le.199512))
 ;;;
-
-;;;===============read soi data=======================================
-   ;;read in data ncols = 9 nrows = 3 
-   ;;这个soi数据的格式是https://crudata.uea.ac.uk/cru/data/soi/ 上说的，year, 12 * monthly value，annual value
-   ;;data time span from 186601-201912
-   soi_r = asciiread ("/home/ys17-19/lsh/data/soi.dat", (/154,14/), "float")
-   dar_r = asciiread ("/home/ys17-19/lsh/data/soi_dar.dat", (/165,13/), "float")
-   tah_r = asciiread ("/home/ys17-19/lsh/data/soi_tah.dat", (/165,13/), "float")
-   soi_r_d = (/tah_r - dar_r/)/10
-   soi_r = (/soi_r*10/)
-
-   soi_2d = soi_r(:,1:12)
-   soi = ndtooned(soi_2d)
-
-   print(soi(0:11))
-   print(soi_r_d(11,:))
-
-   exit
-   
-   tistart = (1979-1866)*12
-   tiend = (2016-1866)*12+11
-   ;    tistart = (1979-1855)*12
-   ; tiend = (2016-1855)*12+11
-   soi_inten = soi(tistart:tiend)
-   
-   soi_inten_month = annual_cycle(soi_inten)
-    
-
 
 ;;===========标准化强度指数==========================
 
@@ -146,9 +109,6 @@ begin
     slp_inten_month_std = dim_standardize(slp_inten_month, 1)
 
     ud_inten_month_std = dim_standardize(ud_inten_month, 1)
-
-    soi_inten_month_std = dim_standardize(soi_inten_month, 1)
-    ; soi_inten_month_std = soi_inten_month
 ;;;
 
     
@@ -177,7 +137,7 @@ x = ispan(1,12,1)
 ;----------------------------------------
 
 ;;;
-    wks=gsn_open_wks("pdf", "沃克环流强度的年循环_allindex")
+    wks=gsn_open_wks("pdf", "1979年沃克环流强度的年循环_allindex")
 
     resxy=True
     resxy@gsnDraw=False
@@ -188,10 +148,11 @@ x = ispan(1,12,1)
     resxy@xyMarkerColors = (/"red","pink","blue","green"/) 
     resxy@xyMonoMarkLineMode = True
     resxy@xyMarkLineMode  = (/"MarkLines"/) 
-    resxy@xyMarker         =  (/16/)                    ; choose type of marker  
+    
+
+    resxy@xyMarkers         =  (/16/)                    ; choose type of marker  
     resxy@xyMarkerSizeF     = 0.01        ; Marker size (default 0.01)
-    resxy@xyMonoDashPattern = True
-    resxy@xyDashPattern = 0 
+    
   
     
     resxy@gsnLeftStringFontHeightF=0.01
@@ -203,7 +164,7 @@ x = ispan(1,12,1)
     resxy@tmXBMode      = "Explicit"                ; Define own tick mark labels.
     resxy@tmXBValues=ispan(1,12,1)
     resxy@tmXBLabels = ""+x
-   
+
     
     resxy@tmXBLabelFontAspectF=1.0
     resxy@tmXBLabelFontHeightF=0.008
@@ -222,13 +183,13 @@ x = ispan(1,12,1)
     resxy@tmYLLabelFontHeightF=0.008
     resxy@tmYLMinorOn=False
     resxy@tmXTOn=False
-    
+ 
     
 
     resxy@pmLegendDisplayMode    = "Always"            ; turn on legend
     resxy@pmLegendSide           = "Top"               ; Change location of 
     resxy@pmLegendParallelPosF   = .2                  ; move units right
-    resxy@pmLegendOrthogonalPosF = -0.43                ; move units down
+    resxy@pmLegendOrthogonalPosF = -0.2                ; move units down
     resxy@pmLegendWidthF         = 0.15                ; Change width and
     resxy@pmLegendHeightF        = 0.18                ; height of legend.
     resxy@lgPerimOn              = False               ; turn off box around
@@ -247,14 +208,7 @@ x = ispan(1,12,1)
     ; res2@xyExplicitLegendLabels = (/"WL"/)         ; create explicit labels
     
     ; plot = gsn_csm_xy2(wks, ispan(1,12, 1), nino3, locationxi_month, resxy, res2)
-    wks2=gsn_open_wks("pdf", "tahit年循环")
-     plot = gsn_csm_xy(wks, ispan(1,12, 1), (/msf_inten_month_std,ud_inten_month_std,u10_inten_month_std,soi_inten_month_std/), resxy)
-    resxy@tmYLValues = ispan(10040,10160,10)
-     plot2 = gsn_csm_xy(wks2, ispan(1,12, 1), (/soi_inten_month_std/), resxy)
-       
-     draw(plot2)
-     frame(wks2)
-
+     plot = gsn_csm_xy(wks, ispan(1,12, 1), (/msf_inten_month_std,ud_inten_month_std,u10_inten_month_std,slp_inten_month_std/), resxy)
 
      draw(plot)
      frame(wks)
