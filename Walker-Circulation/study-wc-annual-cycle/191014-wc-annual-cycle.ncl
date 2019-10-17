@@ -106,7 +106,7 @@ begin
     u10 = (/dtrend_msg_n(ispan(1,dimsizes(u10&time),1),u10,False,True,0)/)
     slp = (/dtrend_msg_n(ispan(1,dimsizes(slp&time),1),slp,False,True,0)/)
 
-    u10_inten = dim_avg_n_Wrap(u10(:,{-5:5},{150:210}),(/1,2/))
+    u10_inten = dim_avg_n_Wrap(u10(:,{-6:6},{180:210}),(/1,2/))
     ; u10_inten = dim_avg_n_Wrap(u10(:,{-5:5},{120:170}),(/1,2/))
     u10_inten = (/-1*u10_inten/)
     u10_inten_month = annual_cycle(u10_inten)
