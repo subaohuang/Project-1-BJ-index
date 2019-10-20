@@ -12,18 +12,23 @@
  
     fils2 = "/home/ys17-19/lsh/CESM-data/f19_f19_FAMIP_rmindian/\
     f19_f19_FAMIP_rmindian.cam.h0.197901-200611.nc"
+
+
+  f1  =  addfile(fils1, "r")
+  f2  =  addfile(fils2, "r")
  
-	f1  =  addfile(fils1, "r")
-	f2  =  addfile(fils2, "r")
 
-	date  =  cd_calendar(f1->time, 1)
-	timeind  =  ind(date.le.201212.and.date.ge.197901)
+  date  =  cd_calendar(f1->time, 1)
+  timeind  =  ind(date.le.201212.and.date.ge.197901)
 
-	PSL_CT  =  f1->PSL(timeind,:,:)
-    PSL_rmin  =  f2->PSL(timeind,:,:)    ;;rmin denotes rm indian warming 
-    
-    PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
-    PSL_rmin_a  =  rmMonAnnCycTLL(PSL_rmin)
+  PSL_CT  =  f1->PSL(timeind,:,:)
+  PSL_rmin  =  f2->PSL(timeind,:,:)    ;;rmin denotes rm indian warming 
+
+   
+  PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
+  PSL_rmin_a  =  rmMonAnnCycTLL(PSL_rmin)
+ 
+
 ;;;--------------------- index of PWC intensity ------------------
       ;;Tahiti region (5S–5N, 160–80W) and the Darwin region (5S–5N, 80–160E)
 

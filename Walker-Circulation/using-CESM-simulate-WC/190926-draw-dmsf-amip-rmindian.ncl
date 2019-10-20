@@ -11,7 +11,7 @@
  
   fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmindian_197901-201212.nc"
   
-  fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlantic_197901-201212.nc"
+  fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
 
   f1  =  addfile(fils1, "r")
   f2  =  addfile(fils2, "r")
@@ -83,18 +83,18 @@
 
 	resxy@tmYLMinorOn = False
 
-	resxy@vpHeightF = 0.13
-	resxy@vpWidthF = 0.7
+	resxy@vpHeightF = 0.3
+	resxy@vpWidthF = 0.6
 	resxy@vpXF = 0.15
 	resxy@vpYF = 0.95
 
 	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0/)          ; make second line thicker
 	resxy@xyLineColors       =  (/"black","red","blue"/)          ; change line color
-	resxy@xyMarkLineModes    =  (/"lines","lines","line"/)
+	resxy@xyMarkLineModes    =  (/"lines","lines","lines"/)
 	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC"/)     ;加线的标注
 
 	
-     wks=gsn_open_wks("pdf", "~/lsh/CESM-dmsf-Compare-F-PADY2-rmindian-rmatlantic")
+     wks=gsn_open_wks("pdf", "CESM-dmsf-Compare-F-PADY2-rmindian-rmatlantic")
 
      plot = gsn_csm_xy(wks,time_year,(/dmsf_CT_y,dmsf_rmin_y,dmsf_rmal_y/), resxy)
      draw(plot)

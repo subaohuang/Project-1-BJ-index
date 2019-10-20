@@ -144,12 +144,13 @@ local a, g, pi ,dfi
         ntime=dimsizes(fi_time_new&time)
         nlev=dimsizes(fi_time_new&lev)
         nlon=dimsizes(fi_time_new&lon)
- 
+
 ;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
 
         diro = outpath
         filo1 = outputname
         system("/bin/rm -f "+diro + filo1+"")
+        ; setfileoption("nc","Format","LargeFile")
         fout=addfile(diro + filo1,"c")
         setfileoption(fout,"DefineMode",True)
         ;======================================文件名
@@ -198,10 +199,10 @@ begin
 
 ;function(path,filename,timestart,timeend,outpath,outputname)
   
-       ; inpath="/home/ys17-19/lsh/CESM-data/F_1850-PDAY/"
-       ; filename="F_1850-PDAY.cam.h0.197901-201212_chazhi.nc"
+       ; inpath="/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/"
+       ; filename="F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
        ; outputpath="~/lsh/data/wc-reslut/"
-       ; outputname="msf_F_1850-PDAY_1979-201212.nc"
+       ; outputname="msf_F_1850-PDAY-rmatlan_197912-201212.nc"
   m = get_msf(inpath,filename,197901,201212,outputpath,outputname)
 
 end 

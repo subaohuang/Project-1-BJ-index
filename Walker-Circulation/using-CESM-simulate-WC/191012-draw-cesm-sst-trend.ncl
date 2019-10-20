@@ -6,7 +6,7 @@
 ;**********************************************************
 begin
 ;;;============读入数据===============================
-    fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_atlantictrend.nc"
+    fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_pacifictrend.nc"
     ; fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
     
     f1 = addfile(fils1, "r")
@@ -74,8 +74,8 @@ begin
     res@mpMaxLatF             = max(sst_trend&lat)
     res@mpMinLonF             = min(sst_trend&lon)
     res@mpMaxLonF             = max(sst_trend&lon)
-    ; res@mpCenterLonF          =avg(sst_trend&lon)
-    res@mpCenterLonF          = 0
+    res@mpCenterLonF          =avg(sst_trend&lon)
+    ; res@mpCenterLonF          = 0
    
     plot = gsn_csm_contour_map(wks, sst_trend, res)
     draw(plot)

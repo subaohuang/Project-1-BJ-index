@@ -44,7 +44,7 @@ fi
    echo "don't exit msf file, procecing..."
    ncl inpath=\"${PRE_DIR_ORG}\"               \
        filename='"F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"' \
-       outputpath='"~/lsh/data/wc-reslut/"' \
+       outputpath='"~/lsh/data/wc-result/"' \
        outputname='"msf_F_1850-PDAY-rmatlan_197912-201212.nc"' \
      ./190926-mass_streamfunciton_cesm.ncl
    echo "finish CESM mass_stream function"
