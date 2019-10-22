@@ -13,9 +13,13 @@
   
   fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
 
+  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
+
+
   f1  =  addfile(fils1, "r")
   f2  =  addfile(fils2, "r")
   f3  =  addfile(fils3, "r")
+  f4  =  addfile(fils4, "r")
 
   time = f2->time
   time  = (/time-1/)   ;;;
@@ -37,6 +41,7 @@
   msf_CT  =  f1->msf_time(timeind,:,:)
   msf_rmin  =  f2->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
   msf_rmal  =  f3->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
+  msf_rmpa  =  f4->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
 
 
   printVarSummary(msf_CT)
@@ -45,6 +50,7 @@
   msf_CT_a  =  rmMonAnnCycTLL(msf_CT)
   msf_rmin_a  =  rmMonAnnCycTLL(msf_rmin)
   msf_rmal_a  =  rmMonAnnCycTLL(msf_rmal)
+  msf_rmpa_a  =  rmMonAnnCycTLL(msf_rmpa)
 ;;;--------------------- index of PWC intensity by msf ------------------
     ;;150°E-150°W ,all level 
 
@@ -58,6 +64,8 @@
      dmsf_rmal= dim_avg_n_Wrap(msf_rmal_a(:,:,{150:210}), (/1,2/))
      dmsf_rmal_y  =  (/month_to_annual(dmsf_rmal, 0)/)
 
+     dmsf_rmpa= dim_avg_n_Wrap(msf_rmpa_a(:,:,{150:210}), (/1,2/))
+     dmsf_rmpa_y  =  (/month_to_annual(dmsf_rmpa, 0)/)
 
      
      printVarSummary(dmsf_CT_y)
@@ -88,15 +96,15 @@
 	resxy@vpXF = 0.15
 	resxy@vpYF = 0.95
 
-	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0/)          ; make second line thicker
-	resxy@xyLineColors       =  (/"black","red","blue"/)          ; change line color
-	resxy@xyMarkLineModes    =  (/"lines","lines","lines"/)
-	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC"/)     ;加线的标注
+	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0,3.0/)          ; make second line thicker
+	resxy@xyLineColors       =  (/"black","red","blue","gray"/)          ; change line color
+	resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines"/)
+	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC","AMIP PACIFIC"/)     ;加线的标注
 
 	
-     wks=gsn_open_wks("pdf", "CESM-dmsf-Compare-F-PADY2-rmindian-rmatlantic")
+     wks=gsn_open_wks("pdf", "CESM-dmsf-Compare-F-PADY2-rmindian-rmatlantic-rmpacific")
 
-     plot = gsn_csm_xy(wks,time_year,(/dmsf_CT_y,dmsf_rmin_y,dmsf_rmal_y/), resxy)
+     plot = gsn_csm_xy(wks,time_year,(/dmsf_CT_y,dmsf_rmin_y,dmsf_rmal_y,dmsf_rmpa_y/), resxy)
      draw(plot)
      frame(wks)
      end 

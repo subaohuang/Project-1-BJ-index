@@ -15,10 +15,14 @@
    
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212.nc"
 
+    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"
+
+
   
     f1  =  addfile(fils1, "r")
     f2  =  addfile(fils2, "r")
     f3  =  addfile(fils3, "r")
+    f4  =  addfile(fils4, "r")
 
 
     date  =  cd_calendar(f1->time, 1)
@@ -38,11 +42,14 @@
     PSL_CT  =  f1->PSL(timeind,:,:)
     PSL_rmin  =  f2->PSL(timeind,:,:)    ;;rmin denotes rm indian warming 
     PSL_rmal  =  f3->PSL(timeind,:,:)    ;;rmal denotes rm atlantic warming 
+    PSL_rmpa  =  f4->PSL(timeind,:,:)    ;;rmal denotes rm atlantic warming 
 
      
     PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
     PSL_rmin_a  =  rmMonAnnCycTLL(PSL_rmin)
     PSL_rmal_a  =  rmMonAnnCycTLL(PSL_rmal)
+    PSL_rmpa_a  =  rmMonAnnCycTLL(PSL_rmpa)
+
  
 
 ;;;--------------------- index of PWC intensity ------------------
@@ -57,11 +64,17 @@
     dslp_rmal  =  dim_avg_n_Wrap(PSL_rmal_a(:,{-5:5},{200:280}), (/1,2/)) -\
     dim_avg_n_Wrap(PSL_rmal_a(:,{-5:5},{80:160}), (/1,2/)) 
  
-     
+    dslp_rmpa  =  dim_avg_n_Wrap(PSL_rmpa_a(:,{-5:5},{200:280}), (/1,2/)) -\
+    dim_avg_n_Wrap(PSL_rmpa_a(:,{-5:5},{80:160}), (/1,2/)) 
+ 
+
      dslp_CT_y  =  (/month_to_annual(dslp_CT, 0)/)
 
      dslp_rmin_y  =  (/month_to_annual(dslp_rmin, 0)/)
+
      dslp_rmal_y  =  (/month_to_annual(dslp_rmal, 0)/)
+     
+      dslp_rmpa_y  =  (/month_to_annual(dslp_rmpa, 0)/)
     
 
      time_year = ispan(startyear,endyear,1)
@@ -89,15 +102,15 @@
 	resxy@vpXF = 0.15
 	resxy@vpYF = 0.95
 
-	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0/)          ; make second line thicker
-	resxy@xyLineColors       =  (/"black","red","blue"/)          ; change line color
-	resxy@xyMarkLineModes    =  (/"lines","lines","lines"/)
-	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC"/)     ;加线的标注
+	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0,3.0/)          ; make second line thicker
+	resxy@xyLineColors       =  (/"black","red","blue","gray"/)          ; change line color
+	resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines"/)
+	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC","AMIP RMPACIFIC"/)     ;加线的标注
 
 	
-  wks=gsn_open_wks("pdf", "CESM-DSLP-Compare-F-pday-rmindian-rmalt")
+  wks=gsn_open_wks("pdf", "CESM-DSLP-Compare-F-pday-rmindian-rmalt-rmpaci")
 
-  plot = gsn_csm_xy(wks,time_year,(/dslp_CT_y,dslp_rmin_y,dslp_rmal_y/), resxy)
+  plot = gsn_csm_xy(wks,time_year,(/dslp_CT_y,dslp_rmin_y,dslp_rmal_y,dslp_rmpa_y/), resxy)
      draw(plot)
      frame(wks)
      end 
