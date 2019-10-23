@@ -23,7 +23,7 @@ function  get_trend_pattern(fils,timestart,timeend)
       
       msf_CT  =  f1->msf_time(timeind,{1000:100},:)
       msf_CT = (/msf_CT/10^9/)
-
+      
       msf_CT_a  =  rmMonAnnCycTLL(msf_CT)
     ;;  
     ;;---------get trend pattern-------------------
@@ -89,9 +89,9 @@ begin
     ;;;
 
     ;;;diff from control run
-    diff_id = (/msf_trend_id - msf_trend_ct/)
-    diff_al = (/msf_trend_al - msf_trend_ct/)
-    diff_pa = (/msf_trend_pa - msf_trend_ct/)
+    diff_id = (/msf_trend_ct - msf_trend_id/)
+    diff_al = (/msf_trend_ct - msf_trend_al/)
+    diff_pa = (/msf_trend_ct - msf_trend_pa/)
 
     copy_VarCoords(msf_trend_id, diff_id)
     copy_VarCoords(msf_trend_al, diff_al)
@@ -111,7 +111,7 @@ begin
     res@cnLinesOn=True
  
     res@cnFillOn =True
-    res@cnFillPalette="BlueWhiteOrangeRed"
+   
     res@cnLinesOn=False
     res@cnLevelSelectionMode ="ManualLevels"
     res@cnMinLevelValF = -0.5
@@ -142,13 +142,13 @@ begin
    
 
     plot=new(4,graphic)
-    res@gsnLeftString = "CT"
+    res@gsnLeftString = "Control run"
     plot(0) = gsn_csm_pres_hgt(wks,msf_trend_ct,res)
-    res@gsnLeftString = "remove indian"
+    res@gsnLeftString = "Control - Indian warming removed"
     plot(1) = gsn_csm_pres_hgt(wks,msf_trend_id,res)
-    res@gsnLeftString = "remove atlantic"
+     res@gsnLeftString = "Control - atlantic warming removed"
     plot(2) = gsn_csm_pres_hgt(wks,msf_trend_al,res)
-    res@gsnLeftString = "remove pacific"
+    res@gsnLeftString = "Control - pacific SST trend removed"
     plot(3) = gsn_csm_pres_hgt(wks,msf_trend_pa,res)
 
     ;;;打点
@@ -185,10 +185,10 @@ begin
     iplot(i) = gsn_contour_shade(iplot(i), 0,0.05, opt)
     end do
 
-    ;;;  
-    do i = 0,3 
-    overlay(plot(i), iplot(i))
-    end do 
+    ; ;;;  
+    ; do i = 0,3 
+    ; overlay(plot(i), iplot(i))
+    ; end do 
 
     pres = True
     pres@gsnPanelLabelBar = True
@@ -196,16 +196,16 @@ begin
     gsn_panel(wks, plot, (/2,2/), pres)
 
   ;;;; 
-    res@cnFillPalette = "BlueRed"
+    res@cnFillPalette = "MPL_seismic"
     wks2 = gsn_open_wks("pdf", "CESM-msf_pattern-F-pday-diff")
     plot_diff = new(4,graphic)
-    res@gsnLeftString = "CT"
+    res@gsnLeftString = "Control run"
     plot_diff(0) = gsn_csm_pres_hgt(wks2,msf_trend_ct,res)
-    res@gsnLeftString = "remove indian"
+    res@gsnLeftString = "Control - Indian warming removed"
     plot_diff(1) = gsn_csm_pres_hgt(wks2,diff_id,res)
-    res@gsnLeftString = "remove atlantic"
+    res@gsnLeftString = "Control - atlantic warming removed"
     plot_diff(2) = gsn_csm_pres_hgt(wks2,diff_al,res)
-    res@gsnLeftString = "remove pacific"
+     res@gsnLeftString = "Control - pacific SST trend removed"
     plot_diff(3) = gsn_csm_pres_hgt(wks2,diff_pa,res)
 
  

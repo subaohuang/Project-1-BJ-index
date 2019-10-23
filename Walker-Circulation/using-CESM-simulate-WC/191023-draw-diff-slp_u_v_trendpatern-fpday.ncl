@@ -111,45 +111,52 @@ begin
     v_trend_pa = trend_pa[2]
     ;;;;
 
-    ;;;;显著性检验
-    pro_trend_ct = rc_test(psl_trend_ct)
-    pro_trend_id = rc_test(psl_trend_id)
-    pro_trend_al = rc_test(psl_trend_al)
-    pro_trend_pa = rc_test(psl_trend_pa)
+    ;;;diff with Control run
+    psl_trend_id = (/psl_trend_ct - psl_trend_id/)
+    psl_trend_pa = (/psl_trend_ct - psl_trend_pa/)
+    psl_trend_al = (/psl_trend_ct - psl_trend_al/)
 
-    pro_u_trend_ct = rc_test(u_trend_ct)
-    pro_u_trend_id = rc_test(u_trend_id)
-    pro_u_trend_al = rc_test(u_trend_al)
-    pro_u_trend_pa = rc_test(u_trend_pa)
+    u_trend_id = (/u_trend_ct - u_trend_id/)
+    u_trend_pa = (/u_trend_ct - u_trend_pa/)
+    u_trend_al = (/u_trend_ct - u_trend_al/)
 
-    pro_v_trend_ct = rc_test(v_trend_ct)
-    pro_v_trend_id = rc_test(v_trend_id)
-    pro_v_trend_al = rc_test(v_trend_al)
-    pro_v_trend_pa = rc_test(v_trend_pa)
+    v_trend_id = (/v_trend_ct - v_trend_id/)
+    v_trend_pa = (/v_trend_ct - v_trend_pa/)
+    v_trend_al = (/v_trend_ct - v_trend_al/)
     ;;;
-     
-    u_trend_ct = where(pro_u_trend_ct.le.0.05, u_trend_ct, u_trend_ct@_FillValue)
-    ; v_trend_ct = where(pro_v_trend_ct.le.0.05, v_trend_ct, v_trend_ct@_FillValue)
+   
     
-    u_trend_id = where(pro_u_trend_id.le.0.05, u_trend_id, u_trend_id@_FillValue)
-    ; v_trend_id = where(pro_v_trend_id.le.0.05, v_trend_id, v_trend_id@_FillValue)
-    
-    u_trend_al = where(pro_u_trend_al.le.0.05, u_trend_al, u_trend_al@_FillValue)
-    ; v_trend_al = where(pro_v_trend_al.le.0.05, v_trend_al, v_trend_al@_FillValue)
-    
-    u_trend_pa = where(pro_u_trend_pa.le.0.05, u_trend_pa, u_trend_pa@_FillValue)
-    ; v_trend_pa = where(pro_v_trend_pa.le.0.05, v_trend_pa, v_trend_pa@_FillValue)
-    
+    u_trend_ct_wsp = avg(dim_avg_n(u_trend_ct({5:5},{150:210}), (/1/)))
+    u_trend_id_wsp = avg(dim_avg_n(u_trend_id({5:5},{150:210}), (/1/)))
+    u_trend_al_wsp = avg(dim_avg_n(u_trend_al({5:5},{150:210}), (/1/)))
+    u_trend_pa_wsp = avg(dim_avg_n(u_trend_pa({5:5},{150:210}), (/1/)))
+  
+
+    u_trend_ct_esp = avg(dim_avg_n(u_trend_ct({5:5},{240:270}), (/1/)))
+    u_trend_id_esp = avg(dim_avg_n(u_trend_id({5:5},{240:270}), (/1/)))
+    u_trend_al_esp = avg(dim_avg_n(u_trend_al({5:5},{240:270}), (/1/)))
+    u_trend_pa_esp = avg(dim_avg_n(u_trend_pa({5:5},{240:270}), (/1/)))
+
+
+    print("u_trend_ct_wsp="+u_trend_ct_wsp)
+    print("u_trend_id_wsp="+u_trend_id_wsp)
+    print("u_trend_al_wsp="+u_trend_al_wsp)
+    print("u_trend_pa_wsp="+u_trend_pa_wsp)
+
+    print("u_trend_ct_esp="+u_trend_ct_esp)
+    print("u_trend_id_esp="+u_trend_id_esp)
+    print("u_trend_al_esp="+u_trend_al_esp)
+    print("u_trend_pa_esp="+u_trend_pa_esp)
 
 
   ;;---------------画趋势图--------------------------------------
-    wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmpaci")
+    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmindian-rmalt-rmpaci")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
     res@gsnAddCyclic=True
 
-
+   
     res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=False
     res@cnFillOn = True 
@@ -169,15 +176,15 @@ begin
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF          = 180.0
 
-    ; res@mpShapeMode = "FreeAspect"
-    ; res@vpWidthF = 0.8
-    ; res@vpHeightF = 0.2
+    res@mpShapeMode = "FreeAspect"
+    res@vpWidthF = 0.7
+    res@vpHeightF = 0.2
 
     ;;
      ;;;LineArrow
@@ -187,7 +194,7 @@ begin
     ; res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.03           ; thin vectors
-    res@vcMinMagnitudeF          =0.04
+    res@vcMinMagnitudeF          =0.05
     res@vcRefMagnitudeF          = 0.6
     res@vcRefLengthF             = 0.04     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
@@ -208,53 +215,16 @@ begin
   
 
     plot=new(4,graphic)
-    res@gsnLeftString = "CT"
+    res@gsnLeftStringFontHeightF = 10.0
+    res@gsnLeftString = "Control run"
     plot(0) = gsn_csm_vector_scalar_map(wks,u_trend_ct,v_trend_ct, psl_trend_ct,res)
-    res@gsnLeftString = "reindian"
+    res@gsnLeftString = "Control - Indian warming removed"
     plot(1) =  gsn_csm_vector_scalar_map(wks,u_trend_id,v_trend_id, psl_trend_id,res)
-    res@gsnLeftString = "remove atlantic"
+    res@gsnLeftString = "Control - altlantic warming removed"
     plot(2) =  gsn_csm_vector_scalar_map(wks,u_trend_al,v_trend_al, psl_trend_al,res)
-    res@gsnLeftString = "remove pacific"
+    res@gsnLeftString = "Control - pacific SST trend removed"
     plot(3) =  gsn_csm_vector_scalar_map(wks,u_trend_pa,v_trend_pa, psl_trend_pa,res)
 
-    ;;;打点
-    res_pro=True
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
-
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-
-    iplot = new(4,graphic)
-
-    iplot(0) = gsn_csm_contour(wks,pro_trend_ct ,res_pro)
-    iplot(1) = gsn_csm_contour(wks,pro_trend_id ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,pro_trend_al ,res_pro)
-    iplot(3) = gsn_csm_contour(wks,pro_trend_pa ,res_pro)
-
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 17         ; stipple
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.2         ; add extra density
-    opt@gsnShadeFillDotSizeF = 0.0      ; make dots larger
-
-    do i=0,3
-    iplot(i) = gsn_contour_shade(iplot(i), 0,0.05, opt)
-    end do
-
-    ;;;  
-    do i = 0,3 
-    overlay(plot(i), iplot(i))
-    end do 
 
     pres = True
     pres@gsnPanelLabelBar = True

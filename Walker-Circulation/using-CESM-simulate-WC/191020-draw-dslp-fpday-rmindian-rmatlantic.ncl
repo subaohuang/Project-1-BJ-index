@@ -80,6 +80,30 @@
      time_year = ispan(startyear,endyear,1)
      printVarSummary(time_year)
 
+     ;;;计算趋势
+
+      PSL_CT_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_CT_y,0,0)  
+      PSL_CT_trend = (/PSL_CT_trend*10*12/)  ;;; convert to decade trend 
+      
+
+      PSL_in_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_rmin_y,0,0)  
+      PSL_in_trend = (/PSL_in_trend*10*12/)  ;;; convert to decade trend 
+
+
+      PSL_al_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_rmal_y,0,0)  
+      PSL_al_trend = (/PSL_al_trend*10*12/)  ;;; convert to decade trend 
+
+
+      PSL_pa_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_rmpa_y,0,0)  
+      PSL_pa_trend = (/PSL_pa_trend*10*12/)  ;;; convert to decade trend 
+      
+
+
+      print("PSL_CT_trend="+PSL_CT_trend)
+      print("PSL_in_trend="+PSL_in_trend)
+      print("PSL_al_trend="+PSL_al_trend)
+      print("PSL_pa_trend="+PSL_pa_trend)
+exit()
 
 ;;;----------------------- draw time series --------------------------------------
 

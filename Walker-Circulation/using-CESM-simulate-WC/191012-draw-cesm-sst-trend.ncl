@@ -6,7 +6,7 @@
 ;**********************************************************
 begin
 ;;;============读入数据===============================
-    fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_alltrend.nc"
+    fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_savepacific.nc"
     ; fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
     
     f1 = addfile(fils1, "r")
