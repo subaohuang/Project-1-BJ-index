@@ -16,36 +16,36 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/
 
 STEP=3
 # step1 : merge the cesm data into a whole data by using cdo
   ### the prefix of data is usually CESM compet name ,alarm for time select
-if  [ ! -e  ${PRE_DIR_ORG}F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc ] ; then
+if  [ ! -e  ${PRE_DIR_ORG}F_1850-PDAY-rmallocean.cam.h0.197801-201212.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
-    rm F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc
-    cdo select,name=U,V,OMEGA,PRECL,PSL,PS F_1850-PDAY-cam4-rmpacific.cam.h0.* F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc 
+    rm F_1850-PDAY-rmallocean.cam.h0.197801-201212.nc
+    cdo select,name=U,V,OMEGA,PRECL,PRECC,PSL,PS F_1850-PDAY-cam4-rmallocean.cam.h0.* F_1850-PDAY-rmallocean.cam.h0.197801-201212.nc 
 fi
 
 # step2 : interpolate the data from hybird level to pressure level
-  if [ ! -e ${PRE_DIR_ORG}F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+  if [ ! -e ${PRE_DIR_ORG}F_1850-PDAY-rmallocean.cam.h0.197801-201212_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
     echo "don't exit chazhi file, procecing..."
     cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/ 
-    ncl  inpath='"~/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"' \
-         outpath='"~/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"' \
+    ncl  inpath='"~/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212.nc"' \
+         outpath='"~/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212_chazhi.nc"' \
        ./190925-CESM-data-chazhi.ncl
     echo "finish CESM chazhi"
   fi 
 # step3 calculate mass stream function
 
-  if  [ ! -e /home/lsh/data/wc-result/msf_F_1850-PDAY-rmpacifictic_197912-201212.nc ] ; then
+  if  [ ! -e /home/lsh/data/wc-result/msf_F_1850-PDAY-rmalloceantic_197912-201212.nc ] ; then
      ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
    echo "don't exit msf file, procecing..."
    ncl inpath=\"${PRE_DIR_ORG}\"               \
-       filename='"F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"' \
+       filename='"F_1850-PDAY-rmallocean.cam.h0.197801-201212_chazhi.nc"' \
        outputpath='"~/lsh/data/wc-result/"' \
-       outputname='"msf_F_1850-PDAY-rmpacific_197912-201212.nc"' \
+       outputname='"msf_F_1850-PDAY-rmallocean_197912-201212.nc"' \
      ./190926-mass_streamfunciton_cesm.ncl
    echo "finish CESM mass_stream function"
   fi

@@ -17,12 +17,15 @@
 
     fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"
 
+    fils5 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212.nc"
+
 
   
     f1  =  addfile(fils1, "r")
     f2  =  addfile(fils2, "r")
     f3  =  addfile(fils3, "r")
     f4  =  addfile(fils4, "r")
+    f5  =  addfile(fils5, "r")
 
 
     date  =  cd_calendar(f1->time, 1)
@@ -39,16 +42,26 @@
     endyear = stringtoint(endyear_r(0))
 
 
-    PSL_CT  =  f1->PSL(timeind,:,:)
+    PSL_CT  =   f1->PSL(timeind,:,:)
     PSL_rmin  =  f2->PSL(timeind,:,:)    ;;rmin denotes rm indian warming 
     PSL_rmal  =  f3->PSL(timeind,:,:)    ;;rmal denotes rm atlantic warming 
-    PSL_rmpa  =  f4->PSL(timeind,:,:)    ;;rmal denotes rm atlantic warming 
+    PSL_rmpa  =  f4->PSL(timeind,:,:)    ;;rmal denotes rm pacific warming 
+    PSL_rmoc  =  f5->PSL(timeind,:,:)    ;;rmal denotes rm all warming 
 
-     
+   PSL_CT = (/PSL_CT/100.0/)
+   PSL_rmin = (/PSL_rmin/100.0/)
+   PSL_rmal = (/PSL_rmal/100.0/)
+   PSL_rmpa = (/PSL_rmpa/100.0/)
+   PSL_rmoc = (/PSL_rmoc/100.0/)
+   
+    
+
+
     PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
     PSL_rmin_a  =  rmMonAnnCycTLL(PSL_rmin)
     PSL_rmal_a  =  rmMonAnnCycTLL(PSL_rmal)
     PSL_rmpa_a  =  rmMonAnnCycTLL(PSL_rmpa)
+    PSL_rmoc_a  =  rmMonAnnCycTLL(PSL_rmoc)
 
  
 
@@ -66,6 +79,9 @@
  
     dslp_rmpa  =  dim_avg_n_Wrap(PSL_rmpa_a(:,{-5:5},{200:280}), (/1,2/)) -\
     dim_avg_n_Wrap(PSL_rmpa_a(:,{-5:5},{80:160}), (/1,2/)) 
+    
+    dslp_rmoc  =  dim_avg_n_Wrap(PSL_rmoc_a(:,{-5:5},{200:280}), (/1,2/)) -\
+    dim_avg_n_Wrap(PSL_rmoc_a(:,{-5:5},{80:160}), (/1,2/)) 
  
 
      dslp_CT_y  =  (/month_to_annual(dslp_CT, 0)/)
@@ -74,7 +90,10 @@
 
      dslp_rmal_y  =  (/month_to_annual(dslp_rmal, 0)/)
      
-      dslp_rmpa_y  =  (/month_to_annual(dslp_rmpa, 0)/)
+     dslp_rmpa_y  =  (/month_to_annual(dslp_rmpa, 0)/)
+
+     dslp_rmoc_y  =  (/month_to_annual(dslp_rmoc, 0)/)
+    
     
 
      time_year = ispan(startyear,endyear,1)
@@ -97,13 +116,16 @@
       PSL_pa_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_rmpa_y,0,0)  
       PSL_pa_trend = (/PSL_pa_trend*10*12/)  ;;; convert to decade trend 
       
+      PSL_oc_trend = regCoef_n(ispan(1,dimsizes(time_year),1),dslp_rmoc_y,0,0)  
+      PSL_oc_trend = (/PSL_oc_trend*10*12/)  ;;; convert to decade trend 
+
 
 
       print("PSL_CT_trend="+PSL_CT_trend)
       print("PSL_in_trend="+PSL_in_trend)
       print("PSL_al_trend="+PSL_al_trend)
       print("PSL_pa_trend="+PSL_pa_trend)
-exit()
+      print("PSL_oc_trend="+PSL_oc_trend)
 
 ;;;----------------------- draw time series --------------------------------------
 
@@ -126,15 +148,15 @@ exit()
 	resxy@vpXF = 0.15
 	resxy@vpYF = 0.95
 
-	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0,3.0/)          ; make second line thicker
-	resxy@xyLineColors       =  (/"black","red","blue","gray"/)          ; change line color
-	resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines"/)
-	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC","AMIP RMPACIFIC"/)     ;加线的标注
+	resxy@xyLineThicknesses  =  (/ 3.0,3.0,3.0,3.0,3.0/)          ; make second line thicker
+	resxy@xyLineColors       =  (/"black","red","blue","gray","green"/)          ; change line color
+	resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines"/)
+	resxy@xyExplicitLegendLabels  =  (/"AMIP CT",  "AMIP RMINDIAN","AMIP RMATLANTIC","AMIP RMPACIFIC","no sst forcing"/)     ;加线的标注
 
 	
   wks=gsn_open_wks("pdf", "CESM-DSLP-Compare-F-pday-rmindian-rmalt-rmpaci")
 
-  plot = gsn_csm_xy(wks,time_year,(/dslp_CT_y,dslp_rmin_y,dslp_rmal_y,dslp_rmpa_y/), resxy)
+  plot = gsn_csm_xy(wks,time_year,(/dslp_CT_y,dslp_rmin_y,dslp_rmal_y,dslp_rmpa_y,dslp_rmoc_y/), resxy)
      draw(plot)
      frame(wks)
      end 

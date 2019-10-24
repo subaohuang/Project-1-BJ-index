@@ -32,21 +32,26 @@ function  get_trend_pattern(fils,timestart,timeend)
       v_CT  =  f1->V(timeind,{850},:,:)
       
       v_CT_a  =  rmMonAnnCycTLL(v_CT)
+  
+        ; PSL_CT_a_year = month_to_annual(PSL_CT_a, 1)
+        ; u_CT_a_year = month_to_annual(u_CT_a, 1)
+        ; v_CT_a_year = month_to_annual(v_CT_a, 1)
 
+       timedim = dimsizes(PSL_CT_a(:,1,1))
     ;;  
 
     ;;---------get trend pattern-------------------
-      PSL_CT_trend = regCoef_n(ispan(1,dimsizes(PSL_CT_a&time),1),PSL_CT_a(:,:,:),0,0)  
+      PSL_CT_trend = regCoef_n(ispan(1,timedim,1),PSL_CT_a(:,:,:),0,0)  
       copy_VarCoords(PSL_CT_a(1,:,:), PSL_CT_trend)
 
-      PSL_CT_trend = (/PSL_CT_trend*10*12/)  ;;; convert to decade trend 
+      PSL_CT_trend = (/PSL_CT_trend*10/)  ;;; convert to decade trend 
 
-      u_CT_trend = regCoef_n(ispan(1,dimsizes(u_CT_a&time),1),u_CT_a(:,:,:),0,0)  
+      u_CT_trend = regCoef_n(ispan(1,timedim,1),u_CT_a(:,:,:),0,0)  
       copy_VarCoords(u_CT_a(1,:,:), u_CT_trend)
-      u_CT_trend = (/u_CT_trend*10*12/)  ;;; convert to decade trend 
-      v_CT_trend = regCoef_n(ispan(1,dimsizes(v_CT_a&time),1),v_CT_a(:,:,:),0,0)  
+      u_CT_trend = (/u_CT_trend*10/)  ;;; convert to decade trend 
+      v_CT_trend = regCoef_n(ispan(1,timedim,1),v_CT_a(:,:,:),0,0)  
       copy_VarCoords(v_CT_a(1,:,:), v_CT_trend)
-      v_CT_trend = (/v_CT_trend*10*12/)  ;;; convert to decade trend 
+      v_CT_trend = (/v_CT_trend*10/)  ;;; convert to decade trend 
     ;;
 
   return [/PSL_CT_trend,u_CT_trend,v_CT_trend/]
