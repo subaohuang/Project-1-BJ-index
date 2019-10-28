@@ -71,8 +71,8 @@ begin
    
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212.pre.nc"
 
-    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.pre.nc"
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212.pre.nc"
+    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.pre.nc"
+    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212.pre.nc"
 
     timestart = 197901
     timeend = 201212
@@ -84,9 +84,9 @@ begin
     PRE_trend_pa = get_trend_pattern(fils4,timestart,timeend)
     ;;;;
     
-   ; PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
-   ; PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
-   ; PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/)
+   PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
+   PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
+   PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/)
 
 
     ;;;;显著性检验
@@ -101,8 +101,8 @@ begin
   ;;---------------画趋势图--------------------------------------
    dir = systemfunc("/bin/pwd")
    
-    ; wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmpaci_DIFF")
-    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmallocean_DIFF")
+    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmpaci_DIFF")
+    ; wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmallocean_DIFF")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -116,7 +116,8 @@ begin
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "precip_diff_12lev"
+    res@cnFillPalette = "MPL_BrBG"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
@@ -139,11 +140,11 @@ begin
     ; res@vpHeightF = 0.2
 
     res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.2
+    res@vpWidthF = 0.6
+    res@vpHeightF = 0.3
 
     plot=new(4,graphic)
-    res@gsnLeftStringFontHeightF = 10.0
+    res@gsnLeftStringFontHeightF = 20.0
     res@gsnLeftString = "Control run"
     plot(0) = gsn_csm_contour_map(wks,PRE_trend_ct,res)
     res@gsnLeftString = "Control run - indian warming removed"
@@ -194,6 +195,7 @@ begin
 
     pres = True
     pres@gsnPanelLabelBar = True
+    pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
     
     gsn_panel(wks, plot, (/2,2/), pres)
   end 

@@ -26,10 +26,12 @@ function  get_trend_pattern(fils,timestart,timeend)
       PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
 
       u_CT  =  f1->U(timeind,{850},:,:)
+      ; u_CT = f1->TAUX(timeind,:,:)
       
       u_CT_a  =  rmMonAnnCycTLL(u_CT)
   
       v_CT  =  f1->V(timeind,{850},:,:)
+      ; v_CT = F1->TAUY(timeind,:,:)
       
       v_CT_a  =  rmMonAnnCycTLL(v_CT)
   
@@ -44,14 +46,14 @@ function  get_trend_pattern(fils,timestart,timeend)
       PSL_CT_trend = regCoef_n(ispan(1,timedim,1),PSL_CT_a(:,:,:),0,0)  
       copy_VarCoords(PSL_CT_a(1,:,:), PSL_CT_trend)
 
-      PSL_CT_trend = (/PSL_CT_trend*10/)  ;;; convert to decade trend 
+      PSL_CT_trend = (/PSL_CT_trend*10*12/)  ;;; convert to decade trend 
 
       u_CT_trend = regCoef_n(ispan(1,timedim,1),u_CT_a(:,:,:),0,0)  
       copy_VarCoords(u_CT_a(1,:,:), u_CT_trend)
-      u_CT_trend = (/u_CT_trend*10/)  ;;; convert to decade trend 
+      u_CT_trend = (/u_CT_trend*10*12/)  ;;; convert to decade trend 
       v_CT_trend = regCoef_n(ispan(1,timedim,1),v_CT_a(:,:,:),0,0)  
       copy_VarCoords(v_CT_a(1,:,:), v_CT_trend)
-      v_CT_trend = (/v_CT_trend*10/)  ;;; convert to decade trend 
+      v_CT_trend = (/v_CT_trend*10*12/)  ;;; convert to decade trend 
     ;;
 
   return [/PSL_CT_trend,u_CT_trend,v_CT_trend/]
@@ -175,7 +177,7 @@ begin
 
     res@cnMinLevelValF       =   -0.4
     res@cnMaxLevelValF       =   0.4
-    res@cnLevelSpacingF      =  0.1
+    res@cnLevelSpacingF      =  0.05
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -189,7 +191,7 @@ begin
 
     res@mpShapeMode = "FreeAspect"
     res@vpWidthF = 0.7
-    res@vpHeightF = 0.2
+    res@vpHeightF = 0.3
 
     ;;
      ;;;LineArrow
@@ -220,7 +222,7 @@ begin
   
 
     plot=new(4,graphic)
-    res@gsnLeftStringFontHeightF = 10.0
+    res@gsnLeftStringFontHeightF = 20.0
     res@gsnLeftString = "Control run"
     plot(0) = gsn_csm_vector_scalar_map(wks,u_trend_ct,v_trend_ct, psl_trend_ct,res)
     res@gsnLeftString = "Control - Indian warming removed"
@@ -233,7 +235,11 @@ begin
 
     pres = True
     pres@gsnPanelLabelBar = True
+    pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
     
     gsn_panel(wks, plot, (/2,2/), pres)
+
+
+
   end 
 

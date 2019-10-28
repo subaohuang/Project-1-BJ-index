@@ -4,11 +4,9 @@
 ;;得到一个新的海温数据，注意在文件中的其他数据要保留不能变化
 ;;linshuheng 2019.10.12 
 ;**********************************************************
+function draw_sst_trend(fils1,wks,gsnLeftString)
 begin
 ;;;============读入数据===============================
-    fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_savepacific.nc"
-    ; fils1 = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
-    
     f1 = addfile(fils1, "r")
     time = f1->time
     lon = f1->lon
@@ -19,7 +17,7 @@ begin
     
     time = (/time-1/)
     date = cd_calendar(time, 1)
-    timeind = ind(date.le.201212.and.date.ge.197801)
+    timeind = ind(date.le.201212.and.date.ge.197901)
     
 ;;;===============计算趋势============================
     SST_ano = rmMonAnnCycTLL(SST_cpl)
@@ -33,7 +31,12 @@ begin
 ;;;=================画图=============================
    
     ; wks = gsn_open_wks("pdf","trend_pattern_remove_atlantictrend")
-    wks = gsn_open_wks("pdf","trend_pattern")
+    
+
+    ; colormap=read_colormap_file("MPL_RdBu")
+    ; printVarSummary(colormap)
+    ; colormap=(/colormap(::-1,:)/)
+    gsn_define_colormap(wks, "cmp_b2r")
     
     res = True
     res@gsnAddCyclic=False
@@ -44,14 +47,19 @@ begin
     res@cnLineColors="Transparent"  ;让填充是渐变的还是分隔的，colorbar是渐变还是间隔
     res@cnFillOn = True 
     res@cnLinesOn = False
+    ; res@cnFillPalette = colormap
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
-    res@cnLevelSpacingF      =  0.1
+    res@cnMinLevelValF       =   -0.3
+    res@cnMaxLevelValF       =   0.5
+    res@cnLevelSpacingF      =  0.05
+    res@gsnLeftString = gsnLeftString
+    res@gsnLeftStringFontHeightF = 20.0
+
   
-    res@lbOrientation = "Vertical"
-    res@lbBoxEndCapStyle="TriangleBothEnds"
+    res@lbLabelBarOn = False
+    ; res@lbOrientation = "Vertical"
+    ; res@lbBoxEndCapStyle="TriangleBothEnds"
  
     res@tmYROn=False
     res@tmXTOn=False
@@ -59,6 +67,7 @@ begin
     res@tmXBLabelFontHeightF=0.01
     res@tmXBLabelFontThicknessF=0.02
     res@tmXBMinorOn=True
+
     ; res@tmXBLabels=(/"100~S~o~N~E","140~S~o~N~E","180~S~o~N~E","140~S~o~N~W","100~S~o~N~W"/)
     ; res@tmYLLabels=(/"30~S~o~N~S","20~S~o~N~S","10~S~o~N~S","0~S~o~N","10~S~o~N~N","20~S~o~N~N","30~S~o~N~N"/)
 
@@ -75,12 +84,53 @@ begin
     res@mpMinLonF             = min(sst_trend&lon)
     res@mpMaxLonF             = max(sst_trend&lon)
     res@mpCenterLonF          =avg(sst_trend&lon)
-    ; res@mpCenterLonF          = 0
+    res@mpFillDrawOrder = "PostDraw"
+
+
    
     plot = gsn_csm_contour_map(wks, sst_trend, res)
-    draw(plot)
-    frame(wks)
+   
+    
+    getvalues plot@contour
+    "cnFillColors": cnFillColors
+    end getvalues
 
+     print(cnFillColors)
+    dim = dimsizes(cnFillColors)
+    ;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
+        NhlSetColor(wks, cnFillColors(dim/2-2),1, 1, 1)
+        NhlSetColor(wks, cnFillColors(dim/2-3),1, 1, 1)    
+return plot
+end 
+
+begin 
+
+wks = gsn_open_wks("pdf","rmindian_ssttrend_pattern")
+   plot = new(4,graphic)
+
+   fils = new(4,string)
+   gsnLeftString = new(4,string)
+
+   gsnLeftString(0) = "Control Run"
+   gsnLeftString(1) = "remove Indian ocean warming "
+   gsnLeftString(2) = "remove Atlantic warming"
+   gsnLeftString(3) = "remove Pacific Lanina-like SST trend "
+
+
+   fils(0) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
+   fils(1) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_indiantrend.nc"
+   fils(2) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_atlantictrend.nc"
+   fils(3) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_pacifictrend.nc"
+   
+   do i = 0,3
+    plot(i) = draw_sst_trend(fils((i)),wks,gsnLeftString(i))
+   end do
+
+   pres = True
+   pres@gsnPanelLabelBar  = True
+
+   gsn_panel(wks, plot, (/2,2/), pres)
+   
 end 
 
 

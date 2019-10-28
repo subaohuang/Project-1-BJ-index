@@ -83,9 +83,9 @@ begin
     fils2 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212_chazhi.nc"
    
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
-
-    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212_chazhi.nc"
+;
+    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
+    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212_chazhi.nc"
 
     timestart = 197901
     timeend = 201212
@@ -144,8 +144,8 @@ begin
 
 
   ;;---------------画趋势图--------------------------------------
-    ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmpaci")
-    wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
+    wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmpaci")
+    ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
