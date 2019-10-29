@@ -175,8 +175,8 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -0.4
-    res@cnMaxLevelValF       =   0.4
+    res@cnMinLevelValF       =   -0.3
+    res@cnMaxLevelValF       =   0.3
     res@cnLevelSpacingF      =  0.05
 
     res@tmXTOn=False

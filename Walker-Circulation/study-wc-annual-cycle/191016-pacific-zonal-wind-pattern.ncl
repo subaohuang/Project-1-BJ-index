@@ -27,27 +27,35 @@ begin
     tind=ind(date.le.201612.and.date.ge.197901)
     u10 = short2flt(f3[:]->u10(tind,:,:))
     slp = short2flt(f3[:]->msl(tind,:,:))
+    sst = short2flt(f3[:]->sst(tind,:,:))
     printVarSummary(u10)     
 
     u10 = (/dtrend_msg_n(ispan(1,dimsizes(u10&time),1),u10,False,True,0)/)
     slp = (/dtrend_msg_n(ispan(1,dimsizes(slp&time),1),slp,False,True,0)/)
+    sst = (/dtrend_msg_n(ispan(1,dimsizes(sst&time),1),sst,False,True,0)/)
     
     u10_clm = clmMonTLL(u10)
-    u10_inten = dim_avg_n_Wrap(u10_clm(:,{-5:5},{80:280}),1)
+    u10_inten = dim_avg_n_Wrap(u10_clm(:,{-5:5},{120:280}),1)
     ; u10_inten = dim_avg_n_Wrap(u10(:,{-5:5},{120:170}),(/1,2/))
 
 
     slp_clm = clmMonTLL(slp)
-    slp_inten = dim_avg_n_Wrap(slp_clm(:,{-5:5},{80:280}),1)
+    slp_inten = dim_avg_n_Wrap(slp_clm(:,{-5:5},{120:280}),1)
     copy_VarCoords(slp(:,1,:), slp_inten)
      
+    sst_clm = clmMonTLL(sst)
+    sst_inten = dim_avg_n_Wrap(sst_clm(:,{-5:5},{120:280}),1)
+    copy_VarCoords(sst(:,1,:), sst_inten)
+
+    
     ;;;remove annual mean 
     slp_inten = (/dim_rmvmean_n(slp_inten, 0)/)
     u10_inten = (/dim_rmvmean_n(u10_inten, 0)/)    
-    
+    sst_inten = (/dim_rmvmean_n(sst_inten, 0)/)    
     ;;;
-
-
+    
+    printMinMax(sst_inten, 1)
+    
     printVarSummary(u10_inten)
     printVarSummary(slp_inten)
 
@@ -65,7 +73,9 @@ wks=gsn_open_wks("pdf", "pacific_zonal_wind_seanson_panel_pattern")
     res@lbLabelBarOn=False     
     res@cnInfoLabelOn=False
     res@cnFillPalette="GMT_polar"
-  
+    res@gsnLeftString = ""
+    res@gsnRightString = ""
+
 
     ; res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
     ; res@cnMinLevelValF       = -8.0              ; min level
@@ -81,19 +91,20 @@ wks=gsn_open_wks("pdf", "pacific_zonal_wind_seanson_panel_pattern")
     res@tmXTOn=False
     res@tmYROn=False
 
-    res@tmXBValues=ispan(80,280,20)
-    res@tmXBLabels= ""+ ispan(80,280,20)
+    res@tmXBValues=ispan(120,280,20)
+    res@tmXBLabels= (/"120E","140E","160E","180","160W","140W","120W","100W","80W"/)
+    
 
     res@tmXBMinorOn=True
     res@tmXBMinorValues=ispan(80,280,5)
 
-    res@vpHeightF=0.2
-    res@vpWidthF=0.4
+    res@vpHeightF=0.4
+    res@vpWidthF=0.6
   
     ;;;LineArrow
     res@gsnScalarContour        = True
     
-    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcGlyphStyle             = "FillArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
     ; res@vcMinDistanceF           = 0.015           ; thin vectors
     ; res@vcMinDistanceF           = 0.02           ; thin vectors
@@ -107,18 +118,32 @@ wks=gsn_open_wks("pdf", "pacific_zonal_wind_seanson_panel_pattern")
     ;;;CurlyVector
     res@vcLineArrowThicknessF=1.5
     res@vcMinFracLengthF=0.3
-    res@vcMinDistanceF           = 0.015           ; thin vectors
-    ; res@vcLineArrowThicknessF=1.0
-    ; res@vcMinDistanceF           = 0.02          ; thin vectors
-    ; res@vcMinMagnitudeF          =0.05
-    ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+   
+    res@vcLineArrowThicknessF=1.0
+    res@vcMinDistanceF           = 0.02          ; thin vectors
+    res@vcMinMagnitudeF          =0.05
+    res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
     res@vcRefMagnitudeF          = 0.8
     res@vcRefLengthF             = 0.04     ; define length of vec ref
 
     v10_inten = u10_inten
     v10_inten = 0
     plot = gsn_csm_vector_scalar(wks, u10_inten,v10_inten,slp_inten, res)
- 
+
+
+    res@cnMinLevelValF = -2.0
+    res@cnMaxLevelValF = 2.0
+    res@cnLevelSpacingF = 0.5
+    res@cnFillOn =False
+    res@cnLinesOn = True
+    res@gsnLeftString = ""
+    res@gsnContourNegLineDashPattern = 1
+    res@cnLineThicknesses = 4.0
+
+    plot_sst = gsn_csm_contour(wks, sst_inten, res)
+
+    overlay(plot, plot_sst)
+
  draw(plot)
  frame(wks)
  end

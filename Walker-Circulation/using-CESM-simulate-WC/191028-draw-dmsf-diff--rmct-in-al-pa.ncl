@@ -30,6 +30,7 @@ function  get_trend_pattern(fils,timestart,timeend)
 
       ud_CT  =  f1->ud_time(timeind,{1000:100},:)
       ud_CT_a = rmMonAnnCycTLL(ud_CT)
+     
 
     ;;  
     ;;---------get trend pattern-------------------
@@ -231,6 +232,7 @@ begin
     res@cnLevelSpacingF = 0.1
     res@lbLabelBarOn =False
     res@cnLineLabelsOn = False
+    res@cnInfoLabelOn = False
 
 
     res@tiYAxisString=""
@@ -268,7 +270,7 @@ begin
     
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
-    res@vcRefMagnitudeF = 0.25               ; define vector ref mag
+    res@vcRefMagnitudeF = 0.2              ; define vector ref mag
     res@vcRefLengthF    = 0.04        ; define length of vec ref
     res@vcGlyphStyle    = "CurlyVector"     ; turn on curly vectors
     res@vcMinDistanceF  = 0.03       ; thin out vectors
@@ -285,11 +287,17 @@ begin
     res@vcLineArrowHeadMinSizeF=0.005
 
     res@vcVectorDrawOrder="PostDraw"
+
+    res@vcRefAnnoOrthogonalPosF  = -1.14
+
+    res@vcRefAnnoPerimOn=False
+    res@vcRefAnnoString2On=False
+
     ;;;;
 
 
    
-    res@cnFillPalette = "MPL_seismic"
+    ; res@cnFillPalette = "MPL_seismic"
     wks2 = gsn_open_wks("pdf", "CESM-msf_pattern-F-pday-diff")
     plot_diff = new(4,graphic)
     res@gsnLeftString = "Control run"
@@ -297,7 +305,7 @@ begin
     res@gsnLeftString = "Control - Indian warming removed"
     plot_diff(1) = gsn_csm_pres_hgt_vector(wks2,diff_id,ud_diff_id ,w_diff_id ,res)
     res@gsnLeftString = "Control - atlantic warming removed"
-    plot_diff(2) = gsn_csm_pres_hgt_vector(wks2, diff_al,ud_diff_id,w_diff_id,res)
+    plot_diff(2) = gsn_csm_pres_hgt_vector(wks2, diff_al,ud_diff_al,w_diff_al,res)
      res@gsnLeftString = "Control - pacific SST trend removed"
     plot_diff(3) = gsn_csm_pres_hgt_vector(wks2,diff_pa,ud_diff_pa,w_diff_pa,res)
 
@@ -309,6 +317,7 @@ begin
     res@cnLinesOn = True
     res@gsnLeftString = ""
     res@gsnContourNegLineDashPattern = 1
+    res@cnLineThicknesses = 3.0
 
      
     plot_clm = new(4,graphic)
