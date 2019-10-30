@@ -30,28 +30,39 @@ function  get_trend_pattern(fils,timestart,timeend)
 
       ud_CT  =  f1->ud_time(timeind,{1000:100},:)
       ud_CT_a = rmMonAnnCycTLL(ud_CT)
-     
 
+
+      ;;;取年平均
+      ; msf_CT_a_year = month_to_annual(msf_CT_a, 1)
+      ; ud_CT_a_year = month_to_annual(ud_CT_a, 1)
+      ; w_CT_a_year = month_to_annual(w_CT_a, 1)
+      msf_CT_a_year = month_to_season(msf_CT_a, "SON")  
+      ud_CT_a_year = month_to_season(ud_CT_a, "SON")
+      w_CT_a_year = month_to_season(w_CT_a, "SON")
+
+      timedim = dimsizes(msf_CT_a_year(:,1,1))
+
+      
+    
     ;;  
     ;;---------get trend pattern-------------------
-      msf_CT_trend = regCoef_n(ispan(1,dimsizes(msf_CT_a&time),1),msf_CT_a(:,:,:),0,0)  
-      copy_VarCoords(msf_CT_a(1,:,:), msf_CT_trend)
+      msf_CT_trend = regCoef_n(ispan(1,timedim,1),msf_CT_a_year(:,:,:),0,0)  
+      copy_VarCoords(msf_CT_a_year(1,:,:), msf_CT_trend)
       printVarSummary(msf_CT_trend)
 
-      msf_CT_trend = (/msf_CT_trend*10*12/)  ;;; convert to decade trend 
+      msf_CT_trend = (/msf_CT_trend*10/)  ;;; convert to decade trend 
 
-      w_CT_trend = regCoef_n(ispan(1,dimsizes(w_CT_a&time),1),w_CT_a(:,:,:),0,0)  
-      copy_VarCoords(w_CT_a(1,:,:), w_CT_trend)
+      w_CT_trend = regCoef_n(ispan(1,timedim,1),w_CT_a_year(:,:,:),0,0)  
+      copy_VarCoords(w_CT_a_year(1,:,:), w_CT_trend)
       printVarSummary(w_CT_trend)
-      w_CT_trend = (/w_CT_trend*10*12/)  ;;; convert to decade trend 
+      w_CT_trend = (/w_CT_trend*10/)  ;;; convert to decade trend 
 
-      ud_CT_trend = regCoef_n(ispan(1,dimsizes(ud_CT_a&time),1),ud_CT_a(:,:,:),0,0)  
-      copy_VarCoords(ud_CT_a(1,:,:), ud_CT_trend)
+      ud_CT_trend = regCoef_n(ispan(1,timedim,1),ud_CT_a_year(:,:,:),0,0)  
+      copy_VarCoords(ud_CT_a_year(1,:,:), ud_CT_trend)
       printVarSummary(ud_CT_trend)
-      ud_CT_trend = (/ud_CT_trend*10*12/)  ;;; convert to decade trend 
+      ud_CT_trend = (/ud_CT_trend*10/)  ;;; convert to decade trend 
 
       msf_CT_clm = dim_avg_n_Wrap(msf_CT,0)
-
 
     ;;
   return  [/msf_CT_trend,w_CT_trend,ud_CT_trend,msf_CT_clm/]
@@ -210,11 +221,10 @@ begin
     copy_VarCoords(ud_trend_al, ud_diff_al)
     copy_VarCoords(ud_trend_pa, ud_diff_pa)
     ;;;
-
+   
     
   ;;---------------画趋势图--------------------------------------
-    wks=gsn_open_wks("pdf", "CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
-    
+   
 
     res = True
     res@gsnDraw=False
@@ -271,7 +281,8 @@ begin
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
     res@vcRefMagnitudeF = 0.2              ; define vector ref mag
-    res@vcRefLengthF    = 0.04        ; define length of vec ref
+    res@vcRefLengthF    = 0.05        ; define length of vec ref
+
     res@vcGlyphStyle    = "CurlyVector"     ; turn on curly vectors
     res@vcMinDistanceF  = 0.03       ; thin out vectors
     res@vcMapDirection  = False
@@ -298,7 +309,8 @@ begin
 
    
     ; res@cnFillPalette = "MPL_seismic"
-    wks2 = gsn_open_wks("pdf", "CESM-msf_pattern-F-pday-diff")
+     wks2 = gsn_open_wks("pdf", "秋季-CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
+    
     plot_diff = new(4,graphic)
     res@gsnLeftString = "Control run"
     plot_diff(0) = gsn_csm_pres_hgt_vector(wks2,msf_trend_ct,ud_trend_ct,w_trend_ct,res)
@@ -331,7 +343,7 @@ begin
     end do 
 
     do i = 0,3 
-      plot_diff(i) = get_topo(plot_diff(i),wks)
+      plot_diff(i) = get_topo(plot_diff(i),wks2)
     end do
 
 
