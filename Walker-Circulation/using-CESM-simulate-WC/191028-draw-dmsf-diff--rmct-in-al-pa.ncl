@@ -33,12 +33,12 @@ function  get_trend_pattern(fils,timestart,timeend)
 
 
       ;;;取年平均
-      ; msf_CT_a_year = month_to_annual(msf_CT_a, 1)
-      ; ud_CT_a_year = month_to_annual(ud_CT_a, 1)
-      ; w_CT_a_year = month_to_annual(w_CT_a, 1)
-      msf_CT_a_year = month_to_season(msf_CT_a, "SON")  
-      ud_CT_a_year = month_to_season(ud_CT_a, "SON")
-      w_CT_a_year = month_to_season(w_CT_a, "SON")
+      msf_CT_a_year = month_to_annual(msf_CT_a, 1)
+      ud_CT_a_year = month_to_annual(ud_CT_a, 1)
+      w_CT_a_year = month_to_annual(w_CT_a, 1)
+      ; msf_CT_a_year = month_to_season(msf_CT_a, "SON")  
+      ; ud_CT_a_year = month_to_season(ud_CT_a, "SON")
+      ; w_CT_a_year = month_to_season(w_CT_a, "SON")
 
       timedim = dimsizes(msf_CT_a_year(:,1,1))
 
@@ -309,7 +309,7 @@ begin
 
    
     ; res@cnFillPalette = "MPL_seismic"
-     wks2 = gsn_open_wks("pdf", "秋季-CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
+     wks2 = gsn_open_wks("pdf", "年平均-CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
     
     plot_diff = new(4,graphic)
     res@gsnLeftString = "Control run"

@@ -42,10 +42,13 @@
   msf_rmin  =  f2->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
   msf_rmal  =  f3->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
   msf_rmpa  =  f4->msf_time(timeind,:,:)    ;;rmin denotes rm indian warming 
-
+  
 
   printVarSummary(msf_CT)
-
+  msf_CT = (/msf_CT/10^9/)
+  msf_rmin = (/msf_rmin/10^9/)
+  msf_rmal = (/msf_rmal/10^9/)
+  msf_rmpa = (/msf_rmpa/10^9/)
 
   msf_CT_a  =  rmMonAnnCycTLL(msf_CT)
   msf_rmin_a  =  rmMonAnnCycTLL(msf_rmin)
@@ -57,6 +60,7 @@
     
      dmsf_CT = dim_avg_n_Wrap(msf_CT_a(:,:,{150:210}), (/1,2/))
      dmsf_CT_y  =  (/month_to_annual(dmsf_CT, 0)/)
+     
 
      dmsf_rmin= dim_avg_n_Wrap(msf_rmin_a(:,:,{150:210}), (/1,2/))
      dmsf_rmin_y  =  (/month_to_annual(dmsf_rmin, 0)/)
@@ -70,9 +74,20 @@
      
      printVarSummary(dmsf_CT_y)
      time_year = ispan(startyear,endyear,1)
+     dim = dimsizes(time_year)
      printVarSummary(time_year)
+     
+     trend_CT = regCoef_n(ispan(1,dim,1),dmsf_CT_y,0,0)  
+     trend_id = regCoef_n(ispan(1,dim,1),dmsf_rmin_y,0,0)  
+     trend_al = regCoef_n(ispan(1,dim,1),dmsf_rmal_y,0,0)  
+     trend_pa = regCoef_n(ispan(1,dim,1),dmsf_rmpa_y,0,0)  
+     
 
-
+     print("trend_CT="+trend_CT)
+     print("trend_id="+trend_id)
+     print("trend_al="+trend_al)
+     print("trend_pa="+trend_pa)
+    exit()
 
     
 ;;;----------------------- draw time series --------------------------------------
