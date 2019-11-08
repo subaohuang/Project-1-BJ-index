@@ -19,7 +19,7 @@ end
 ;;read  wind and slp data
 ;----------------------------------------
 begin
-    fils = systemfunc("ls /home/ys17-19/lsh/data/era/sur_1.5/era_interim_sur1.5_"+"*"+".nc")
+    fils = systemfunc("ls /home/ys17-19/lsh/data/era/era_interim_sur1.5_"+"*"+".nc")
     f3 = addfiles(fils, "r")
 
     time=f3[:]->time
