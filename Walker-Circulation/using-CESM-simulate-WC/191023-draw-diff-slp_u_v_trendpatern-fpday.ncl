@@ -93,7 +93,8 @@ begin
    
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
 
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
+    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacifi.cam.h0.197801-201212_chazhi.nc"
+    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
 
     timestart = 197901
     timeend = 201212
@@ -159,7 +160,7 @@ begin
 
 
   ;;---------------画趋势图--------------------------------------
-    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmindian-rmalt-rmpaci")
+    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmindian-rmalt-rafixed")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False

@@ -140,8 +140,8 @@ begin
 
   fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
 
-  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
-  ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmallocean_197912-201212.nc"
+  ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
+  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
 
     timestart = 197901
     timeend = 201212
