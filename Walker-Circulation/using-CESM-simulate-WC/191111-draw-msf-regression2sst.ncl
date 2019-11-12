@@ -38,6 +38,32 @@ begin
    end do
    return (xAnom)
 end
+function partial_corr(msf_time_annual,ssta_annual_id,ssta_annual_pa,ssta_annual_al)
+begin 
+;;partial correlation
+  ;;1 : msf_time_annual 2: ssta_annual_id 3:ssta_annual_pa 4:ssta_annual_al
+  r12=escorc_n(msf_time_annual,ssta_annual_id, 0,0)
+  r13 = escorc_n(msf_time_annual,ssta_annual_pa, 0, 0)
+  r14 = escorc_n(msf_time_annual, ssta_annual_al, 0, 0)
+  
+  r23=escorc_n(ssta_annual_id, ssta_annual_pa, 0,0)
+  r24 = escorc_n(ssta_annual_id, ssta_annual_al, 0, 0)
+  r34 = escorc_n(ssta_annual_pa, ssta_annual_al, 0, 0)
+  
+  r_12_3 = (/r12 - r13*r23/)/sqrt((1-r13^2)*(1-r23^2))
+
+  r_12_4 = (/r12 - r14*r24/)/sqrt((1-r14^2)*(1-r24^2))
+
+  r_13_4= (/r13 - r14*r34/)/sqrt((1-r14^2)*(1-r34^2))
+
+  r_23_4 = (/r23 - r24*r34/)/sqrt((1-r24^2)*(1-r34^2))
+
+  r_12_34 = (/r_12_4 - r_13_4*r_23_4/)/sqrt((1-r_13_4^2)*(1-r_23_4^2))
+
+  copy_VarCoords(msf_time_annual(0,:,:), r_12_34)
+ return r_12_34
+end 
+
 ;;;;
 begin
 ;;;读入HadiSST海温数据
@@ -119,7 +145,15 @@ begin
   copy_VarCoords(msf_time_annual(0,:,:), msf_al_rc)
 ;;;
 
-  
+;;;parital correlation
+ r_msf_id = partial_corr(msf_time_annual,ssta_annual_id,ssta_annual_pa,ssta_annual_al)  
+ r_msf_pa = partial_corr(msf_time_annual,ssta_annual_pa,ssta_annual_id,ssta_annual_al)
+ r_msf_al = partial_corr(msf_time_annual,ssta_annual_al,ssta_annual_id,ssta_annual_pa)
+;;
+
+;;
+
+
 ; ;;;回归u场,v场
 
 ;   ssta_rc=regCoef_n(ipindex2,ssta_s,0,0)  
@@ -203,11 +237,11 @@ wks = gsn_open_wks("pdf", "各海盆sst强度指数回归msf")
 
     plot=new(3,graphic)
     res@gsnLeftString = "regression to inidan sst "
-    plot(0) = gsn_csm_pres_hgt(wks,msf_id_rc,res)
+    plot(0) = gsn_csm_pres_hgt(wks,r_msf_id,res)
     res@gsnLeftString = "regression to pacific sst"
-    plot(1) = gsn_csm_pres_hgt(wks,msf_pa_rc,res)
+    plot(1) = gsn_csm_pres_hgt(wks,r_msf_pa,res)
      res@gsnLeftString = "regression to atlantic sst"
-    plot(2) = gsn_csm_pres_hgt(wks,msf_al_rc,res)
+    plot(2) = gsn_csm_pres_hgt(wks,r_msf_al,res)
    
 pres = True
 pres@gsnPanelLabelBar = True

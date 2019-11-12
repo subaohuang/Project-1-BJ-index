@@ -26,11 +26,16 @@ function  get_trend_pattern(fils,timestart,timeend)
       msf_CT_a  =  rmMonAnnCycTLL(msf_CT)
 
       w_CT  =  f1->w_time(timeind,{1000:100},:)
+
+
       w_CT_a = rmMonAnnCycTLL(w_CT)
+
 
       ud_CT  =  f1->ud_time(timeind,{1000:100},:)
       ud_CT_a = rmMonAnnCycTLL(ud_CT)
-
+      
+       print(ud_CT(1,{1000},:))
+      exit()
 
       ;;;取年平均
       msf_CT_a_year = month_to_annual(msf_CT_a, 1)
