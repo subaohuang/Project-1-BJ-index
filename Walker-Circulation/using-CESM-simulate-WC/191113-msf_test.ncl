@@ -1,6 +1,6 @@
  ;;;;;
   begin 
-	fils1  =  "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY_1979-201212.nc"
+	fils1  =  "/home/ys17-19/lsh/data/rea_msf/msf_time_era_global.nc"
 	f1  =  addfile(fils1, "r")
 	timestart = 197901
 	timeend = 201212
@@ -13,30 +13,56 @@
 	startyear = stringtoint(startyear_r(0))
 	endyear = stringtoint(endyear_r(0))
 
-	ud_new  =  f1->ud_time(timeind,:,:)
-	level = f1->lev
+	ud  =  f1->ud_time(:,:,timeind)
+    ud_new = ud(time|:,level|:,lon|:)
+
+
+    
+	level = f1->level
+    print(level)
     msf_time = f1->msf_time
-    msf_clm = dim_avg_n_Wrap(msf_time(:,{1000:100},:), 0)
+    msf_clm = dim_avg_n_Wrap(msf_time({1000:100},:,:), 2)
 	printVarSummary(ud_new)
     vint = ud_new
+    dp_or = dpres_plevel(level, 1013, 0, 0)  ; dp(30)
+   
+   
+    dp = level
+
+    level2 = level
+    level2(0:dimsizes(level)-2) = level(1:)
+    level2(dimsizes(level)-1) = 0
+    dp = level - level2
+
+    ud_2 = ud_new
+
+    ud_2(:,0:dimsizes(level)-2,:) = ud_new(:,1:,:)
+    ud_2(:,dimsizes(ud_new&level)-1,:) = 0
+    ud_a = (/ud_new + ud_2/)*0.5
+
+    ddp  = dpres_plevel(level(15:), 1000, 0, 0)  ; dp(30)
  
+ ;;; 积分
+      
 	do i=0,dimsizes(level)-2
-	; dp  = dpres_plevel(level(i:), max(level(i)), 0, 0)  ; dp(30)
-    dp = level(i:)
-    level2 = level(i:)
-    level2(0:dimsizes(level(i:))-2) = level(i+1:)
-    level2(dimsizes(level(i:))-1) = 0
-    dp = level(i:) - level2
-	dp_new = conform_dims(dimsizes(ud_new(:,i:,:)), dp, 1)
-	print(dp)
-    ; exit()
-    printVarSummary(dp_new)
-	vint(:,i,:)= dim_sum_n(ud_new(:,i:,:)*dp_new,1)
-    delete(dp)
-    delete(dp_new)
-    delete(level2)
+        ; dp  = dpres_plevel(level(i:), max(level(i)), 0, 0)  ; dp(30)
+        ; dp = level(i:)
+        ; level2 = level(i:)
+        ; level2(0:dimsizes(level(i:))-2) = level(i+1:)
+        ; level2(dimsizes(level(i:))-1) = 0
+        ; dp = level(i:) - level2
+        ; printVarSummary(ud_new(:,i+1:,:))
+        ; printVarSummary(dp)
+        dp_new = conform_dims(dimsizes(ud_a(:,i:,:)), dp(i:dimsizes(level2)-1), 1)
+        print(dp)
+        ; exit()
+        printVarSummary(dp_new)
+        vint(:,i,:)= dim_sum_n(ud_new(:,i:,:)*dp_new,1)
+        ; delete(dp)
+        delete(dp_new)
+        ; delete(level2)
 	end do 
-    vint(:,dimsizes(level)-1,:) = 50*ud_new(:,dimsizes(level)-1,:)
+    ; vint(:,dimsizes(level)-1,:) = 100*ud_new(:,dimsizes(level)-1,:)
     
     a = 6371000
     g = 9.8
@@ -51,7 +77,7 @@
     fi_clm = dim_avg_n_Wrap(fi(:,{1000:100},:), 0)
     printVarSummary(fi_clm)
     fi_clm = (/fi_clm/10^9/)
-    msf_clm = (/msf_clm/10^9/)
+    msf_clm = (/msf_clm/10^9*0.98/)
 
 
 ;;;;;;/
@@ -61,7 +87,7 @@
     res = True
     res@gsnDraw=False
     res@gsnFrame=False
-    res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "BlueDarkRed18"
 
     res@cnLinesOn=True
  
