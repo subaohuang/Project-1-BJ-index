@@ -1,7 +1,51 @@
  ;;;;;
+function get_had(v_a)
+begin
+    a = 6371000
+    g = 9.8
+    pi = get_pi("double")
+    dfi = pi
+    cosfi = cos(v_a&latitude/180.0)
+    print(cosfi)
+    
+    cosfi_new = conform_dims(dimsizes(vint), cosfi, 2)
+
+
+   ;;; vibeta(p, x, linlog, psfc, pbot, ptop)积分纬向平均的结果，得到mass
+   vint_beta = v_a
+   psfc = v_a(:,1,:)
+   psfc = 1013.0
+   
+    do i = 0,dimsizes(level) -1
+      vint_beta(:,i,:)  = (/vibeta( level, v_a(time|:,latitude|:,level|:), 1, psfc, level(i), 0)/)
+    end do
+
+    vint_beta_fi = v_a
+    vint_beta_fi := (/((2*a*dfi*cosfi_new)/g)*vint_beta*100/)
+    vint_beta_fi = (/vint_beta_fi/10^10/)
+    copy_VarCoords(v_a, vint_beta_fi)
+
+return vint_beta_fi
+end 
+
+function get_trend(fi_annual)
+begin
+;;;trend 
+  rc1 = regCoef_n(ispan(1, dimsizes(fi_annual(:,1,1)), 1), fi_annual, 0, 0)
+   
+  rc1 = (/rc1*10/)  ;;;convert to decadal trend mean
+
+  copy_VarCoords(fi(0,{1000:100},{-30:30}), rc1)
+;;;
+return rc1
+end 
+;;;;;;
+;;*****main program 
+;;
+;;;;;;
   begin 
-	fils1  =  "/home/ys17-19/lsh/data/era/era_pre_global.nc"
-    ; fils1  =  "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
+	; fils1  =  "/home/ys17-19/lsh/data/era/era_pre_global.nc"
+    fils1  =  "/home/ys17-19/lsh/data/wc-result/1850-PDAY-rmpacific_197912-201212.nc"
     
 	f1  =  addfile(fils1, "r")
 	timestart = 197901
@@ -15,47 +59,15 @@
 	startyear = stringtoint(startyear_r(0))
 	endyear = stringtoint(endyear_r(0))
 
-	v  =  short2flt(f1->v(timeind,::-1,:,:))
+	v  =  f1->V(timeind,::-1,:,:)
 
 	level = f1->level(::-1)
     print(level)
    
     ;; v avg 
-      v_a = dim_avg_n_Wrap(v , 3) ;;;time,level,lat
+    v_a = dim_avg_n_Wrap(v , 3) ;;;time,level,lat
     ;;
-
-    ;;;积分
-    level2 = level
-    level2(0:dimsizes(level)-2) = level(1:)
-    level2(dimsizes(level)-1) = 0
-    dp = level - level2
- 
-    v_2 = v_a
-
-    v_2(:,0:dimsizes(v_a&level)-2,:) = v_a(:,1:,:)
-    v_2(:,dimsizes(v_a&level)-1,:) = 0
-    v_a = (/(v_a + v_2)*0.5/)
-    printVarSummary(v_a)
-  
-
-    ;;;;
-
-
- ;;; 积分
-      vint = v_a
-	do i=0,dimsizes(level)-1
-       
-        dp_new = conform_dims(dimsizes(v_a(:,i:,:)), dp(i:dimsizes(level2)-1), 1)
-        print(dp)
-        ; exit()
-        printVarSummary(dp_new)
-        vint(:,i,:)= dim_sum_n(v_a(:,i:,:)*dp_new,1)
-        ; delete(dp)
-        delete(dp_new)
-        ; delete(level2)
-	end do 
-    ; vint(:,dimsizes(level)-1,:) = 50*ud_new(:,dimsizes(level)-1,:)
-    
+   
     a = 6371000
     g = 9.8
     pi = get_pi("double")
@@ -63,24 +75,7 @@
     cosfi = cos(v_a&latitude/180.0)
     print(cosfi)
     
-    
-     
     cosfi_new = conform_dims(dimsizes(vint), cosfi, 2)
-
-  
-
-    fi = v_a
-	fi := (/((2*a*dfi*cosfi_new)/g)*vint*100/)
-    fi = (/fi/10^10/)
-
-    copy_VarCoords(v_a, fi)
-	delete(vint)
-    printVarSummary(fi)
-    fi_clm = dim_avg_n_Wrap(fi(:,{1000:100},{-30:30}), 0)
-    printVarSummary(fi_clm)
-
-    fi_win = month_to_season(fi(:,{1000:100},{-30:30}), "DJF")
-    fi_win_clm = dim_avg_n_Wrap(fi_win, 0)
 ;;;
 
 ;;; vibeta(p, x, linlog, psfc, pbot, ptop)积分
@@ -105,19 +100,6 @@
 ;;;;;;
 
 
-
-;;;trend 
-  fi_annual = month_to_annual(fi(:,{1000:100},{-30:30}), 1)
-  rc1 = regCoef_n(ispan(1, dimsizes(fi_annual(:,1,1)), 1), fi_annual, 0, 0)
-   
-  vint_annual = month_to_annual(vint_beta_fi(:,{1000:100},{-30:30}), 1)
-  rc2 = regCoef_n(ispan(1, dimsizes(vint_annual(:,1,1)), 1), vint_annual, 0, 0)
-  
-  rc1 = (/rc1*10/)
-  rc2 = (/rc2*10/)
-
-  copy_VarCoords(fi(0,{1000:100},{-30:30}), rc1)
-  copy_VarCoords(fi(0,{1000:100},{-30:30}), rc2)
 
 ;;;
 
