@@ -30,12 +30,12 @@ function read_rea_data(diri,filename,timestart,timeend)
     endyear = stringtoint(endyear_r(0))
 
     if any(vatt.eq."scale_factor") 
-      v  =  short2flt(f1->$vnames(varid)$(timeind,::-1,:,:))
+      v  =  short2flt(f1->$vnames(varid)$(timeind,:,:,:))
     else
-      v  =  f1->$vnames(varid)$(timeind,::-1,:,:)
+      v  =  f1->$vnames(varid)$(timeind,:,:,:)
     end if
 
-    level = f1->level(::-1)
+    level = f1->level(:)
  return [/v,level/]
  end 
 
@@ -61,7 +61,7 @@ function read_model_data(diri,filename,timestart,timeend)
  end 
 
 function get_had(v,level)   ;;;get Hadley mass streamfunction
- begin
+  begin
 
     v_a = dim_avg_n_Wrap(v,3)
     a = 6371000
@@ -87,7 +87,7 @@ function get_had(v,level)   ;;;get Hadley mass streamfunction
       if  any(getVarDimNames(v_a).eq."lev") 
        msf(:,i,:)  = (/vibeta( level, v_a(time|:,lat|:,lev|:), 1, psfc, level(i), 0)/)
       else  
-       msf(:,i,:)  = (/vibeta( level, v_a(time|:,latitude|:,level|:), 1, psfc, level(i), 0)/)
+       msf(:,i,:)  = (/vibeta( level, v_a(time|:,lat|:,level|:), 1, psfc, level(i), 0)/)
       end if
     end do
 
@@ -113,7 +113,7 @@ function get_trend(fi_annual)
   return rc1
  end 
 
-function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
+function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode,rc)
   begin 
     
 
@@ -128,42 +128,41 @@ function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
     msf_CT_annual = month_to_annual(msf_CT, 1)
 
     ;;;; linear trend
-    rc_ct = get_trend(msf_CT_annual)
+      rc_ct = get_trend(msf_CT_annual)
+      if filename.ne."F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212_chazhi.nc".and.filename.ne."vwnd.mon.mean.nc"
+      rc_ct = (/rc - rc_ct/)
+      end if
     ;;;;
 
     ;;;get clim
-    msf_ct_clm = dim_avg_n_Wrap(msf_CT, 0)
+      msf_ct_clm = dim_avg_n_Wrap(msf_CT, 0)
     ;;;
     
-    printVarSummary(rc_ct)
-    printVarSummary(msf_ct_clm)
+  
 
     if any(getVarDimNames(rc_ct).eq."lev")
        rc_ct&lev@units = "hPa" 
        rc_ct&lev@long_name = "pressure_level"
+       msf_ct_clm&lev@long_name = "pressure_level"
+       msf_ct_clm&lev@units = "hPa"
+
     else 
        rc_ct&level@units = "hPa"
        rc_ct&level@long_name = "pressure_level"
-       
+       msf_ct_clm&level@long_name = "pressure_level"
+       msf_ct_clm&level@units = "hPa"
     end if
   
-   printVarSummary(rc_ct&level)
-   
-
-
-
-
+  
+  
     ;;;;;;画图
     res = True
     res@gsnDraw=False
     res@gsnFrame=False
     res@cnFillPalette = "BlRe"
 
-    res@cnLinesOn=True
- 
-    res@cnFillOn =True
-   
     res@cnLinesOn=False
+    res@cnFillOn =True
     res@cnLevelSelectionMode ="ManualLevels"
     res@cnMinLevelValF = -0.4
     res@cnMaxLevelValF = 0.4
@@ -172,7 +171,7 @@ function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
     res@lbLabelBarOn =False
     res@cnLineLabelsOn = False
     res@cnInfoLabelOn = False
-    res@lbLabelBarOn = True
+    
     
     res@tiYAxisString=""
     res@tmXTOn=False
@@ -198,8 +197,8 @@ function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
     ; res@cnFillPalette = "MPL_seismic"
 
     res@gsnLeftString = LeftString
-    plot_diff = gsn_csm_pres_hgt(wks,rc_ct,res)
-    exit()
+    plot_diff = gsn_csm_pres_hgt(wks,rc_ct({1000:100},{-30:30}),res)
+    
     
     ;;;;添加气候态的等值线
     res2 =res
@@ -216,7 +215,8 @@ function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
     res2@gsnContourZeroLineThicknessF=4.0
     
     
-    plot_clm = gsn_csm_pres_hgt(wks, msf_ct_clm, res2)
+    plot_clm = gsn_csm_pres_hgt(wks, msf_ct_clm({1000:100},{-30:30}), res2)
+
     
     overlay(plot_diff, plot_clm)
 
@@ -229,31 +229,53 @@ function  draw_msf_trend(diri,filename,timestart,timeend,wks,LeftString,mode)
 ;;********************************************
 ;;;;;;
  begin
-    diri1 =  "/home/ys17-19/lsh/data/era/"
+    ; diri1 =  "/home/ys17-19/lsh/data/era/"
+    ; diri1 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/"
+    diri1 = "/home/yangsong3/data-observation/20thCRV2/"
     diri2 = "/home/ys17-19/lsh/CESM-data/"
     
     filename1 = "F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212_chazhi.nc"
     filename2 = "F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212_chazhi.nc"
-    filename3 = "F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlantic.cam.h0.197801-201212_chazhi.nc"
+    filename3 = "F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
     filename4 = "F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"  
     filename5 = "F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
-    filename6 = "era_pre_global.nc"
+    ; filename6 = "era_pre_global.nc"
+    filename6  = "vwnd.mon.mean.nc"
 
     timestart = 197901
     timeend = 201212
 
-    wks = gsn_open_wks("pdf", "CESM各试验模拟的哈德来环流的趋势")
+    wks = gsn_open_wks("pdf", "CESM各试验模拟的哈德来环流的趋势-20cr")
 
-    plot_era = draw_msf_trend(diri1,filename6,timestart,timeend,wks,"ERA-Interim",1)
-    plot_CT = draw_msf_trend(diri2,filename1,timestart,timeend,wks,"Control run",0)
-    plot_rmid = draw_msf_trend(diri2,filename2,timestart,timeend,wks,"indian warming",0)
-    plot_rmal = draw_msf_trend(diri2,filename3,timestart,timeend,wks,"altlantic warming",0)
-    plot_rmpa = draw_msf_trend(diri2,filename4,timestart,timeend,wks,"pacific SST trend",0) 
-    plot_rafixed = draw_msf_trend(diri2,filename5,timestart,timeend,wks,"GHG",0)
+    ;;; read_model_data
+      data_ct = read_model_data(diri2,filename1,197901,201212)
+      had_ct = get_had(data_ct[0],data_ct[1])
     
+      had_ct_annual = month_to_annual(had_ct, 1)
+      rc_ct = get_trend(had_ct_annual)
+      
+
+    plots =  new(6,graphic)
+
+    plot_era = draw_msf_trend(diri1,filename6,timestart,timeend,wks,"ERA-Interim",1,rc_ct)
+    plot_CT = draw_msf_trend(diri2,filename1,timestart,timeend,wks,"Control run",0,rc_ct)
+    plot_rmid = draw_msf_trend(diri2,filename2,timestart,timeend,wks,"indian warming",0,rc_ct)
+    plot_rmal = draw_msf_trend(diri2,filename3,timestart,timeend,wks,"altlantic warming",0,rc_ct)
+    plot_rmpa = draw_msf_trend(diri2,filename4,timestart,timeend,wks,"pacific SST trend",0,rc_ct) 
+    plot_rafixed = draw_msf_trend(diri2,filename5,timestart,timeend,wks,"GHG",0,rc_ct)
+
+
+    
+    plots(0) = plot_era
+    plots(1) = plot_CT
+    plots(2) = plot_rmid
+    plots(3) = plot_rmal
+    plots(4) = plot_rmpa
+    plots(5) = plot_rafixed
 
     
     pres = True
+    pres@gsnPanelLabelBar = True
     pres@gsnPanelLabelBar = True
     
     gsn_panel(wks, plots, (/3,2/), pres)

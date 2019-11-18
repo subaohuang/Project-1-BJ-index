@@ -10,8 +10,9 @@
 function  get_trend_pattern(fils,timestart,timeend)
   begin
     ;;--------------read data-------- ------------
-      f1  =  addfile(fils, "r")
 
+      f1  =  addfile(fils, "r")
+   
       date  =  cd_calendar(f1->time, 1)
       timeind  =  ind(date.le.timeend.and.date.ge.timestart)
 
@@ -20,15 +21,19 @@ function  get_trend_pattern(fils,timestart,timeend)
 
       startyear = stringtoint(startyear_r(0))
       endyear = stringtoint(endyear_r(0))
-      
+      if fils.ne."/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc"
+
       PRECL_CT  =  f1->PRECL(timeind,:,:)
       PRECC_CT  =  f1->PRECC(timeind,:,:)
      
       PRE_CT = PRECC_CT
       PRE_CT = (/PRECC_CT+PRECL_CT/)
       PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
+      else 
+      PRE_CT = f1->precip(timeind,:,:)
+      end if
       PRE_CT_a  =  rmMonAnnCycTLL(PRE_CT)
-
+      
 
     ;;---------get trend pattern-------------------
       PRE_CT_trend = regCoef_n(ispan(1,dimsizes(PRE_CT_a&time),1),PRE_CT_a(:,:,:),0,0)  
@@ -72,7 +77,10 @@ begin
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212.pre.nc"
 
     fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"
-    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-cam4-rmallocean/F_1850-PDAY-rmallocean.cam.h0.197801-201212.pre.nc"
+
+    fils5 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212.nc"
+
+    fils6 = "/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc"
 
     timestart = 197901
     timeend = 201212
@@ -82,11 +90,14 @@ begin
     PRE_trend_id = get_trend_pattern(fils2,timestart,timeend)
     PRE_trend_al = get_trend_pattern(fils3,timestart,timeend)
     PRE_trend_pa = get_trend_pattern(fils4,timestart,timeend)
+    PRE_trend_ghg = get_trend_pattern(fils5,timestart,timeend)
+    PRE_trend_mre = get_trend_pattern(fils6,timestart,timeend)
     ;;;;
-    
-   PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
-   PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
-   PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/)
+      
+     PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
+     PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
+     PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/) 
+     PRE_trend_ghg = (/PRE_trend_ct - PRE_trend_ghg/) 
 
 
     ;;;;显著性检验
@@ -101,7 +112,7 @@ begin
   ;;---------------画趋势图--------------------------------------
    dir = systemfunc("/bin/pwd")
    
-    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmpaci_DIFF")
+    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-ssttrend-DIFF")
     ; wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmallocean_DIFF")
     res=True
     res@gsnDraw=False
@@ -143,50 +154,57 @@ begin
     res@vpWidthF = 0.6
     res@vpHeightF = 0.3
 
-    plot=new(4,graphic)
+    plot=new(6,graphic)
     res@gsnLeftStringFontHeightF = 20.0
+    res@gsnLeftString = "Observation"
+    plot(0) = gsn_csm_contour_map(wks,PRE_trend_mre,res)
     res@gsnLeftString = "Control run"
-    plot(0) = gsn_csm_contour_map(wks,PRE_trend_ct,res)
-    res@gsnLeftString = "Control run - indian warming removed"
-    plot(1) = gsn_csm_contour_map(wks,PRE_trend_id,res)
-    res@gsnLeftString = "Control run - atlantic warming removed"
-    plot(2) = gsn_csm_contour_map(wks,PRE_trend_al,res)
-    res@gsnLeftString = "Control run - pacific sst trend removed"
-    plot(3) = gsn_csm_contour_map(wks,PRE_trend_pa,res)
+    plot(1) = gsn_csm_contour_map(wks,PRE_trend_ct,res)
+    ; res@gsnLeftString = "Control run - indian warming removed"
+    res@gsnLeftString = "Indian warming"
+    plot(2) = gsn_csm_contour_map(wks,PRE_trend_id,res)
+    ; res@gsnLeftString = "Control run - atlantic warming removed"
+    res@gsnLeftString = "Atlantic warming"
+    plot(3) = gsn_csm_contour_map(wks,PRE_trend_al,res)
+    ; res@gsnLeftString = "Control run - pacific sst trend removed"
+    res@gsnLeftString = "Pacific Lanina-like SST trend"
+    plot(4) = gsn_csm_contour_map(wks,PRE_trend_pa,res)
+    res@gsnLeftString = "GHG effect"
+    plot(5) = gsn_csm_contour_map(wks,PRE_trend_ghg,res)
 
-    ;;;打点
-    res_pro=True
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
+    ; ;;;打点
+    ; res_pro=True
+    ; res_pro@gsnDraw=False
+    ; res_pro@gsnFrame=False
+    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    ; res_pro@cnLinesOn=False
+    ; res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    ; res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    ; res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    ; res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
 
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
+    ; res_pro@cnLineLabelsOn=False
+    ; res_pro@tmYRMode = "Automatic"
+    ; res_pro@cnInfoLabelOn=False
 
-    iplot = new(4,graphic)
+    ; iplot = new(6,graphic)
 
-    iplot(0) = gsn_csm_contour(wks,pro_trend_ct ,res_pro)
-    iplot(1) = gsn_csm_contour(wks,pro_trend_id ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,pro_trend_al ,res_pro)
-    iplot(3) = gsn_csm_contour(wks,pro_trend_pa ,res_pro)
+    ; iplot(0) = gsn_csm_contour(wks,pro_trend_ct ,res_pro)
+    ; iplot(1) = gsn_csm_contour(wks,pro_trend_id ,res_pro)
+    ; iplot(2) = gsn_csm_contour(wks,pro_trend_al ,res_pro)
+    ; iplot(3) = gsn_csm_contour(wks,pro_trend_pa ,res_pro)
 
 
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 17         ; stipple
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.2         ; add extra density
-    opt@gsnShadeFillDotSizeF = 0.0      ; make dots larger
+    ; opt                      = True
+    ; opt@gsnShadeFillType     = "pattern"
+    ; opt@gsnShadeMid     = 17         ; stipple
+    ; ; opt@gsnShadeHigh   = "green"
+    ; opt@gsnShadeFillScaleF   = 0.2         ; add extra density
+    ; opt@gsnShadeFillDotSizeF = 0.0      ; make dots larger
 
-    do i=0,3
-    iplot(i) = gsn_contour_shade(iplot(i), 0,0.05, opt)
-    end do
+    ; do i=0,3
+    ; iplot(i) = gsn_contour_shade(iplot(i), 0,0.05, opt)
+    ; end do
 
     ;;;  
     ; do i = 0,3 
@@ -195,8 +213,8 @@ begin
 
     pres = True
     pres@gsnPanelLabelBar = True
-    pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
+    pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
     
-    gsn_panel(wks, plot, (/2,2/), pres)
+    gsn_panel(wks, plot, (/3,2/), pres)
   end 
 

@@ -20,22 +20,34 @@ function  get_trend_pattern(fils,timestart,timeend)
 
       startyear = stringtoint(startyear_r(0))
       endyear = stringtoint(endyear_r(0))
+
+      print("****************"+fils+"*******************8")
       
-      msf_CT  =  f1->msf_time(timeind,{1000:100},:)
+      if fils.eq."/home/ys17-19/lsh/data/rea_msf/msf_time_mre_global.nc"
+        msf_r = f1->msf_time(:,:,timeind)
+        msf_CT = msf_r(time|:,level|:,lon|:)
+        
+        w_r = f1->w_time(:,:,timeind)
+        w_CT = w_r(time|:,level|:,lon|:)
+        
+        ud_r = f1->ud_time(:,:,timeind)
+        ud_CT = ud_r(time|:,level|:,lon|:)
+        delete(msf_r)
+        delete(w_r)
+        delete(ud_r)
+
+      else 
+        msf_CT  =  f1->msf_time(timeind,{1000:100},:)
+        w_CT  =  f1->w_time(timeind,{1000:100},:)
+        ud_CT  =  f1->ud_time(timeind,{1000:100},:)
+      end if
+
+      ;;;get anomaly       
       msf_CT = (/msf_CT/10^9/)
       msf_CT_a  =  rmMonAnnCycTLL(msf_CT)
-
-      w_CT  =  f1->w_time(timeind,{1000:100},:)
-
-
       w_CT_a = rmMonAnnCycTLL(w_CT)
-
-
-      ud_CT  =  f1->ud_time(timeind,{1000:100},:)
       ud_CT_a = rmMonAnnCycTLL(ud_CT)
-      
-       print(ud_CT(1,{1000},:))
-      exit()
+
 
       ;;;取年平均
       msf_CT_a_year = month_to_annual(msf_CT_a, 1)
@@ -68,7 +80,7 @@ function  get_trend_pattern(fils,timestart,timeend)
       ud_CT_trend = (/ud_CT_trend*10/)  ;;; convert to decade trend 
 
       msf_CT_clm = dim_avg_n_Wrap(msf_CT,0)
-
+    ;;
     ;;
   return  [/msf_CT_trend,w_CT_trend,ud_CT_trend,msf_CT_clm/]
  end
@@ -145,10 +157,16 @@ begin
 
   fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
 
-  ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
-  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
+  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
 
-    timestart = 197901
+  fils5 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
+  
+  fils6 = "/home/ys17-19/lsh/data/rea_msf/msf_time_mre_global.nc"
+  
+
+  
+
+    timestart = 197901  
     timeend = 201212
     
     ;;;;get trend pattern
@@ -156,14 +174,18 @@ begin
     trend_id = get_trend_pattern(fils2,timestart,timeend)
     trend_al = get_trend_pattern(fils3,timestart,timeend)
     trend_pa = get_trend_pattern(fils4,timestart,timeend)
+    trend_ghg = get_trend_pattern(fils5,timestart,timeend)
+    trend_mre = get_trend_pattern(fils6,timestart,timeend)
     ;;;;
-    
+    print("**************"+"done"+"*******************")
 
     ;;;;get trend pattern
     msf_trend_ct = trend_ct[0]
     msf_trend_id = trend_id[0]
     msf_trend_al = trend_al[0]
     msf_trend_pa = trend_pa[0]
+    msf_trend_ghg = trend_ghg[0]
+    msf_trend_mre = trend_mre[0]
     ;;;;
 
     ;;;;get trend pattern
@@ -171,11 +193,16 @@ begin
     w_trend_id = trend_id[1]
     w_trend_al = trend_al[1]
     w_trend_pa = trend_pa[1]
+    w_trend_ghg = trend_ghg[1]
+    w_trend_mre = trend_mre[1]
     
     ud_trend_ct = trend_ct[2]
     ud_trend_id = trend_id[2]
     ud_trend_al = trend_al[2]
     ud_trend_pa = trend_pa[2]
+    ud_trend_ghg = trend_ghg[2]
+    ud_trend_mre = trend_mre[2]
+
     ;;;; 
 
     ;;;;get clm pattern
@@ -183,6 +210,8 @@ begin
     msf_clm_id = trend_id[3]
     msf_clm_al = trend_al[3]
     msf_clm_pa = trend_pa[3]
+    msf_clm_ghg = trend_ghg[3]
+    msf_clm_mre = trend_mre[3]
     ;;;;
 
     ; ;;;;显著性检验
@@ -196,11 +225,13 @@ begin
     diff_id = (/msf_trend_ct - msf_trend_id/)
     diff_al = (/msf_trend_ct - msf_trend_al/)
     diff_pa = (/msf_trend_ct - msf_trend_pa/)
+    diff_ghg = (/msf_trend_ct - msf_trend_ghg/)
     ;;;
 
     copy_VarCoords(msf_trend_id, diff_id)
     copy_VarCoords(msf_trend_al, diff_al)
     copy_VarCoords(msf_trend_pa, diff_pa)
+    copy_VarCoords(msf_trend_ghg, diff_ghg)
     ;;;
 
 
@@ -208,11 +239,13 @@ begin
     w_diff_id = (/w_trend_ct - w_trend_id/)
     w_diff_al = (/w_trend_ct - w_trend_al/)
     w_diff_pa = (/w_trend_ct - w_trend_pa/)
+    w_diff_ghg = (/w_trend_ct - w_trend_ghg/)
     ;;;
   
     copy_VarCoords(w_trend_id, w_diff_id)
     copy_VarCoords(w_trend_al, w_diff_al)
     copy_VarCoords(w_trend_pa, w_diff_pa)
+    copy_VarCoords(w_trend_ghg, w_diff_ghg)
     ;;;
     
 
@@ -220,16 +253,18 @@ begin
     ud_diff_id = (/ud_trend_ct - ud_trend_id/)
     ud_diff_al = (/ud_trend_ct - ud_trend_al/)
     ud_diff_pa = (/ud_trend_ct - ud_trend_pa/)
+    ud_diff_ghg = (/ud_trend_ct - ud_trend_ghg/)
     ;;;
   
     copy_VarCoords(ud_trend_id, ud_diff_id)
     copy_VarCoords(ud_trend_al, ud_diff_al)
     copy_VarCoords(ud_trend_pa, ud_diff_pa)
+    copy_VarCoords(ud_trend_ghg, ud_diff_ghg)
     ;;;
    
     
   ;;---------------画趋势图--------------------------------------
-   
+      print("**************"+"画图"+"*******************")
 
     res = True
     res@gsnDraw=False
@@ -315,17 +350,30 @@ begin
    
     ; res@cnFillPalette = "MPL_seismic"
      wks2 = gsn_open_wks("pdf", "年平均-CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
+     ; wks2 = gsn_open_wks("pdf", "秋季-CESM-diff_msf_pattern-F-pday-rmindian-rmalt-rmpacific")
     
-    plot_diff = new(4,graphic)
-    res@gsnLeftString = "Control run"
-    plot_diff(0) = gsn_csm_pres_hgt_vector(wks2,msf_trend_ct,ud_trend_ct,w_trend_ct,res)
-    res@gsnLeftString = "Control - Indian warming removed"
-    plot_diff(1) = gsn_csm_pres_hgt_vector(wks2,diff_id,ud_diff_id ,w_diff_id ,res)
-    res@gsnLeftString = "Control - atlantic warming removed"
-    plot_diff(2) = gsn_csm_pres_hgt_vector(wks2, diff_al,ud_diff_al,w_diff_al,res)
-     res@gsnLeftString = "Control - pacific SST trend removed"
-    plot_diff(3) = gsn_csm_pres_hgt_vector(wks2,diff_pa,ud_diff_pa,w_diff_pa,res)
+    plot_diff = new(6,graphic)
+    res@gsnLeftString = "Observation"
+    ; print(w_trend_ct)
 
+  
+    plot_diff(0) = gsn_csm_pres_hgt_vector(wks2,msf_trend_mre,ud_trend_mre,w_trend_ct,res)
+    ; plot_diff(0) = gsn_csm_pres_hgt(wks2,msf_trend_mre,res)
+    
+    print("**************"+"画图1完成"+"*******************")
+    res@gsnLeftString = "Control run"
+    plot_diff(1) = gsn_csm_pres_hgt_vector(wks2,msf_trend_ct,ud_trend_ct,w_trend_ct,res)
+    ; res@gsnLeftString = "Control - Indian warming removed"
+    res@gsnLeftString = "Indian warming"
+    plot_diff(2) = gsn_csm_pres_hgt_vector(wks2,diff_id,ud_diff_id ,w_diff_id ,res)
+    ; res@gsnLeftString = "Control - atlantic warming removed"
+    res@gsnLeftString = "Atlantic warming "
+    plot_diff(3) = gsn_csm_pres_hgt_vector(wks2, diff_al,ud_diff_al,w_diff_al,res)
+     ; res@gsnLeftString = "Control - pacific SST trend removed"
+     res@gsnLeftString = "Pacific Lanina-like SST trend "
+    plot_diff(4) = gsn_csm_pres_hgt_vector(wks2,diff_pa,ud_diff_pa,w_diff_pa,res)
+     res@gsnLeftString = "GHG effect "
+    plot_diff(5) = gsn_csm_pres_hgt_vector(wks2,diff_ghg,ud_diff_ghg,w_diff_ghg,res)
 
     res@cnMinLevelValF = -6.0
     res@cnMaxLevelValF = 6.0
@@ -337,27 +385,26 @@ begin
     res@cnLineThicknesses = 3.0
 
      
-    plot_clm = new(4,graphic)
-    plot_clm(0) = gsn_csm_pres_hgt(wks2, msf_clm_ct, res)
-    plot_clm(1) = gsn_csm_pres_hgt(wks2, msf_clm_id, res)
-    plot_clm(2) = gsn_csm_pres_hgt(wks2, msf_clm_al, res)
-    plot_clm(3) = gsn_csm_pres_hgt(wks2, msf_clm_pa, res)
+    plot_clm = new(6,graphic)
+    plot_clm(0) = gsn_csm_pres_hgt(wks2, msf_clm_mre, res)
+    plot_clm(1) = gsn_csm_pres_hgt(wks2, msf_clm_ct, res)
+    plot_clm(2) = gsn_csm_pres_hgt(wks2, msf_clm_id, res)
+    plot_clm(3) = gsn_csm_pres_hgt(wks2, msf_clm_al, res)
+    plot_clm(4) = gsn_csm_pres_hgt(wks2, msf_clm_pa, res)
+    plot_clm(5) = gsn_csm_pres_hgt(wks2, msf_clm_ghg, res)
    
-    do i = 0, 3
+    do i = 0, 5
      overlay(plot_diff(i), plot_clm(i))
     end do 
 
-    do i = 0,3 
+    do i = 0,5
       plot_diff(i) = get_topo(plot_diff(i),wks2)
     end do
 
-
-
-
     pres =True
     pres@gsnPanelLabelBar  = True
-    pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
-    gsn_panel(wks2, plot_diff, (/2,2/), pres)
+    pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
+    gsn_panel(wks2, plot_diff, (/3,2/), pres)
 
   end 
 

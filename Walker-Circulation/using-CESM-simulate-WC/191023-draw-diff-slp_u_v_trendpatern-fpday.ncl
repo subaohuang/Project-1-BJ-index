@@ -21,28 +21,43 @@ function  get_trend_pattern(fils,timestart,timeend)
       startyear = stringtoint(startyear_r(0))
       endyear = stringtoint(endyear_r(0))
       
-      PSL_CT  =  f1->PSL(timeind,:,:)
-      PSL_CT = (/PSL_CT/100/)
-      PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
-
-      u_CT  =  f1->U(timeind,{850},:,:)
-      ; u_CT = f1->TAUX(timeind,:,:)
+      ;;;read data
+        vnames =  getfilevarnames(f1)
       
-      u_CT_a  =  rmMonAnnCycTLL(u_CT)
-  
-      v_CT  =  f1->V(timeind,{850},:,:)
-      ; v_CT = F1->TAUY(timeind,:,:)
-      
-      v_CT_a  =  rmMonAnnCycTLL(v_CT)
-  
-     PSL_CT_a_year = month_to_annual(PSL_CT_a, 1)
-     u_CT_a_year = month_to_annual(u_CT_a, 1)
-     v_CT_a_year = month_to_annual(v_CT_a, 1)
+          if any(vnames.eq."U") 
+            varid1 = ind(vnames.eq."U")
+            varid2 = ind(vnames.eq."V")
+            varid3 = ind(vnames.eq."PSL")
+          else 
+            varid1 = ind(vnames.eq."uwnd")
+            varid2 = ind(vnames.eq."vwnd")
+            varid3 = ind(vnames.eq."slp")
+          end if 
+         
 
-       timedim = dimsizes(PSL_CT_a_year(:,1,1))
+          PSL_CT  =  f1->$vnames(varid3)$(timeind,:,:)
+        
+         if any(vnames.eq."PSL") 
+           PSL_CT = (/PSL_CT/100/)
+         end if
+        PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
 
-       
-    ;;  
+        u_CT  =  f1->$vnames(varid1)$(timeind,{850},:,:)
+        ; u_CT = f1->TAUX(timeind,:,:)
+
+        u_CT_a  =  rmMonAnnCycTLL(u_CT)
+
+        v_CT  =  f1->$vnames(varid2)$(timeind,{850},:,:)
+        ; v_CT = F1->TAUY(timeind,:,:)
+
+        v_CT_a  =  rmMonAnnCycTLL(v_CT)
+
+        PSL_CT_a_year = month_to_annual(PSL_CT_a, 1)
+        u_CT_a_year = month_to_annual(u_CT_a, 1)
+        v_CT_a_year = month_to_annual(v_CT_a, 1)
+
+        timedim = dimsizes(PSL_CT_a_year(:,1,1))
+      ;;;
 
     ;;---------get trend pattern-------------------
       PSL_CT_trend = regCoef_n(ispan(1,timedim,1),PSL_CT_a_year(:,:,:),0,0)  
@@ -93,8 +108,11 @@ begin
    
     fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
 
-    ; fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacifi.cam.h0.197801-201212_chazhi.nc"
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
+    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
+
+    fils5 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
+
+    fils6 = "/home/ys17-19/lsh/data/MRE/mre_u_v_slp_chazhi.nc"
 
     timestart = 197901
     timeend = 201212
@@ -104,35 +122,48 @@ begin
     trend_id = get_trend_pattern(fils2,timestart,timeend)
     trend_al = get_trend_pattern(fils3,timestart,timeend)
     trend_pa = get_trend_pattern(fils4,timestart,timeend)
+    trend_ghg = get_trend_pattern(fils5,timestart,timeend)
+    trend_mre = get_trend_pattern(fils6,timestart,timeend)
 
     psl_trend_ct = trend_ct[0]
     psl_trend_id = trend_id[0]
     psl_trend_al = trend_al[0]
     psl_trend_pa = trend_pa[0]
+    psl_trend_ghg = trend_ghg[0]
+    psl_trend_mre = trend_mre[0]
+
     
     u_trend_ct = trend_ct[1]
     u_trend_id = trend_id[1]
     u_trend_al = trend_al[1]
     u_trend_pa = trend_pa[1]
+    u_trend_ghg = trend_ghg[1]
+    u_trend_mre = trend_mre[1]
 
     v_trend_ct = trend_ct[2]
     v_trend_id = trend_id[2]
     v_trend_al = trend_al[2]
     v_trend_pa = trend_pa[2]
+    v_trend_ghg = trend_ghg[2]
+    v_trend_mre = trend_mre[2]
     ;;;;
 
     ;;;diff with Control run
     psl_trend_id = (/psl_trend_ct - psl_trend_id/)
     psl_trend_pa = (/psl_trend_ct - psl_trend_pa/)
     psl_trend_al = (/psl_trend_ct - psl_trend_al/)
+    psl_trend_ghg = (/psl_trend_ct - psl_trend_ghg/)
+
 
     u_trend_id = (/u_trend_ct - u_trend_id/)
     u_trend_pa = (/u_trend_ct - u_trend_pa/)
     u_trend_al = (/u_trend_ct - u_trend_al/)
+    u_trend_ghg = (/u_trend_ct - u_trend_ghg/)
 
     v_trend_id = (/v_trend_ct - v_trend_id/)
     v_trend_pa = (/v_trend_ct - v_trend_pa/)
     v_trend_al = (/v_trend_ct - v_trend_al/)
+    v_trend_ghg = (/v_trend_ct - v_trend_ghg/)
     ;;;
    
     
@@ -160,7 +191,7 @@ begin
 
 
   ;;---------------画趋势图--------------------------------------
-    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmindian-rmalt-rafixed")
+    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmssttrend-rafixed")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -193,7 +224,7 @@ begin
     res@mpCenterLonF          = 180.0
 
     res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
+    res@vpWidthF = 0.6
     res@vpHeightF = 0.3
 
     ;;
@@ -224,23 +255,30 @@ begin
     ;;;
   
 
-    plot=new(4,graphic)
+    plot=new(6,graphic)
     res@gsnLeftStringFontHeightF = 20.0
+    res@gsnLeftString = "Observation"
+    plot(0) = gsn_csm_vector_scalar_map(wks,u_trend_mre,v_trend_mre , psl_trend_mre,res)
     res@gsnLeftString = "Control run"
-    plot(0) = gsn_csm_vector_scalar_map(wks,u_trend_ct,v_trend_ct, psl_trend_ct,res)
-    res@gsnLeftString = "Control - Indian warming removed"
-    plot(1) =  gsn_csm_vector_scalar_map(wks,u_trend_id,v_trend_id, psl_trend_id,res)
-    res@gsnLeftString = "Control - altlantic warming removed"
-    plot(2) =  gsn_csm_vector_scalar_map(wks,u_trend_al,v_trend_al, psl_trend_al,res)
-    res@gsnLeftString = "Control - pacific SST trend removed"
-    plot(3) =  gsn_csm_vector_scalar_map(wks,u_trend_pa,v_trend_pa, psl_trend_pa,res)
-
+    plot(1) = gsn_csm_vector_scalar_map(wks,u_trend_ct,v_trend_ct, psl_trend_ct,res)
+    ; res@gsnLeftString = "Control - Indian warming removed" 
+    res@gsnLeftString = "Indian warming "
+    plot(2) =  gsn_csm_vector_scalar_map(wks,u_trend_id,v_trend_id, psl_trend_id,res)
+    ; res@gsnLeftString = "Control - altlantic warming removed"
+    res@gsnLeftString = "Atlantic warming"
+    plot(3) =  gsn_csm_vector_scalar_map(wks,u_trend_al,v_trend_al, psl_trend_al,res)
+    ; res@gsnLeftString = "Control - pacific SST trend removed"
+    res@gsnLeftString = "Pacific Lanila-like SST trend "
+    plot(4) =  gsn_csm_vector_scalar_map(wks,u_trend_pa,v_trend_pa, psl_trend_pa,res)
+    ; res@gsnLeftString = "Control - GHG fixed"
+    res@gsnLeftString = "GHG effect"
+    plot(5) =  gsn_csm_vector_scalar_map(wks,u_trend_ghg,v_trend_ghg, psl_trend_ghg,res)
 
     pres = True
     pres@gsnPanelLabelBar = True
-    pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
+    pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
     
-    gsn_panel(wks, plot, (/2,2/), pres)
+    gsn_panel(wks, plot, (/3,2/), pres)
 
 
 
