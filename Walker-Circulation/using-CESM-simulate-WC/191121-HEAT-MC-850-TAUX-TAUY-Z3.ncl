@@ -1,3 +1,15 @@
+;;;将每年每个月的数据分开
+function month_to_month(u_heat) 
+begin
+    dim = dimsizes(u_heat)
+    year =  dim(0)/12
+    u_heat_mon = new((/12,year,dim(1),dim(2)/),typeof(u_heat))
+    
+    do i = 0,11,1
+    u_heat_mon(i,:,:,:) = u_heat(i:dim(0)-1:12,:,:)
+    end do
+  return u_heat_mon
+end 
 begin
 fils1  =  "/home/ys17-19/lsh/HEAT_MC_CP.cam.h0.25001-28912.nc"
 fils2 = "/home/ys17-19/lsh/B2000_f19g16_CP_CTRL.cam.h0.25001-28912.nc"
@@ -20,6 +32,11 @@ v_ct = f2->TAUY(timeind,:,:)
 slp_heat = f1->Z3(timeind,{200},:,:)
 slp_ct = f2->Z3(timeind,{200},:,:)
 
+;;;得到每个月的值
+
+   u_heat_mon = month_to_month(u_heat)
+   u_ct_mon = month_to_month(u_ct)
+;;;;
 
 u_heat_mam = month_to_season(u_heat, "MAM")
 u_ct_mam = month_to_season(u_ct, "MAM")
@@ -47,7 +64,41 @@ corr_ct = escorc_n(u_ct_mam_pa, u_ct_mam_id, 0, 0)
 print("corr_heat="+corr_heat)
 print("corr_ct="+corr_ct)
 
+   ;;;
+    x = dim_avg_n_Wrap(u_ct(:,{-5:5},{150:210}), (/1,2/))
+    y = dim_avg_n_Wrap(u_ct(:,{-5:5},{70:100}), (/1,2/))
 
+    mxlag    = 12
+    x_Lead_y = esccr(x,y,mxlag)
+    y_Lead_x = esccr(y,x,mxlag)    ; switch the order of the series
+
+    ccr = new ( 2*mxlag+1, float)    
+    ccr(0:mxlag-1) = y_Lead_x(1:mxlag:-1)  ; "negative lag", -1 reverses order
+    ccr(mxlag:)    = x_Lead_y(0:mxlag)     ; "positive lag"
+
+    wks=gsn_open_wks("pdf", "春季的IWC与PWC的超前滞后相关")
+
+    res=True
+    plot=gsn_csm_xy(wks, fspan(-12,12,25), ccr, res)
+
+delete(plot)
+delete(wks)
+exit()
+
+;;;计算每个月的相关系数
+
+    u_heat_mon_pa = dim_avg_n_Wrap(u_heat_mon(:,:,{-5:5},{150:210}), (/2,3/))
+
+    u_heat_mon_id = dim_avg_n_Wrap(u_heat_mon(:,:,{-5:5},{70:100}), (/2,3/))
+
+    corr_heat_mon = escorc_n(u_heat_mon_id, u_heat_mon_pa, 1, 1)
+
+    u_ct_mon_pa = dim_avg_n_Wrap(u_ct_mon(:,:,{-5:5},{150:210}), (/2,3/))
+
+    u_ct_mon_id = dim_avg_n_Wrap(u_ct_mon(:,:,{-5:5},{70:100}), (/2,3/))
+
+    corr_ct_mon = escorc_n(u_ct_mon_id, u_ct_mon_pa, 1, 1)
+;;;
 
 
 u_diff = dim_avg_n_Wrap(u_heat_mam, 0) - dim_avg_n_Wrap(u_ct_mam, 0)
@@ -131,6 +182,21 @@ copy_VarCoords(slp_heat(1,:,:), slp_diff)
    
    draw(plot)
    frame(wks)
+;;;;画直线图，每个月的情况
+
+    res2 =True
+    res2@tmXBMode = "Manual"
+    res2@tmXBTickStartF = 1
+    res2@tmXBTickEndF = 12
+  
+    res2@xyMonoMarkLineMode = True
+    res2@xyMarkLineMode  = (/"MarkLines"/) 
+    res2@xyMonoMarkLineMode = True
+    res2@xyLineColors      = (/"black","pink"/)          ; change line color
+    res2@xyMarkerColors = (/"black","pink"/) 
+    
+    wks2 = gsn_open_wks("pdf", "HEAT-MC-IWC-PWC-TAUX-corr")
+    plotxy = gsn_csm_xy(wks2, ispan(1, 12, 1), (/corr_ct_mon,corr_heat_mon/), res2)
 
 end
 
