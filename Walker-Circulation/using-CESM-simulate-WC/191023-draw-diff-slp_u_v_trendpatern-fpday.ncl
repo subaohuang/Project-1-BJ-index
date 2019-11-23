@@ -42,12 +42,12 @@ function  get_trend_pattern(fils,timestart,timeend)
          end if
         PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
 
-        u_CT  =  f1->$vnames(varid1)$(timeind,{850},:,:)
+        u_CT  =  f1->$vnames(varid1)$(timeind,{700},:,:)
         ; u_CT = f1->TAUX(timeind,:,:)
 
         u_CT_a  =  rmMonAnnCycTLL(u_CT)
 
-        v_CT  =  f1->$vnames(varid2)$(timeind,{850},:,:)
+        v_CT  =  f1->$vnames(varid2)$(timeind,{700},:,:)
         ; v_CT = F1->TAUY(timeind,:,:)
 
         v_CT_a  =  rmMonAnnCycTLL(v_CT)
@@ -167,11 +167,11 @@ begin
     ;;;
    
     
-    u_trend_ct_wsp = avg(dim_avg_n(u_trend_ct({5:5},{150:210}), (/1/)))
-    u_trend_id_wsp = avg(dim_avg_n(u_trend_id({5:5},{150:210}), (/1/)))
-    u_trend_al_wsp = avg(dim_avg_n(u_trend_al({5:5},{150:210}), (/1/)))
-    u_trend_pa_wsp = avg(dim_avg_n(u_trend_pa({5:5},{150:210}), (/1/)))
-  
+    u_trend_ct_wsp = avg(dim_avg_n(u_trend_ct({-5:5},{150:210}), (/1/)))
+    u_trend_id_wsp = avg(dim_avg_n(u_trend_id({-5:5},{150:210}), (/1/)))
+    u_trend_al_wsp = avg(dim_avg_n(u_trend_al({-5:5},{150:210}), (/1/)))
+    u_trend_pa_wsp = avg(dim_avg_n(u_trend_pa({-5:5},{150:210}), (/1/)))
+    u_trend_ghg_wsp = avg(dim_avg_n(u_trend_ghg({-5:5},{150:210}), (/1/)))
 
     u_trend_ct_esp = avg(dim_avg_n(u_trend_ct({5:5},{240:270}), (/1/)))
     u_trend_id_esp = avg(dim_avg_n(u_trend_id({5:5},{240:270}), (/1/)))
@@ -183,12 +183,13 @@ begin
     print("u_trend_id_wsp="+u_trend_id_wsp)
     print("u_trend_al_wsp="+u_trend_al_wsp)
     print("u_trend_pa_wsp="+u_trend_pa_wsp)
+    print("u_trend_ghg_wsp="+u_trend_ghg_wsp)
 
     print("u_trend_ct_esp="+u_trend_ct_esp)
     print("u_trend_id_esp="+u_trend_id_esp)
     print("u_trend_al_esp="+u_trend_al_esp)
     print("u_trend_pa_esp="+u_trend_pa_esp)
-
+exit()
 
   ;;---------------画趋势图--------------------------------------
     wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmssttrend-rafixed")

@@ -261,7 +261,19 @@ begin
     copy_VarCoords(ud_trend_pa, ud_diff_pa)
     copy_VarCoords(ud_trend_ghg, ud_diff_ghg)
     ;;;
-   
+
+    ud_diff_ct_wsp = avg(ud_trend_ct({700},{150:210}))
+    ud_diff_id_wsp = avg(ud_diff_id({700},{150:210}))
+    ud_diff_al_wsp = avg(ud_diff_al({700},{150:210}))
+    ud_diff_pa_wsp = avg(ud_diff_pa({700},{150:210}))
+    ud_diff_ghg_wsp = avg(ud_diff_ghg({700},{150:210}))
+
+    print("ud_diff_ct_wsp="+ud_diff_ct_wsp)
+    print("ud_diff_id_wsp="+ud_diff_id_wsp)
+    print("ud_diff_al_wsp="+ud_diff_al_wsp)
+    print("ud_diff_pa_wsp="+ud_diff_pa_wsp)
+    print("ud_diff_ghg_wsp="+ud_diff_ghg_wsp)
+; exit()
     
   ;;---------------画趋势图--------------------------------------
       print("**************"+"画图"+"*******************")
@@ -269,7 +281,8 @@ begin
     res = True
     res@gsnDraw=False
     res@gsnFrame=False
-    res@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "BlRe"
 
     res@cnLinesOn=True
  
@@ -320,7 +333,7 @@ begin
     
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
-    res@vcRefMagnitudeF = 0.2              ; define vector ref mag
+    res@vcRefMagnitudeF = 0.1              ; define vector ref mag
     res@vcRefLengthF    = 0.05        ; define length of vec ref
 
     res@vcGlyphStyle    = "CurlyVector"     ; turn on curly vectors
