@@ -42,12 +42,12 @@ function  get_trend_pattern(fils,timestart,timeend)
          end if
         PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
 
-        u_CT  =  f1->$vnames(varid1)$(timeind,{700},:,:)
+        u_CT  =  f1->$vnames(varid1)$(timeind,{850},:,:)
         ; u_CT = f1->TAUX(timeind,:,:)
 
         u_CT_a  =  rmMonAnnCycTLL(u_CT)
 
-        v_CT  =  f1->$vnames(varid2)$(timeind,{700},:,:)
+        v_CT  =  f1->$vnames(varid2)$(timeind,{850},:,:)
         ; v_CT = F1->TAUY(timeind,:,:)
 
         v_CT_a  =  rmMonAnnCycTLL(v_CT)
@@ -189,7 +189,7 @@ begin
     print("u_trend_id_esp="+u_trend_id_esp)
     print("u_trend_al_esp="+u_trend_al_esp)
     print("u_trend_pa_esp="+u_trend_pa_esp)
-exit()
+
 
   ;;---------------画趋势图--------------------------------------
     wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmssttrend-rafixed")
@@ -236,13 +236,13 @@ exit()
     ; res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.03           ; thin vectors
-    res@vcMinMagnitudeF          =0.05
-    res@vcRefMagnitudeF          = 0.6
+    res@vcMinMagnitudeF          =0.06
+    res@vcRefMagnitudeF          = 0.5
     res@vcRefLengthF             = 0.04     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-    res@vcLineArrowThicknessF=1.0
-    res@vcLineArrowHeadMaxSizeF=0.01
-    res@vcLineArrowHeadMinSizeF=0.01
+    res@vcLineArrowThicknessF=2.0
+    ; res@vcLineArrowHeadMaxSizeF=0.01
+    ; res@vcLineArrowHeadMinSizeF=0.01
     res@vcVectorDrawOrder="PostDraw"
 
     ;;;CurlyVector
