@@ -3,17 +3,48 @@
 ;;;2019.10.29
 ;;;by shuheng lin
 ;;;**********************************************************
-function  rc_test(ssta_rc)
+function  rc_test(ssta_rc,id1,id2)
 begin
-  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+   dim = dimsizes(id1)
+   ;;有效自由度 
+   r1_r = esacr(id1, 1)
+   r2_r = esacr(id2, 1)
+   
+   r1_o = r1_r(1)
+   r2 = r2_r(:,:,1)
+   f = dimsizes(r2)
+  printVarSummary(r2)
+  printVarSummary(ssta_rc)
+  exit()
+   r1  = onedtond(r1_o, dimsizes(r2))
+
+   ; v = dim*(/1-r1*r2/)/(/1+r1*r2/) 
+   v = onedtond(dim, dimsizes(ssta_rc)) 
+
+   ssta_rc_new = onedtond(ssta_rc, dimsizes(ssta_rc))
+
+   ; tval = sqrt(v)*(/ssta_rc_new/)/(sqrt(1- ssta_rc_new^2))
+  
+   tval  =onedtond(ssta_rc@tval, dimsizes(ssta_rc))
+   df   = v-2
    b = tval    ; b must be same size as tval (and df)
    b = 0.5
    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
    copy_VarCoords(ssta_rc, prob)
-
 return prob
 end
+
+; function  rc_test(ssta_rc)
+; begin
+;   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
+;    df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+;    b = tval    ; b must be same size as tval (and df)
+;    b = 0.5
+;    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
+;    copy_VarCoords(ssta_rc, prob)
+; return prob
+; end
+
 ;;;
 function clm_ano(x[*]:numeric)  ;去除一维时间序列的年循环
 begin
@@ -76,18 +107,18 @@ begin
 
   msf_time_annual = month_to_annual(msf_time(time|:,level|:,lon|:), 1)
 
-  msf_pa_inten = dim_avg_n_Wrap(msf_time_annual(:,:,{180:230}),(/1,2/))
-  msf_id_inten = dim_avg_n_Wrap(msf_time_annual(:,:,{0:60}),(/1,2/))
+  msf_pa_inten = dim_avg_n_Wrap(msf_time_annual(:,:,{150:210}),(/1,2/))
+  msf_id_inten = dim_avg_n_Wrap(msf_time_annual(:,:,{70:100}),(/1,2/))
   msf_al_inten = dim_avg_n_Wrap(msf_time_annual(:,:,{310:340}),(/1,2/))
   delete(date)
   delete(timeind)
 ;;;
 
 ;;;滑动平均，提取年代际变化信号
-  msf_pa_inten = (/runave_n(msf_pa_inten, 9, 0, 0)/)
-  msf_id_inten = (/-1*runave_n(msf_id_inten,9, 0, 0)/)
-  msf_al_inten = (/runave_n(msf_al_inten, 9, 0, 0)/)
-  ssta_annual = (/runave_n(ssta_annual,9, 0, 0)/)
+  ; msf_pa_inten = (/runave_n(msf_pa_inten, 9, 0, 0)/)
+  ; msf_id_inten = (/-1*runave_n(msf_id_inten,9, 0, 0)/)
+  ; msf_al_inten = (/runave_n(msf_al_inten, 9, 0, 0)/)
+  ; ; ssta_annual = (/runave_n(ssta_annual,9, 0, 0)/)
 ;;;
 
 ; ;;;回归sst场
@@ -101,6 +132,11 @@ begin
   ssta_al_rc=regCoef_n(msf_al_inten,ssta_annual,0,0)  
   copy_VarCoords(ssta(0,:,:), ssta_al_rc)
 
+  ;;;相关系数
+  rc_id = escorc_n(msf_id_inten, ssta_annual, 0, 0)
+  rc_pa = escorc_n(msf_pa_inten, ssta_annual, 0, 0)
+  rc_al = escorc_n(msf_al_inten, ssta_annual, 0, 0)
+;;;
 
   
 ; ;;;回归u场,v场
@@ -113,12 +149,21 @@ begin
 
 ;   va_rc=regCoef_n(ipindex2,va_cold,0,0)  
 ;   copy_VarCoords(va(0,:,:), va_rc)
-; ;;;显著性检验
-;   prob_ssta=rc_test(ssta_rc)
-;   prob_ua=rc_test(ua_rc)
-;   prob_va=rc_test(va_rc)
-; ;;;
-; ;;;
+
+;;;显著性检验
+  prob_id=rc_test(ssta_id_rc, msf_id_inten,ssta_annual)
+  prob_pa=rc_test(ssta_pa_rc, msf_pa_inten, ssta_annual)
+  prob_al=rc_test(ssta_al_rc, msf_al_inten, ssta_annual)
+
+  ; prob_id=rc_test(ssta_id_rc)
+  ; prob_pa=rc_test(ssta_pa_rc)
+  ; prob_al=rc_test(ssta_al_rc)
+
+ 
+  copy_VarCoords(ssta_id_rc, prob_id)
+  copy_VarCoords(ssta_id_rc, prob_pa)
+  copy_VarCoords(ssta_id_rc, prob_al)
+
 
 ; ;;;显著性检验
 ;   prob_ssta=rtest(ssta_rc,dimsizes(ssta_s&time),0)
@@ -156,8 +201,9 @@ wks = gsn_open_wks("pdf", "各环流强度指数回归sst")
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
   res@cnMinLevelValF       =   -2.0
   res@cnMaxLevelValF       =   2.0
-  res@cnLevelSpacingF      =  0.1
+  res@cnLevelSpacingF      =  0.5
   res@lbLabelBarOn=False
+  res@cnLineLabelsOn =False
   
   ; res@cnMinLevelValF       =   -0.1
   ; res@cnMaxLevelValF       =   0.1
@@ -197,35 +243,45 @@ wks = gsn_open_wks("pdf", "各环流强度指数回归sst")
    res@gsnLeftString = "atlantic cell"
    plot(2) = gsn_csm_contour_map(wks, ssta_al_rc, res)
  
-; ;;;打点
-;   res_pro=True
-;   res_pro@gsnDraw=False
-;   res_pro@gsnFrame=False
-;   res_pro@cnLevelSelectionMode = "ExplicitLevels"
-;   res_pro@cnLinesOn=False
-;   res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-;   res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-;   res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-;   res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
-;   ; res_pro@cnLevels = ispan(-6,6,1)
-;   res_pro@cnLineLabelsOn=False
-;   res_pro@tmYRMode = "Automatic"
-;   res_pro@cnInfoLabelOn=False
-;   ; res_pro@cnLineLabelBackgroundColor="Transparent"
-;   ; res_pro@cnLineThicknessF = 3.
-;   ; res_pro@cnFillOn        = True
- 
-;   iplot=gsn_csm_contour(wks,prob_ssta,res_pro)
+;;;打点
+  res_pro=True
+  res_pro@gsnDraw=False
+  res_pro@gsnFrame=False
+  res_pro@cnLevelSelectionMode = "ExplicitLevels"
+  res_pro@cnLinesOn=False
+  res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+  res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+  res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+  res_pro@cnLevelSpacingF     = 0.5       ; set contour spacing
+  ; res_pro@cnLevels = ispan(-6,6,1)
+  res_pro@cnLineLabelsOn=False
+  res_pro@tmYRMode = "Automatic"
+  res_pro@cnInfoLabelOn=False
+  ; res_pro@cnLineLabelBackgroundColor="Transparent"
+  ; res_pro@cnLineThicknessF = 3.
+  ; res_pro@cnFillOn        = True
+  iplot = new(3,graphic)
 
-;   opt                      = True
-;   opt@gsnShadeFillType     = "pattern"
-;   opt@gsnShadeMid     = 17         ; stipple
-;   ; opt@gsnShadeHigh   = "green"
-;   opt@gsnShadeFillScaleF   = 0.2         ; add extra density
-;   opt@gsnShadeFillDotSizeF = 0.0      ; make dots larger
-;   iplot = gsn_contour_shade(iplot, 0,0.05, opt)
-; ;;;  
-; overlay(plot, iplot)
+  iplot(0)=gsn_csm_contour(wks,prob_id,res_pro)
+  iplot(1)=gsn_csm_contour(wks,prob_pa,res_pro)
+  iplot(2)=gsn_csm_contour(wks,prob_al,res_pro)
+  
+
+
+  opt                      = True
+  opt@gsnShadeFillType     = "pattern"
+  opt@gsnShadeMid     = 11         ; stipple
+  ; ; opt@gsnShadeHigh   = "green"
+  ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density
+  ; opt@gsnShadeFillDotSizeF =  0.0     ; make dots larger      ; make dots larger
+  do i=0,2
+  iplot(i) = gsn_contour_shade(iplot(i), 0,0.5, opt)
+  end do
+;;;  
+do i=0,2
+overlay(plot(i), iplot(i))
+end do
+
 pres = True
 pres@gsnPanelLabelBar = True
 gsn_panel(wks, plot, (/2,2/), pres)
