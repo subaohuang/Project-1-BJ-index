@@ -6,26 +6,23 @@
 function  rc_test(ssta_rc,id1,id2)
 begin
    dim = dimsizes(id1)
+   varname = getVarDimNames(id2)
+  
    ;;有效自由度 
-   r1_r = esacr(id1, 1)
-   r2_r = esacr(id2, 1)
-   
+   r1_r = esacr(id1, 1)  
+   r2_r = esacr(id2(latitude|:,longitude|:,year|:), 1)
+
    r1_o = r1_r(1)
    r2 = r2_r(:,:,1)
    f = dimsizes(r2)
-  printVarSummary(r2)
-  printVarSummary(ssta_rc)
-  exit()
+
    r1  = onedtond(r1_o, dimsizes(r2))
 
-   ; v = dim*(/1-r1*r2/)/(/1+r1*r2/) 
-   v = onedtond(dim, dimsizes(ssta_rc)) 
-
+   v = dim*(/1-r1*r2/)/(/1+r1*r2/) 
+ 
    ssta_rc_new = onedtond(ssta_rc, dimsizes(ssta_rc))
+   tval = sqrt(v-2)*(/ssta_rc_new/)/(sqrt(1- ssta_rc_new^2))
 
-   ; tval = sqrt(v)*(/ssta_rc_new/)/(sqrt(1- ssta_rc_new^2))
-  
-   tval  =onedtond(ssta_rc@tval, dimsizes(ssta_rc))
    df   = v-2
    b = tval    ; b must be same size as tval (and df)
    b = 0.5
@@ -33,17 +30,6 @@ begin
    copy_VarCoords(ssta_rc, prob)
 return prob
 end
-
-; function  rc_test(ssta_rc)
-; begin
-;   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-;    df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
-;    b = tval    ; b must be same size as tval (and df)
-;    b = 0.5
-;    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
-;    copy_VarCoords(ssta_rc, prob)
-; return prob
-; end
 
 ;;;
 function clm_ano(x[*]:numeric)  ;去除一维时间序列的年循环
@@ -114,12 +100,12 @@ begin
   delete(timeind)
 ;;;
 
-;;;滑动平均，提取年代际变化信号
-  ; msf_pa_inten = (/runave_n(msf_pa_inten, 9, 0, 0)/)
-  ; msf_id_inten = (/-1*runave_n(msf_id_inten,9, 0, 0)/)
-  ; msf_al_inten = (/runave_n(msf_al_inten, 9, 0, 0)/)
-  ; ; ssta_annual = (/runave_n(ssta_annual,9, 0, 0)/)
-;;;
+;;滑动平均，提取年代际变化信号
+  msf_pa_inten = (/runave_n(msf_pa_inten, 9, 0, 0)/)
+  msf_id_inten = (/-1*runave_n(msf_id_inten,9, 0, 0)/)
+  msf_al_inten = (/runave_n(msf_al_inten, 9, 0, 0)/)
+  ; ssta_annual = (/runave_n(ssta_annual,9, 0, 0)/)
+;;
 
 ; ;;;回归sst场
 
@@ -131,8 +117,9 @@ begin
 
   ssta_al_rc=regCoef_n(msf_al_inten,ssta_annual,0,0)  
   copy_VarCoords(ssta(0,:,:), ssta_al_rc)
+;;;
 
-  ;;;相关系数
+;;;相关系数
   rc_id = escorc_n(msf_id_inten, ssta_annual, 0, 0)
   rc_pa = escorc_n(msf_pa_inten, ssta_annual, 0, 0)
   rc_al = escorc_n(msf_al_inten, ssta_annual, 0, 0)
@@ -151,9 +138,9 @@ begin
 ;   copy_VarCoords(va(0,:,:), va_rc)
 
 ;;;显著性检验
-  prob_id=rc_test(ssta_id_rc, msf_id_inten,ssta_annual)
-  prob_pa=rc_test(ssta_pa_rc, msf_pa_inten, ssta_annual)
-  prob_al=rc_test(ssta_al_rc, msf_al_inten, ssta_annual)
+  prob_id=rc_test(rc_id, msf_id_inten,ssta_annual)
+  prob_pa=rc_test(rc_pa, msf_pa_inten, ssta_annual)
+  prob_al=rc_test(rc_al, msf_al_inten, ssta_annual)
 
   ; prob_id=rc_test(ssta_id_rc)
   ; prob_pa=rc_test(ssta_pa_rc)
@@ -188,7 +175,8 @@ begin
 
 ;;;画图
 wks = gsn_open_wks("pdf", "各环流强度指数回归sst")
-  gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+  ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+  gsn_define_colormap(wks, "BlRe")
   
   res=True
   res@gsnDraw=False
@@ -247,12 +235,26 @@ wks = gsn_open_wks("pdf", "各环流强度指数回归sst")
   res_pro=True
   res_pro@gsnDraw=False
   res_pro@gsnFrame=False
+  res_pro@cnFillOn = True
+
   res_pro@cnLevelSelectionMode = "ExplicitLevels"
-  res_pro@cnLinesOn=False
-  res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-  res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-  res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-  res_pro@cnLevelSpacingF     = 0.5       ; set contour spacing
+  res_pro@cnLevels = (/0,0.05/)
+  res_pro@lbLabelBarOn = False
+
+  ; res_pro@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+  ; res_pro@cnMinLevelValF       =   0
+  ; res_pro@cnMaxLevelValF       =   0.05
+  ; res_pro@cnLevelSpacingF      =  0.05
+
+  res_pro@cnLinesOn=True
+  res_pro@cnMonoLineColor =False
+  res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+  res_pro@cnMonoFillPattern = True
+  res_pro@cnFillPattern = 17
+  res_pro@cnFillDotSizeF = 0.0045
+  res_pro@cnMonoFillColor = False
+  res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
   ; res_pro@cnLevels = ispan(-6,6,1)
   res_pro@cnLineLabelsOn=False
   res_pro@tmYRMode = "Automatic"
@@ -267,17 +269,6 @@ wks = gsn_open_wks("pdf", "各环流强度指数回归sst")
   iplot(2)=gsn_csm_contour(wks,prob_al,res_pro)
   
 
-
-  opt                      = True
-  opt@gsnShadeFillType     = "pattern"
-  opt@gsnShadeMid     = 11         ; stipple
-  ; ; opt@gsnShadeHigh   = "green"
-  ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density
-  ; opt@gsnShadeFillDotSizeF =  0.0     ; make dots larger      ; make dots larger
-  do i=0,2
-  iplot(i) = gsn_contour_shade(iplot(i), 0,0.5, opt)
-  end do
-;;;  
 do i=0,2
 overlay(plot(i), iplot(i))
 end do
