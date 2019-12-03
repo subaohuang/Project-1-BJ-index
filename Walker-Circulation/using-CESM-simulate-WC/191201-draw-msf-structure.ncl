@@ -31,6 +31,28 @@ begin
       msf_annual_2=dim_avg_n_Wrap(msf_year({1995:2012},:,:),0)
     ;;;
 
+    ;;;clmatology 
+      msf_clm = dim_avg_n_Wrap(msf_year, 0)
+    ;;;
+
+     msf_trend = regCoef_n(msf_year&year, msf_year, 0, 0)
+     
+     numyear = msf_trend
+     numyear = 34
+
+     msf_add = msf_clm + msf_trend*numyear
+
+     printVarSummary(msf_add)
+     ;;;;
+     
+     msf_annual_1 = (/msf_year({1979},:,:)/)
+     msf_annual_2 = (/msf_add/)
+
+     ;;;
+
+
+
+
     ;;;;画图
       res2 = True
       res2@gsnDraw=False
