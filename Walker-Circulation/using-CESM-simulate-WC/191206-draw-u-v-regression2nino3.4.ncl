@@ -46,7 +46,7 @@ begin
       f3=addfile("/home/ys17-19/lsh/data/sst/HadISST_sst.nc", "r")
       date=cd_calendar(f3->time, 1)
       timeind=ind(date.ge.194001.and.date.le.201212)
-      sst=lonFlip(f3->sst(timeind,{20:-20},:))
+      sst=lonFlip(f3->sst(timeind,{30:-30},:))
       ssta=(/rmMonAnnCycTLL(sst)/)
       copy_VarCoords(sst, ssta)
       ssta_de=dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)
@@ -104,7 +104,7 @@ begin
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "BlRe"
+    res@cnFillPalette = "BlueWhiteOrangeRed"
 
     ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
@@ -135,7 +135,7 @@ begin
 
     res@vcMinDistanceF           = 0.03           ; thin vectors
     ; res@vcMinMagnitudeF          =0.05
-    ; res@vcRefMagnitudeF          = 0.6
+    res@vcRefMagnitudeF          = 3.0
     res@vcRefLengthF             = 0.04     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.0
