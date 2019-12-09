@@ -1,0 +1,111 @@
+;;;************************************************************
+;;
+;; linshuheng 2019.10.22
+;;;*********************************************************
+begin
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
+  
+
+    f1=addfile(fils1, "r")
+    f2=addfile(fils2, "r")
+
+    date=cd_calendar(f1->time, 1)
+    timeind=ind(date.ge.601.and.date.le.4012)
+    
+
+    PSL_CT  =  f1->PSL(timeind,:,:)
+    PSL_CT = (/PSL_CT/100/)
+
+    u_CT  =  f1->U(timeind,{850},:,:)
+    v_CT  =  f1->V(timeind,{850},:,:)
+
+    
+    PSL_indian  =  f2->PSL(timeind,:,:)
+    PSL_indian = (/PSL_indian/100/)
+
+    u_indian  =  f2->U(timeind,{850},:,:)
+    v_indian  =  f2->V(timeind,{850},:,:)
+    
+    PSL_CT_clm = dim_avg_n_Wrap(PSL_CT, 0)
+    PSL_indian_clm = dim_avg_n_Wrap(PSL_indian, 0)
+    
+    u_CT_clm = dim_avg_n_Wrap(u_CT, 0)
+    u_indian_clm = dim_avg_n_Wrap(u_indian, 0)
+
+    v_CT_clm = dim_avg_n_Wrap(v_CT, 0)
+    v_indian_clm = dim_avg_n_Wrap(v_indian, 0)
+
+
+    PSL_diff = PSL_CT_clm
+    PSL_diff = (/PSL_indian_clm - PSL_CT_clm/)
+    
+    u_diff = u_CT_clm
+    u_diff = (/u_indian_clm - u_CT_clm/)
+    
+    v_diff = v_CT_clm
+    v_diff = (/v_indian_clm - v_CT_clm/)
+    
+   
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern")
+    ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
+    res=True
+    res@gsnDraw=False
+    res@gsnFrame=False
+    res@gsnAddCyclic=True
+
+
+    res@cnLineColors="Transparent"  ;
+    res@lbLabelBarOn=False
+    res@cnFillOn = True 
+    res@cnLinesOn =False
+    res@cnLineLabelsOn=False
+    res@cnRasterSmoothingOn=True
+
+    res@cnFillPalette = "BlueWhiteOrangeRed"
+
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+
+    ; res@cnMinLevelValF       =   -0.4
+    ; res@cnMaxLevelValF       =   0.4
+    ; res@cnLevelSpacingF      =  0.1
+
+    res@tmXTOn=False
+    res@tmYROn=False
+
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
+    res@mpMinLonF             = 0.0
+    res@mpMaxLonF             = 360.0
+    res@mpCenterLonF          = 180.0
+
+     res@mpShapeMode = "FreeAspect"
+    res@vpWidthF = 0.7
+    res@vpHeightF = 0.3
+;
+    ;;
+     ;;;LineArrow
+    res@gsnScalarContour        = True
+    
+    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    ; res@vcGlyphStyle="CurlyVector"
+
+    res@vcMinDistanceF           = 0.03           ; thin vectors
+    res@vcMinMagnitudeF          =0.04
+    res@vcRefMagnitudeF          = 1.0
+    res@vcRefLengthF             = 0.04     ; define length of v
+    res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    res@vcLineArrowThicknessF=1.0
+    res@vcLineArrowHeadMaxSizeF=0.01
+    res@vcLineArrowHeadMinSizeF=0.01
+    res@vcVectorDrawOrder="PostDraw"
+
+  
+    plot = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PSL_diff,res)
+
+    draw(plot)
+    frame(wks)
+  end
+  
+

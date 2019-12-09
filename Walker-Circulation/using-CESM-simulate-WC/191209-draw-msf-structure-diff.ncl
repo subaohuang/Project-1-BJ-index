@@ -4,13 +4,12 @@
 ;; linshuheng 2019.12.06
 ;;;*********************************************************
 
-;************************************************************
-;;       function of draw structure pattern
-;************************************************************
-function draw_msf(fils1,wks,LeftString)
+;;;;funtion of read data 
+function read_msf(fils1)
 begin
     f1=addfile(fils1, "r")
     date=cd_calendar(f1->time, 1)
+
     timeind=ind(date.ge.197901.and.date.le.201212)
    
     msf_time_20cr_r=f1->msf_time(timeind,{1000:100},:)
@@ -32,26 +31,28 @@ begin
     ;;;
 
     ;;;clmatology 
-      msf_clm = dim_avg_n_Wrap(msf_year, 0)
+     msf_clm = dim_avg_n_Wrap(msf_year, 0)
     ;;;
-
      msf_trend = regCoef_n(msf_year&year, msf_year, 0, 0)
      
+    copy_VarCoords(msf_annual_1, msf_clm)
+    copy_VarCoords(msf_annual_1, msf_trend)
+    ;;;
+  return [/msf_clm,msf_trend/]
+end 
+;;;function of draw plot 
+function draw_msf(msf_clm,msf_trend, wks,LeftString)
+begin
      numyear = msf_trend
      numyear = 34
      
-    
      msf_add = msf_clm + msf_trend*numyear
-
+     copy_VarCoords(msf_trend, msf_add)
      printVarSummary(msf_add)
      ;;;;
-     msf_annual_1 = (/msf_clm/)
-     msf_annual_2 = (/msf_add/)
+     msf_annual_1 = msf_clm
+     msf_annual_2 = msf_add
      ;;;
-
-   
-
-
 
     ;;;;画图
       res2 = True
@@ -225,16 +226,30 @@ begin
   ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmallocean_197912-201212.nc"
 
    
-    wks = gsn_open_wks("pdf", "cesm-msf-structure-rminpaal")
+    data_ct = read_msf(fils1)
+    data_id = read_msf(fils2)
+    data_pa = read_msf(fils3)
+    data_al = read_msf(fils4)
+    
+    msf_trend_ct = data_ct[1]
+
+    msf_trend_id = (/data_ct[1] - data_id[1]/)
+    msf_trend_pa = (/data_ct[1] - data_pa[1]/)
+    msf_trend_al = (/data_ct[1] - data_al[1]/)
+
+    copy_VarCoords(msf_trend_ct, msf_trend_id)
+    copy_VarCoords(msf_trend_ct, msf_trend_pa)
+    copy_VarCoords(msf_trend_ct, msf_trend_al) 
+
+    wks = gsn_open_wks("pdf", "cesm-msf-structure-diff")
     plot = new(4,graphic)
     ;;;;get trend pattern
-    plot(0) = draw_msf(fils1,wks,"CT")
-    plot(1) = draw_msf(fils2,wks,"rmindian")
-    plot(2) = draw_msf(fils3,wks,"rmatlan")
-    plot(3) = draw_msf(fils4,wks,"rmpacific")
+    plot(0) = draw_msf(data_ct[0],data_ct[1],wks,"CT")
+    plot(1) = draw_msf(data_ct[0],msf_trend_id,wks,"rmindian")
+    plot(2) = draw_msf(data_ct[0],msf_trend_pa, wks,"rmatlan")
+    plot(3) = draw_msf(data_ct[0],msf_trend_al,wks,"rmpacific")
     ;;;;
-  
-  
+
     pres = True
     gsn_panel(wks, plot, (/2,2/), pres)
 

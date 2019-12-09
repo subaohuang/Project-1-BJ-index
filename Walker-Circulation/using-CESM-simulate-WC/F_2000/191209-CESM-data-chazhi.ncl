@@ -9,7 +9,6 @@ undef("cesm_hybird2pre")
   ;; infilepath : absolute path of cesm data interpolated from hybrid to pressure level
   ;; OUTPUT variable : U,V,OMEGA,PSL,PRECL
   ;; linshuheng 2019.9.25
-  ;; modify in variable time 2019.12.09
   ;;;*********************************************************
   function cesm_hybird2pre(infilepath,outfilepath)
   begin
@@ -25,11 +24,14 @@ undef("cesm_hybird2pre")
     PSL = f1->PSL
     OMEGA = f1->OMEGA
     PRECL = f1->PRECL
+    PRECC = f1->PRECC
 
     lat = f1->lat
     lon = f1->lon  
     time = f1->time
-    time = (/time-1/) ;;;时间要注意
+    
+  
+    ; time = (/time - 1.0/) ;;;注意cesm得到的时候，time_bnd的第一位，所以读出来有问题
 
 
     P0mb = 1000.0                        ; reference pressure [mb]
@@ -55,7 +57,7 @@ undef("cesm_hybird2pre")
     Wnew&lev = lev 
    
     ;;-----------------------写入nc文件---------------------------
-    system("/bin/rm -f" +"" + outfilepath +"")   ; remove any pre-existing file
+    system("/bin/rm -f "+outfilepath+"" )   ; remove any pre-existing file
     ncdf = addfile(outfilepath ,"c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
@@ -76,15 +78,23 @@ undef("cesm_hybird2pre")
 
     ncdf->OMEGA   =  Wnew
     ncdf->PRECL = PRECL
+    ncdf->PRECC = PRECC
     ncdf->PSL = PSL
 
     ncdf->lat   =  lat
     ncdf->lon = lon 
     ncdf->lev = lev
-    ncdf->time = time
+    h = time - 1.0
+    printVarSummary(h)  
+    ; copy_VarCoords(time, h)
+    ; printVarSummary(h)
 
+    ncdf->time = h     ;;;;不要把time的信息赋值过去，不然time会修改，因为time这个变量默认会取coordinate中的情况
+    ;;这种简单的写nc文件很容易出现这个问题，如果time这个变量没有坐标变量变量time，那么文件变量会用time这个变量的值作为
+    ;;坐标变量
+    print("****"+h(0))
     k= "插值处理完成"
-    print(k)
+    print("插值处理完成")
     return(k)
   end 
 

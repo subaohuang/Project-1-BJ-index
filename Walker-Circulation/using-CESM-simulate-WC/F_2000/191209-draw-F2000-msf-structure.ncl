@@ -1,59 +1,32 @@
 ;;;************************************************************
-;; 查看F-pday控制试验以及去掉印度洋海温增温和大西洋增温,太平洋增温的敏感性试验的
-;; MSF空间结构的变化。
-;; linshuheng 2019.12.06
+;;
+;; linshuheng 2019.10.22
 ;;;*********************************************************
-
-;************************************************************
-;;       function of draw structure pattern
-;************************************************************
-function draw_msf(fils1,wks,LeftString)
 begin
+  fils1 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_CTRL_0101-4012.nc"  
+  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_indian_0101-4012.nc"  
+
     f1=addfile(fils1, "r")
+    f2=addfile(fils2, "r")
+
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201212)
-   
-    msf_time_20cr_r=f1->msf_time(timeind,{1000:100},:)
-
-
-    msf_time_20cr_pi=lonPivot(msf_time_20cr_r, 30)
-    msf_time_20cr=msf_time_20cr_pi
-
-    msf_time_20cr=(/msf_time_20cr/10^9/)
-    delete(msf_time_20cr&time)
-    msf_time_20cr&time=date(timeind)
-    printVarSummary(msf_time_20cr)
-
-    ;;;先得到秋季和冬季eninio年的沃克环流情况SONDJF
-      msf_year=month_to_annual(msf_time_20cr, 1)
-      msf_year&year=ispan(1979,2012,1)  ;;;因为这里第一个是1958 1月和2月的平均，第二个是195812,195901,195902的平均
-      msf_annual_1=dim_avg_n_Wrap(msf_year({1979:1994},:,:), 0)
-      msf_annual_2=dim_avg_n_Wrap(msf_year({1995:2012},:,:),0)
-    ;;;
-
-    ;;;clmatology 
-      msf_clm = dim_avg_n_Wrap(msf_year, 0)
-    ;;;
-
-     msf_trend = regCoef_n(msf_year&year, msf_year, 0, 0)
-     
-     numyear = msf_trend
-     numyear = 34
-     
+    timeind=ind(date.ge.601.and.date.le.4012)
     
-     msf_add = msf_clm + msf_trend*numyear
 
-     printVarSummary(msf_add)
-     ;;;;
-     msf_annual_1 = (/msf_clm/)
-     msf_annual_2 = (/msf_add/)
-     ;;;
-
-   
-
-
+    msf_time_ctrl=lonPivot(f1->msf_time(timeind,{1000:100},:),30)
+    msf_time_addindian=lonPivot(f2->msf_time(timeind,{1000:100},:),30)
+    
+    msf_time_ctrl=(/msf_time_ctrl/10^9/)
+    msf_time_addindian=(/msf_time_addindian/10^9/)
+    
+    msf_clm_ctrl = dim_avg_n_Wrap(msf_time_ctrl, 0)
+    msf_clm_addindian = dim_avg_n_Wrap(msf_time_addindian, 0)
+    
+    msf_annual_1 = msf_clm_ctrl
+    msf_annual_2 = msf_clm_addindian
 
     ;;;;画图
+     wks = gsn_open_wks("pdf", "../F_2000/F_2000-msf-structure-indianwarming")
       res2 = True
       res2@gsnDraw=False
       res2@gsnFrame=False
@@ -64,7 +37,7 @@ begin
       res2@cnInfoLabelOn=False
       res2@lbLabelBarOn=False
       res2@cnLineLabelsOn=False
-      res2@gsnLeftString= LeftString
+      
       res2@gsnLeftStringFontHeightF=18
 
       ; res2@cnLineColors=(/0,0,0,0,0,0,18,18,18,18,18,18/)
@@ -208,36 +181,8 @@ begin
       amres@amParallelPosF   = -0.38         ; move legend to the right
       amres@amOrthogonalPosF = -0.38             ; move the legend down
       annoid1 = gsn_add_annotation(plot,lbid,amres)   ; add legend to
-return plot
-end 
-
-begin 
- ;;------------------read data---------------------------------
-	
-
-  fils1  =  "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY_1979-201212.nc"
-
-  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmindian_197901-201212.nc"
-
-  fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
-
-  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
-  ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmallocean_197912-201212.nc"
-
-   
-    wks = gsn_open_wks("pdf", "cesm-msf-structure-rminpaal")
-    plot = new(4,graphic)
-    ;;;;get trend pattern
-    plot(0) = draw_msf(fils1,wks,"CT")
-    plot(1) = draw_msf(fils2,wks,"rmindian")
-    plot(2) = draw_msf(fils3,wks,"rmatlan")
-    plot(3) = draw_msf(fils4,wks,"rmpacific")
-    ;;;;
-  
-  
-    pres = True
-    gsn_panel(wks, plot, (/2,2/), pres)
-
+  draw(plot)
+  frame(wks)
 
   end 
 

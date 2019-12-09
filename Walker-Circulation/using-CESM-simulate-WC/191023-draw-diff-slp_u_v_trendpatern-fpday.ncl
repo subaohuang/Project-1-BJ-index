@@ -11,8 +11,12 @@ function  get_trend_pattern(fils,timestart,timeend)
   begin
     ;;--------------read data-------- ------------
       f1  =  addfile(fils, "r")
+      time = f1->time 
+      if fils.ne."/home/ys17-19/lsh/data/MRE/mre_u_v_slp_chazhi.nc" 
+      time = (/time-1/)
+      end if
+      date  =  cd_calendar(time, 1)
 
-      date  =  cd_calendar(f1->time, 1)
       timeind  =  ind(date.le.timeend.and.date.ge.timestart)
 
       startyear_r = str_split_by_length(timestart, 4)  ;; 将时间string分解成年和月
@@ -102,15 +106,15 @@ begin
  ;;------------------read data---------------------------------
 	
 
-    fils1 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212_chazhi.nc"
+    fils1 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212_chazhi.nc"
     
-    fils2 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212_chazhi.nc"
-   
-    fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212_chazhi.nc"
 
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
+    fils3 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212_chazhi.nc"
 
-    fils5 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
+    fils4 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212_chazhi.nc"
+
+    fils5 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212_chazhi.nc"
 
     fils6 = "/home/ys17-19/lsh/data/MRE/mre_u_v_slp_chazhi.nc"
 
