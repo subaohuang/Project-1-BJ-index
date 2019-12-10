@@ -13,6 +13,7 @@ function  get_trend_pattern(fils,timestart,timeend)
       f1  =  addfile(fils, "r")
 
       date  =  cd_calendar(f1->time, 1)
+     
       timeind  =  ind(date.le.timeend.and.date.ge.timestart)
 
       startyear_r = str_split_by_length(timestart, 4)  ;; 将时间string分解成年和月

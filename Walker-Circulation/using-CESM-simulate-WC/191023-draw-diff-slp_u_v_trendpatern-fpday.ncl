@@ -46,12 +46,12 @@ function  get_trend_pattern(fils,timestart,timeend)
          end if
         PSL_CT_a  =  rmMonAnnCycTLL(PSL_CT)
 
-        u_CT  =  f1->$vnames(varid1)$(timeind,{850},:,:)
+        u_CT  =  f1->$vnames(varid1)$(timeind,{200},:,:)
         ; u_CT = f1->TAUX(timeind,:,:)
 
         u_CT_a  =  rmMonAnnCycTLL(u_CT)
 
-        v_CT  =  f1->$vnames(varid2)$(timeind,{850},:,:)
+        v_CT  =  f1->$vnames(varid2)$(timeind,{200},:,:)
         ; v_CT = F1->TAUY(timeind,:,:)
 
         v_CT_a  =  rmMonAnnCycTLL(v_CT)
@@ -196,7 +196,7 @@ begin
 
 
   ;;---------------画趋势图--------------------------------------
-    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmssttrend-rafixed")
+    wks=gsn_open_wks("pdf", "DIFF-slp_u_v_pattern-F-pday-rmssttrend-rafixed-200hpa")
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
