@@ -4,7 +4,7 @@
 ;;;*********************************************************
 begin
   fils1 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_CTRL_0101-4012.nc"  
-  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_indian_0101-4012.nc"  
+  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_pacific_0101-4012.nc"  
 
     f1=addfile(fils1, "r")
     f2=addfile(fils2, "r")
@@ -29,7 +29,7 @@ begin
     msf_diff = (/msf_clm_addindian - msf_clm_ctrl/)
 
     ;;;;画图
-     wks = gsn_open_wks("pdf", "../F_2000/F_2000-msf-diff-indianwarming")
+     wks = gsn_open_wks("pdf", "../F_2000/F_2000-msf-diff-pacificcwarming")
       res2 = True
       res2@gsnDraw=False
       res2@gsnFrame=False
@@ -38,7 +38,7 @@ begin
 
       res2@cnLinesOn=True
       res2@cnInfoLabelOn=False
-      res2@lbLabelBarOn=False
+      res2@lbLabelBarOn=True
       res2@cnLineLabelsOn=False
       
       res2@gsnLeftStringFontHeightF=18
@@ -47,6 +47,13 @@ begin
       res2@tmYRMode="Automatic"
       res2@tmXTOn=False
       res2@tmYROn=False
+
+     res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+
+     res2@cnMinLevelValF       =   -2.0
+     res2@cnMaxLevelValF       =   2.0
+     res2@cnLevelSpacingF      =  0.5
+
       
        
       res2@tiYAxisString=""

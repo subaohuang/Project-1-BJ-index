@@ -3,9 +3,9 @@
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012.nc"  
   
 
     f1=addfile(fils1, "r")
@@ -15,19 +15,17 @@ begin
     timeind=ind(date.ge.601.and.date.le.4012)
     
 
-    PSL_CT  =  f1->PSL(timeind,:,:)
-    PSL_CT = (/PSL_CT/100/)
 
+    PSL_CT  =  f1->Z3(timeind,{500},:,:)
+ 
 
-    u_CT  =  f1->U(timeind,{850},:,:)
-    v_CT  =  f1->V(timeind,{850},:,:)
+    u_CT  =  f1->U(timeind,{200},:,:)
+    v_CT  =  f1->V(timeind,{200},:,:)
 
-    
-    PSL_indian  =  f2->PSL(timeind,:,:)
-    PSL_indian = (/PSL_indian/100/)
+    PSL_indian  =  f2->Z3(timeind,{500},:,:)
 
-    u_indian  =  f2->U(timeind,{850},:,:)
-    v_indian  =  f2->V(timeind,{850},:,:)
+    u_indian  =  f2->U(timeind,{200},:,:)
+    v_indian  =  f2->V(timeind,{200},:,:)
     
     PSL_CT_clm = dim_avg_n_Wrap(PSL_CT, 0)
     PSL_indian_clm = dim_avg_n_Wrap(PSL_indian, 0)
@@ -41,6 +39,12 @@ begin
 
     PSL_diff = PSL_CT_clm
     PSL_diff = (/PSL_indian_clm - PSL_CT_clm/)
+
+    PSL_diff_zonmean = dim_avg_n_Wrap(PSL_diff,0)
+    PSL_diff_zonmean_com = conform_dims(dimsizes(PSL_diff), PSL_diff_zonmean, 1)
+
+    PSL_diff = (/PSL_diff - PSL_diff_zonmean_com/)
+
     
     u_diff = u_CT_clm
     u_diff = (/u_indian_clm - u_CT_clm/)
@@ -49,7 +53,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-pacific")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-atlantic")
     ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False
@@ -64,24 +68,24 @@ begin
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res@cnFillPalette = "BlueWhiteOrangeRed"
 
-    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    ; res@cnMinLevelValF       =   -3
-    ; res@cnMaxLevelValF       =   3
-    ; res@cnLevelSpacingF      =  0.5
+    ; res@cnMinLevelValF       =   -0.4
+    ; res@cnMaxLevelValF       =   0.4
+    ; res@cnLevelSpacingF      =  0.1
     
-    ; res@cnMinLevelValF       =   -16
-    ; res@cnMaxLevelValF       =   16
-    ; res@cnLevelSpacingF      =  2
+    res@cnMinLevelValF       =   -16
+    res@cnMaxLevelValF       =   16
+    res@cnLevelSpacingF      =  2
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    res@mpMinLatF             = -90.0
+    res@mpMaxLatF             = 90.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF          = 180.0
@@ -112,10 +116,12 @@ begin
     res@vcLineArrowHeadMinSizeF=0.01
     res@vcVectorDrawOrder="PostDraw"
     
-    
+    res@gsnLeftString = "Geopotential height at the level of 510(difference between indian ocean warming 1degree and control run)"
     res@gsnRightString = ""
-    plot = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PSL_diff,res)
-    
+    ; plot = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PSL_diff,res)
+    plot = gsn_csm_contour_map(wks, PSL_diff, res)
+
+
     draw(plot)
     frame(wks)
     print("done script")
