@@ -3,9 +3,10 @@
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
   
 
     f1=addfile(fils1, "r")
@@ -17,7 +18,7 @@ begin
 
     PSL_CT  =  f1->PSL(timeind,:,:)
     PSL_CT = (/PSL_CT/100/)
-
+ 
 
     u_CT  =  f1->U(timeind,{850},:,:)
     v_CT  =  f1->V(timeind,{850},:,:)
@@ -41,7 +42,12 @@ begin
 
     PSL_diff = PSL_CT_clm
     PSL_diff = (/PSL_indian_clm - PSL_CT_clm/)
+
+    PSL_glbal = avg(dim_avg_n_Wrap(PSL_diff, (/1/)))  ;;;;为什么要去掉全球平均后才是想要的结果？可能CTRL有问题？
     
+
+    ; PSL_diff = (/PSL_diff - PSL_glbal/)
+
     u_diff = u_CT_clm
     u_diff = (/u_indian_clm - u_CT_clm/)
     
@@ -49,7 +55,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-pacific")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-indian")
     ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False
@@ -66,11 +72,11 @@ begin
 
     res@cnFillPalette = "BlueWhiteOrangeRed"
 
-    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    ; res@cnMinLevelValF       =   -3
-    ; res@cnMaxLevelValF       =   3
-    ; res@cnLevelSpacingF      =  0.5
+    res@cnMinLevelValF       =   -1
+    res@cnMaxLevelValF       =   1
+    res@cnLevelSpacingF      =  0.1
     
     ; res@cnMinLevelValF       =   -16
     ; res@cnMaxLevelValF       =   16
@@ -80,8 +86,8 @@ begin
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF          = 180.0
@@ -103,8 +109,8 @@ begin
     ; res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.03           ; thin vectors
-    res@vcMinMagnitudeF          =0.04
-    res@vcRefMagnitudeF          = 1.0
+    ; res@vcMinMagnitudeF          =0.04
+    ; res@vcRefMagnitudeF          = 1.0
     res@vcRefLengthF             = 0.04     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.0

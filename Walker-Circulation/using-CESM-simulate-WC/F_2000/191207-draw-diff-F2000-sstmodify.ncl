@@ -18,7 +18,7 @@ begin
     ice_cov  = f1->ice_cov
     ice_cov_prediddle = f1->ice_cov_prediddle
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addalloceanwarming.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addallocean-extropical.nc"
     f2 = addfile(fils2, "r")
     
     SST_cpl_m = f2->SST_cpl(:,:,:)
@@ -40,7 +40,7 @@ begin
 
 
 ;;; draw 
-   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-alltropical")
+   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-allocean")
     
     res=True
     res@gsnDraw=False

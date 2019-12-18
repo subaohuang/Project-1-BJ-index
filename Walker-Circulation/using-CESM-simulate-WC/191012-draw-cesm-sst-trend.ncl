@@ -36,7 +36,8 @@ begin
     ; colormap=read_colormap_file("MPL_RdBu")
     ; printVarSummary(colormap)
     ; colormap=(/colormap(::-1,:)/)
-    gsn_define_colormap(wks, "cmp_b2r")
+    ; gsn_define_colormap(wks, "cmp_b2r")
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
     
     res = True
     res@gsnAddCyclic=False
@@ -47,12 +48,13 @@ begin
     res@cnLineColors="Transparent"  ;让填充是渐变的还是分隔的，colorbar是渐变还是间隔
     res@cnFillOn = True 
     res@cnLinesOn = False
-    ; res@cnFillPalette = colormap
+    res@cnFillPalette = "BlueWhiteOrangeRed"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -0.3
+    res@cnMinLevelValF       =   -0.5
     res@cnMaxLevelValF       =   0.5
     res@cnLevelSpacingF      =  0.05
+    ; res@cnLevelSpacingF      =  0.1
     res@gsnLeftString = gsnLeftString
     res@gsnLeftStringFontHeightF = 20.0
 
@@ -84,22 +86,22 @@ begin
     res@mpMinLonF             = min(sst_trend&lon)
     res@mpMaxLonF             = max(sst_trend&lon)
     res@mpCenterLonF          =avg(sst_trend&lon)
-    res@mpFillDrawOrder = "PostDraw"
+    ; res@mpFillDrawOrder = "PostDraw"
 
 
    
     plot = gsn_csm_contour_map(wks, sst_trend, res)
-   
-    
-    getvalues plot@contour
-    "cnFillColors": cnFillColors
-    end getvalues
+ 
+    ; getvalues plot@contour
+    ; "cnFillColors": cnFillColors
+    ; end getvalues
 
-     print(cnFillColors)
-    dim = dimsizes(cnFillColors)
-    ;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
-        NhlSetColor(wks, cnFillColors(dim/2-2),1, 1, 1)
-        NhlSetColor(wks, cnFillColors(dim/2-3),1, 1, 1)    
+    ;  print(cnFillColors)
+    ; dim = dimsizes(cnFillColors)
+    ; ;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
+    ;     NhlSetColor(wks, cnFillColors(dim/2-2),1, 1, 1)
+    ;     NhlSetColor(wks, cnFillColors(dim/2-3),1, 1, 1)   
+
 return plot
 end 
 
@@ -117,11 +119,12 @@ wks = gsn_open_wks("pdf","rmindian_ssttrend_pattern")
    gsnLeftString(3) = "remove Pacific Lanina-like SST trend "
 
 
-   fils(0) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
-   fils(1) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_indiantrend.nc"
-   fils(2) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_atlantictrend.nc"
-   fils(3) = "~/lsh/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_pacifictrend.nc"
-   
+   fils(0) = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_1978_2012_c130411.nc"
+   fils(1) = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_indiantrend.nc"
+   fils(2) = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_atlantictrend.nc"
+   ; fils(3) = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_1978_2012_remove_pacifictrend.nc"
+   fils(3) = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_1978_2012_savepacific.nc"
+              
    do i = 0,3
     plot(i) = draw_sst_trend(fils((i)),wks,gsnLeftString(i))
    end do

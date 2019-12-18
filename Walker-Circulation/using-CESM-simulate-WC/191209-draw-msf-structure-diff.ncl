@@ -33,8 +33,9 @@ begin
     ;;;clmatology 
      msf_clm = dim_avg_n_Wrap(msf_year, 0)
     ;;;
-     msf_trend = regCoef_n(msf_year&year, msf_year, 0, 0)
+     msf_trend = regCoef_n(ispan(1,dimsizes(msf_year&year),1), msf_year, 0, 0)
      
+    
     copy_VarCoords(msf_annual_1, msf_clm)
     copy_VarCoords(msf_annual_1, msf_trend)
     ;;;
@@ -46,13 +47,19 @@ begin
      numyear = msf_trend
      numyear = 34
      
-     msf_add = msf_clm + msf_trend*numyear
+     msf_add = msf_clm + msf_trend*numyear 
      copy_VarCoords(msf_trend, msf_add)
      printVarSummary(msf_add)
      ;;;;
      msf_annual_1 = msf_clm
      msf_annual_2 = msf_add
      ;;;
+    
+    ;  ;;;如果用回归的时间序列，然后比较两个时间段，则用msf_re
+
+    ;   msf_annual_1=dim_avg_n_Wrap(msf_re({1979:1994},:,:), 0)
+    ;   msf_annual_2=dim_avg_n_Wrap(msf_re({1995:2012},:,:),0)
+    ; ;;;;
 
     ;;;;画图
       res2 = True
@@ -81,7 +88,7 @@ begin
       res2@cnFillOn=False
       res2@cnLineColor="blue"
       res2@cnMonoLineColor=True
-      res2@cnLineThicknessF =4.0
+      res2@cnLineThicknessF =2.0
       
       res2@tmXBMode="Explicit"
       res2@tmXBValues=(/30,90,150,210,270,330,387.5/)
@@ -90,7 +97,7 @@ begin
       res2@tmXBMinorOn=True
       res2@tmXBMinorValues=ispan(30,390,10)
 
-      res2@vpHeightF=0.3                      
+      res2@vpHeightF=0.3                   
       res2@vpWidthF=0.7
       res2@cnLinesOn=False
 
@@ -178,7 +185,7 @@ begin
       plot@$str4$= gsn_add_polyline(wks,plot,  ploylon4,ploylevel4,  ployres)
 
       text=(/"IWC","PWC","AWC"/)
-      x=(/90,210,330/)
+      x=(/90,210,320/)
       y=(/400,400,400/)
       text1=new(3,graphic)
       textres=True
@@ -203,7 +210,7 @@ begin
       lgres@lgPerimOn=False
       lgres@lgPerimThicknessF  = 5.0            ; thicken the box perimeter
 
-      lbid = gsn_create_legend(wks,2,(/" 1979-1994","1995-2012"/),lgres)         ; create legend
+      lbid = gsn_create_legend(wks,2,(/"clmatology","SST forcing"/),lgres)         ; create legend
 
       amres = True
       amres@amParallelPosF   = -0.38         ; move legend to the right
@@ -220,10 +227,12 @@ begin
 
   fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmindian_197901-201212.nc"
 
-  fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
+  fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
 
-  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
+  fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
+
   ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmallocean_197912-201212.nc"
+  ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
 
    
     data_ct = read_msf(fils1)
@@ -234,20 +243,29 @@ begin
     msf_trend_ct = data_ct[1]
 
     msf_trend_id = (/data_ct[1] - data_id[1]/)
-    msf_trend_pa = (/data_ct[1] - data_pa[1]/)
+    msf_trend_pa = (/ data_ct[1] - data_pa[1]/)
     msf_trend_al = (/data_ct[1] - data_al[1]/)
 
     copy_VarCoords(msf_trend_ct, msf_trend_id)
     copy_VarCoords(msf_trend_ct, msf_trend_pa)
     copy_VarCoords(msf_trend_ct, msf_trend_al) 
 
+    ; ;;;得到回归的数据
+    ;  b = onedtond(msf_trend@yintercept, dimsizes(msf_trend))
+    ;  x = ispan(1,34,1)
+    ;  msf_re = msf_year
+    ; do i = 0,dimsizes(msf_year&year)-1
+    ;  msf_re(i,:,:) = msf_trend*x(i) + b
+    ; end do
+     
+
     wks = gsn_open_wks("pdf", "cesm-msf-structure-diff")
     plot = new(4,graphic)
     ;;;;get trend pattern
-    plot(0) = draw_msf(data_ct[0],data_ct[1],wks,"CT")
-    plot(1) = draw_msf(data_ct[0],msf_trend_id,wks,"rmindian")
-    plot(2) = draw_msf(data_ct[0],msf_trend_pa, wks,"rmatlan")
-    plot(3) = draw_msf(data_ct[0],msf_trend_al,wks,"rmpacific")
+    plot(0) = draw_msf(data_ct[0],data_ct[1],wks,"Control run")
+    plot(1) = draw_msf(data_ct[0],msf_trend_id,wks,"Indian warming")
+    plot(2) = draw_msf(data_ct[0],msf_trend_al,wks,"Atlantic warming")
+    plot(3) = draw_msf(data_ct[0],msf_trend_pa,wks,"Pacific Lanina-like SST trend")
     ;;;;
 
     pres = True
