@@ -48,7 +48,7 @@ print("检验结束")
 
 
 ;;;画图 
-  wks=gsn_open_wks("pdf", "ERA-in的local沃克及哈得来环流的趋势")
+  wks=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流的趋势")
 
   ; gsn_define_colormap(wks, "BlRe")
   res=True
@@ -70,12 +70,16 @@ print("检验结束")
   ; res@cnLevelSpacingF      =  0.005
 
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = min(m_zonal_annual&lat)
-  res@mpMaxLatF             = max(m_zonal_annual&lat)
-  res@mpMinLonF             = min(m_zonal_annual&lon)
-  res@mpMaxLonF             = max(m_zonal_annual&lon)
-  res@mpCenterLonF          =avg(m_zonal_annual&lon)
-   
+  ; res@mpMinLatF             = min(m_zonal_annual&lat)
+  ; res@mpMaxLatF             = max(m_zonal_annual&lat)
+  ; res@mpMinLonF             = min(m_zonal_annual&lon)
+  ; res@mpMaxLonF             = max(m_zonal_annual&lon)
+  ; res@mpCenterLonF          =avg(m_zonal_annual&lon)
+ 
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 45
+  res@mpMinLonF             =90
+  res@mpMaxLonF             = 160
 
   res@tmXTOn=False
   res@tmYROn=False
@@ -91,7 +95,7 @@ print("检验结束")
   plot(1)= gsn_csm_contour_map(wks,m_zonal_rc2,res)
   ;*********************************************************
    ;plot clm
-     wks1=gsn_open_wks("pdf", "ERA-in的local沃克及哈得来环流的气候态")
+     wks1=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流的气候态")
   plot_clm = new(2,graphic)
 
   res@cnMinLevelValF       =   -0.005
