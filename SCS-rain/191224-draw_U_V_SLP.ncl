@@ -65,7 +65,7 @@ begin
     prob_v = rc_test(v_rc)
     prob_slp = rc_test(slp_rc)
 
-    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
     ; v_rc = where(prob_v.le.0.1.or.prob_v.le.0.1, v_rc, v_rc@_FillValue)
   
  
@@ -116,9 +116,9 @@ begin
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -200
-  res@cnMaxLevelValF       =   200
-  res@cnLevelSpacingF      =  25
+  res@cnMinLevelValF       =   -100
+  res@cnMaxLevelValF       =   100
+  res@cnLevelSpacingF      =  10
 
   res@cnFillPalette="BlueWhiteOrangeRed"
 

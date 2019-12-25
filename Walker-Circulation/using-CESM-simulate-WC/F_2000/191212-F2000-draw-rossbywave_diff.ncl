@@ -53,7 +53,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-atlantic")
+     wks=gsn_open_wks("pdf", "CESM-F2000-rossby-atlantic")
     ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False
