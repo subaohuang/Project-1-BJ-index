@@ -129,8 +129,8 @@ begin
    
    dq = grad_latlon_cfd(q_bar, g_lat, g_lon, False, False)
 
-   era_adv_q_bar = q_bar
-   era_adv_q_bar = u_bar*dq[0] + v_bar*dq[1]
+   era_adv_q_bar = q_bar                         
+   era_adv_q_bar = u_bar*dq[1] + v_bar*dq[0]    ;;dq[o]:dq/dy，dq[1]:dq/dx
 
    dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
    era_wgt_adv_q_bar=(/dim_sum_n(dp_cfm_new*era_adv_q_bar,1)/)               ; sum(var*dp)
@@ -150,7 +150,21 @@ begin
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_con_q_bar)
    ;;;
 
-    ;;;eddy term
+    ; ;;;eddy term
+
+    ; ;;;test 
+
+    ; series_era_divQ_bar = dim_avg_n_Wrap(era_divQ_bar(:,{0:15},{110:155}), (/1,2/))
+    ; series_adv_q_bar = dim_avg_n_Wrap(era_wgt_adv_q_bar(:,{0:15},{110:155}), (/1,2/))
+    ; series_con_q_bar = dim_avg_n_Wrap(era_wgt_con_q_bar(:,{0:15},{110:155}), (/1,2/))
+    
+    ; wks   = gsn_open_wks("pdf", "Q_bar以及adve和convc的时间序列")
+    ; res  = True
+    ; res@xyLineColors       =  (/"black","blue","red","green","gray"/)          ; change line color
+    ; res@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines"/)
+    ; plot = gsn_csm_xy(wks, ispan(1,yearnum,1), (/series_era_divQ_bar,series_adv_q_bar,series_con_q_bar/), res)
+    ; exit()
+
 ;==============================================================
 ; Mission 3. trend 
 ; ==============================================================

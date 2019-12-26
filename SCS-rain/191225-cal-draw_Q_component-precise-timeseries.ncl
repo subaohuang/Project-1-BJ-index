@@ -29,8 +29,13 @@ begin
           lon1 = 60
           lon2 = 160
         ;;;
+        ;   ;;;region 
+        ;   lat1 = -10
+        ;   lat2 = 10
+        ;   lon1 = 100
+        ;   lon2 = 160
+        ; ;;;
 
-    
 
         ;;;time span
         startmon =197901
@@ -178,101 +183,97 @@ begin
   ;;;;;
     print("=====now start componte calculate==========")
    ;;; Calculate the MFC dynamic term
-   ;; MFC_dynamic = d(δv*q)  
-
-    era_dyna_qu = u_delta*q_clm_cfm
-    era_dyna_qv = v_delta*q_clm_cfm
+   ;;
+   ;; MFC_dynamic_adv = δvd(q)  
    
+      dq_clm = grad_latlon_cfd(q_clm,g_lat,g_lon,False,False)
+      era_dynamic_adv_q = u_delta*conform_dims(dimsizes(u_delta), dq_clm[1], (/1,2,3/)) \
+      + v_delta*conform_dims(dimsizes(v_delta), dq_clm[0], (/1,2,3/))
 
-    era_dynamic_q = uv2dv_cfd(era_dyna_qu,era_dyna_qv,g_lat,g_lon,2)
-    dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
+      dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
+      era_wgt_dyna_adv_q = (/dim_sum_n(dp_cfm_new*era_dynamic_adv_q,1)/)               ; sum(var*dp)
+      era_wgt_dyna_adv_q = (/era_wgt_dyna_adv_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_adv_q)
+    ;;
 
-    era_wgt_dyna_q = (/dim_sum_n(dp_cfm_new*era_dynamic_q,1)/)               ; sum(var*dp)
-    era_wgt_dyna_q = (/era_wgt_dyna_q*86400/(-9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_q)
+    ;; MFC_dynamic_con = qd(δv)
+
+      duv_delta = uv2dv_cfd(u_delta,v_delta,g_lat,g_lon,2)
+      era_dynamic_con_q = duv_delta*conform_dims(dimsizes(duv_delta), q_clm, (/1,2,3/))
+      
+      era_wgt_dyna_con_q = (/dim_sum_n(dp_cfm_new*era_dynamic_con_q,1)/)               ; sum(var*dp)
+      era_wgt_dyna_con_q = (/era_wgt_dyna_con_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_con_q)
+    ;;;;
 
     print("=====end dynamic componte calculate==========")
-  
-  ; Calculate the MFC thermaldynamic term
-  ;   MFC_thermaldynamic = d(v*δq)
-    
-    era_thermaldyna_qu = u_clm_cfm*q_delta
-    era_thermaldyna_qv = v_clm_cfm*q_delta
-   
-    era_thermaldyna_q = uv2dv_cfd(era_thermaldyna_qu,era_thermaldyna_qv,g_lat,g_lon,2)
-    
-    era_wgt_thermaldyna_q = (/dim_sum_n(dp_cfm_new*era_thermaldyna_q,1)/)               ; sum(var*dp)
-    era_wgt_thermaldyna_q = (/era_wgt_thermaldyna_q*86400/(-9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_q)
-    
-     print("=====end thermaldynamic componte calculate==========")
-  ;;;quadratic term d(δv*δq)
 
-    era_quad_qu = u_delta*q_delta
-    era_quad_qv = v_delta*q_delta
+    ; Calculate the MFC thermaldynamic term
+    ;   MFC_thermaldynamic_adv = vd(δq)
+       
+      dq_delta = grad_latlon_cfd(q_delta,g_lat,g_lon,False,False)
+      era_thermaldynamic_adv_q = u_clm_cfm*dq_delta[1] + v_clm_cfm*dq_delta[0]
 
-    era_quad_q = uv2dv_cfd(era_quad_qu,era_quad_qv,g_lat,g_lon,2)
-    
-    era_wgt_quad_q = (/dim_sum_n(dp_cfm_new*era_quad_q,1)/)               ; sum(var*dp)
-    era_wgt_quad_q = (/era_wgt_quad_q*86400/(-9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_q)
+      era_wgt_thermaldyna_adv_q = (/dim_sum_n(dp_cfm_new*era_thermaldynamic_adv_q,1)/)               ; sum(var*dp)
+      era_wgt_thermaldyna_adv_q = (/era_wgt_thermaldyna_adv_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_adv_q)
+    ;;;
+
+    ;;  MFC_thermaldynamic_con = qd(δv)
+
+      duv_clm = uv2dv_cfd(u_clm,v_clm,g_lat,g_lon,2)
+      era_thermaldynamic_con_q = q_delta*conform_dims(dimsizes(q_delta), duv_clm, (/1,2,3/))
+
+      era_wgt_thermaldyna_con_q = (/dim_sum_n(dp_cfm_new*era_thermaldynamic_con_q,1)/)               ; sum(var*dp)
+      era_wgt_thermaldyna_con_q = (/era_wgt_thermaldyna_con_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_con_q)
+      print("=====end thermaldynamic componte calculate==========")
+    ;;;
+
+
+  ;;;quadratic adv term δv*d(δq)
+      era_quad_adv_q = u_delta*dq_delta[1] + v_delta*dq_delta[0]    
+
+      era_wgt_quad_adv_q = (/dim_sum_n(dp_cfm_new*era_quad_adv_q,1)/)               ; sum(var*dp)
+      era_wgt_quad_adv_q = (/era_wgt_quad_adv_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_adv_q)
+  ;;;
+
+  ;;;;;;quadratic con term δq*d(δv)
+      era_quad_con_q = q_delta*uv2dv_cfd(u_delta,v_delta,g_lat,g_lon,2)
+
+      era_wgt_quad_con_q = (/dim_sum_n(dp_cfm_new*era_quad_con_q,1)/)               ; sum(var*dp)
+      era_wgt_quad_con_q = (/era_wgt_quad_con_q*86400/(-9.8)/)       ;;convert to day
+      copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_con_q)
      print("=====end quadratic componte calculate==========")
   ;;;
 
-  ;;;quandratic climate term d((δv*δq)clm)
 
-     era_quad_qu_clm = dim_avg_n_Wrap(era_quad_qu, 0)
-     era_quad_qv_clm = dim_avg_n_Wrap(era_quad_qv, 0)
+  ; ;;;quandratic climate term d((δv*δq)clm)
 
-     era_quad_clm_q = uv2dv_cfd(era_quad_qu_clm ,era_quad_qv_clm,g_lat,g_lon,2)
+  ;   era_quad_clm_q = uv2dv_cfd(era_quad_qu_clm ,era_quad_qv_clm,g_lat,g_lon,2)
 
-      dp_cfm_new2 = conform_dims(dimsizes(u_bar(1,:,:,:)),dp,0)          ; confirm dp to caculate sum(var*dp)
-      era_wgt_quad_q_clm = (/dim_sum_n(dp_cfm_new2*era_quad_clm_q,0)/)               ; sum(var*dp)
-      era_wgt_quad_q_clm = (/era_wgt_quad_q_clm*86400/(-9.8)/)       ;;convert to day
-      copy_VarCoords(q_bar(1,1,:,:), era_wgt_quad_q_clm)
-      printVarSummary(era_wgt_quad_q_clm)
-     
-       print("=====end quandratic clmate componte calculate==========")
+  ;   dp_cfm_new2 = conform_dims(dimsizes(u_bar(1,:,:,:)),dp,0)          ; confirm dp to caculate sum(var*dp)
+  ;   era_wgt_quad_q_clm = (/dim_sum_n(dp_cfm_new2*era_quad_clm_q,0)/)               ; sum(var*dp)
+  ;   era_wgt_quad_q_clm = (/era_wgt_quad_q_clm*86400/(-9.8)/)       ;;convert to day
+  ;   copy_VarCoords(q_bar(1,1,:,:), era_wgt_quad_q_clm)
+  ;   printVarSummary(era_wgt_quad_q_clm)
 
-  ;;;eddy term δd((bar(v'q'))
+  ;   print("=====end quandratic clmate componte calculate==========")
+
+  ;;eddy term δd((bar(v'q'))
 
     ; era_eddy_q_annual = uv2dv_cfd(uq_eddy_bar,vq_eddy_bar,g_lat,g_lon,2)
     ; era_eddy_q = dim_rmvmean_n_Wrap(era_eddy_q_annual, 0)  
-
-
     era_eddy_q = uv2dv_cfd(uq_eddy_delta,vq_eddy_delta,g_lat,g_lon,2)
 
     era_wgt_eddy_q = (/dim_sum_n(dp_cfm_new*era_eddy_q,1)/)               ; sum(var*dp)
     era_wgt_eddy_q = (/era_wgt_eddy_q*86400/(-9.8)/)       ;;convert to day
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_q)
 
-     print("=====end eddy componte calculate==========")
+    print("=====end eddy componte calculate==========")
 
   ;;;
-
-
-; ;==============================================================
-; ; Mission 3.  trend
-; ; ==============================================================
-
-   
-;     divQ_rc  = regCoef_n(ispan(1, yearnum, 1), era_divQ_bar, 0, 0)
-;     copy_VarCoords(era_divQ_bar(1,:,:), divQ_rc)
-;     prob1 = rc_test(divQ_rc)
-;     divQ_rc = (/divQ_rc*yearnum/)
-
-   
-;     era_wgt_adv_q_bar_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_adv_q_bar, 0, 0)
-;     copy_VarCoords(era_wgt_adv_q_bar(1,:,:), era_wgt_adv_q_bar_rc )
-
-
-;     prob2 = rc_test(era_wgt_adv_q_bar_rc)
-;     era_wgt_adv_q_bar_rc = (/era_wgt_adv_q_bar_rc*yearnum/)
-
-;     era_wgt_con_q_bar_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_con_q_bar, 0, 0)
-;     copy_VarCoords(era_wgt_con_q_bar(1,:,:), era_wgt_con_q_bar_rc )
-;     prob3 = rc_test(era_wgt_con_q_bar_rc)
-;     era_wgt_con_q_bar_rc = (/era_wgt_con_q_bar_rc*yearnum/)
 
 ; ;==============================================================
 ; ; Mission 3.  area avg(x)
@@ -282,89 +283,74 @@ begin
    ;lat2 = 15
    ;lon1 = 110
    ;lon2 = 155
-
     series_era_divQ_delta  = dim_avg_n_Wrap(era_divQ_delta(:,{0:15},{110:155}), (/1,2/))
-    ; series_era_divQ_delta = (/series_era_divQ_delta - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
-    series_thermaldyna_q = dim_avg_n_Wrap(era_wgt_thermaldyna_q(:,{0:15},{110:155}), (/1,2/))
-    series_dyna_q = dim_avg_n_Wrap(era_wgt_dyna_q(:,{0:15},{110:155}), (/1,2/))
-    series_quad_q = dim_avg_n_Wrap(era_wgt_quad_q(:,{0:15},{110:155}), (/1,2/))
+    
+    series_dyna_adv_q = dim_avg_n_Wrap(era_wgt_dyna_adv_q(:,{0:15},{110:155}),(/1,2/))
+    series_dyna_con_q = dim_avg_n_Wrap(era_wgt_dyna_con_q(:,{0:15},{110:155}),(/1,2/))
+    
+    series_thermaldyna_adv_q = dim_avg_n_Wrap(era_wgt_thermaldyna_adv_q(:,{0:15},{110:155}),(/1,2/))
+    series_thermaldyna_con_q = dim_avg_n_Wrap(era_wgt_thermaldyna_con_q(:,{0:15},{110:155}),(/1,2/))
+    
+    series_quad_adv_q = dim_avg_n_Wrap(era_wgt_quad_adv_q(:,{0:15},{110:155}),(/1,2/))
+    series_quad_con_q = dim_avg_n_Wrap(era_wgt_quad_con_q(:,{0:15},{110:155}),(/1,2/))
+
     series_eddy_q = dim_avg_n_Wrap(era_wgt_eddy_q(:,{0:15},{110:155}), (/1,2/))
 
     
     ; series_eddy_q = (/series_thermaldyna_q + series_dyna_q + series_quad_q + series_eddy_q - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
 
-    ;;trend
+; ;==============================================================
+; ; Mission 4.  trend
+; ; ==============================================================
+
     q_delta_rc = regline(ispan(1,yearnum,1), series_era_divQ_delta)
     q_delta_rc = (/q_delta_rc*yearnum/)
 
-    q_dyna_rc = regline(ispan(1,yearnum,1), series_dyna_q)
-    q_dyna_rc = (/q_dyna_rc*yearnum/)
+    print("q_delta_rc="+q_delta_rc)
 
-    q_thermaldyna_rc = regline(ispan(1,yearnum,1), series_thermaldyna_q)
-    q_thermaldyna_rc = (/q_thermaldyna_rc*yearnum/)
+    q_dyna_adv_rc = regline(ispan(1,yearnum,1), series_dyna_adv_q)
+    q_dyna_adv_rc = (/q_dyna_adv_rc*yearnum/)
+    
+    print("q_dyna_adv_rc="+q_dyna_adv_rc)
 
-    q_quad_rc = regline(ispan(1,yearnum,1), series_quad_q)
-    q_quad_rc = (/q_quad_rc*yearnum/)
+    q_dyna_con_rc = regline(ispan(1,yearnum,1), series_dyna_con_q)
+    q_dyna_con_rc = (/q_dyna_con_rc*yearnum/)
+    
+    print("q_dyna_con_rc="+q_dyna_con_rc)
 
+    q_thermaldyna_adv_rc = regline(ispan(1,yearnum,1), series_thermaldyna_adv_q)
+    q_thermaldyna_adv_rc = (/q_thermaldyna_adv_rc*yearnum/)
+    
+    q_thermaldyna_con_rc = regline(ispan(1,yearnum,1), series_thermaldyna_con_q)
+    q_thermaldyna_con_rc = (/q_thermaldyna_con_rc*yearnum/)
+
+   
+    q_quad_adv_rc = regline(ispan(1,yearnum,1), series_quad_adv_q)
+    q_quad_adv_rc = (/q_quad_adv_rc*yearnum/)
+    
+    q_quad_con_rc = regline(ispan(1,yearnum,1), series_quad_con_q)
+    q_quad_con_rc = (/q_quad_con_rc*yearnum/)
+
+    
     q_eddy_rc = regline(ispan(1,yearnum,1), series_eddy_q)
     q_eddy_rc = (/q_eddy_rc*yearnum/)
 
-
-
-
-
-;==============================================================
-; Mission 4. draw time series
-; ==============================================================
-  wks   = gsn_open_wks("pdf", "Q的动力项和热力项的时间序列")
-  plot=new(1,graphic)
-  
-  resxy = True
-  resxy@gsnDraw = False
-  resxy@gsnFrame = False
-    
-  resxy@tmXBMode  =  "Explicit"
-  resxy@trXMaxF = 2013
-  resxy@trXMinF = 1979
-  resxy@tmXBValues = ispan(1979,2013,5)
-  resxy@tmXBLabels = ispan(1979,2013,5)
-  resxy@tmXBMinorOn = True
-  resxy@tmXBMinorValues = ispan(1979,2013,1)
-
-  resxy@tmYLMinorOn = False
-
-  resxy@vpHeightF = 0.4
-  resxy@vpWidthF = 0.6
-  ; resxy@vpXF = 0.15
-  ; resxy@vpYF = 0.95
-
-  resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
-  resxy@xyMonoLineThickness = True
-  resxy@xyLineColors       =  (/"black","blue","red","green","gray"/)          ; change line color
-  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines"/)
-  resxy@xyExplicitLegendLabels  =  (/"main","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
-  
-
-  time = ispan(1979, 2013, 1)
-  plot = gsn_csm_xy(wks,time,(/series_era_divQ_delta,series_dyna_q,series_thermaldyna_q,series_quad_q,series_eddy_q/), resxy)
-  draw(plot)
-  frame(wks)
 
 
 ;==============================================================
 ; Mission 5. bar plot
 ; ==============================================================
   
-  x = (/1,2,3,4,5/)
-  y = (/q_delta_rc,q_dyna_rc,\
-       q_thermaldyna_rc,q_quad_rc,q_eddy_rc/)
+  x = (/1,2,3,4,5,6,7,8/)
+  y = (/q_delta_rc,q_dyna_adv_rc,q_dyna_con_rc,q_thermaldyna_adv_rc,\
+       q_thermaldyna_con_rc,q_quad_adv_rc,q_quad_con_rc,q_eddy_rc/)
 
-  labels = (/"TOTAL","DY","TH",\
-  "QD","EDDY"/)
+  labels = (/"TOTAL","ADV(DY)","CON(DY)","ADV(TH)","CON(TH)",\
+  "ADV(QD)","CON(QD)","EDDY"/)
 ;********************************************************
 ; create the plot
 ;********************************************************   
-  wks1 = gsn_open_wks("pdf","bar-q-component-没分解-trend")                  ; send graphics to PNG file
+  wks1 = gsn_open_wks("pdf","bar-q-component-trend")                  ; send graphics to PNG file
   res                       = True                 ; plot mods desired         
   res@gsnFrame              = False                ; don't advance frame yet
   res@gsnXYBarChart         = True                 ; turn on bar chart
@@ -394,6 +380,50 @@ begin
   
  draw(plot)
  frame(wks1)
+
+ ;==============================================================
+; Mission 5. draw timeseries
+; ==============================================================
+  wks2   = gsn_open_wks("pdf", "Q的动力项和热力项的时间序列-precise")
+  plot2 = new(1,graphic)
+  
+  resxy = True
+  resxy@gsnDraw = False
+  resxy@gsnFrame = False
+    
+  resxy@tmXBMode  =  "Explicit"
+  resxy@trXMaxF = endyear
+  resxy@trXMinF = startyear
+  resxy@tmXBValues = ispan(startyear,endyear,5)
+  resxy@tmXBLabels = ispan(startyear,endyear,5)
+  resxy@tmXBMinorOn = True
+  resxy@tmXBMinorValues = ispan(startyear,endyear,1)
+
+  resxy@tmYLMinorOn = False
+
+  resxy@vpHeightF = 0.4
+  resxy@vpWidthF = 0.6
+  ; resxy@vpXF = 0.15
+  ; resxy@vpYF = 0.95
+
+  resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
+  resxy@xyMonoLineThickness = True
+  resxy@xyLineColors       =  (/"black","blue","red","green","gray","pink","purple","orange"/)          ; change line color
+  resxy@xyMarkLineModes    =  (/"lines"/)
+  resxy@xyMonoMarkLineMode = True
+  resxy@xyExplicitLegendLabels  =  (/"main","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
+  
+
+  time = ispan(startyear, endyear, 1)
+  plot2 = gsn_csm_xy(wks2,time,(/series_era_divQ_delta,series_dyna_adv_q,\
+                              series_dyna_con_q,series_thermaldyna_adv_q,series_thermaldyna_con_q,series_quad_adv_q,series_quad_con_q,\
+                          series_eddy_q/), resxy)
+  draw(plot2)
+  frame(wks2)
+
+
+
+
 
 end 
     
