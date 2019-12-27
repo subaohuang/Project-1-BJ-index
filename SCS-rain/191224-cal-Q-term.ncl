@@ -105,8 +105,8 @@ begin
     ; print(DivQ(0,:,:))
     print("=====finish DivQ calculate==========")
     
-    era_divQ_bar = month_to_annual(DivQ, 1)
-    ; era_divQ_bar = month_to_season(DivQ, "MAM")
+    ; era_divQ_bar = month_to_annual(DivQ, 1)
+    era_divQ_bar = month_to_season(DivQ, "MAM")
 
 ;==============================================================
 ; Mission 2. calculate individual term of Q
@@ -190,7 +190,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "Q_bar趋势以及adve和convc趋势")
+  wks   = gsn_open_wks("pdf", "Q_bar趋势以及adve和convc趋势-春季")
   plot=new(3,graphic)
   res=True
   res@gsnFrame=False

@@ -140,6 +140,28 @@ print("检验结束")
   iplot(i) = gsn_contour_shade(iplot(i), 0,0.05, opt)
 end do
 ;;;  
+ 
+  ; ;;添加区域
+   ;;warm pool
+   pgres = True
+   pgres@gsLineThicknessF=2.0
+   pgres@gsLineDashPattern=0
+  
+   str = (/"1","2"/)
+   
+   ;;;画box
+   lat1 = 0
+   lat2 = 15
+   lon1 = 110
+   lon2 = 155
+
+   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ;;;
+   do i = 0,1
+   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   end do
+
   do i=0,1
   overlay(plot(i), iplot(i))
   end do
