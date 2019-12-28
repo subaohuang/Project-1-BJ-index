@@ -29,49 +29,29 @@ begin
 
     timeind:=ind(date.le.201312.and.date.ge.197901)
 
-    sst=f1->sst(timeind,{20:60},{-70:-20})
-    ssta=(/rmMonAnnCycTLL(sst)/)
+    sst=lonFlip(f1->sst(timeind,:,:))
+    ssta=(/rmMonAnnCycTLL(sst)*-1/)
     copy_VarCoords(sst, ssta)
     ssta=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ssta_annual = month_to_annual(ssta, 1)
 
-    sst_index = dim_avg_n_Wrap(ssta_annual, (/1,2/))
+    sst_index = dim_avg_n_Wrap(ssta_annual(:,{5:-5},{190:240}), (/1,2/))
     printVarSummary(sst_index)
     ;;;
 
-    ;;;;
-    f4 = addfile("/home/yangsong3/data-observation/ERA-interim/monthly/hgt.mon.mean.nc","r")
-    date :=cd_calendar(f4->time, 1)
-    timeind :=ind(date.ge.197901.and.date.le.201312)
-    z = short2flt(f4->z(timeind,{500},:,:))   
-    print("=====finish read data==========")
-    ;;;
-
-    z = (/rmMonAnnCycTLL(z)/)
-    z=(/dtrend_msg_n(ispan(1,dimsizes(z&time),1),z,False,True,0)/)
-    
-    z_annual = month_to_annual(z, 1)
-
-
-     
     ;;;回归pre
      p_rc = regCoef_n(sst_index, p_annual, 0, 0)
      copy_VarCoords(p_annual(1,:,:), p_rc)
 
-      z_rc = regCoef_n(sst_index, z_annual, 0, 0)
-     copy_VarCoords(z_annual(1,:,:), z_rc)
 
-    ;    z_rc = escorc_n(sst_index, z_annual, 0, 0)
-    ;    copy_VarCoords(z_annual(1,:,:), z_rc)
+
     ; ;;
     
     ;;检验
     prob_p = rc_test(p_rc)
-    ; prob_z = rtest(z_rc,35,0)
-    ; z_rc = where(prob_z.le.0.05, z_rc, z_rc@_FillValue)
-
+    
     ;;;
-wks = gsn_open_wks("pdf", "位势高度回归到大西洋的sst")
+  wks = gsn_open_wks("pdf", "降水回归到nino3.4的sst")
 
   plot=new(1,graphic)
   res=True
@@ -88,10 +68,10 @@ wks = gsn_open_wks("pdf", "位势高度回归到大西洋的sst")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -90
-  res@mpMaxLatF             = 90
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 45
+  res@mpMinLonF             = 90
+  res@mpMaxLonF             = 160
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False
@@ -118,7 +98,7 @@ wks = gsn_open_wks("pdf", "位势高度回归到大西洋的sst")
 
   res@cnFillPalette="MPL_BrBG"
   res@gsnLeftString="(b)GPCP Precipitation"
-  plot = gsn_csm_contour_map(wks, z_rc, res)
+  plot = gsn_csm_contour_map(wks, p_rc, res)
 
    draw(plot)
    frame(wks)

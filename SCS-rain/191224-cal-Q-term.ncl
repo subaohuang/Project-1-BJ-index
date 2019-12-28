@@ -105,8 +105,8 @@ begin
     ; print(DivQ(0,:,:))
     print("=====finish DivQ calculate==========")
     
-    ; era_divQ_bar = month_to_annual(DivQ, 1)
-    era_divQ_bar = month_to_season(DivQ, "MAM")
+    era_divQ_bar = month_to_annual(DivQ, 1)
+    ; era_divQ_bar = month_to_season(DivQ, "MAM")
 
 ;==============================================================
 ; Mission 2. calculate individual term of Q
@@ -187,10 +187,31 @@ begin
     copy_VarCoords(era_wgt_con_q_bar(1,:,:), era_wgt_con_q_bar_rc )
     prob3 = rc_test(era_wgt_con_q_bar_rc)
     era_wgt_con_q_bar_rc = (/era_wgt_con_q_bar_rc*yearnum/)
+
+
+    ;;;各成分的箭头
+     era_wgt_qu_annual = month_to_annual(era_wgt_qu, 1)
+     era_wgt_qv_annual = month_to_annual(era_wgt_qv, 1)
+
+     era_wgt_qu_rc = regCoef_n(ispan(1, yearnum, 1), era_wgt_qu_annual, 0, 0)
+     copy_VarCoords(era_divQ_bar(1,:,:), era_wgt_qu_rc)
+     prob_qu = rc_test(era_wgt_qu_rc)
+     era_wgt_qu_rc = (/era_wgt_qu_rc*yearnum/)
+
+
+     era_wgt_qv_rc = regCoef_n(ispan(1, yearnum, 1), era_wgt_qv_annual, 0, 0)
+     copy_VarCoords(era_divQ_bar(1,:,:),era_wgt_qv_rc )
+     prob_qv = rc_test(era_wgt_qv_rc)
+     era_wgt_qv_rc = (/era_wgt_qv_rc*yearnum/)
+
+     ;;;
+
+
+
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "Q_bar趋势以及adve和convc趋势-春季")
+  wks   = gsn_open_wks("pdf", "Q_bar趋势以及adve和convc趋势-箭头")
   plot=new(3,graphic)
   res=True
   res@gsnFrame=False
@@ -227,7 +248,24 @@ begin
   res@tmBorderThicknessF=4.0
 
 
-  plot(0)=gsn_csm_contour_map(wks, divQ_rc, res)
+
+  ; res@mpFillOn = False
+  ; res@gsnScalarContour        = True
+  ;   ;;;;;;;LineArrow
+  ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; ; res@vcGlyphStyle="CurlyVector"
+
+  ; res@vcMinDistanceF           = 0.02           ; thin vectors
+  ; ; res@vcMinMagnitudeF          =0.04
+  ; ; res@vcRefMagnitudeF          = 1.0
+  ; ; res@vcRefMagnitudeF          = 0.1
+  ; res@vcRefLengthF             = 0.08     ; define length of v
+  ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  ; res@vcLineArrowThicknessF=1.0
+  ; res@vcVectorDrawOrder="PostDraw"
+
+  ; plot(0)=gsn_csm_vector_scalar_map(wks, era_wgt_qu_rc, era_wgt_qv_rc, divQ_rc, res)
+   plot(0)=gsn_csm_contour_map(wks, divQ_rc, res)
   plot(1)=gsn_csm_contour_map(wks, era_wgt_adv_q_bar_rc, res)
   plot(2)=gsn_csm_contour_map(wks, era_wgt_con_q_bar_rc, res)
 
@@ -293,9 +331,9 @@ begin
     iplot(2)=gsn_csm_contour(wks,prob3,res_pro)
   
 
-    do i=0,2
-    overlay(plot(i), iplot(i))
-    end do
+    ; do i=0,2
+    ; overlay(plot(i), iplot(i))
+    ; end do
 
  pres = True
  gsn_panel(wks, plot, (/3,1/), pres)

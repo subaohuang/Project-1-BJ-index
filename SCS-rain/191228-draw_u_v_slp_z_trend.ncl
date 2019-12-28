@@ -53,13 +53,13 @@ begin
     ;   lon1 = 0
     ;   lon2 = 360
     ; ;;;
+    
         ;;;region 
       lat1 = -30
       lat2 = 30
       lon1 = 0
       lon2 = 360
     ;;;
-
     ;;;time span
     startmon =197901
     endmon = 201312
@@ -109,19 +109,17 @@ begin
      z_annual = month_to_annual(z, 1)
      slp_annual = month_to_annual(slp, 1)
 
-     u_annual = (/dtrend_msg_n(ispan(1,dim(0),1),u_annual,False,True,0)/)
-     v_annual = (/dtrend_msg_n(ispan(1,dim(0),1),v_annual,False,True,0)/)
-     z_annual = (/dtrend_msg_n(ispan(1,dim(0),1),z_annual,False,True,0)/)
-     slp_annual = (/dtrend_msg_n(ispan(1,dim(0),1),slp_annual,False,True,0)/)
-
-
+     ; u_annual = (/dtrend_msg_n(ispan(1,dim(0),1),u_annual,False,True,0)/)
+     ; v_annual = (/dtrend_msg_n(ispan(1,dim(0),1),v_annual,False,True,0)/)
+     ; z_annual = (/dtrend_msg_n(ispan(1,dim(0),1),z_annual,False,True,0)/)
+     ; slp_annual = (/dtrend_msg_n(ispan(1,dim(0),1),slp_annual,False,True,0)/)
    ;;;
   
    ;;回归
-   u_rc = regCoef_n(pre_index, u_annual, 0, 0)
-   v_rc = regCoef_n(pre_index, v_annual, 0, 0)
-   slp_rc = regCoef_n(pre_index, slp_annual, 0, 0)
-   z_rc = regCoef_n(pre_index, z_annual, 0, 0)
+   u_rc = regCoef_n(ispan(1, dim(0), 1), u_annual, 0, 0)
+   v_rc = regCoef_n(ispan(1, dim(0), 1), v_annual, 0, 0)
+   slp_rc = regCoef_n(ispan(1, dim(0), 1), slp_annual, 0, 0)
+   z_rc = regCoef_n(ispan(1, dim(0), 1), z_annual, 0, 0)
 
    copy_VarCoords(u_annual(1,:,:), u_rc)
    copy_VarCoords(v_annual(1,:,:), v_rc)
@@ -130,51 +128,20 @@ begin
 
    ;;;
 
-   ;  ;;;选相关
-   ; u_rc = escorc_n(pre_index, u_annual, 0, 0)
-   ; v_rc = escorc_n(pre_index, v_annual, 0, 0)
-   ; slp_rc = escorc_n(pre_index, slp_annual, 0, 0)
-   ; z_rc = escorc_n(pre_index, z_annual, 0, 0)
-   
-   ; copy_VarCoords(u_annual(1,:,:), u_rc)
-   ; copy_VarCoords(v_annual(1,:,:), v_rc)
-   ; copy_VarCoords(slp_annual(1,:,:), slp_rc)
-   ; copy_VarCoords(z_annual(1,:,:), z_rc)
-   ;;;  
-   ;;;趋势一致性
-   ;;;
-
-
    ;;;显著性检验
     prob_slp = rc_test(slp_rc)
     prob_u = rc_test(u_rc)
     prob_v = rc_test(v_rc)
     prob_z = rc_test(z_rc)
    ;;;
-    ; prob_slp = rtest(slp_rc,35,0)
-    ; prob_u = rtest(u_rc,35,0)
-    ; prob_v = rtest(v_rc,35,0)
-    ; prob_z = rtest(z_rc,35,0)
-
-   
-
+ 
    slp_rc = where(prob_slp.le.0.1, slp_rc, slp_rc@_FillValue)
-
    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
-
-   ;;;趋势一致性
-   ;;;
-   slp_rc = (/slp_rc*p_rc/)
-   u_rc = (/u_rc*p_rc/)
-   v_rc = (/v_rc*p_rc/)
-   z_rc = (/z_rc*p_rc/)
-    
-
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_pre-index-线性一致")
+  wks   = gsn_open_wks("pdf", "uv_slp_z_trend")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False
@@ -185,29 +152,24 @@ begin
 
   res@cnFillOn=True
   res@cnLinesOn=False
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -100
-  ; res@cnMaxLevelValF       =   100
-  ; res@cnLevelSpacingF      =  10
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -4
   res@cnMaxLevelValF       =   4
-  res@cnLevelSpacingF      =  1.0
+  res@cnLevelSpacingF      =  1
+  ;   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -1
+  ; res@cnMaxLevelValF       =   1
+  ; res@cnLevelSpacingF      =  .1
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
-
   res@mpLimitMode           = "LatLon"
   res@mpMinLatF             = lat1
   res@mpMaxLatF             = lat2
   res@mpMinLonF             = lon1
-  res@mpMaxLonF             = lon2 
-
+  res@mpMaxLonF             = lon2
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
-
-
-
 
   res@tmXTOn=False
   res@tmYROn=False
@@ -254,8 +216,8 @@ begin
 
     res_z@cnLinesOn=True
     res_z@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_z@cnMinLevelValF      = -10.0        ; set min contour level
-    res_z@cnMaxLevelValF      = 10.0      ; set max contour level
+    res_z@cnMinLevelValF      = -15.0        ; set min contour level
+    res_z@cnMaxLevelValF      = 15.0      ; set max contour level
     res_z@cnLevelSpacingF     = 1      ; set contour spacin
 
     ;  res_z@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
