@@ -70,17 +70,38 @@ begin
     delete(date)
 
 
+;;;读入Q-term
+    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Q-term-5.nc", "r")
+    series_Q = f3->series_Q(:)
+    series_thermaldyna_q = f3->series_thermaldyna_q
+    series_dyna_q = f3->series_dyna_q
+    series_quad_q = f3->series_quad_q
+    series_eddy_q = f3->series_eddy_q
 
- ;;;回归p场
+;;;
 
-  m_zonal_rc1=regCoef_n(pre_index,m_zonal_annual,0,0)  
+;;;回归p场
+
+  ; m_zonal_rc1=regCoef_n(pre_index,m_zonal_annual,0,0)  
+  ; copy_VarCoords(m_zonal_annual(0,:,:), m_zonal_rc1)
+  ; m_zonal_rc1=(/m_zonal_rc1*10/)
+  ; m_zonal_rc2=regCoef_n(pre_index,m_meri_annual,0,0)  
+  ; copy_VarCoords(m_zonal_annual(0,:,:), m_zonal_rc2)
+  ; m_zonal_rc2=(/m_zonal_rc2*10/)
+
+  m_zonal_rc1=regCoef_n(series_thermaldyna_q(0:33),m_zonal_annual,0,0)  
   copy_VarCoords(m_zonal_annual(0,:,:), m_zonal_rc1)
   m_zonal_rc1=(/m_zonal_rc1*10/)
-  m_zonal_rc2=regCoef_n(pre_index,m_meri_annual,0,0)  
+  m_zonal_rc2=regCoef_n(series_thermaldyna_q(0:33),m_meri_annual,0,0)  
   copy_VarCoords(m_zonal_annual(0,:,:), m_zonal_rc2)
   m_zonal_rc2=(/m_zonal_rc2*10/)
 
-  print("趋势计算结束")
+  print("回归结束")
+;;;
+
+;;;
+
+
 
 ;;;
 ;;;显著性检验
@@ -90,15 +111,20 @@ begin
 print("检验结束")
 
 
-;;;一致性
-m_zonal_rc1 = (/m_zonal_rc1*p_rc/)
+; ;;;一致性
+; m_zonal_rc1 = (/m_zonal_rc1*p_rc/)
 
-m_zonal_rc2 = (/m_zonal_rc2*p_rc/)
+; m_zonal_rc2 = (/m_zonal_rc2*p_rc/)
 
-;;;
+; ;;;
+
+
+
+
+
 
 ;;;画图 
-  wks=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流回归到降水指数")
+  wks=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流回归到Q_thermaldyna")
 
   ; gsn_define_colormap(wks, "BlRe")
   res=True
