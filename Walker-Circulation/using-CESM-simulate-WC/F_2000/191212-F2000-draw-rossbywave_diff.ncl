@@ -3,7 +3,7 @@
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012.nc"  
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012.nc"  
   
@@ -53,7 +53,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-rossby-atlantic")
+     wks=gsn_open_wks("pdf", "CESM-F2000-rossby-atlantic-new")
     ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False

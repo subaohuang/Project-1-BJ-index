@@ -3,10 +3,11 @@
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012.nc"
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
+  ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
   
 
     f1=addfile(fils1, "r")
@@ -55,7 +56,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-indian")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-indian-old")
     ; wks=gsn_open_wks("pdf", "CESM-slp_u_v_pattern-F-pday-rmindian-rmalt-rmallocean")
     res=True
     res@gsnDraw=False
@@ -72,11 +73,10 @@ begin
 
     res@cnFillPalette = "BlueWhiteOrangeRed"
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
-    res@cnLevelSpacingF      =  0.1
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    ; res@cnMinLevelValF       =   -1
+    ; res@cnMaxLevelValF       =   1
+    ; res@cnLevelSpacingF      =  0.1
     
     ; res@cnMinLevelValF       =   -16
     ; res@cnMaxLevelValF       =   16
