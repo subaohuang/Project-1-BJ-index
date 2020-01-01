@@ -78,9 +78,11 @@ begin
 
 ;;;计算 趋势
 
-    evp_annual = month_to_annual(evp_new, 1)
-    p_annual  = month_to_annual(p, 1)
-    
+    ; evp_annual = month_to_annual(evp_new, 1)
+    evp_annual = month_to_season(evp_new, "DJF")
+
+    ; p_annual  = month_to_annual(p, 1)
+    p_annual = month_to_season(p, "DJF")
 
 
     p_e = p_annual
@@ -113,7 +115,7 @@ begin
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-    wks   = gsn_open_wks("pdf", "蒸发和降水的趋势")
+    wks   = gsn_open_wks("pdf", "蒸发和降水的趋势-DJF")
     plot=new(3,graphic)
     res=True
     res@gsnFrame=False

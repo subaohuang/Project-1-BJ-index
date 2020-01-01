@@ -39,15 +39,15 @@ begin
     ;   lon2 = 360
     ; ;;;
         ;;;region 
-      lat1 = -40
-      lat2 = 40
-      lon1 = 0
-      lon2 = 360
+      lat1 = 0
+      lat2 = 15
+      lon1 = 110
+      lon2 = 155
     ;;;
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201212
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -69,21 +69,33 @@ begin
 
     f2 = addfile(filein(1),"r")
     t = short2flt(f2->t(timeind,:,{lat1:lat2},{lon1:lon2}))
-    t = (/t-273.16/)
+    
 
     level = q&level
+
+    ;;将温度处理成位势温度
+     pt = pot_temp(level*100, t, 1, False)
+     
+     t = (/pt/)
+
    ;;;处理成年异常数据
 
 
-     ;;;区域平均
-     q_scs = dim_avg_n_Wrap(q(:,:,{0:15},{110:155}), (/2,3/))
-     t_scs = dim_avg_n_Wrap(t(:,:,{0:15},{110:155}), (/2,3/))
-     ;;;
-   
-     q_annual_scs = month_to_annual(q_scs, 1)
-     t_annual_scs = month_to_annual(t_scs, 1)
-   ;;;
+     ; q_annual  = month_to_annual(q, 1)
+     ; t_annual  = month_to_annual(t, 1)
 
+     q_annual = month_to_season(q, "DJF")
+     t_annual = month_to_season(t, "DJF")
+
+     ;;;区域平均
+     q_annual_scs  = dim_avg_n_Wrap(q_annual(:,:,{0:15},{110:155}), (/2,3/))
+     t_annual_scs = dim_avg_n_Wrap(t_annual(:,:,{0:15},{110:155}), (/2,3/))
+     ;;;
+
+  
+
+   ;;;
+   
  
 
    ;;;计算趋势
@@ -117,7 +129,7 @@ begin
 ;;;=================================================
 ;;;画垂直坡面图
 ;;===================================================
- wks = gsn_open_wks("pdf","q和ts气候态和趋势的profile")                  ; send graphics to PNG file
+ wks = gsn_open_wks("pdf","q和ts气候态和趋势的profile-DJF")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
@@ -126,10 +138,13 @@ begin
     resxy@xyLineColors       =  (/"black","blue"/)          ; change line color
     resxy@xyMarkLineModes    =  (/"lines","lines"/)
     resxy@xyExplicitLegendLabels  =  (/"main","dyn"/)     ;加线的标注
-    resxy@trYReverse        = True                       ; reverse Y-axis
+    resxy@trYReverse        = True               
+    resxy@trYMinF = 100        ; reverse Y-axis
 
     plot1 = gsn_csm_xy(wks, (/q_clm_scs,q_change/),level ,resxy)
     resxy@xyLineThicknessF  =  (/ 1.0/)          ; make second line thicker
+    resxy@trXMinF = 290
+    resxy@trXMaxF = 400
     plot2 = gsn_csm_xy(wks, (/t_clm_scs,t_change/),level ,resxy)
 
     pres = True

@@ -22,8 +22,11 @@ begin
     m_zonal_500=rmMonAnnCycTLL(m_zonal(:,{500},{-60:60},:))
     m_meri_500=rmMonAnnCycTLL(m_meri(:,{500},{-60:60},:))
     
-    m_zonal_annual=month_to_annual(m_zonal_500, 1)
-    m_meri_annual=month_to_annual(m_meri_500, 1)
+    ; m_zonal_annual=month_to_annual(m_zonal_500, 1)
+    ; m_meri_annual=month_to_annual(m_meri_500, 1)
+    
+    m_zonal_annual=month_to_season(m_zonal_500, "DJF")
+    m_meri_annual=month_to_season(m_meri_500, "DJF")
     
     dims=dimsizes(m_zonal_annual)
 ;;
@@ -48,7 +51,7 @@ print("检验结束")
 
 
 ;;;画图 
-  wks=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流的趋势")
+  wks=gsn_open_wks("pdf", "ERA-in的SCS-local沃克及哈得来环流的趋势-冬季")
 
   ; gsn_define_colormap(wks, "BlRe")
   res=True

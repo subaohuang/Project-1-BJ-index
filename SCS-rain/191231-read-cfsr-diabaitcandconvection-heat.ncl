@@ -63,7 +63,9 @@ print("finish read data")
 ;    wgt_var1=86400*wgt_var1/sum(dp)                 ; Integral=sum(var*dp)/sum(dp)
 ;    printVarSummary(wgt_var1)
 ;-----------Follow to caculate the trend--------------
-    var1_annual = month_to_annual(var1,1)
+    ; var1_annual = month_to_annual(var1,1)
+    var1_annual = month_to_season(var1, "MAM")
+
     var1_annual!0="time" 
     dimz = dimsizes(var1_annual)
     yr_length = dimz(0)
@@ -88,35 +90,42 @@ print("finish read data")
     y(0,:)= (/var1_clim_area/)
     y(1,:)= y(0,:)+(/var1_annual_rc_area/)
 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/diabatic_deepcon_heating_CFSR_ANN_clm_change_profile.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/diabatic_deepcon_heating_CFSR_MAM_clm_change_profile.nc"
 
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
     ; output variables directly
     ncdf->diab_q = y
 
-;;;读入 deep convection 的数据
+; ;;;读入 deep convection 的数据
+;     print("***********deep convection数据*******************")
 
-    deepcon_q = f1[:]->CNVHR_P8_L100_GLL0     ; Deep convective heating rate 
-    var2 = deepcon_q
+;     deepcon_q = f1[:]->CNVHR_P8_L100_GLL0     ; Deep convective heating rate 
+;     var2 = deepcon_q
 
-    var2_annual = month_to_annual(var2,1)
-    var2_annual!0="time" 
-    dimz = dimsizes(var2_annual)
-    yr_length = dimz(0)
+;     var2_annual = month_to_annual(var2,1)
+;     var2_annual!0="time" 
+;     dimz = dimsizes(var2_annual)
+;     yr_length = dimz(0)
 
-    var2_annual_rc = regCoef_n(ispan(1,yr_length,1), var2_annual,0,0)
-    copy_VarCoords(var2_annual(1,:,:,:), var2_annual_rc)
-    var2_annual_rc = var2_annual_rc*yr_length
+;     var2_annual_rc = regCoef_n(ispan(1,yr_length,1), var2_annual,0,0)
+;     copy_VarCoords(var2_annual(1,:,:,:), var2_annual_rc)
+;     var2_annual_rc = var2_annual_rc*yr_length
 
-    var2_clim = dim_avg_n_Wrap(var2_annual,0)
-    var2_clim_area = wgt_areaave_Wrap(var2_clim(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+;     var2_clim = dim_avg_n_Wrap(var2_annual,0)
+;     var2_clim_area = wgt_areaave_Wrap(var2_clim(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
 
-    var2_annual_rc_area = wgt_areaave_Wrap(var2_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+;     var2_annual_rc_area = wgt_areaave_Wrap(var2_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
 
-    y2 = var2_annual(:1,:,0,0)
-    y2(0,:)= (/var2_clim_area/)
-    y2(1,:)= y2(0,:)+(/var2_annual_rc_area/)
-    ncdf->deepcon_q = y2
+;     y2 = var2_annual(:1,:,0,0)
+;     y2(0,:)= (/var2_clim_area/)
+;     y2(1,:)= y2(0,:)+(/var2_annual_rc_area/)
+
+;     g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/deepcon_heating_CFSR_ANN_clm_change_profile.nc"
+
+;     system("rm "+g_data_out_path)
+;     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
+;     ; output variables directly
+;     ncdf->deepcon_q = y2
 ;;;;
 end 
