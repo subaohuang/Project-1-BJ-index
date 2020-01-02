@@ -89,9 +89,9 @@ begin
      ; q_annual  = month_to_annual(q, 1)
      ; t_annual  = month_to_annual(t, 1)
 
-     w_annual = month_to_season(w, "SON")
-     t_annual = month_to_season(t, "SON")
-     dtdp_annual = month_to_season(dtdp, "SON")
+     w_annual = month_to_season(w, "DJF")
+     t_annual = month_to_season(t, "DJF")
+     dtdp_annual = month_to_season(dtdp, "DJF")
 
      t_annual = dtdp_annual*100
 
@@ -161,7 +161,7 @@ begin
 ;;;=================================================
 ;;;画垂直坡面图
 ;;===================================================
- wks = gsn_open_wks("pdf","NCEP-DOE的w和位温的气候态和趋势的profile-SON")                  ; send graphics to PNG file
+ wks = gsn_open_wks("pdf","NCEP-DOE的w和位温的气候态和趋势的profile-DJF")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
@@ -188,7 +188,7 @@ begin
 ;;;=================================================
 ;;;平面分布图
 ;;===================================================
- wks2   = gsn_open_wks("pdf", "NCEP-DOE中的W和静力稳定度的趋势平面图-SON")
+ wks2   = gsn_open_wks("pdf", "NCEP-DOE中的W和静力稳定度的趋势平面图-DJF")
     plot=new(2,graphic)
     res=True
     res@gsnFrame=False

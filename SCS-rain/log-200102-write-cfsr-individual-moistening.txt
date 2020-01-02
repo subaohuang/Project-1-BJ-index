@@ -1,0 +1,13 @@
+ Copyright (C) 1995-2017 - All Rights Reserved
+ University Corporation for Atmospheric Research
+ NCAR Command Language Version 6.4.0
+ The use of this software is governed by a License Agreement.
+ See http://www.ncl.ucar.edu/ for more details.
+fatal:syntax error: line 109 in file 200102-write-cfsr-individual-moistening.ncl before or near > 
+    temp  = f1[:]->
+------------------^
+
+fatal:Syntax Error in block, block not executed
+fatal:error at line 130 in file 200102-write-cfsr-individual-moistening.ncl
+
+
