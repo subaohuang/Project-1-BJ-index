@@ -83,9 +83,10 @@ begin
 
      ; q_annual  = month_to_annual(q, 1)
      ; t_annual  = month_to_annual(t, 1)
+     MONTH  = "JJA"
 
-     q_annual = month_to_season(q, "DJF")
-     t_annual = month_to_season(t, "DJF")
+     q_annual = month_to_season(q, MONTH)
+     t_annual = month_to_season(t, MONTH)
 
      ;;;区域平均
      q_annual_scs  = dim_avg_n_Wrap(q_annual(:,:,{0:15},{110:155}), (/2,3/))
@@ -129,7 +130,7 @@ begin
 ;;;=================================================
 ;;;画垂直坡面图
 ;;===================================================
- wks = gsn_open_wks("pdf","q和ts气候态和趋势的profile-DJF")                  ; send graphics to PNG file
+ wks = gsn_open_wks("pdf","q和ts气候态和趋势的profile-"+MONTH)                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False

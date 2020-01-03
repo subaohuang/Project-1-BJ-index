@@ -28,10 +28,11 @@ begin
     ; g_lonW=110.
     ; g_lonE=160.
 
-   g_latS=0.
-    g_latN=15.
+    g_latS=-10.
+    g_latN=0.
     g_lonW=240.
     g_lonE=270.
+
     var1_clim_area = wgt_areaave_Wrap(var1_clim(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
     var1_annual_rc_area = wgt_areaave_Wrap(var1_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
 
@@ -62,13 +63,13 @@ end
   printVarSummary(f1)
   
   ;;;bulid a nc file 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/individual_heating_CFSR_ANN_clm_change_profile-test2.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/individual_heating_CFSR_ANN_clm_change_profile-EP.nc"
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
   ;;;
 
-    g_latS=0.
-    g_latN=15.
+    g_latS=-10.
+    g_latN=0.
     g_lonW=240.
     g_lonE=270.
   ;;read diabiatic heating

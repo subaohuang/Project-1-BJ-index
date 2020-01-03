@@ -38,12 +38,20 @@ begin
     ;   lon1 = 0
     ;   lon2 = 360
     ; ;;;
-        ;;;region 
-      lat1 = 0
-      lat2 = 15
-      lon1 = 110
-      lon2 = 155
+    ; ;;;region 
+    ;   lat1 = 0
+    ;   lat2 = 15
+    ;   lon1 = 110
+    ;   lon2 = 155
+    ; ;;;
+    
+    ;;;region 
+      lat1 = -5
+      lat2 = 45
+      lon1 = 100
+      lon2 = 160
     ;;;
+
 
     ;;;time span
     startmon =197901
@@ -77,21 +85,26 @@ begin
     ;;将温度处理成位势温度
      pt = pot_temp(level*100, t, 1, False)
      
-     t = (/pt*-1/)
-
+  
     p=level*100
     dtdp = pt
     dtdp = center_finite_diff_n(pt, p,False , 0, 1)  
-
+    dtdp = dtdp*-1
    ;;;处理成年异常数据
 
 
      ; q_annual  = month_to_annual(q, 1)
      ; t_annual  = month_to_annual(t, 1)
+     MONTH = "ANN"
 
-     w_annual = month_to_season(w, "DJF")
-     t_annual = month_to_season(t, "DJF")
-     dtdp_annual = month_to_season(dtdp, "DJF")
+     ; w_annual = month_to_season(w, MONTH)
+     ; t_annual = month_to_season(t, MONTH)
+     ; dtdp_annual = month_to_season(dtdp, MONTH)
+     
+      w_annual = month_to_annual(w, 1) 
+      t_annual = month_to_annual(t, 1)
+      dtdp_annual = month_to_annual(dtdp, 1)
+
 
      t_annual = dtdp_annual*100
 
@@ -101,7 +114,7 @@ begin
     wgt_w = w_annual(:,1,:,:)
     wgt_w=(/dim_sum_n(dp_cfm*w_annual,1)/)               ; sum(var*dp)
 
-    ; wgt_w = w_annual(:,{500},:,:)
+    wgt_w = w_annual(:,{500},:,:)
 
     wgt_t = t_annual(:,1,:,:)
     wgt_t=(/dim_sum_n(dp_cfm*t_annual,1)/)               ; sum(var*dp)
@@ -115,9 +128,6 @@ begin
      w_annual_scs  = dim_avg_n_Wrap(w_annual(:,:,{0:15},{110:155}), (/2,3/))
      t_annual_scs = dim_avg_n_Wrap(t_annual(:,:,{0:15},{110:155}), (/2,3/))
      ;;;
-
-
-  
 
 
 
@@ -134,6 +144,10 @@ begin
 
     prob_t = rc_test(wgt_t_rc)
     prob_w = rc_test(wgt_w_rc)
+
+    ; prob_t  = prob_t*10^6
+    
+
 
    ;;;
    
@@ -161,7 +175,7 @@ begin
 ;;;=================================================
 ;;;画垂直坡面图
 ;;===================================================
- wks = gsn_open_wks("pdf","NCEP-DOE的w和位温的气候态和趋势的profile-DJF")                  ; send graphics to PNG file
+ wks = gsn_open_wks("pdf","NCEP-DOE的w和位温的气候态和趋势的profile"+MONTH)                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
@@ -188,7 +202,7 @@ begin
 ;;;=================================================
 ;;;平面分布图
 ;;===================================================
- wks2   = gsn_open_wks("pdf", "NCEP-DOE中的W和静力稳定度的趋势平面图-DJF")
+ wks2   = gsn_open_wks("pdf", "NCEP-DOE中的W和静力稳定度的趋势平面图-"+MONTH)
     plot=new(2,graphic)
     res=True
     res@gsnFrame=False
@@ -224,15 +238,21 @@ begin
     res@tmYLMajorThicknessF=3.0
     res@tmBorderThicknessF=4.0
 
-    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    ; res@cnMinLevelValF       =   -0.04
-    ; res@cnMaxLevelValF       =   0.04
-    ; res@cnLevelSpacingF      =  0.005
+    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+    ; res@cnMinLevelValF       =   -1.4
+    ; res@cnMaxLevelValF       =   1.4
+    ; res@cnLevelSpacingF      =  0.2
 
 
     plot(0) = gsn_csm_contour_map(wks2, wgt_w_rc, res)
+
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
+    res@cnLevelSpacingF      =  0.1
+
    
     plot(1) = gsn_csm_contour_map(wks2, wgt_t_rc, res)
+
    
 
   ; ;;添加区域
@@ -264,7 +284,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0.0,0.1/)
     res_pro@lbLabelBarOn = False
 
     res_pro@cnLinesOn=False
@@ -275,7 +295,7 @@ begin
     res_pro@cnFillPattern = 17
     res_pro@cnFillDotSizeF = 0.0045
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
