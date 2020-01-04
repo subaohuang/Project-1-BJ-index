@@ -252,28 +252,76 @@ begin
 
 
 ; ;==============================================================
-; ; Mission 3.  trend
+; ; Mission 3.  read P,E data
 ; ; ==============================================================
+;;
+ ;;read  eva data 
+    fils_evp = systemfunc("ls /home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_"+"*"+".nc")
+
+    f1 := addfiles(fils_evp, "r")
+    date := cd_calendar(f1[:]->time, 1)
+    timeind := ind(date.ge.197901.and.date.le.201312)
+    evp_r = short2flt(f1[:]->evapr(timeind,:,:))
+    evp_r@missing_value = -9.96921e+36
+    evp_r@_FillValue =   -9.96921e+36
+    evp_r&lat@units = "degrees_north"
+    evp_r&lon@units = "degrees_east"
+    
+    evp_r = where(evp_r.eq.3276.6, -9.96921e+36, evp_r)
+    evp =  evp_r*10 / 365.0   ;;convert t0 day
+    copy_VarMeta(evp_r, evp)
+    delete(evp_r)
+   
+    printVarSummary(evp)
+    
+    
+    ;;;处理数据
+        ;;; 水平插值 lat:-88.75：88.75 ； lon:1.25 2.5×2.5度
+
+        yo = fspan(-88.75, 88.75, 72)
+        xo = fspan(1.25, 358.75, 144)
+
+        evp_new = linint2_Wrap(evp&lon, evp&lat, evp, True, xo, yo, 0)
+
+        delete(evp_new&LAT)
+        delete(evp_new&LON)
+        evp_new!1 = "lat"
+        evp_new!2 = "lon"
+        evp_new&lat = yo
+        evp_new&lon = xo
+        printVarSummary(evp_new)
+        ;;;
+        ; ;;116.25存在插值后缺侧的现象，现在插值下
+        ; m =  linmsg(u_av_1({100:120}),0)
+        ; copy_VarCoords(u_av_1({100:120}), m)
+        ; u_av_1({116.25}) = m({116.25})
+        ; delete(m)
+        ; ;;;
+;;;;
+
+;;;read pre data
+
+        f2 = addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+        date:=cd_calendar(f2->time, 1)
+        timeind:=ind(date.ge.197901.and.date.le.201312)
+        p=f2->precip(timeind,:,:)
+
+        delete(p&time)
+        p&time=date(timeind)
+        printVarSummary(p)
+;;;   
+        p_e = p
+        p_e = p - evp_new
+        ;;;
+
+;;;  month to annual
+        
+    p_e_annual = month_to_annual(p_e, 1)
+    p_e_annual = (/dim_rmvmean_n(p_e_annual, 0)/)
+    
+;;;
 
    
-;     divQ_rc  = regCoef_n(ispan(1, yearnum, 1), era_divQ_bar, 0, 0)
-;     copy_VarCoords(era_divQ_bar(1,:,:), divQ_rc)
-;     prob1 = rc_test(divQ_rc)
-;     divQ_rc = (/divQ_rc*yearnum/)
-
-   
-;     era_wgt_adv_q_bar_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_adv_q_bar, 0, 0)
-;     copy_VarCoords(era_wgt_adv_q_bar(1,:,:), era_wgt_adv_q_bar_rc )
-
-
-;     prob2 = rc_test(era_wgt_adv_q_bar_rc)
-;     era_wgt_adv_q_bar_rc = (/era_wgt_adv_q_bar_rc*yearnum/)
-
-;     era_wgt_con_q_bar_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_con_q_bar, 0, 0)
-;     copy_VarCoords(era_wgt_con_q_bar(1,:,:), era_wgt_con_q_bar_rc )
-;     prob3 = rc_test(era_wgt_con_q_bar_rc)
-;     era_wgt_con_q_bar_rc = (/era_wgt_con_q_bar_rc*yearnum/)
-
 ; ;==============================================================
 ; ; Mission 3.  area avg(x)
 ; ; ==============================================================
@@ -282,6 +330,7 @@ begin
    ;lat2 = 15
    ;lon1 = 110
    ;lon2 = 155
+    p_e_annual_series = dim_avg_n_Wrap(p_e_annual(:,{0:15},{110:155}), (/1,2/))
 
     series_era_divQ_delta  = dim_avg_n_Wrap(era_divQ_delta(:,{0:15},{110:155}), (/1,2/))
     ; series_era_divQ_delta = (/series_era_divQ_delta - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
@@ -290,39 +339,45 @@ begin
     series_quad_q = dim_avg_n_Wrap(era_wgt_quad_q(:,{0:15},{110:155}), (/1,2/))
     series_eddy_q = dim_avg_n_Wrap(era_wgt_eddy_q(:,{0:15},{110:155}), (/1,2/))
 
-      ;;;写成nc 文件输出
 
-    outpath = "/home/ys17-19/lsh/Project/SCS-rain/Q-term-5.nc"
-       ;;-----------------------写入nc文件---------------------------
-    system("/bin/rm -f" + outpath)   ; remove any pre-existing file
-    ncdf = addfile(outpath ,"c")  ; open output netCDF file
 
-    filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
-   ;===================================================================
-    ; create global attributes of the file (optional)
-    ;===================================================================
-    fAtt               = True            ; assign file attributes
-    fAtt@title         = "Q-term,热力，动力，平方以及eddy项"
-    fAtt@Conventions   = "CHAZHI"
-    fAtt@creation_date = systemfunc ("date")
-    fileattdef( ncdf, fAtt )            ; copy file attributes==
-    ;=================================================================
-    ; output variables directly; NCL will call appropriate functions
-    ; to write the meta data associated with each variable
-    ;===================================================================
-    ncdf->series_Q  =  series_era_divQ_delta
-    ncdf->series_thermaldyna_q  = series_thermaldyna_q 
-    ncdf->series_dyna_q = series_dyna_q
-    ncdf->series_quad_q = series_quad_q
-    ncdf->series_eddy_q = series_eddy_q
-    ncdf->time = ispan(1979,2013,1)
-    ;;;
+   ;  ;;;写成nc 文件输出
+
+   ;  outpath = "/home/ys17-19/lsh/Project/SCS-rain/Q-term-5.nc"
+   ;     ;;-----------------------写入nc文件---------------------------
+   ;  system("/bin/rm -f" + outpath)   ; remove any pre-existing file
+   ;  ncdf = addfile(outpath ,"c")  ; open output netCDF file
+
+   ;  filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
+   ; ;===================================================================
+   ;  ; create global attributes of the file (optional)
+   ;  ;===================================================================
+   ;  fAtt               = True            ; assign file attributes
+   ;  fAtt@title         = "Q-term,热力，动力，平方以及eddy项"
+   ;  fAtt@Conventions   = "CHAZHI"
+   ;  fAtt@creation_date = systemfunc ("date")
+   ;  fileattdef( ncdf, fAtt )            ; copy file attributes==
+   ;  ;=================================================================
+   ;  ; output variables directly; NCL will call appropriate functions
+   ;  ; to write the meta data associated with each variable
+   ;  ;===================================================================
+   ;  ncdf->series_Q  =  series_era_divQ_delta
+   ;  ncdf->series_thermaldyna_q  = series_thermaldyna_q 
+   ;  ncdf->series_dyna_q = series_dyna_q
+   ;  ncdf->series_quad_q = series_quad_q
+   ;  ncdf->series_eddy_q = series_eddy_q
+   ;  ncdf->time = ispan(1979,2013,1)
+   ;  ;;;
 
 
     
     ; series_eddy_q = (/series_thermaldyna_q + series_dyna_q + series_quad_q + series_eddy_q - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
 
     ;;trend
+    
+    p_e_rc = regline(ispan(1,yearnum,1), p_e_annual_series)
+    p_e_rc = (/p_e_rc*yearnum/)
+
     q_delta_rc = regline(ispan(1,yearnum,1), series_era_divQ_delta)
     q_delta_rc = (/q_delta_rc*yearnum/)
 
@@ -364,15 +419,15 @@ begin
   ; resxy@vpXF = 0.15
   ; resxy@vpYF = 0.95
 
-  resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
-  resxy@xyMonoLineThickness = True
-  resxy@xyLineColors       =  (/"black","blue","red","green","gray"/)          ; change line color
-  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines"/)
-  resxy@xyExplicitLegendLabels  =  (/"main","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
+  resxy@xyLineThicknessF  =  (/ 5,2,2,2,2,2/)          ; make second line thicker
+
+  resxy@xyLineColors       =  (/"gray","black","blue","red","green","orange"/)          ; change line color
+  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
+  resxy@xyExplicitLegendLabels  =  (/"P-E","main","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
   
 
   time = ispan(1979, 2013, 1)
-  plot = gsn_csm_xy(wks,time,(/series_era_divQ_delta,series_dyna_q,series_thermaldyna_q,series_quad_q,series_eddy_q/), resxy)
+  plot = gsn_csm_xy(wks,time,(/p_e_annual_series, series_era_divQ_delta,series_dyna_q,series_thermaldyna_q,series_quad_q,series_eddy_q/), resxy)
   draw(plot)
   frame(wks)
 

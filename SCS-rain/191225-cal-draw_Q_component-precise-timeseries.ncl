@@ -299,6 +299,39 @@ begin
     
     ; series_eddy_q = (/series_thermaldyna_q + series_dyna_q + series_quad_q + series_eddy_q - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
 
+
+    ;;;写成nc 文件输出
+
+    outpath = "/home/ys17-19/lsh/Project/SCS-rain/Q-term-8.nc"
+       ;;-----------------------写入nc文件---------------------------
+    system("/bin/rm -f" + outpath)   ; remove any pre-existing file
+    ncdf = addfile(outpath ,"c")  ; open output netCDF file
+
+    filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
+   ;===================================================================
+    ; create global attributes of the file (optional)
+    ;===================================================================
+    fAtt               = True            ; assign file attributes
+    fAtt@title         = "Q-term,热力平流，热力幅合，动力平流，动力幅合，平方以及eddy项"
+    fAtt@Conventions   = "CHAZHI"
+    fAtt@creation_date = systemfunc ("date")
+    fileattdef( ncdf, fAtt )            ; copy file attributes==
+    ;=================================================================
+    ; output variables directly; NCL will call appropriate functions
+    ; to write the meta data associated with each variable
+    ;===================================================================
+    ncdf->series_Q  =  series_era_divQ_delta
+    ncdf->series_dyna_adv_q = series_dyna_adv_q
+    ncdf->series_dyna_con_q = series_dyna_con_q
+    ncdf->series_thermaldyna_adv_q = series_thermaldyna_adv_q
+    ncdf->series_thermaldyna_con_q = series_thermaldyna_con_q
+    ncdf->series_quad_adv_q = series_quad_adv_q
+    ncdf->series_quad_con_q = series_quad_con_q
+    ncdf->series_eddy_q = series_eddy_q
+
+    ncdf->time = ispan(1979,2013,1)
+    ;;;
+
 ; ;==============================================================
 ; ; Mission 4.  trend
 ; ; ==============================================================

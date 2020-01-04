@@ -94,6 +94,10 @@ begin
 ;;;读入Q-term
     f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Q-term-5.nc", "r")
     series_Q = f3->series_Q(:)
+    series_thermaldyna_q = f3->series_thermaldyna_q
+    series_dyna_q = f3->series_dyna_q
+    series_quad_q = f3->series_quad_q
+    series_eddy_q = f3->series_eddy_q
 ;;;
 
 ;;;
@@ -101,7 +105,7 @@ begin
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "Q以及P-E的时间序列")
+  wks   = gsn_open_wks("pdf", "P-E以及Q的各项的时间序列")
   plot=new(1,graphic)
   
   resxy = True
@@ -123,16 +127,36 @@ begin
   ; resxy@vpXF = 0.15
   ; resxy@vpYF = 0.95
 
-  resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
-  resxy@xyMonoLineThickness = True
-  resxy@xyLineColors       =  (/"black","blue","red","green","gray"/)          ; change line color
-  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines"/)
-  resxy@xyExplicitLegendLabels  =  (/"main","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
+   resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2/)          ; make second line thicker
   
-
+  resxy@xyLineColors       =  (/"gray","black","blue","red","green","orange"/)          ; change line color
+  resxy@xyMonoDashPattern = False
+  resxy@xyDashPatterns =(/0,0,1,1,1,1/)
+  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
+  resxy@xyExplicitLegendLabels  =  (/"P-E","divQ","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
+  
   time = ispan(1979, 2013, 1)
-  plot = gsn_csm_xy(wks,time,(/p_e_t,series_Q,p_annual_t,evp_annual_t/), resxy)
+  plot = gsn_csm_xy(wks,time,(/p_e_t, series_Q,series_dyna_q,series_thermaldyna_q,series_quad_q,series_eddy_q/), resxy)
 
+  ;;添加legend 
+  gres = True
+  gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                    ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+  gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+
+  lineres = True
+  ; lineres@lgLineColors = (/"black"，/) ; line colors
+  lineres@lgLineColors       = (/"gray","black","blue","red","green","orange"/)  
+  lineres@lgLineThicknesses = (/ 5,3,2,2,2,2/)                     ; line thicknesses
+  lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+  lineres@lgDashIndexes = (/0,0,1,1,1,1/)
+
+
+  textres = True
+  textres@lgLabels = (/"P-E","DivQ","Dynamic","Thermodynamic","Quadratic", "Eddy"/) 
+
+  plot = simple_legend(wks,plot,gres,lineres,textres)   
   draw(plot)
   frame(wks)
+
   end
