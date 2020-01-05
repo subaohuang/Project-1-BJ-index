@@ -212,9 +212,11 @@ begin
     slp_dyna_rc = where(prob_slp_dyna.le.0.1, slp_dyna_rc, slp_dyna_rc@_FillValue)
     
 
-   ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
-
-  ;;趋势一致性
+    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    u_p_rc = where(prob_u_p.le.0.1.or.prob_v_p.le.0.1, u_p_rc, u_p_rc@_FillValue)
+    u_Q_rc = where(prob_u_Q.le.0.1.or.prob_v_Q.le.0.1, u_Q_rc, u_Q_rc@_FillValue)   
+    u_dyna_rc = where(prob_u_dyna.le.0.1.or.prob_v_dyna.le.0.1, u_dyna_rc, u_dyna_rc@_FillValue)
+;;趋势一致性
 
     slp_p_rc = (/slp_p_rc*p_rc/)
     u_p_rc = (/u_p_rc*p_rc/)
@@ -369,7 +371,8 @@ print("==========finish preprocessing data =============")
     ; end do
 
     pres = True
-    pres@gsnPanelLabelBar = True
+    pres@gsnPanelLabelBar = False
+    ; pres@lbOrientation  = "Vertical"
     gsn_panel(wks, plot, (/2,2/), pres)
 end
     

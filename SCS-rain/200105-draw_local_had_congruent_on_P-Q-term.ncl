@@ -3,49 +3,48 @@
 ;;
 ;;lnshuheng 2020.1.4
 ;**********************************************************
-function  rc_test(ssta_rc)
+function  rc_test(m_zonala_rc)
 begin
-  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+  tval = onedtond(m_zonala_rc@tval , dimsizes(m_zonala_rc))
+   df   = onedtond(m_zonala_rc@nptxy, dimsizes(m_zonala_rc)) - 2
    b = tval    ; b must be same size as tval (and df)
    b = 0.5
    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
-   copy_VarCoords(ssta_rc, prob)
+   copy_VarCoords(m_zonala_rc, prob)
 return prob
 end
 
 begin
 ;;;读入Q-term
     f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Q-term-5.nc", "r")
-    series_Q = f3->series_Q(:)
-    series_thermaldyna_q = f3->series_thermaldyna_q
-    series_dyna_q = f3->series_dyna_q
-    series_quad_q = f3->series_quad_q
-    series_eddy_q = f3->series_eddy_q
+    series_Q = f3->series_Q(:33)
+    series_thermaldyna_q = f3->series_thermaldyna_q(:33)
+    series_dyna_q = f3->series_dyna_q(:33)
+    series_quad_q = f3->series_quad_q(:33)
+    series_eddy_q = f3->series_eddy_q(:33)
 ;;;
 
 ;;;读入GPCP降水场
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
+    timeind:=ind(date.ge.197901.and.date.le.201212)
     p_t=f2->precip(timeind,:,:)
 
 ;;;
 
 ;==========================================================
-;;;回归SST
+;;;回归local wk and had 
 ;;==========================================================
 
-   ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+
+   ;;;读入Hadim_zonal海温数据
+    diri="/home/ys17-19/lsh/data/era/"
+    fils1=systemfunc("ls "+diri+"era_m_zonal_meri_new.nc")
     f1=addfile(fils1, "r")
-   
-   
    ;;;
 
 
-        ;;;region 
+    ;;;region 
       lat1 = -40
       lat2 = 40
       lon1 = 0
@@ -54,7 +53,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201212
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -66,18 +65,20 @@ begin
     dim = yearnum
     ;;
 
-
-    f1 = addfile(fils1,"r")
-    date:=cd_calendar(f1->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    m_zonal=f1->m_meri
+  
     
-    sst=lonFlip(f1->sst(timeind,:,:))
-
+    m_zonal_clm = dim_avg_n_Wrap(m_zonal(:,{500},:,:), 0)
+    m_zonal_500=rmMonAnnCycTLL(m_zonal(:,{500},{-60:60},:))
+   
+  
+    m_zonal_annual=month_to_annual(m_zonal_500, 1)
+  
+    dims=dimsizes(m_zonal_annual)
+;;
    
    ;;;处理成年异常数据
-     sst = (/rmMonAnnCycTLL(sst)/)
-     sst_annual = month_to_annual(sst, 1)
-     
+    
      p_t = (/rmMonAnnCycTLL(p_t)/)
      p = dim_avg_n_Wrap(p_t(:,{0:15},{110:155}), (/1,2/))
      
@@ -87,12 +88,14 @@ begin
 
      ;;;计算趋势,计算线性一致性之前先把趋势计算了
      
-     sst_rc  = regCoef_n(ispan(1, yearnum, 1), sst_annual, 0, 0)
-     ; sst_rc = sst_rc*10
+     m_zonal_rc  = regCoef_n(ispan(1, yearnum, 1), m_zonal_annual, 0, 0)
+     ; m_zonal_rc = m_zonal_rc*10
 
-     sst_rc = sst_rc*yearnum
+      m_zonal_rc = m_zonal_rc*yearnum*10^4
 
-     copy_VarCoords(sst_annual(1,:,:), sst_rc)
+      copy_VarCoords(m_zonal_annual(1,:,:), m_zonal_rc)
+
+
 
     
      p_rc  = regCoef_n(ispan(1, yearnum, 1), p_annual, 0, 0)
@@ -100,7 +103,7 @@ begin
   
 
     
-     sst_annual = (/dtrend_msg_n(ispan(1,dim(0),1),sst_annual,False,True,0)/)
+     m_zonal_annual = (/dtrend_msg_n(ispan(1,dim(0),1),m_zonal_annual,False,True,0)/)
      p_annual = (/dtrend_msg_n(ispan(1,dim(0),1),p_annual,False,True,0)/)
 
 
@@ -122,15 +125,15 @@ begin
    
    ;;回归
     ;;1: 回归到P
-    sst_p_rc = regCoef_n(p_annual, sst_annual, 0, 0)
-    copy_VarCoords(sst_annual(1,:,:), sst_p_rc)
+    m_zonal_p_rc = regCoef_n(p_annual, m_zonal_annual, 0, 0)
+    copy_VarCoords(m_zonal_annual(1,:,:), m_zonal_p_rc)
     
     ;;2: 回归到Q
-    sst_Q_rc = regCoef_n(series_Q, sst_annual, 0, 0)
-    copy_VarCoords(sst_annual(1,:,:), sst_Q_rc)
+    m_zonal_Q_rc = regCoef_n(series_Q, m_zonal_annual, 0, 0)
+    copy_VarCoords(m_zonal_annual(1,:,:), m_zonal_Q_rc)
     
-    sst_dyna_rc = regCoef_n(series_dyna_q, sst_annual, 0, 0)
-    copy_VarCoords(sst_annual(1,:,:), sst_dyna_rc)
+    m_zonal_dyna_rc = regCoef_n(series_dyna_q, m_zonal_annual, 0, 0)
+    copy_VarCoords(m_zonal_annual(1,:,:), m_zonal_dyna_rc)
     
    ;;;
 
@@ -138,13 +141,13 @@ begin
   
    ;;;显著性检验
     
-    prob_sst = rc_test(sst_rc)
+    prob_m_zonal = rc_test(m_zonal_rc)
   
-    prob_sst_p = rc_test(sst_p_rc)
+    prob_m_zonal_p = rc_test(m_zonal_p_rc)
 
-    prob_sst_Q = rc_test(sst_Q_rc)
+    prob_m_zonal_Q = rc_test(m_zonal_Q_rc)
   
-    prob_sst_dyna = rc_test(sst_dyna_rc)
+    prob_m_zonal_dyna = rc_test(m_zonal_dyna_rc)
   
 
    ;;;;
@@ -154,19 +157,19 @@ begin
 
    
     ;;;
-    ; sst_rc = where(prob_sst.le.0.1, sst_rc, sst_rc@_FillValue)
-    ; sst_p_rc = where(prob_sst_p.le.0.1, sst_p_rc, sst_p_rc@_FillValue)
-    ; sst_Q_rc = where(prob_sst_Q.le.0.1, sst_Q_rc, sst_Q_rc@_FillValue)
-    ; sst_dyna_rc = where(prob_sst_dyna.le.0.1, sst_dyna_rc, sst_dyna_rc@_FillValue)
+    ; m_zonal_rc = where(prob_m_zonal.le.0.1, m_zonal_rc, m_zonal_rc@_FillValue)
+    ; m_zonal_p_rc = where(prob_m_zonal_p.le.0.1, m_zonal_p_rc, m_zonal_p_rc@_FillValue)
+    ; m_zonal_Q_rc = where(prob_m_zonal_Q.le.0.1, m_zonal_Q_rc, m_zonal_Q_rc@_FillValue)
+    ; m_zonal_dyna_rc = where(prob_m_zonal_dyna.le.0.1, m_zonal_dyna_rc, m_zonal_dyna_rc@_FillValue)
     
 
    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
 
   ;;;趋势一致性
 
-    sst_p_rc = (/sst_p_rc*p_rc/)
-    sst_Q_rc = (/sst_Q_rc*series_Q_rc/)
-    sst_dyna_rc = (/sst_dyna_rc*series_dyna_q_rc/)
+    m_zonal_p_rc = (/m_zonal_p_rc*p_rc*10^4/)
+    m_zonal_Q_rc = (/m_zonal_Q_rc*series_Q_rc*10^4/)
+    m_zonal_dyna_rc = (/m_zonal_dyna_rc*series_dyna_q_rc*10^4/)
     
   
   ;;;;
@@ -176,7 +179,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "sst_congruent_on_P,Q-dynaterm")
+  wks   = gsn_open_wks("pdf", "m_meridial_congruent_on_P,Q-dynaterm")
   plot=new(4,graphic)
   res=True
   res@gsnFrame=False
@@ -188,9 +191,9 @@ begin
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.0
-  res@cnMaxLevelValF       =   2.0
-  res@cnLevelSpacingF      =  0.4
+  res@cnMinLevelValF       =   -6.0
+  res@cnMaxLevelValF       =   6.0
+  res@cnLevelSpacingF      =  1.0
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
   res@lbLabelStride=2
@@ -218,16 +221,16 @@ begin
   res@tmBorderThicknessF=4.0
   
  
-  plot(0) = gsn_csm_contour_map(wks,sst_rc ,res)
-     res@cnMinLevelValF       =   -0.5
-    res@cnMaxLevelValF       =   0.5
-    res@cnLevelSpacingF      =  0.1
+  plot(0) = gsn_csm_contour_map(wks,m_zonal_rc ,res)
+    ;  res@cnMinLevelValF       =   -0.5
+    ; res@cnMaxLevelValF       =   0.5
+    ; res@cnLevelSpacingF      =  0.1
 
-  plot(1) = gsn_csm_contour_map(wks,sst_p_rc ,res)
+  plot(1) = gsn_csm_contour_map(wks,m_zonal_p_rc ,res)
 
-  plot(2) = gsn_csm_contour_map(wks,sst_Q_rc ,res)
+  plot(2) = gsn_csm_contour_map(wks,m_zonal_Q_rc ,res)
 
-  plot(3) = gsn_csm_contour_map(wks,sst_dyna_rc ,res)
+  plot(3) = gsn_csm_contour_map(wks,m_zonal_dyna_rc ,res)
   
   
    
@@ -279,10 +282,10 @@ begin
     ; res_pro@cnFillOn        = True
     iplot = new(4,graphic)
 
-    iplot(0)=gsn_csm_contour(wks,prob_sst,res_pro)
-    iplot(1)=gsn_csm_contour(wks,prob_sst_p,res_pro)
-    iplot(2)=gsn_csm_contour(wks,prob_sst_Q,res_pro)
-    iplot(3)=gsn_csm_contour(wks,prob_sst_dyna,res_pro)
+    iplot(0)=gsn_csm_contour(wks,prob_m_zonal,res_pro)
+    iplot(1)=gsn_csm_contour(wks,prob_m_zonal_p,res_pro)
+    iplot(2)=gsn_csm_contour(wks,prob_m_zonal_Q,res_pro)
+    iplot(3)=gsn_csm_contour(wks,prob_m_zonal_dyna,res_pro)
     do i = 0,3
     overlay(plot(i), iplot(i))
     end do

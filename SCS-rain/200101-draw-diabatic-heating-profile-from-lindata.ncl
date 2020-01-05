@@ -33,7 +33,7 @@ begin
 ;;;
 
 ;;;read Q1 monthly data from linshuheng
-  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/Q_time_ncep2.nc")
+  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/Q_time_era.nc")
   f3 = addfile(fils, "r")
   date = cd_calendar(f3->time, 1)
 
@@ -43,8 +43,8 @@ begin
 
   printVarSummary(q1)
 
-  ; q1_annual = month_to_annual(q1, 1)
-  q1_annual = month_to_season(q1, "MAM")
+  q1_annual = month_to_annual(q1, 1)
+  ; q1_annual = month_to_season(q1, "MAM")
 
   dim = dimsizes(q1_annual)
 
@@ -76,7 +76,7 @@ begin
 ;;;;
 
   
-    wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-mam")                  ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False

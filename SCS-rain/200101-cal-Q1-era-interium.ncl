@@ -64,7 +64,7 @@ delete(t_r)
  printVarSummary(dtdp)
  Q=new((/dimsizes(pt&time),dimsizes(pt&level),dimsizes(pt&lat),dimsizes(pt&lon)/),float)
  do i=0,dimsizes(p)-1
- Q(:,i,:,:)=((p(i)/100000.0)^0.286)*w(:,i,:,:)*dtdp(:,i,:,:)*3600.0*24.0
+ Q(:,i,:,:)=dble2flt(((p(i)/100000.0)^0.286)*w(:,i,:,:)*dtdp(:,i,:,:)*3600.0*24.0)
  end do
  delete(w)
  copy_VarCoords(pt, Q)
