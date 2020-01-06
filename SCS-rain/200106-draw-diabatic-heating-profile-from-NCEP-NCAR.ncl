@@ -9,7 +9,7 @@ begin
 ; ==============================================================
 ; Mission 1. read data
 ; ==============================================================
-;;read diabatic data
+;;read diabatic data 
   f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/diabatic_heating_CFSR_ANN_clm_change_profile.nc", "r")
 
   diabatic_heat_change = f1->diab_q(1,:)
@@ -32,20 +32,20 @@ begin
   deepcon_heat_clm = (/deepcon_heat_clm*86400/)
 ;;;
 
-;;;read Q1 monthly data
-  fils = systemfunc("ls /home/yangsong3/data-observation/NCEP_DOE/monthly/q1/q1."+"*"+".mon.mean.nc")
-  
-  f3 = addfiles(fils, "r")
-  date = cd_calendar(f3[:]->time, 1)
+;;;read Q1 monthly data from linshuheng
+  fils = systemfunc("ls /home/yangsong3/data-observation/NCEP_NCAR/monthly/q1.1948-2014.nc")
+  f3 = addfile(fils, "r")
+  date = cd_calendar(f3->time, 1)
 
   timeind = ind(date.le.201312.and.date.ge.197901)
 
-  q1 = f3[:]->q1(timeind,:,:,:)
+  q1 = f3->q1(timeind,:,:,:)
+  q1 = (/q1*86400/)
 
   printVarSummary(q1)
 
-  ; q1_annual = month_to_annual(q1, 1)
-  q1_annual = month_to_season(q1, "MAM")
+  q1_annual = month_to_annual(q1, 1)
+  ; q1_annual = month_to_season(q1, "MAM")
 
   dim = dimsizes(q1_annual)
 
@@ -69,15 +69,15 @@ begin
   ;;;
   
 
-  q1_clim_area = q1_clim_area*86400
-  q1_change = q1_change*86400
+  q1_clim_area = q1_clim_area
+  q1_change = q1_change
   ;;;
   
 
 ;;;;
 
   
-    wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-mam")                  ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","NCEP-NCAR_Q1,非绝热加热,深对流加热的profile-lindata-era")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
@@ -161,7 +161,7 @@ begin
     res_lines@gsMarkerThicknessF   = 3.0
     yy = yy+50
     dum7 = gsn_add_polyline(wks,plot1,xx,yy,res_lines)              ; add polyline
-    dum8 = gsn_add_text(wks,plot1,"DIABH Clim Q1",text_pos,yy(0),res_text); add text
+    dum8 = gsn_add_text(wks,plot1,"DIABH Clim",text_pos,yy(0),res_text); add text
     dum77 = gsn_add_polymarker(wks,plot1,xx,yy,res_lines)   
     
     res_lines@gsLineDashPattern = 1.

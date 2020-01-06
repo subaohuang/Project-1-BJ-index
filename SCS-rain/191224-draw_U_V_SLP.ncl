@@ -65,7 +65,7 @@ begin
     prob_v = rc_test(v_rc)
     prob_slp = rc_test(slp_rc)
 
-    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    u_rc = where(prob_u.le.0.2.or.prob_v.le.0.2, u_rc, u_rc@_FillValue)
     ; v_rc = where(prob_v.le.0.1.or.prob_v.le.0.1, v_rc, v_rc@_FillValue)
   
  
@@ -129,13 +129,13 @@ begin
   ; res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
-  res@vcMinMagnitudeF          =0.04
+  res@vcMinMagnitudeF          =0.1
   res@vcRefMagnitudeF          = 1.0
   res@vcRefLengthF             = 0.04     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0
-  ; res@vcLineArrowHeadMaxSizeF=0.01
-  ; res@vcLineArrowHeadMinSizeF=0.01
+  res@vcLineArrowHeadMaxSizeF=0.005
+  res@vcLineArrowHeadMinSizeF=0.005
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
  

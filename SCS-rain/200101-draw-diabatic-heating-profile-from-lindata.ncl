@@ -160,7 +160,7 @@ begin
     res_lines@gsMarkerThicknessF   = 3.0
     yy = yy+50
     dum7 = gsn_add_polyline(wks,plot1,xx,yy,res_lines)              ; add polyline
-    dum8 = gsn_add_text(wks,plot1,"DIABH Clim Q1",text_pos,yy(0),res_text); add text
+    dum8 = gsn_add_text(wks,plot1,"DIABH Clim",text_pos,yy(0),res_text); add text
     dum77 = gsn_add_polymarker(wks,plot1,xx,yy,res_lines)   
     
     res_lines@gsLineDashPattern = 1.

@@ -136,7 +136,7 @@ begin
   res@cnLevelSpacingF      =  0.5
 
   res@cnFillPalette="MPL_BrBG"
-  res@gsnLeftString="(b)GPCP Precipitation"
+  res@gsnLeftString="GPCP Precipitation trend congruent with IPO index"
   plot = gsn_csm_contour_map(wks, p_rc, res)
    
   ; ;;添加区域

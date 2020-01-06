@@ -70,15 +70,15 @@ begin
  ;;------------------read data---------------------------------
 	
 
-    fils1 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212.pre.nc"
+    fils1 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY/F_1850-PDAY.cam.h0.197801-201212.pre.nc"
     
-    fils2 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212.pre.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmindian/F_1850-PDAY-rmindian.cam.h0.197801-201212.pre.nc"
    
-    fils3 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212.pre.nc"
+    fils3 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmatlantic/F_1850-PDAY-rmatlan.cam.h0.197801-201212.pre.nc"
 
-    fils4 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"
+    fils4 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rmpacific/F_1850-PDAY-rmpacific.cam.h0.197801-201212.nc"
 
-    fils5 = "/home/ys17-19/lsh/CESM-data/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212.nc"
+    fils5 = "/home/ys17-19/lsh/CESM-data/F/F_1850-PDAY-rafixed/F_1850-PDAY-rafixed.cam.h0.197801-201212.nc"
 
     fils6 = "/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc"
 
@@ -95,7 +95,7 @@ begin
     ;;;;
       
      PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
-     PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
+     ; PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
      PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/) 
      PRE_trend_ghg = (/PRE_trend_ct - PRE_trend_ghg/) 
 
@@ -112,7 +112,7 @@ begin
   ;;---------------画趋势图--------------------------------------
    dir = systemfunc("/bin/pwd")
    
-    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-ssttrend-DIFF")
+    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-ssttrend-DIFF-test")
     ; wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmallocean_DIFF")
     res=True
     res@gsnDraw=False
