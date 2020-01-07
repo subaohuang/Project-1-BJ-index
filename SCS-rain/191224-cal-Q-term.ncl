@@ -104,6 +104,35 @@ begin
     printVarSummary(DivQ)
     ; print(DivQ(0,:,:))
     print("=====finish DivQ calculate==========")
+
+    
+    ;;;写成nc 文件输出
+
+    outpath = "/home/ys17-19/lsh/Project/SCS-rain/era-interium-DivQ.nc"
+       ;;-----------------------写入nc文件---------------------------
+    system("/bin/rm -f" + outpath)   ; remove any pre-existing file
+    ncdf = addfile(outpath ,"c")  ; open output netCDF file
+
+    filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
+   ;===================================================================
+    ; create global attributes of the file (optional)
+    ;===================================================================
+    fAtt               = True            ; assign file attributes
+    fAtt@title         = "DivQ"
+    fAtt@Conventions   = "CHAZHI"
+    fAtt@creation_date = systemfunc ("date")
+    fileattdef( ncdf, fAtt )            ; copy file attributes==
+    ;=================================================================
+    ; output variables directly; NCL will call appropriate functions
+    ; to write the meta data associated with each variable
+    ;===================================================================
+    ncdf->DivQ  =  DivQ
+    ncdf->time = f1->time
+    ;;;
+
+exit()
+
+
     
     era_divQ_bar = month_to_annual(DivQ, 1)
     ; era_divQ_bar = month_to_season(DivQ, "MAM")

@@ -6,8 +6,8 @@ begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
   
 
     f1=addfile(fils1, "r")
@@ -44,7 +44,7 @@ begin
     PSL_diff = PSL_CT_clm
     PSL_diff = (/PSL_indian_clm - PSL_CT_clm/)
 
-    PSL_glbal = avg(dim_avg_n_Wrap(PSL_diff, (/1/)))  ;;;;为什么要去掉全球平均后才是想要的结果？可能CTRL有问题？
+    ; PSL_glbal = avg(dim_avg_n_Wrap(PSL_diff, (/1/)))  ;;;;为什么要去掉全球平均后才是想要的结果？可能CTRL有问题？
     
 
     ; PSL_diff = (/PSL_diff - PSL_glbal/)
@@ -56,7 +56,7 @@ begin
     v_diff = (/v_indian_clm - v_CT_clm/)
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-pacific")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-allocean")
     
     res=True
     res@gsnDraw=False
@@ -110,7 +110,8 @@ begin
 
     res@vcMinDistanceF           = 0.02           ; thin vectors
     res@vcMinMagnitudeF          =0.04
-    res@vcRefMagnitudeF          = 2.0
+    res@vcMaxMagnitudeF = 7.0
+    res@vcRefMagnitudeF          = 3.0
     res@vcRefLengthF             = 0.05     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.0

@@ -106,8 +106,8 @@ begin
     ; res@cnMaxLevelValF       =   1
     ; res@cnLevelSpacingF      =  0.1
     
-    res@cnMinLevelValF       =   -1.6
-    res@cnMaxLevelValF       =   1.6
+    res@cnMinLevelValF       =   -0.8
+    res@cnMaxLevelValF       =   0.8
     res@cnLevelSpacingF      =  0.2
 
     res@tmXTOn=False
