@@ -25,7 +25,7 @@ begin
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/F_2000_allocean.cam.h0.0101-4012.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindopacific/F_2000_indopacific.cam.h0.0101-4012_chazhi.nc"
   
 
     f1=addfile(fils1, "r")
@@ -84,7 +84,7 @@ begin
      
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-allocean-SCS")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-indopacific-SCS")
     
     res=True
     res@gsnDraw=False

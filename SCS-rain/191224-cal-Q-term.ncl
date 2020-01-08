@@ -23,12 +23,21 @@ begin
 		var_name = (/"uwnd","vwnd","shum"/)
 		filein = path_wind + var_name +".mon.mean.nc"
         
+        ; ;;;region 
+        ;   lat1 = -10
+        ;   lat2 = 50
+        ;   lon1 = 60
+        ;   lon2 = 160
+        ; ;;;
+        
         ;;;region 
-          lat1 = -10
-          lat2 = 50
-          lon1 = 60
-          lon2 = 160
+          lat1 = -90
+          lat2 = 90
+          lon1 = 0
+          lon2 = 360
         ;;;
+
+
 
         ;;;time span
         startmon =197901
@@ -105,29 +114,51 @@ begin
     ; print(DivQ(0,:,:))
     print("=====finish DivQ calculate==========")
 
-    
+    dim = dimsizes(DivQ)
+    nlat = dim(1)
+    nlon = dim(2)
+
+
     ;;;写成nc 文件输出
 
     outpath = "/home/ys17-19/lsh/Project/SCS-rain/era-interium-DivQ.nc"
        ;;-----------------------写入nc文件---------------------------
-    system("/bin/rm -f" + outpath)   ; remove any pre-existing file
-    ncdf = addfile(outpath ,"c")  ; open output netCDF file
+    system("rm " + outpath)   ; remove any pre-existing file
+    fout = addfile(outpath ,"c")  ; open output netCDF file
+    setfileoption(fout,"DefineMode",True)
 
-    filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
    ;===================================================================
     ; create global attributes of the file (optional)
     ;===================================================================
+
     fAtt               = True            ; assign file attributes
-    fAtt@title         = "DivQ"
-    fAtt@Conventions   = "CHAZHI"
-    fAtt@creation_date = systemfunc ("date")
-    fileattdef( ncdf, fAtt )            ; copy file attributes==
-    ;=================================================================
-    ; output variables directly; NCL will call appropriate functions
-    ; to write the meta data associated with each variable
-    ;===================================================================
-    ncdf->DivQ  =  DivQ
-    ncdf->time = f1->time
+    fAtt@title         = "1979-2012,era40,ncep1,jra-55,20cr,merra,ncep1的风场平均结果，精度为2.5乘2.5"    
+    fAtt@creation_date = "2017.12.21"
+    fileattdef( fout, fAtt)            ; copy file attributes    
+    ;----------------------------坐标变量的定义
+    dimnames=(/"time","lat","lon"/)
+    dimsize=(/-1,nlat,nlon/)
+    dimunlim=(/True,False,False/)
+    filedimdef(fout, dimnames, dimsize, dimunlim)
+    filevardef(fout, "lat", typeof(DivQ&latitude),(/"lat"/))
+    filevardef(fout, "lon", typeof(DivQ&longitude),(/"lon"/))
+    filevardef(fout, "time", typeof(DivQ&time),(/"time"/))
+    ;-----------------------------定义变量名，类型和维数
+    filevardef(fout, "DivQ",typeof(DivQ),(/"time","lat","lon"/))
+
+      ;;属性
+      filevarattdef(fout, "lon", DivQ&longitude)
+      filevarattdef(fout, "lat", DivQ&latitude)
+      filevarattdef(fout, "time", DivQ&time)
+      filevarattdef(fout, "DivQ", DivQ)
+
+      ;;
+
+      fout->lon=(/DivQ&longitude/)
+      fout->lat=(/DivQ&latitude/)
+      fout->time=(/DivQ&time/)
+      fout->DivQ=(/DivQ/)
+       print("=====finish NC write==========")
     ;;;
 
 exit()
