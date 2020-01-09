@@ -184,11 +184,11 @@ begin
 
 
 
-  ; opt1=diri+"sst_p_ud_timef1_1958_2012.ascii"
-  ; opt2=diri+"sst_p_ud_timef2_1958_2012.ascii"
-  ; asciiwrite(opt1, sprintf ("%6.2f,", ev_timef_std(0,:)))
-  ; asciiwrite(opt2, sprintf ("%6.2f,", ev_timef_std(1,:)))
-  
+    opt1="sst_Q_pre_PC1_1958_2013.ascii"
+    opt2="sst_Q_pre_PC2_1958_2013.ascii"
+    asciiwrite(opt1, sprintf ("%6.2f,", ev_timef_std(0,:)))
+    asciiwrite(opt2, sprintf ("%6.2f,", ev_timef_std(1,:)))
+  exit()
  
    mode=1
 

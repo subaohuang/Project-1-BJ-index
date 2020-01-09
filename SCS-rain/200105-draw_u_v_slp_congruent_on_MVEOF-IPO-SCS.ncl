@@ -33,40 +33,28 @@ return prob
 end
 begin
     
-    ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-    f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->time, 1)
+   ;;;read MV- EOF PC1 data
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
-
-    sst=lonFlip(f1->sst(timeind,:,:))
-    ssta=(/rmMonAnnCycTLL(sst)/)
-    copy_VarCoords(sst, ssta)
-    sst_annual = month_to_annual(ssta, 1)
-    dim = dimsizes(sst_annual)
+    PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")
     
-    ;;;;ipo index 
-     sst_ipo = (/dim_avg_n_Wrap(sst_annual(:,{5:-5},{210:270}), (/1,2/))\
-    -  (dim_avg_n_Wrap(sst_annual(:,{45:25},{150:210}), (/1,2/))+dim_avg_n_Wrap(sst_annual(:,{-25:-45},{150:210}), (/1,2/)))/2\
-    /)
-    sst_ipo_sm=runave_n_Wrap(sst_ipo, 13, 1, 0)
-    ; sst_ipo_sm = sst_ipo
-    sst_ipo_sm=(/dim_standardize_n_Wrap(sst_ipo_sm, 0, 0)/)
+    id1 = 1979-1958
+
+    IPO = PC(id1:)
+    printVarSummary(IPO)
     
-    sst_index = sst_ipo_sm
+    ; IPO=(/dim_standardize_n_Wrap(IPO, 0, 0)/)
 
-    sst_index_rc = regline(ispan(1, dimsizes(sst_index), 1), sst_index)
+    sst_index_rc = regline(ispan(1, dimsizes(IPO), 1), IPO)
 
-    sst_index = (/dtrend_msg_n(ispan(1,dimsizes(sst_index),1),sst_index,False,True,0)/)
-   print(sst_index_rc)
-   exit()
-    ;;;
+    IPO = (/dtrend_msg_n(ispan(1,dimsizes(IPO),1),IPO ,False,True,0)/)
+    
+    ; sst_index = IPO
+    sst_index = runave_n_Wrap(IPO, 13, 1, 0)  ;;;;因为之前的指数是已经三年滑动平均过的，不过再做13年滑动平均其实也没没事
+
+    dim = dimsizes(IPO)
    
-  
-    delete(timeind)
-    delete(date)
+  print(sst_index_rc)
+  exit()
 ;==========================================================
 ;;;回归u，v,slp，500hpa Geophyoptensial heigh
 ;;==========================================================
@@ -89,7 +77,7 @@ begin
       lon2 = 160
     ;;;
 
-    ;;;time span
+    ;;time span
     startmon =197901
     endmon = 201312
 
@@ -180,7 +168,7 @@ begin
 
 
    ;;;显著性检验,注意是用相关系数进行回归系数的显著性检验
-    u_r = escorc_n(sst_index, u_annual, 0, 0)
+   u_r = escorc_n(sst_index, u_annual, 0, 0)
    v_r = escorc_n(sst_index, v_annual, 0, 0)
    slp_r = escorc_n(sst_index, slp_annual, 0, 0)
    z_r = escorc_n(sst_index, z_annual, 0, 0)
@@ -214,7 +202,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_IPO-index-线性一致-SCS")
+  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_MVEOF-PC2-线性一致-SCS")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False
@@ -225,11 +213,8 @@ begin
 
   res@cnFillOn=True
   res@cnLinesOn=False
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -100
-  ; res@cnMaxLevelValF       =   100
-  ; res@cnLevelSpacingF      =  10
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -4
   res@cnMaxLevelValF       =   4
   res@cnLevelSpacingF      =  1.0
@@ -268,13 +253,12 @@ begin
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
-  ; res@vcRefMagnitudeF          = 1.0
-  ; res@vcRefMagnitudeF          = 0.1
-  res@vcRefLengthF             = 0.08     ; define length of v
+  res@vcRefMagnitudeF          = 0.1
+  res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0
-  ; res@vcLineArrowHeadMaxSizeF=0.01
-  ; res@vcLineArrowHeadMinSizeF=0.01
+  res@vcLineArrowHeadMaxSizeF=0.005
+  res@vcLineArrowHeadMinSizeF=0.005
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
 
