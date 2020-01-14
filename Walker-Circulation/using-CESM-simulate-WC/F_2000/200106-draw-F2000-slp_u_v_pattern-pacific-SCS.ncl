@@ -25,7 +25,7 @@ begin
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindopacific/F_2000_indopacific.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/F_2000_ghg.cam.h0.0101-4012_chazhi.nc"
   
 
     f1=addfile(fils1, "r")
@@ -80,11 +80,11 @@ begin
     prob_v = t_test(v_indian,v_CT)
 
     
-    u_diff = where(prob_u.le.0.05.or.prob_v.le.0.05, u_diff, u_diff@_FillValue)
+    ; u_diff = where(prob_u.le.0.05.or.prob_v.le.0.05, u_diff, u_diff@_FillValue)
      
     
    
-     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-indopacific-SCS")
+     wks=gsn_open_wks("pdf", "CESM-F2000-slp_u_v_pattern-ghg-SCS")
     
     res=True
     res@gsnDraw=False
@@ -136,7 +136,7 @@ begin
 
     res@vcMinDistanceF           = 0.025           ; thin vectors
     res@vcMinMagnitudeF          =0.04
-    res@vcRefMagnitudeF          = 3.0
+    res@vcRefMagnitudeF          = 1.0
     res@vcMaxMagnitudeF = 6.0
     res@vcRefLengthF             = 0.05     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
