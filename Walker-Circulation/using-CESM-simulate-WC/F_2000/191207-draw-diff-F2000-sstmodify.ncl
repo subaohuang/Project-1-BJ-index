@@ -40,7 +40,7 @@ begin
 
 
 ;;; draw 
-   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-indopacific")
+   wks=gsn_open_wks("png", "diff-cesmsstdata2modify-indopacific")
     
     res=True
     res@gsnDraw=False
