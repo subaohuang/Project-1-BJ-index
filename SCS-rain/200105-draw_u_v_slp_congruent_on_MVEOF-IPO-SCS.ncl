@@ -35,7 +35,8 @@ begin
     
    ;;;read MV- EOF PC1 data
 
-    PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")
+    ; PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")
+    PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC1_1958_2013.ascii", 56, "float")  ;;;回归到PC1-GHG index
     
     id1 = 1979-1958
 
@@ -48,13 +49,12 @@ begin
 
     IPO = (/dtrend_msg_n(ispan(1,dimsizes(IPO),1),IPO ,False,True,0)/)
     
-    ; sst_index = IPO
-    sst_index = runave_n_Wrap(IPO, 13, 1, 0)  ;;;;因为之前的指数是已经三年滑动平均过的，不过再做13年滑动平均其实也没没事
+    sst_index = IPO
+    ; sst_index = runave_n_Wrap(IPO, 13, 1, 0)  ;;;;因为之前的指数是已经三年滑动平均过的，不过再做13年滑动平均其实也没没事
 
     dim = dimsizes(IPO)
    
-  print(sst_index_rc)
-  exit()
+
 ;==========================================================
 ;;;回归u，v,slp，500hpa Geophyoptensial heigh
 ;;==========================================================
@@ -126,9 +126,9 @@ begin
      z_annual = month_to_annual(z, 1)
      slp_annual = month_to_annual(slp, 1)
 
-     slp_annual = (/runave_n_Wrap(slp_annual, 13, 1, 0)/)
-      u_annual = (/runave_n_Wrap(u_annual, 13, 1, 0)/)
-       v_annual = (/runave_n_Wrap(v_annual, 13, 1, 0)/)
+     ; slp_annual = (/runave_n_Wrap(slp_annual, 13, 1, 0)/)
+     ;  u_annual = (/runave_n_Wrap(u_annual, 13, 1, 0)/)
+     ;   v_annual = (/runave_n_Wrap(v_annual, 13, 1, 0)/)
         
 
      u_annual = (/dtrend_msg_n(ispan(1,dim(0),1),u_annual,False,True,0)/)
@@ -202,7 +202,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_MVEOF-PC2-线性一致-SCS")
+  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_MVEOF-PC1-线性一致-SCS")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False
