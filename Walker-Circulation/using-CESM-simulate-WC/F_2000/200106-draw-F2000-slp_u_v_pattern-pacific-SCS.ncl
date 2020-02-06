@@ -26,6 +26,7 @@ begin
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/F_2000_ipo.cam.h0.0101-4012_chazhi.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/F_2000_ghg.cam.h0.0101-4012_chazhi.nc"
   
 
     f1=addfile(fils1, "r")
@@ -80,7 +81,7 @@ begin
     prob_v = t_test(v_indian,v_CT)
 
     
-    ; u_diff = where(prob_u.le.0.05.or.prob_v.le.0.05, u_diff, u_diff@_FillValue)
+    ; u_diff = where(prob_u.le.0.2.or.prob_v.le.0.2, u_diff, u_diff@_FillValue)
      
     
    
@@ -134,7 +135,7 @@ begin
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.025           ; thin vectors
+    ; res@vcMinDistanceF           = 0.015           ; thin vectors
     res@vcMinMagnitudeF          =0.04
     res@vcRefMagnitudeF          = 1.0
     res@vcMaxMagnitudeF = 6.0

@@ -35,8 +35,8 @@ begin
     
    ;;;read MV- EOF PC1 data
 
-    ; PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")
-    PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")  ;;;回归到PC1-GHG index
+    PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC1_1958_2013.ascii", 56, "float")
+    ; PC = asciiread("/home/ys17-19/lsh/Project/SCS-rain/sst_Q_pre_PC2_1958_2013.ascii", 56, "float")  ;;;回归到PC1-GHG index
     
     id1 = 1979-1958
 
@@ -45,9 +45,9 @@ begin
     
     ; IPO=(/dim_standardize_n_Wrap(IPO, 0, 0)/)
 
-    sst_index_rc = regline(ispan(1, dimsizes(IPO), 1), IPO)
+    ; sst_index_rc = regline(ispan(1, dimsizes(IPO), 1), IPO)
 
-    IPO = (/dtrend_msg_n(ispan(1,dimsizes(IPO),1),IPO ,False,True,0)/)
+    ; IPO = (/dtrend_msg_n(ispan(1,dimsizes(IPO),1),IPO ,False,True,0)/)
     
     sst_index = IPO
     ; sst_index = runave_n_Wrap(IPO, 13, 1, 0)  ;;;;因为之前的指数是已经三年滑动平均过的，不过再做13年滑动平均其实也没没事
@@ -131,10 +131,10 @@ begin
      ;   v_annual = (/runave_n_Wrap(v_annual, 13, 1, 0)/)
         
 
-     u_annual = (/dtrend_msg_n(ispan(1,dim(0),1),u_annual,False,True,0)/)
-     v_annual = (/dtrend_msg_n(ispan(1,dim(0),1),v_annual,False,True,0)/)
-     z_annual = (/dtrend_msg_n(ispan(1,dim(0),1),z_annual,False,True,0)/)
-     slp_annual = (/dtrend_msg_n(ispan(1,dim(0),1),slp_annual,False,True,0)/)
+     ; u_annual = (/dtrend_msg_n(ispan(1,dim(0),1),u_annual,False,True,0)/)
+     ; v_annual = (/dtrend_msg_n(ispan(1,dim(0),1),v_annual,False,True,0)/)
+     ; z_annual = (/dtrend_msg_n(ispan(1,dim(0),1),z_annual,False,True,0)/)
+     ; slp_annual = (/dtrend_msg_n(ispan(1,dim(0),1),slp_annual,False,True,0)/)
 
 
    ;;;
@@ -188,14 +188,14 @@ begin
 
    slp_rc = where(prob_slp.le.0.1, slp_rc, slp_rc@_FillValue)
 
-   ; u_rc = where(prob_u.le.0.2.or.prob_v.le.0.2, u_rc, u_rc@_FillValue)
+   u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
 
 
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_MVEOF-PC2-SCS")
+  wks   = gsn_open_wks("pdf", "uv_slp_z_regression_on_MVEOF-PC1-SCS")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False

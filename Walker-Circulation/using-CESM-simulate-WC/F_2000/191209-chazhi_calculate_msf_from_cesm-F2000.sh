@@ -21,7 +21,7 @@ PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
 
 STEP=3
 modelname=F_2000_ipo
-variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3
+variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 
 # step1 : merge the cesm data into a whole data by using cdo
