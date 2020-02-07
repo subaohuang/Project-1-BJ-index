@@ -22,6 +22,7 @@ undef("cesm_hybird2pre")
     U    = f1->U                     ; say "T" is (lat,lev,lon)
     V    = f1->V                     ; say "T" is (lat,lev,lon)
     Z3    = f1->Z3                     ; say "T" is (lat,lev,lon)
+    Q = f1->Q
     PSL = f1->PSL
     OMEGA = f1->OMEGA
     PRECL = f1->PRECL
@@ -50,6 +51,8 @@ undef("cesm_hybird2pre")
 
     Z3new = vinth2p (Z3(time|:,lev|:,lat|:,lon|:),hyam,hybm,pnew,f1->PS,1,P0mb,1,True)
 
+    Qnew = vinth2p (Q(time|:,lev|:,lat|:,lon|:),hyam,hybm,pnew,f1->PS,1,P0mb,1,True)
+
     Unew!1 = "lev"
     Unew&lev = lev 
    
@@ -61,6 +64,9 @@ undef("cesm_hybird2pre")
 
     Z3new!1 = "lev"
     Z3new&lev = lev 
+
+    Qnew!1 = "lev"
+    Qnew&lev = lev 
    
     ;;-----------------------写入nc文件---------------------------
     system("/bin/rm -f "+outfilepath+"" )   ; remove any pre-existing file
@@ -82,6 +88,7 @@ undef("cesm_hybird2pre")
     ncdf->U  =  Unew
     ncdf->V  = Vnew
     ncdf->Z3 = Z3new
+    ncdf->Q = Qnew
 
     ncdf->OMEGA   =  Wnew
 

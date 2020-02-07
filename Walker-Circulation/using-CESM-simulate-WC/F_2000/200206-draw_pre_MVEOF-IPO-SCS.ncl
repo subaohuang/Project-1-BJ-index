@@ -22,7 +22,7 @@ end
 begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/F_2000_ipo.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/F_2000_ghg.cam.h0.0101-4012_chazhi.nc"
     ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012_chazhi.nc" 
   
 
@@ -67,7 +67,7 @@ begin
   ;;;;
 
     ; wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-GHG")
-    wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-ipo")
+    wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-GHG-SCS")
     
     res=True
     res@gsnDraw=False
@@ -88,22 +88,22 @@ begin
 
     res@cnMinLevelValF       =   -1.0
     res@cnMaxLevelValF       =   1.0
-    res@cnLevelSpacingF      =  0.2
+    res@cnLevelSpacingF      =  0.1
     
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -5
-    ; res@mpMaxLatF             = 45
-    ; res@mpMinLonF             =90
-    ; res@mpMaxLonF             = 160
+    res@mpMinLatF             = -5
+    res@mpMaxLatF             = 45
+    res@mpMinLonF             =90
+    res@mpMaxLonF             = 160
 
-    res@mpMinLatF             = -60
-    res@mpMaxLatF             = 60
-    res@mpMinLonF             =0
-    res@mpMaxLonF             = 360
+    ; res@mpMinLatF             = -60
+    ; res@mpMaxLatF             = 60
+    ; res@mpMinLonF             =0
+    ; res@mpMaxLonF             = 360
 
 
 

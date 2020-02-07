@@ -16,11 +16,12 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
+# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=F_2000_ipo
+modelname=F_2000_CTRL
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 
