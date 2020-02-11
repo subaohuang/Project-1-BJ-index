@@ -67,17 +67,26 @@ end
 
 begin
   ;;;read CESM data 
-		; path_wind= (/"/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/","/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/"/)
-    path_wind= (/"/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/","/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/"/)
-		file_name = (/"F_2000_ipo.cam.h0.0101-4012_chazhi.nc","F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"/)
+		path_wind= (/"/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/","/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/"/)
+    ; path_wind= (/"/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/","/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/"/)
+		file_name = (/"F_2000_ghg.cam.h0.0101-4012_chazhi.nc","F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"/)
 		filein = path_wind + file_name 
         
+    ; ;;;region 
+    ;   lat1 = -10
+    ;   lat2 = 50
+    ;   lon1 = 60
+    ;   lon2 = 160
+    ; ;;;
+
     ;;;region 
-      lat1 = -10
+      lat1 = -50
       lat2 = 50
-      lon1 = 60
-      lon2 = 160
+      lon1 = 0
+      lon2 = 360
     ;;;
+
+  
 
   
         ;;;time span
@@ -186,7 +195,7 @@ begin
 ;==============================================================
 ; Mission 6. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "CESM-diff2CTrun-ipo")
+  wks   = gsn_open_wks("pdf", "CESM-diff2CTrun-ghg-global")
   plot=new(4,graphic)
   res=True
   res@gsnFrame=False
@@ -205,10 +214,16 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             = 90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             = 90
+  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -30
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 30
+  res@mpMaxLonF             = 280
+
+
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False

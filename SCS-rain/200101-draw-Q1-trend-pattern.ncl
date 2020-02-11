@@ -27,16 +27,26 @@ begin
 ; Mission 1. read data
 ; ==============================================================
 ;;;read Q1 monthly data
-  fils = systemfunc("ls /home/yangsong3/data-observation/NCEP_DOE/monthly/q1/q1."+"*"+".mon.mean.nc")
-  f3 = addfiles(fils, "r")
-  date = cd_calendar(f3[:]->time, 1)
 
-  timeind = ind(date.le.201312.and.date.ge.197901)
+  ; fils = systemfunc("ls /home/yangsong3/data-observation/NCEP_DOE/monthly/q1/q1."+"*"+".mon.mean.nc")
+  ; f3 = addfiles(fils, "r")
+  ; date = cd_calendar(f3[:]->time, 1)
+  ; timeind = ind(date.le.201312.and.date.ge.197901)
+  ; q1 = f3[:]->q1(timeind,:,:,:)
+   ; printVarSummary(q1)
+   ;  pver  = q1&lev
+  
+  ;;era data
+    fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/Q_time_era.nc")
+    f3 = addfile(fils, "r")
+    date = cd_calendar(f3->time, 1)
+    timeind = ind(date.le.201312.and.date.ge.197901)
+    q1 = f3->Q_time(timeind,:,:,:)
+    printVarSummary(q1)
+    pver  = q1&level
+  ;;;
 
-  q1 = f3[:]->q1(timeind,:,:,:)
-
-  printVarSummary(q1)
-  pver  = q1&lev
+ 
  
   dp=dpres_plevel(pver,1013,min(pver),0)              ; caculate dp
   dp_cfm=conform_dims(dimsizes(q1),dp,1)          ; confirm dp to caculate sum(var*dp)
@@ -67,7 +77,7 @@ begin
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-    wks   = gsn_open_wks("pdf", "Q1的趋势平面图")
+    wks   = gsn_open_wks("pdf", "Q1的趋势平面图-era")
     plot=new(4,graphic)
     res=True
     res@gsnFrame=False
