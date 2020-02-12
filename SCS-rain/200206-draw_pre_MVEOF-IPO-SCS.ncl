@@ -22,7 +22,7 @@ end
 begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/F_2000_ghg.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/F_2000_ipo.cam.h0.0101-4012_chazhi.nc"
     ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012_chazhi.nc" 
   
 
@@ -67,7 +67,7 @@ begin
   ;;;;
 
     ; wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-GHG")
-    wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-GHG-SCS")
+    wks=gsn_open_wks("pdf", "CESM-F2000-p_pattern-pacific-IPO-SCS")
     
     res=True
     res@gsnDraw=False
@@ -86,8 +86,8 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
+    res@cnMinLevelValF       =   -0.4
+    res@cnMaxLevelValF       =   0.4 
     res@cnLevelSpacingF      =  0.1
     
 
@@ -151,6 +151,29 @@ begin
 
     i = 0
     overlay(plot(i), iplot(i))
+
+
+  ; ;;添加区域
+   ;;warm pool
+   pgres = True
+   pgres@gsLineThicknessF=2.0
+   pgres@gsLineDashPattern=0
+  
+   str = (/"1","2","3"/)
+   
+   ;;;画box
+   lat1 = 0
+   lat2 = 15
+   lon1 = 110
+   lon2 = 155
+
+   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ;;;
+   i = 0
+   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   
+
 
     draw(plot)
     frame(wks)

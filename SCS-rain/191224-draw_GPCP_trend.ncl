@@ -45,7 +45,7 @@ end
     prob_p=rc_test(p_rc)
     p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势")
+    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -64,10 +64,17 @@ end
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -60
+  res@mpMaxLatF             = 60
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
+
+
+
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False
@@ -77,13 +84,13 @@ end
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
 
-  res@tmXBValues=(/30,90,150,210,270,330,387.5/)
-  res@tmXBLabels=(/"30~S~o~N~E","90~S~o~N~E","150~S~o~N~E","150~S~o~N~W"\
-              ,"90~S~o~N~W","30~S~o~N~W","30~S~o~N~E"/)
+  ; res@tmXBValues=(/30,90,150,210,270,330,387.5/)
+  ; res@tmXBLabels=(/"30~S~o~N~E","90~S~o~N~E","150~S~o~N~E","150~S~o~N~W"\
+  ;             ,"90~S~o~N~W","30~S~o~N~W","30~S~o~N~E"/)
 
-  res@tmYLValues=(/30,20,10,0,-10,-20,-30/)
-  res@tmYLLabels=(/"30~S~o~N~N","20~S~o~N~N","10~S~o~N~N","0"\
-        ,"10~S~o~N~S","20~S~o~N~S","30~S~o~N~S"/)
+  ; res@tmYLValues=(/30,20,10,0,-10,-20,-30/)
+  ; res@tmYLLabels=(/"30~S~o~N~N","20~S~o~N~N","10~S~o~N~N","0"\
+  ;       ,"10~S~o~N~S","20~S~o~N~S","30~S~o~N~S"/)
   ; res@tmYLLabels=(/"30~S~o~C~~Z130~~H5~N","20~S~o","10~S~o","0"\
   ;               ,"10~S~o","20~S~o~","~Z70~~H5~~V2~S~C~~Z100~~V20~30~S~o"/)
 
