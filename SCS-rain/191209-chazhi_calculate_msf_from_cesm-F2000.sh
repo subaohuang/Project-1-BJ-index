@@ -39,6 +39,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
     echo "don't exit chazhi file, procecing..."
     cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+    pwd
     ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012.nc\" \
          outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_chazhi.nc\" \
        ./191209-CESM-data-chazhi.ncl
@@ -50,6 +51,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
      ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
    echo "don't exit msf file, procecing..."
    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+   pwd
    ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
        filename=\"${modelname}.cam.h0.0101-4012_chazhi.nc\" \
        outputpath='"~/lsh/data/wc-result/"' \
