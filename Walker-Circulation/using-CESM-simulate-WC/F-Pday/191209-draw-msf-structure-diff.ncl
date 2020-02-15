@@ -10,9 +10,20 @@ begin
     f1=addfile(fils1, "r")
     date=cd_calendar(f1->time, 1)
 
+
     timeind=ind(date.ge.197901.and.date.le.201212)
-   
-    msf_time_20cr_r=f1->msf_time(timeind,{1000:100},:)
+     
+    if fils1.eq."/home/ys17-19/lsh/data/rea_msf/msf_time_mre_global_new.nc" then 
+      msf_time_20cr_r1 = f1->msf_time({1000:100},:,timeind)
+      msf_time_20cr_r  = msf_time_20cr_r1(time|:,level|:,lon|:)
+      
+      msf_time_20cr_r!1 = "lev"
+      msf_time_20cr_r&lev = msf_time_20cr_r1&level
+      msf_time_20cr_r&lev@units = "mb"
+    else
+     msf_time_20cr_r=f1->msf_time(timeind,{1000:100},:)
+    end if
+
 
 
     msf_time_20cr_pi=lonPivot(msf_time_20cr_r, 30)
@@ -208,9 +219,14 @@ begin
       lgres@vpHeightF          = 0.1            ; height of legend (NDC)
       lgres@lgPerimColor       = "orange"       ; draw the box perimeter in orange
       lgres@lgPerimOn=False
-      lgres@lgPerimThicknessF  = 5.0            ; thicken the box perimeter
+      lgres@lgPerimThicknessF  = 5.0            ; thicken the box perimeter  
 
-      lbid = gsn_create_legend(wks,2,(/"clmatology","SST forcing"/),lgres)         ; create legend
+      if LeftString.ne."Observation" then 
+        lbid = gsn_create_legend(wks,2,(/"clmatology","SST forcing"/),lgres)         ; create legend
+      else
+         lgres@lgLabelFontHeightF = .5
+        lbid = gsn_create_legend(wks,2,(/"clmatology","clmatology+change"/),lgres)         ; create legend
+      end if
 
       amres = True
       amres@amParallelPosF   = -0.38         ; move legend to the right
@@ -222,7 +238,7 @@ end
 begin 
  ;;------------------read data---------------------------------
 	
-
+  
   fils1  =  "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY_1979-201212.nc"
 
   fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmindian_197901-201212.nc"
@@ -230,6 +246,10 @@ begin
   fils3 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmpacific_197912-201212.nc"
 
   fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmatlan_197912-201212.nc"
+
+  fils5 = "/home/ys17-19/lsh/data/rea_msf/msf_time_mre_global_new.nc"
+
+  fils6 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
 
   ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rmallocean_197912-201212.nc"
   ; fils4 = "/home/ys17-19/lsh/data/wc-result/msf_F_1850-PDAY-rafixed_197912-201212.nc"
@@ -239,16 +259,21 @@ begin
     data_id = read_msf(fils2)
     data_pa = read_msf(fils3)
     data_al = read_msf(fils4)
+
+    data_mre = read_msf(fils5)
+    data_ghg = read_msf(fils6)
     
     msf_trend_ct = data_ct[1]
 
     msf_trend_id = (/data_ct[1] - data_id[1]/)
     msf_trend_pa = (/ data_ct[1] - data_pa[1]/)
     msf_trend_al = (/data_ct[1] - data_al[1]/)
+    msf_trend_ghg = (/data_ct[1] - data_ghg[1]/)
 
     copy_VarCoords(msf_trend_ct, msf_trend_id)
     copy_VarCoords(msf_trend_ct, msf_trend_pa)
     copy_VarCoords(msf_trend_ct, msf_trend_al) 
+    copy_VarCoords(msf_trend_ct, msf_trend_ghg) 
 
     ; ;;;得到回归的数据
     ;  b = onedtond(msf_trend@yintercept, dimsizes(msf_trend))
@@ -260,16 +285,22 @@ begin
      
 
     wks = gsn_open_wks("pdf", "cesm-msf-structure-diff")
-    plot = new(4,graphic)
+    plot = new(6,graphic)
     ;;;;get trend pattern
-    plot(0) = draw_msf(data_ct[0],data_ct[1],wks,"Control run")
-    plot(1) = draw_msf(data_ct[0],msf_trend_id,wks,"Indian warming")
-    plot(2) = draw_msf(data_ct[0],msf_trend_al,wks,"Atlantic warming")
-    plot(3) = draw_msf(data_ct[0],msf_trend_pa,wks,"Pacific Lanina-like SST trend")
+    plot(0) = draw_msf(data_mre[0],data_mre[1],wks,"Observation")
+    plot(1) = draw_msf(data_ct[0],data_ct[1],wks,"Control run")
+    plot(2) = draw_msf(data_ct[0],msf_trend_id,wks,"Indian warming")
+    plot(3) = draw_msf(data_ct[0],msf_trend_al,wks,"Atlantic warming")
+    plot(4) = draw_msf(data_ct[0],msf_trend_pa,wks,"Pacific Lanina-like SST trend")
+    plot(5) = draw_msf(data_ct[0],msf_trend_ghg,wks,"GHG effect")
+
     ;;;;
 
     pres = True
-    gsn_panel(wks, plot, (/2,2/), pres)
+    pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
+
+    gsn_panel(wks, plot, (/3,2/), pres)
+
 
 
   end 

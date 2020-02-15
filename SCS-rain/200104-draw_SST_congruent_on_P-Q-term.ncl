@@ -217,16 +217,18 @@ begin
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
   
- 
+  
+  res@gsnLeftString = "(a)observed SST linear trend" 
   plot(0) = gsn_csm_contour_map(wks,sst_rc ,res)
-     res@cnMinLevelValF       =   -0.5
-    res@cnMaxLevelValF       =   0.5
-    res@cnLevelSpacingF      =  0.1
-
+  res@cnMinLevelValF       =   -0.5
+  res@cnMaxLevelValF       =   0.5
+  res@cnLevelSpacingF      =  0.1
+  res@gsnLeftString = "(b)SST linearly congruent with GPCP Pr"
   plot(1) = gsn_csm_contour_map(wks,sst_p_rc ,res)
+  res@gsnLeftString = "(c)SST linearly congruent with DivQ"
 
   plot(2) = gsn_csm_contour_map(wks,sst_Q_rc ,res)
-
+  res@gsnLeftString = "(d)SST linearly congruent with DivQ dynamical component"
   plot(3) = gsn_csm_contour_map(wks,sst_dyna_rc ,res)
   
   

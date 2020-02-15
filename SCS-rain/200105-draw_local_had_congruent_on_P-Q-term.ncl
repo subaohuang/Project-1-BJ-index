@@ -179,7 +179,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "m_meridial_congruent_on_P,Q-dynaterm")
+  wks   = gsn_open_wks("pdf", "m_meridional_congruent_on_P,Q-dynaterm")
   plot=new(4,graphic)
   res=True
   res@gsnFrame=False
@@ -195,7 +195,7 @@ begin
   res@cnMaxLevelValF       =   6.0
   res@cnLevelSpacingF      =  1.0
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=True
+  res@lbLabelBarOn=False
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
 
@@ -220,15 +220,17 @@ begin
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
   
- 
+  res@gsnLeftString = "(a)observed local HC linear trend" 
   plot(0) = gsn_csm_contour_map(wks,m_zonal_rc ,res)
     ;  res@cnMinLevelValF       =   -0.5
     ; res@cnMaxLevelValF       =   0.5
     ; res@cnLevelSpacingF      =  0.1
-
+  res@gsnLeftString = "(b)observed local HC linearly congruent with GPCP Pr" 
   plot(1) = gsn_csm_contour_map(wks,m_zonal_p_rc ,res)
+  res@gsnLeftString = "(c)observed local HC linearly congruent with DivQ" 
 
   plot(2) = gsn_csm_contour_map(wks,m_zonal_Q_rc ,res)
+  res@gsnLeftString = "(d)observed local HC linearly congruent with DivQ dynamical component" 
 
   plot(3) = gsn_csm_contour_map(wks,m_zonal_dyna_rc ,res)
   
@@ -291,7 +293,9 @@ begin
     end do
 
     pres = True
-    pres@gsnPanelLabelBar = False
+    pres@gsnPanelLabelBar = True
+    pres@lbOrientation  = "Vertical"
+    pres@pmLabelBarHeightF = 0.25
     gsn_panel(wks, plot, (/2,2/), pres)
 end
     

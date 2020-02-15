@@ -49,12 +49,12 @@ begin
           lon2 = 160
         ;;;
 
-        ;;;global region 
-        lat1 = -50
-        lat2 = 50
-        lon1 = 0
-        lon2 = 360
-        ;;;
+        ; ;;;global region 
+        ; lat1 = -50
+        ; lat2 = 50
+        ; lon1 = 0
+        ; lon2 = 360
+        ; ;;;
 
     
 
@@ -393,7 +393,7 @@ begin
 ;==============================================================
 ; Mission 6. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "q_delta以及各个项的趋势以及箭头-global-region")
+  wks   = gsn_open_wks("pdf", "q_delta以及各个项的趋势以及箭头")
   plot=new(5,graphic)
   res=True
   res@gsnFrame=False
@@ -412,17 +412,17 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             = 90
-  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 45
+  res@mpMinLonF             = 90
+  res@mpMaxLonF             = 160
   
-  ;;;global region
-   res@mpMinLatF             = -30
-   res@mpMaxLatF             = 30
-   res@mpMinLonF             = 0
-   res@mpMaxLonF             = 360
-  ;;;
+  ; ;;;global region
+  ;  res@mpMinLatF             = -30
+  ;  res@mpMaxLatF             = 30
+  ;  res@mpMinLonF             = 0
+  ;  res@mpMaxLonF             = 360
+  ; ;;;
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -536,6 +536,9 @@ begin
 
  pres = True
  pres@gsnPanelLabelBar = True
+ pres@lbOrientation = "vertical"
+ pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
+
  gsn_panel(wks, plot, (/3,2/), pres)
  
 

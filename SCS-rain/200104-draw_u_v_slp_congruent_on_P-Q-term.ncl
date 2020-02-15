@@ -288,31 +288,34 @@ print("==========finish preprocessing data =============")
   ; res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.04
+  res@vcMinMagnitudeF          =0.04
   res@vcRefMagnitudeF          = 4.0
   ; res@vcRefMagnitudeF          = 0.1
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0
-  ; res@vcLineArrowHeadMaxSizeF=0.01
-  ; res@vcLineArrowHeadMinSizeF=0.01
+  res@vcLineArrowHeadMaxSizeF=0.008
+  res@vcLineArrowHeadMinSizeF=0.008
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
 
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
- 
+ res@gsnLeftString = "(a)observed U,V,SLP linear trend" 
   plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
-  res@vcRefMagnitudeF          = 1.0
-
+  res@vcRefMagnitudeF          = 2.0
   res@cnMinLevelValF       =   -60
   res@cnMaxLevelValF       =   60
   res@cnLevelSpacingF      =  10
+
+   res@gsnLeftString = "(b)U,V,SLP linearly congruent with GPCP Pr"
+    
   plot(1) = gsn_csm_vector_scalar_map(wks,u_p_rc,v_p_rc,slp_p_rc ,res)
-
+  res@vcRefMagnitudeF          = 1.0
+   res@gsnLeftString = "(c)U,V,SLP linearly congruent with DivQ"
   plot(2) = gsn_csm_vector_scalar_map(wks,u_Q_rc,v_Q_rc,slp_Q_rc ,res)
-
+  res@gsnLeftString = "(d)U,V,SLP linearly congruent with DivQ dynamical component"
   plot(3) = gsn_csm_vector_scalar_map(wks,u_dyna_rc,v_dyna_rc,slp_dyna_rc ,res)
   
   

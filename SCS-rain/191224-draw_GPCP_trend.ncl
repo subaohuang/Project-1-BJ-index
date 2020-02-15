@@ -45,7 +45,7 @@ end
     prob_p=rc_test(p_rc)
     p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-global")
+    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -54,7 +54,6 @@ end
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@gsnLeftString="(a) OLR"
   res@cnFillPalette="NCV_blu_red"
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -64,14 +63,14 @@ end
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =90
-  ; res@mpMaxLonF             = 160
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             = 60
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 45
+  res@mpMinLonF             =90
+  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
 
 
@@ -110,7 +109,7 @@ end
   res@cnLevelSpacingF      =  0.25
 
   res@cnFillPalette="MPL_BrBG"
-  res@gsnLeftString="(b)GPCP Precipitation"
+  res@gsnLeftString="GPCP Precipitation trend"
   plot = gsn_csm_contour_map(wks, p_rc, res)
   
 
@@ -215,9 +214,8 @@ end
 
     ;;;  
     overlay(plot, iplot)
-    pres=True
-    gsn_panel(wks, plot, (/3,1/), pres)
-
+draw(plot)
+frame(wks)
 
 
 end

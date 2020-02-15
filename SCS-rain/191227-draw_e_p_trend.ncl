@@ -78,11 +78,11 @@ begin
 
 ;;;计算 趋势
 
-    ; evp_annual = month_to_annual(evp_new, 1)
-    evp_annual = month_to_season(evp_new, "JJA")
+    evp_annual = month_to_annual(evp_new, 1)
+    ; evp_annual = month_to_season(evp_new, "JJA")
 
-    ; p_annual  = month_to_annual(p, 1)
-    p_annual = month_to_season(p, "JJA")
+    p_annual  = month_to_annual(p, 1)
+    ; p_annual = month_to_season(p, "JJA")
 
 
     p_e = p_annual
@@ -115,7 +115,7 @@ begin
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-    wks   = gsn_open_wks("pdf", "蒸发和降水的趋势-JJA")
+    wks   = gsn_open_wks("pdf", "蒸发和降水的趋势")
     plot=new(3,graphic)
     res=True
     res@gsnFrame=False
@@ -193,38 +193,74 @@ begin
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
+   ; ;;;打点
+   ;  res_pro=True
+   ;  res_pro@gsnAddCyclic = False
+   ;  res_pro@gsnDraw=False
+   ;  res_pro@gsnFrame=False
+   ;  res_pro@cnFillOn = True
+
+   ;  res_pro@cnLevelSelectionMode = "ExplicitLevels"
+   ;  res_pro@cnLevels = (/0,0.1/)
+   ;  res_pro@lbLabelBarOn = False
+
+   ;  res_pro@cnLinesOn=False
+   ;  ; res_pro@cnMonoLineColor =False
+   ;  ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+   ;  res_pro@cnMonoFillPattern = True
+   ;  res_pro@cnFillPattern = 17
+   ;  res_pro@cnFillDotSizeF = 0.0045
+   ;  res_pro@cnMonoFillColor = False
+   ;  res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+   ;  ; res_pro@cnLevels = ispan(-6,6,1)
+   ;  res_pro@cnLineLabelsOn=False
+   ;  res_pro@tmYRMode = "Automatic"
+   ;  res_pro@cnInfoLabelOn=False
+   ;  ; res_pro@cnLineLabelBackgroundColor="Transparent"
+   ;  ; res_pro@cnLineThicknessF = 3.
+   ;  ; res_pro@cnFillOn        = True
+    ; iplot = new(3,graphic)
+
+    ; iplot(0)=gsn_csm_contour(wks,prob1,res_pro)
+    ; iplot(1)=gsn_csm_contour(wks,prob2,res_pro)
+    ; iplot(2)=gsn_csm_contour(wks,prob3,res_pro)
+
    ;;;打点
     res_pro=True
-    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-    res_pro@lbLabelBarOn = False
-
     res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.0045
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-    iplot = new(3,graphic)
+
+   iplot = new(3,graphic)
 
     iplot(0)=gsn_csm_contour(wks,prob1,res_pro)
     iplot(1)=gsn_csm_contour(wks,prob2,res_pro)
     iplot(2)=gsn_csm_contour(wks,prob3,res_pro)
+
+    
+
+    opt                      = True
+    opt@gsnShadeFillType     = "pattern"
+    opt@gsnShadeMid     = 6         ; stipple
+    ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; opt@gsnShadeHigh   = "green"
+    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+
+
+    do i=0,2 
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+    end do
+    
   
 
     do i=0,2
@@ -232,7 +268,7 @@ begin
     end do
 
  pres = True
- gsn_panel(wks, plot, (/3,1/), pres)
+ gsn_panel(wks, plot, (/1,3/), pres)
 
 
 end

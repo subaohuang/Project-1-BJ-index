@@ -95,7 +95,7 @@ begin
     ;;;;
       
      PRE_trend_id = (/PRE_trend_ct - PRE_trend_id/)
-     ; PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
+     PRE_trend_al = (/PRE_trend_ct - PRE_trend_al/)
      PRE_trend_pa = (/PRE_trend_ct - PRE_trend_pa/) 
      PRE_trend_ghg = (/PRE_trend_ct - PRE_trend_ghg/) 
 
@@ -110,9 +110,9 @@ begin
 
 
   ;;---------------画趋势图--------------------------------------
-   dir = systemfunc("/bin/pwd")
+    dir = systemfunc("/bin/pwd")
    
-    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-ssttrend-DIFF-test")
+    wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-ssttrend-DIFF")
     ; wks=gsn_open_wks("pdf", dir+"/fig/"+"CESM-prec_diff_pattern-F-pday-rmindian-rmalt-rmallocean_DIFF")
     res=True
     res@gsnDraw=False
@@ -150,9 +150,9 @@ begin
     ; res@vpWidthF = 0.8
     ; res@vpHeightF = 0.2
 
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.6
-    res@vpHeightF = 0.3
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.6
+    ; res@vpHeightF = 0.3
 
     plot=new(6,graphic)
     res@gsnLeftStringFontHeightF = 20.0
@@ -212,6 +212,7 @@ begin
     ; end do 
 
     pres = True
+    pres@gsnMaximize = True
     pres@gsnPanelLabelBar = True
     pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
     
