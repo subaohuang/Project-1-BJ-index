@@ -4,7 +4,7 @@
 ;;;*********************************************************
 begin
   fils1 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_CTRL_0101-4012.nc"  
-  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_allocean-tropical_0101-4012.nc"  
+  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_indian_0101-4012.nc"  
 
     f1=addfile(fils1, "r")
     f2=addfile(fils2, "r")
@@ -29,7 +29,7 @@ begin
     msf_diff = (/msf_clm_addindian - msf_clm_ctrl/)
 
     ;;;;画图
-     wks = gsn_open_wks("pdf", "../F_2000/F_2000-msf-diff-allcoean_warming")
+     wks = gsn_open_wks("pdf", "F_2000-msf-diff-indianwarming")
       res2 = True
       res2@gsnDraw=False
       res2@gsnFrame=False

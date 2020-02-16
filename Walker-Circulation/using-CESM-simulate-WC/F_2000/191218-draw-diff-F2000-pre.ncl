@@ -56,7 +56,7 @@ begin
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "precip_diff_12lev"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
@@ -83,9 +83,9 @@ begin
     
 
 
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.3
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.7
+    ; res@vpHeightF = 0.3
 ;
     res@gsnRightString = ""
     plot = gsn_csm_contour_map(wks, PRE_diff, res)

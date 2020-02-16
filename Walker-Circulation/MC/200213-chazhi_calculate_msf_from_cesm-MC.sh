@@ -20,11 +20,11 @@
 # PRE_DIR_ORG=/home/yangsong3/data-model/MC-ztt/amip_10_noland/atm/monthly/
 # PRE_DIR_ORG=/home/yangsong3/data-model/MC-ztt/cmip_10_noland/atm/monthly/
 # NOW_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/cmip_10_noland/
-PRE_DIR_ORG=/home/yangsong3/data-model/MC-ztt/cmip_10_ctl/atm/monthly/
-NOW_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/cmip_10_ctl/
+PRE_DIR_ORG=/home/yangsong3/data-model/MC-ztt/cmip_10_noland/atm/monthly/
+NOW_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/cmip_10_noland/
 
-# modelname=cmip_10_noland
-modelname=cmip_10_ctl
+modelname=cmip_10_noland
+# modelname=cmip_10_ctl
 
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q    
