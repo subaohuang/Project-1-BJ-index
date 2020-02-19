@@ -20,6 +20,7 @@ function chazhi(data)
    
    data_chazhi&lat = yo
    data_chazhi&lon = xo
+   copy_VarAtts(data, data_chazhi)
  
    return data_chazhi
 end 

@@ -1,10 +1,10 @@
 ;;********************************************************
 ;;计算SST倾向以及SST值与净长波辐射，短波辐射，感热，潜热以及平流和对流,
-;;其中热通量的方向都是向上为正，向下为负
-;;的相关系数场，热通量数据是NCEP-NCAR数据，海洋数据是SODA2.2.4,SST是哈哈得来SST数据
+;;其中热通量的方向都是向上为正，向下为负。。
+;;;的回归场，热通量数据是NCEP-NCAR数据，海洋数据是SODA2.2.4,SST是哈哈得来SST数据
 ;;由于数据之间的精度不同，需要进行插值预处理,SODA精度是0.5×0.5,HADISST是1×1
 ;;NCEP-NCAR的精度为1.87×1.9
-;;
+;;s
 ;;                                         lnshuheng 2020.02.18
 ;**********************************************************
 function  rc_test(ssta_rc)
@@ -65,11 +65,28 @@ begin
      dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
 
     ;;;
-
-
     delete(date)
     delete(timeind)
 ;;;
+
+;;get region mean as index     
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 110
+   ; lon2 = 155
+
+   ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:15},{110:155}), (/1,2/))
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:15},{110:155}), (/1,2/))
+
+   ;;;normalized 
+   
+   ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
+   dsst_index = (/dim_standardize_n(dsst_index, 1, 0)/)
+;;;
+
+
+
+
 
 
 ;;;read NCEP-NCAR heat flux data
@@ -104,24 +121,24 @@ begin
     nlwrs_annual =(/dtrend_msg_n(ispan(1,yearnum,1),nlwrs_annual,False,True,0)/)
 
 ;;;;
- printVarSummary(dsst_annual)
+ printVarSummary(dsst_index)
 
-print("*******开始计算相关系数*****************")
+print("*******开始计算回归系数*****************")
 ;;;calculate correlation coef
 
     ;;;correlation with sst
-    r_sst_lh =  escorc_n(ssta_annual, lhtfl_annual, 0, 0)
-    r_sst_sh   = escorc_n(ssta_annual, shtfl_annual, 0, 0)
+    r_sst_lh =  regCoef_n(ssta_index, lhtfl_annual, 0, 0)
+    r_sst_sh   = regCoef_n(ssta_index, shtfl_annual, 0, 0)
 
-    r_sst_ns =  escorc_n(ssta_annual, nswrs_annual, 0, 0)
-    r_sst_nl   = escorc_n(ssta_annual, nlwrs_annual, 0, 0)
+    r_sst_ns =  regCoef_n(ssta_index, nswrs_annual, 0, 0)
+    r_sst_nl   = regCoef_n(ssta_index, nlwrs_annual, 0, 0)
     ;;;;
 
-    r_dsst_lh =  escorc_n(dsst_annual, lhtfl_annual, 0, 0)
-    r_dsst_sh   = escorc_n(dsst_annual, shtfl_annual, 0, 0)
+    r_dsst_lh =  regCoef_n(dsst_index, lhtfl_annual, 0, 0)
+    r_dsst_sh   = regCoef_n(dsst_index, shtfl_annual, 0, 0)
 
-    r_dsst_ns =  escorc_n(dsst_annual, nswrs_annual, 0, 0)
-    r_dsst_nl   = escorc_n(dsst_annual, nlwrs_annual, 0, 0)
+    r_dsst_ns =  regCoef_n(dsst_index, nswrs_annual, 0, 0)
+    r_dsst_nl   = regCoef_n(dsst_index, nlwrs_annual, 0, 0)
     
     copy_VarCoords(ssta_annual(0,:,:), r_sst_lh)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_sh)
@@ -140,15 +157,15 @@ print("*******开始计算相关系数*****************")
 print("*******显著性检验*****************")
 
 ;;;t test 
-   prob_p1= rtest(r_sst_lh,yearnum,0)
-   prob_p2= rtest(r_sst_sh,yearnum,0)
-   prob_p3= rtest(r_sst_nl,yearnum,0)
-   prob_p4= rtest(r_sst_ns,yearnum,0)
+   prob_p1= rc_test(r_sst_lh)
+   prob_p2= rc_test(r_sst_sh)
+   prob_p3= rc_test(r_sst_nl)
+   prob_p4= rc_test(r_sst_ns)
 
-   prob_p5= rtest(r_dsst_lh,yearnum,0)
-   prob_p6= rtest(r_dsst_sh,yearnum,0)
-   prob_p7= rtest(r_dsst_nl,yearnum,0)
-   prob_p8= rtest(r_dsst_ns,yearnum,0)
+   prob_p5= rc_test(r_dsst_lh)
+   prob_p6= rc_test(r_dsst_sh)
+   prob_p7= rc_test(r_dsst_nl)
+   prob_p8= rc_test(r_dsst_ns)
   
   copy_VarCoords(r_sst_lh, prob_p1)
   copy_VarCoords(r_sst_lh, prob_p2)
@@ -159,15 +176,15 @@ print("*******显著性检验*****************")
   copy_VarCoords(r_sst_lh, prob_p7)
   copy_VarCoords(r_sst_lh, prob_p8)
   
-  printVarSummary(prob_p1)
- prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
- prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
- prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
- prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
- prob_p5 = where(prob_p5.eq.0, 2, prob_p5)
- prob_p6 = where(prob_p6.eq.0, 2, prob_p6)
- prob_p7 = where(prob_p7.eq.0, 2, prob_p7)
- prob_p8 = where(prob_p8.eq.0, 2, prob_p8)
+ ;  printVarSummary(prob_p1)
+ ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
+ ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
+ ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
+ ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+ ; prob_p5 = where(prob_p5.eq.0, 2, prob_p5)
+ ; prob_p6 = where(prob_p6.eq.0, 2, prob_p6)
+ ; prob_p7 = where(prob_p7.eq.0, 2, prob_p7)
+ ; prob_p8 = where(prob_p8.eq.0, 2, prob_p8)
 ;;;;
 
 
@@ -177,7 +194,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "SST以及DSST与NCEP-NACR-Heatflux的相关系数")
+  wks   = gsn_open_wks("pdf", "SST以及DSST与NCEP-NACR-Heatflux的回归系数场")
 
   res=True
   res@gsnFrame=False
@@ -214,10 +231,10 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.1
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -1.0
+  ; res@cnMaxLevelValF       =   1.0
+  ; res@cnLevelSpacingF      =  0.1
  
 
   plot = new(8,graphic)
