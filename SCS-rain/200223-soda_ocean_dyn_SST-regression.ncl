@@ -133,12 +133,14 @@ begin
     
     hadv = u
     hadv = u*T_grad_lon + v*T_grad_lat
+    hadv = (/-1*hadv/)
 
     
     T_grad_z = center_finite_diff_n(T, T&depth,False,0,1)
     
     vadv = wt
     vadv = wt*T_grad_z
+
 
   
 
