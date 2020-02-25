@@ -110,6 +110,15 @@ begin
     nswrs  = (/rmMonAnnCycTLL(nswrs)/)
     nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
 
+    ;;;转化成方向向下
+
+    lhtfl = (/-1*lhtfl/)
+    shtfl = (/-1*shtfl/)
+    nswrs = (/-1*nswrs/)
+    nlwrs = (/-1*nlwrs/)
+
+
+
     lhtfl_annual = month_to_annual(lhtfl, 1)
     shtfl_annual = month_to_annual(shtfl, 1)
     nswrs_annual = month_to_annual(nswrs, 1)

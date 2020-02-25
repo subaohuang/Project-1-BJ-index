@@ -94,13 +94,11 @@ begin
    ; lon1 = 110
    ; lon2 = 155
 
-   ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:15},{130:155}), (/1,2/))
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:15},{130:155}), (/1,2/))
-   ; ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:5},{130:155}), (/1,2/))
-   ; dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:5},{130:155}), (/1,2/))
+   ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:15},{110:155}), (/1,2/))
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:15},{110:155}), (/1,2/))
 
    ;;;normalized 
-
+   
    ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
    dsst_index = (/dim_standardize_n(dsst_index, 1, 0)/)
 ;;;
@@ -110,68 +108,52 @@ begin
 ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
 ;;;averaged in mixed layer
     
-    f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_u_mn_1980-2015_chazhi.nc", "r")   
-    f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
+    f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_taux_mn_1980-2015_chazhi.nc", "r")   
+    f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_tauy_mn_1980-2015_chazhi.nc", "r")   
     f4=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_wt_mn_1980-2015_chazhi.nc", "r")   
-    f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r")   
+    f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r") 
 
 
     indyear = (2013-1980+1)*12-1
-    u = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    v = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    u_mean = f2->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    v_mean = f3->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
     wt = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    T = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    mlt = f5->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
 
-
-    ;;;calculate Horizontal and Vertical advction
-
-    gradLatLon  = grad_latlon_cfd (T, T&lat, T&lon, True, False)
-                             
-    T_grad_lat  = gradLatLon[0]    ; for clarity; explicitly extract variables from returned 'list' 
-    T_grad_lon  = gradLatLon[1]
-    delete(gradLatLon)
-    
-    hadv = u
-    hadv = u*T_grad_lon + v*T_grad_lat
-    hadv = (/-1*hadv/)
-
-    
-    T_grad_z = center_finite_diff_n(T, T&depth,False,0,1)
-    
-    vadv = wt
-    vadv = wt*T_grad_z
-
+   
+   
 
   
 
     ;;;;垂直积分平均，在混合层内进行
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
-    z =  vadv&depth
+    z =  wt&depth
     z&depth = z
     print(z)    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
-    copy_VarCoords(u(1,:,:,:), dz)
+    copy_VarCoords(wt(1,:,:,:), dz)
      
-    dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
-
-    hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/sum(dz)
-    vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/sum(dz)
-   
-    copy_VarCoords(u(:,1,:,:), hadv_mean)
-    copy_VarCoords(u(:,1,:,:), vadv_mean)
+    dz_4d = conform_dims(dimsizes(wt), dz, (/1,2,3/))
+  
+    ;;;
+    wt_mean = dim_sum_n_Wrap(wt*dz_4d,1)/sum(dz)
+    copy_VarCoords(wt(:,1,:,:), wt_mean)
 
     ;;;年平均
-       hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
-       vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
+       u_mean = (/rmMonAnnCycTLL(u_mean)/)
+       v_mean = (/rmMonAnnCycTLL(v_mean)/)
+       wt_mean = (/rmMonAnnCycTLL(wt_mean)/)
+       
+       u_mean_annual = month_to_annual(u_mean, 1) 
+       v_mean_annual = month_to_annual(v_mean, 1)
+       wt_mean_annual = month_to_annual(wt_mean, 1)
+      
+       u_mean_annual = (/dtrend_msg_n(ispan(1,yearnum,1),u_mean_annual,False,True,0)/)
+       v_mean_annual = (/dtrend_msg_n(ispan(1,yearnum,1),v_mean_annual,False,True,0)/)
+       wt_mean_annual = (/dtrend_msg_n(ispan(1,yearnum,1),wt_mean_annual,False,True,0)/)
 
-       hadv_mean_annual = month_to_annual(hadv_mean, 1)
-       vadv_mean_annual = month_to_annual(vadv_mean, 1)
 
-       hadv_mean_annual = (/dtrend_msg_n(ispan(1,yearnum,1),hadv_mean_annual,False,True,0)/)
-       vadv_mean_annual = (/dtrend_msg_n(ispan(1,yearnum,1),vadv_mean_annual,False,True,0)/)
     ;;;
 
 
@@ -180,31 +162,38 @@ begin
  
 print("*******计算回归系数*****************")
 ;;;calculate correlation coef
+     
 
-    ;;;hadv correlation with sst
-    r_sst_hadv =   regCoef_n(ssta_index, hadv_mean_annual, 0, 0)
-    r_dsst_hadv =   regCoef_n(dsst_index, hadv_mean_annual, 0, 0)
+     ;;;u correlation with sst
+    r_sst_u =   regCoef_n(ssta_index, u_mean_annual, 0, 0)
+    r_dsst_u =   regCoef_n(dsst_index, u_mean_annual, 0, 0)
       
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_hadv)
-    copy_VarCoords(dsst_annual(0,:,:), r_dsst_hadv)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_u)
+    copy_VarCoords(dsst_annual(0,:,:), r_dsst_u)
+
+    ;;;v correlation with sst
+    r_sst_v =   regCoef_n(ssta_index, v_mean_annual, 0, 0)
+    r_dsst_v =   regCoef_n(dsst_index, v_mean_annual, 0, 0)
+      
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_v)
+    copy_VarCoords(dsst_annual(0,:,:), r_dsst_v)
 
     
-  
-    ;;;hadv correlation with sst
-    r_sst_vadv =   regCoef_n(ssta_index, vadv_mean_annual, 0, 0)
-    r_dsst_vadv =   regCoef_n(dsst_index, vadv_mean_annual, 0, 0)
+    ;;;wt correlation with sst
+    r_sst_wt =   regCoef_n(ssta_index, wt_mean_annual, 0, 0)
+    r_dsst_wt =   regCoef_n(dsst_index, wt_mean_annual, 0, 0)
       
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_vadv)
-    copy_VarCoords(dsst_annual(0,:,:), r_dsst_vadv)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_wt)
+    copy_VarCoords(dsst_annual(0,:,:), r_dsst_wt)
     ;;;
-   
-    ;;;
-    r_sst_hadv = r_sst_hadv*10^11
-    r_dsst_hadv = r_dsst_hadv*10^11
-    r_sst_vadv = r_sst_vadv*10^11
-    r_dsst_vadv = r_dsst_vadv*10^11
-   
-   printMinMax(r_sst_hadv, 1)
+
+    r_sst_wt = r_sst_wt*10^10
+    r_sst_u = r_sst_u*10^5
+    r_sst_v = r_sst_v*10^5
+
+    r_dsst_wt = r_dsst_wt*10^10
+    r_dsst_u = r_dsst_u*10^5
+    r_dsst_v = r_dsst_v*10^5
        
 
 
@@ -213,35 +202,28 @@ print("*******计算回归系数*****************")
 print("*******显著性检验*****************")
 
 ;;;t test 
-  prob_p1= rc_test(r_sst_hadv)
-  prob_p2= rc_test(r_dsst_hadv)
+  prob_p1= rc_test(r_sst_u)
+  prob_p2= rc_test(r_dsst_u)
 
-  copy_VarCoords(r_sst_hadv, prob_p1)
-  copy_VarCoords(r_dsst_hadv, prob_p2)
-
+  copy_VarCoords(r_sst_u, prob_p1)
+  copy_VarCoords(r_dsst_u, prob_p2)
+  
   printVarSummary(prob_p1)
 
-  prob_p3= rc_test(r_sst_vadv)
-  prob_p4= rc_test(r_dsst_vadv)
+  prob_p3= rc_test(r_sst_v)
+  prob_p4= rc_test(r_dsst_v)
 
-  copy_VarCoords(r_sst_vadv, prob_p3)
-  copy_VarCoords(r_dsst_vadv, prob_p4)
+  copy_VarCoords(r_sst_v, prob_p3)
+  copy_VarCoords(r_dsst_v, prob_p4)
 
-  ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
-  ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
+  prob_p5= rc_test(r_sst_wt)
+  prob_p6= rc_test(r_dsst_wt)
 
-  ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
-  ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+  copy_VarCoords(r_sst_wt, prob_p5)
+  copy_VarCoords(r_dsst_wt, prob_p6)
 
-;;;;
+  
 
- ; r_sst_hadv = where(prob_p1.le.0.5,r_sst_hadv, r_sst_hadv@_FillValue)
- ; r_dsst_hadv = where(prob_p2.le.0.5,r_dsst_hadv, r_dsst_hadv@_FillValue)
- ; r_sst_vadv = where(prob_p3.le.0.5,r_sst_vadv, r_sst_vadv@_FillValue)
- ; r_dsst_vadv = where(prob_p4.le.0.5,r_dsst_vadv, r_dsst_vadv@_FillValue)
-
-
-print("*********开始画图********")
 
 print("*********开始画图********")
 
@@ -249,13 +231,13 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "海洋的平流项和垂直扩散项与DSST及SST的回归系数")
+  wks   = gsn_open_wks("pdf", "风应力以及w与DSST及SST的回归系数")
 
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlueWhiteOrangeRed"
+  res@cnFillPalette="BlRe"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -287,22 +269,35 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.5
-  res@cnMaxLevelValF       =   0.5
-  res@cnLevelSpacingF      =  0.1
- 
+  res@cnMinLevelValF       =   -12
+  res@cnMaxLevelValF       =   12
+  res@cnLevelSpacingF      =  1
+   
+   ;;;
 
-  plot = new(4,graphic)
+  res@gsnScalarContour        = True
+
+  ;;;;;;;LineArrow
+  res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res@vcGlyphStyle="CurlyVector"
+
+  res@vcMinDistanceF           = 0.02           ; thin vectors
+  ; res@vcMinMagnitudeF          =0.04
+  ; res@vcRefMagnitudeF          = 4.0
+
+  res@vcRefLengthF             = 0.08     ; define length of v
+  res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  res@vcLineArrowThicknessF=1.0
+  res@vcLineArrowHeadMaxSizeF=0.008
+  res@vcLineArrowHeadMinSizeF=0.008
+  res@vcVectorDrawOrder="PostDraw"
+  ; res@mpFillOn =stZeroFLabelSide
+
+  plot = new(2,graphic)
   res@gsnLeftString = "SST&Horizontal advction"
-  plot(0) = gsn_csm_contour_map(wks, r_sst_hadv, res)
-   res@gsnLeftString = "SST&Vertical advction"
-  plot(1) = gsn_csm_contour_map(wks, r_sst_vadv, res)
+  plot(0) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v,r_sst_wt ,res)         
   res@gsnLeftString = "DSST&Horizontal advction"
-  plot(2) = gsn_csm_contour_map(wks, r_dsst_hadv, res)
-  res@gsnLeftString = "DSST&Vertical advction"
-  plot(3) = gsn_csm_contour_map(wks, r_dsst_vadv, res)
- 
-  
+  plot(1) = gsn_csm_vector_scalar_map(wks,r_dsst_u,r_dsst_v,r_dsst_wt ,res)
   
 
 
@@ -318,7 +313,7 @@ print("*********开始画图********")
   
     str = "" + ispan(1,4,1)
 
-   do i = 0,3
+   do i = 0,1
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
    end do
 
@@ -341,7 +336,7 @@ print("*********开始画图********")
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
    str2 = "0" + ispan(1,4,1)
-   do i = 0,3
+   do i = 0,1
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
@@ -360,15 +355,11 @@ print("*********开始画图********")
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
 
-    iplot=new(4,graphic)
+    iplot=new(2,graphic)
 
     
-      iplot(0) = gsn_csm_contour(wks,prob_p1,res_pro)
-      iplot(1) = gsn_csm_contour(wks,prob_p3,res_pro)
-      iplot(2) = gsn_csm_contour(wks,prob_p2,res_pro)
-      iplot(3) = gsn_csm_contour(wks,prob_p4,res_pro)
-     
-
+      iplot(0) = gsn_csm_contour(wks,prob_p5,res_pro)
+      iplot(1) = gsn_csm_contour(wks,prob_p6,res_pro)
   
 
     opt                      = True
@@ -379,19 +370,19 @@ print("*********开始画图********")
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
 
-    do i = 0,3
+    do i = 0,1
      iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
     end do
 
     ;;;  
-    do i = 0,3
+    do i = 0,1
       overlay(plot(i), iplot(i))
     end do 
 
   pres = True
   pres@gsnPanelLabelBar  = True
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/2,1/), pres)
  
 
 
