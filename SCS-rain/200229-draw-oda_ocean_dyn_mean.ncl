@@ -183,18 +183,18 @@ begin
 
   
  
-print("*******计算趋势*****************")
+print("*******计算平均*****************")
 ;;;calculate correlation coef
 
     ;;;hadv correlation with sst
-    r_sst_hadv =   regCoef_n(ispan(1,yearnum,1), hadv_mean_annual, 0, 0)  
+    r_sst_hadv =   dim_avg_n_Wrap(hadv_mean_annual,0)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_hadv)
     
     ;;;hadv correlation with sst
-    r_sst_vadv =   regCoef_n(ispan(1,yearnum,1), vadv_mean_annual, 0, 0)    
+    r_sst_vadv =   dim_avg_n_Wrap(vadv_mean_annual,0)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_vadv)
     
-    r_sst_total =   regCoef_n(ispan(1,yearnum,1), total_mean_annual, 0, 0)    
+    r_sst_total =  dim_avg_n_Wrap(total_mean_annual,0)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_total)
   
     ;;;
@@ -203,39 +203,12 @@ print("*******计算趋势*****************")
     r_sst_vadv = (/r_sst_vadv*yearnum*10^10/)
     r_sst_total = (/r_sst_total*yearnum*10^10/)
    
-   printMinMax(r_sst_hadv, 1)
+   ; printMinMax(r_sst_hadv, 1)
        
 
 
 ;;;;
 
-print("*******显著性检验*****************")
-
-;;;t test 
-  prob_p1= rc_test(r_sst_hadv)
-  copy_VarCoords(r_sst_hadv, prob_p1)
-
-  printVarSummary(prob_p1)
-  prob_p2= rc_test(r_sst_vadv)
-
-  copy_VarCoords(r_sst_vadv, prob_p2)
-
-   prob_p3= rc_test(r_sst_total)
-  copy_VarCoords(r_sst_hadv, prob_p3)
-
-
-  ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
-  ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-
-  ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
-  ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
-
-;;;;
-
- ; r_sst_hadv = where(prob_p1.le.0.5,r_sst_hadv, r_sst_hadv@_FillValue)
- ; r_dsst_hadv = where(prob_p2.le.0.5,r_dsst_hadv, r_dsst_hadv@_FillValue)
- ; r_sst_vadv = where(prob_p3.le.0.5,r_sst_vadv, r_sst_vadv@_FillValue)
- ; r_dsst_vadv = where(prob_p4.le.0.5,r_dsst_vadv, r_dsst_vadv@_FillValue)
 
 
 print("*********开始画图********")
@@ -244,7 +217,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "海洋的平流项和垂直扩散项的趋势")
+  wks   = gsn_open_wks("pdf", "海洋的平流项和垂直扩散项的long-term-mean")
 
   res=True
   res@gsnFrame=False
@@ -282,9 +255,9 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.1
-  res@cnMaxLevelValF       =   0.1
-  res@cnLevelSpacingF      =  0.01
+  res@cnMinLevelValF       =   -30 
+  res@cnMaxLevelValF       =   30
+  res@cnLevelSpacingF      =  5
  
 
   plot = new(3,graphic)
@@ -339,48 +312,7 @@ print("*********开始画图********")
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
-    ;;;打点
-    res_pro=True
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
-
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-
-    iplot=new(3,graphic)
-
-    
-      iplot(0) = gsn_csm_contour(wks,prob_p1,res_pro)
-      iplot(1) = gsn_csm_contour(wks,prob_p2,res_pro)
-      iplot(2) = gsn_csm_contour(wks,prob_p3,res_pro)
-      
-
-  
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-
-    do i = 0,2
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
-    end do
-
-    ;;;  
-    do i = 0,2
-      overlay(plot(i), iplot(i))
-    end do 
-
+   
   pres = True
   pres@gsnPanelLabelBar  = True
 

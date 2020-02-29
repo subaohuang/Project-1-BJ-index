@@ -92,23 +92,51 @@ begin
 ;;;read NCEP-NCAR heat flux data
     
  
-    fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
-    f2 = addfile(fils2, "r")
+    ; fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
+    ; f2 = addfile(fils2, "r")
 
-    date:=cd_calendar(f2->time, 1)
+    ; date:=cd_calendar(f2->time, 1)
+    ; print(date)
+    ; exit()
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
-  
+    ; timeind:=ind(date.le.201312.and.date.ge.197901)
     
-    lhtfl = f2->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
-    shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
-    nswrs = f2->nswrs(timeind,{lat1:lat2},{lon1:lon2})
-    nlwrs = f2->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
-    lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
-    shtfl  = (/rmMonAnnCycTLL(shtfl)/)
-    nswrs  = (/rmMonAnnCycTLL(nswrs)/)
-    nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
+    ; lhtfl = f2->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; nswrs = f2->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    ; nlwrs = f2->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+    
+
+    fils1 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/lhtfl.sfc.mon.mean.nc"
+    fils2 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/shtfl.sfc.mon.mean.nc"
+    fils3 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nswrs.sfc.mon.mean.nc"
+    fils4 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nlwrs.sfc.mon.mean.nc"
+
+    f1 = addfile(fils1, "r")
+    f2 = addfile(fils2, "r")
+    f3 = addfile(fils3, "r")
+    f4 = addfile(fils4, "r")
+
+    date:=cd_calendar(f1->time, 1)
+
+
+    timeind:=ind(date.le.197812.and.date.ge.194801)
+    
+
+    lhtfl = f1->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    nlwrs = f4->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+
+
+
+
+    ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
+    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
+    ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
+    ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
 
     ;;;转化成方向向下
 
@@ -131,16 +159,16 @@ begin
 ;;;;
  printVarSummary(dsst_index)
 
-print("*******开始计算回归系数*****************")
+print("*******开始计算平均*****************")
 ;;;calculate correlation coef
 
     ;;;correlation with sst
-    r_sst_lh =  regCoef_n(ispan(1, yearnum, 1), lhtfl_annual, 0, 0)
-    r_sst_sh   = regCoef_n(ispan(1, yearnum, 1), shtfl_annual, 0, 0)
+    r_sst_lh =  dim_avg_n_Wrap(lhtfl_annual, 0)
+    r_sst_sh   = dim_avg_n_Wrap(shtfl_annual, 0)
 
-    r_sst_ns =  regCoef_n(ispan(1, yearnum, 1), nswrs_annual, 0, 0)
-    r_sst_nl   = regCoef_n(ispan(1, yearnum, 1), nlwrs_annual, 0, 0)
-    r_sst_total = regCoef_n(ispan(1, yearnum, 1), total_annual, 0, 0)
+    r_sst_ns =  dim_avg_n_Wrap(nswrs_annual, 0)
+    r_sst_nl   = dim_avg_n_Wrap(nlwrs_annual, 0)
+    r_sst_total = dim_avg_n_Wrap(total_annual, 0)
     ;;;;
 
 
@@ -150,46 +178,11 @@ print("*******开始计算回归系数*****************")
     copy_VarCoords(ssta_annual(0,:,:), r_sst_nl)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_total)
     
-    r_sst_lh = (/r_sst_lh*yearnum/)
-    r_sst_sh = (/r_sst_sh*yearnum/)
-    r_sst_ns = (/r_sst_ns*yearnum/)
-    r_sst_nl = (/r_sst_nl*yearnum/)
-    r_sst_total = (/r_sst_total*yearnum/)
- 
+
 
 
     ;;;;;
 ;;;;
-
-print("*******显著性检验*****************")
-
-;;;t test 
-   prob_p1= rc_test(r_sst_lh)
-   prob_p2= rc_test(r_sst_sh)
-   prob_p3= rc_test(r_sst_nl)
-   prob_p4= rc_test(r_sst_ns)
-   prob_p5= rc_test(r_sst_total)
-
- 
-  
-  copy_VarCoords(r_sst_lh, prob_p1)
-  copy_VarCoords(r_sst_lh, prob_p2)
-  copy_VarCoords(r_sst_lh, prob_p3)
-  copy_VarCoords(r_sst_lh, prob_p4)
-  copy_VarCoords(r_sst_total, prob_p5)
-  
-  
- ;  printVarSummary(prob_p1)
- ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
- ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
- ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
- ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
- ; prob_p5 = where(prob_p5.eq.0, 2, prob_p5)
- ; prob_p6 = where(prob_p6.eq.0, 2, prob_p6)
- ; prob_p7 = where(prob_p7.eq.0, 2, prob_p7)
- ; prob_p8 = where(prob_p8.eq.0, 2, prob_p8)
-;;;;
-
 
 print("*********开始画图********")
 
@@ -197,7 +190,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "NCEP-NACR-Heatflux的线性趋势")
+  wks   = gsn_open_wks("pdf", "NCEP-NACR-Heatflux的long-term-mean-pre1979")
 
   res=True
   res@gsnFrame=False
@@ -235,9 +228,9 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -8
-  res@cnMaxLevelValF       =   8
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -100
+  res@cnMaxLevelValF       =   100
+  res@cnLevelSpacingF      =  20
  
 
   plot = new(5,graphic)
@@ -293,49 +286,7 @@ print("*********开始画图********")
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
-    ;;;打点
-    res_pro=True
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.1      ; set contour spacing
-
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-
-    iplot=new(5,graphic)
-
-    
-      iplot(0) = gsn_csm_contour(wks,prob_p1,res_pro)
-      iplot(1) = gsn_csm_contour(wks,prob_p2,res_pro)
-      iplot(2) = gsn_csm_contour(wks,prob_p3,res_pro)
-      iplot(3) = gsn_csm_contour(wks,prob_p4,res_pro)
-      iplot(4) = gsn_csm_contour(wks,prob_p5,res_pro)
-    
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-
-    do i = 0,4
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
-    end do
-
-    ;;;  
-    do i = 0,4
-      overlay(plot(i), iplot(i))
-    end do 
-
+   
   pres = True
   pres@gsnPanelLabelBar  = True
 
