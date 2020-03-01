@@ -1,28 +1,12 @@
 ;;********************************************************
-;;计算海洋动力过程项,SST倾向以及SST值.
-;;的相关系数场，
-;;NCEP-NCAR的精度为1.87×1.9,soda数据已经插值到1°乘1°
-;;
+;;计算SST倾向以及SST值与净长波辐射，短波辐射，感热，潜热以及平流和对流,
+;;其中热通量的方向都是向上为正，向下为负。。
+;;;的回归场，热通量数据是NCEP-NCAR数据，海洋数据是SODA2.2.4,SST是哈哈得来SST数据
+;;由于数据之间的精度不同，需要进行插值预处理,SODA精度是0.5×0.5,HADISST是1×1
+;;NCEP-NCAR的精度为1.87×1.9
+;;s
 ;;                                         lnshuheng 2020.02.18
 ;**********************************************************
-function chazhi(data)
- begin
-   xi = data&lon
-   yi = data&lat
-   xo = fspan(0.5,359.5,360)
-   yo = fspan(-89.5,89.5,180)
- 
-   data_chazhi = linint2_Wrap(xi, yi, data, True, xo, yo, 0)
-  
-   data_chazhi!1 = "lat"
-   data_chazhi!2= "lon"
-   
-   data_chazhi&lat = yo
-   data_chazhi&lon = xo
-   copy_VarAtts(data, data_chazhi)
- 
-   return data_chazhi
-end 
 function  rc_test(ssta_rc)
 begin
   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
@@ -71,42 +55,21 @@ begin
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
 
-
     ssta_annual = month_to_annual(ssta(:,{lat1:lat2},{lon1:lon2}), 1)
-    printVarSummary(ssta_annual)
+    ssta_annual =(/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
 
-   
-    ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
     ;;;sst 倾向值
      dsst = center_finite_diff_n(ssta, 1, False, 0, 0) 
      copy_VarCoords(ssta, dsst)
      dsst_annual = month_to_annual(dsst(:,{lat1:lat2},{lon1:lon2}), 1)
-     dsst_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
+     dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
 
     ;;;
     delete(date)
     delete(timeind)
 ;;;
 
-;;get region mean as index     
-   ; lat1 = 0
-   ; lat2 = 15
-   ; lon1 = 110
-   ; lon2 = 155
-
-   ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:15},{130:155}), (/1,2/))
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:15},{130:155}), (/1,2/))
-   ; ssta_index = dim_avg_n_Wrap(ssta_annual(:,{0:5},{130:155}), (/1,2/))
-   ; dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:5},{130:155}), (/1,2/))
-
-   ;;;normalized 
-
-   ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
-   dsst_index = (/dim_standardize_n(dsst_index, 1, 0)/)
-;;;
-
-
-
+   
 ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
 ;;;averaged in mixed layer
     
@@ -127,7 +90,6 @@ begin
 
     ;;;calculate Horizontal and Vertical advction
 
-
     gradLatLon  = grad_latlon_cfd (T, T&lat, T&lon, True, False)
                              
     T_grad_lat  = gradLatLon[0]    ; for clarity; explicitly extract variables from returned 'list' 
@@ -137,8 +99,7 @@ begin
     hadv = u
     hadv = u*T_grad_lon + v*T_grad_lat
     hadv = (/-1*hadv/)
-    
-    
+
     
     T_grad_z = center_finite_diff_n(T, T&depth,False,0,1)
     
@@ -149,10 +110,7 @@ begin
       hadv =365*86400*hadv
       vadv =365*86400*vadv
     ;;;
-
     
-    
-
     ;;;;垂直积分平均，在混合层内进行
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
@@ -160,27 +118,15 @@ begin
     z&depth = z
     print(z)    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
-
-    ; dz = dpres_plevel(z,50, 0, 0)
-    ; m = ispan(1, 12, 1)
-    ; m=1
-    ; k = sum(m*dz)
-    ; print(k)
-    ; exit()
-    printVarSummary(dz)
-
     copy_VarCoords(u(1,:,:,:), dz)
      
     dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
-
 
     hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
    
     copy_VarCoords(u(:,1,:,:), hadv_mean)
     copy_VarCoords(u(:,1,:,:), vadv_mean)
-   
-
 
     ;;;年平均
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
@@ -188,42 +134,133 @@ begin
 
        hadv_mean_annual = month_to_annual(hadv_mean, 1)
        vadv_mean_annual = month_to_annual(vadv_mean, 1)
-
+       total_ocean_annual = hadv_mean_annual
+       total_ocean_annual = hadv_mean_annual + vadv_mean_annual
 
     ;;;
+
+;;;read NCEP-NCAR heat flux data
+    
  
-    ;;;total 
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
+    f3 = addfile(fils3, "r")
 
-      total_mean_annual = hadv_mean_annual
-      total_mean_annual = hadv_mean_annual + vadv_mean_annual
-    ;;;;
+    date:=cd_calendar(f3->time, 1)
 
-
-
+    timeind:=ind(date.le.201312.and.date.ge.198001)
   
- 
-print("*******计算平均*****************")
+    
+    lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    shtfl = f3->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+
+    ;;;nswrs_pen 
+     R = 0.58
+     L1 = 0.35
+     L2 = 23
+     nswrs_pen = nswrs
+     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+    ;;;
+
+    ;;;convert to units degree ℃/year
+      density = 1025  ;;kg/m3
+      cp  = 3850         ;;j/kg℃
+      coef  = mlt*density*cp
+
+      lhtfl = 365*86400*lhtfl/coef
+      shtfl = 365*86400*shtfl/coef
+      nswrs = 365*86400*nswrs/coef
+      nlwrs = 365*86400*nlwrs/coef
+      nswrs_pen = 365*86400*nswrs_pen/coef
+    ;;;
+
+    ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
+    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
+    ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
+    ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
+    ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
+
+    ;;;转化成方向向下
+
+    lhtfl = (/-1*lhtfl/)
+    shtfl = (/-1*shtfl/)
+    nswrs = (/-1*nswrs/)
+    nlwrs = (/-1*nlwrs/)
+    nswrs_pen = (/-1*nswrs_pen/)
+
+
+    lhtfl_annual = month_to_annual(lhtfl, 1)
+    shtfl_annual = month_to_annual(shtfl, 1)
+    nswrs_annual = month_to_annual(nswrs, 1)
+    nlwrs_annual = month_to_annual(nlwrs, 1)
+    nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
+    total_annual = lhtfl_annual
+    total_annual  = lhtfl_annual + shtfl_annual + nswrs_annual + nlwrs_annual -nswrs_pen_annual
+
+
+       ; printMinMax(total_ocean_annual, 1)
+       ; printMinMax(total_annual, 1)
+       ; printMinMax(hadv_mean_annual, 1)
+       ; printMinMax(vadv_mean_annual, 1)
+
+ total_ocean_mean = dim_avg_n_Wrap(total_ocean_annual, 0)
+ total_mean = dim_avg_n_Wrap(total_annual, 0)
+ total = total_ocean_mean + total_mean
+
+;;;
+
+
+
+
+print("*******开始计算趋势系数*****************")
 ;;;calculate correlation coef
 
-    ;;;hadv correlation with sst
-    r_sst_hadv =   dim_avg_n_Wrap(hadv_mean_annual,0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_hadv)
-    
-    ;;;hadv correlation with sst
-    r_sst_vadv =   dim_avg_n_Wrap(vadv_mean_annual,0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_vadv)
-    
-    r_sst_total =  dim_avg_n_Wrap(total_mean_annual,0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_total)
-  
+    ;;;大气
+    r_lh =  dim_avg_n_Wrap(lhtfl_annual, 0)
+    r_sh   = dim_avg_n_Wrap(shtfl_annual, 0)
+
+    r_ns = dim_avg_n_Wrap(nswrs_annual,0)
+    r_nl   = dim_avg_n_Wrap(nlwrs_annual, 0)
+    r_total = dim_avg_n_Wrap(total_annual, 0)
+
+    copy_VarCoords(ssta_annual(0,:,:), r_lh)
+    copy_VarCoords(ssta_annual(0,:,:), r_sh)
+    copy_VarCoords(ssta_annual(0,:,:), r_ns)
+    copy_VarCoords(ssta_annual(0,:,:), r_nl)
+    copy_VarCoords(ssta_annual(0,:,:), r_total)
     ;;;
-   
 
-   ; printMinMax(r_sst_hadv, 1)
-       
+    ;;;海洋
+    r_hadv =  dim_avg_n_Wrap(hadv_mean_annual, 0)
+    r_vadv   = dim_avg_n_Wrap(vadv_mean_annual, 0)
+    r_total_ocean   = dim_avg_n_Wrap(total_ocean_annual, 0)    
+
+    copy_VarCoords(ssta_annual(0,:,:), r_hadv)
+    copy_VarCoords(ssta_annual(0,:,:), r_vadv)
+    copy_VarCoords(ssta_annual(0,:,:), r_total_ocean)
+    
+    ;;;r_net 
+     r_net  = r_total_ocean
+     r_net = r_total_ocean + r_total
 
 
-;;;;
+
+    ;;;;;
+
+    ; r_lh = (/r_lh*yearnum/)
+    ; r_sh = (/r_sh*yearnum/)
+    ; r_ns = (/r_ns*yearnum/)
+    ; r_nl = (/r_nl*yearnum/)
+    ; r_total = (/r_total*yearnum/)
+    
+    ; r_hadv = (/r_hadv*yearnum/)
+    ; r_vadv = (/r_vadv*yearnum/)
+    ; r_total_ocean = (/r_total_ocean*yearnum/)
+
+
+
 
 
 
@@ -233,7 +270,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "海洋的平流项和垂直扩散项的long-term-mean-摄氏度")
+  wks   = gsn_open_wks("pdf", "所有通量的平均")
 
   res=True
   res@gsnFrame=False
@@ -245,7 +282,7 @@ print("*********开始画图********")
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
+  res@lbLabelBarOn=True
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
@@ -271,21 +308,33 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -8
-  res@cnMaxLevelValF       =   8
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -10
+  res@cnMaxLevelValF       =   10
+  res@cnLevelSpacingF      =  2
  
 
-  plot = new(3,graphic)
-  res@gsnLeftString = "Horizontal advction"
-  plot(0) = gsn_csm_contour_map(wks, r_sst_hadv, res)
- 
-   res@gsnLeftString = "Vertical advction"
-  plot(1) = gsn_csm_contour_map(wks, r_sst_vadv, res)
-  
-  res@gsnLeftString = "Total"
-  plot(2) = gsn_csm_contour_map(wks, r_sst_total, res)
-  
+  plot = new(9,graphic)
+
+
+  plot(0) = gsn_csm_contour_map(wks, r_net, res)
+  res@gsnLeftString = "Total Atm Heat Flux"
+
+  plot(1) = gsn_csm_contour_map(wks, r_total, res)
+  res@gsnLeftString = "Total ocean Heat Flux"
+  plot(2) = gsn_csm_contour_map(wks, r_total_ocean, res)
+  res@gsnLeftString = "Latent heating"
+  plot(3) = gsn_csm_contour_map(wks, r_lh, res)
+  res@gsnLeftString = "Sensible heating"
+  plot(4) = gsn_csm_contour_map(wks, r_sh, res)
+  res@gsnLeftString = "Net Longwave radiation"
+  plot(5) = gsn_csm_contour_map(wks, r_nl, res)
+  res@gsnLeftString = "Net Shortwave radiation"
+  plot(6) = gsn_csm_contour_map(wks, r_ns, res)
+  res@gsnLeftString = "ocean horizonal advction"
+  plot(7) = gsn_csm_contour_map(wks, r_hadv, res)
+  res@gsnLeftString = "ocean Vertical advction"
+  plot(8) = gsn_csm_contour_map(wks, r_vadv, res)
+
   
 
 
@@ -299,9 +348,9 @@ print("*********开始画图********")
     pgres@gsLineThicknessF=1.0
     pgres@gsLineDashPattern=1
   
-    str = "" + ispan(1,3,1)
+    str = "" + ispan(1,9,1)
 
-   do i = 0,2
+   do i = 0,8
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
    end do
 
@@ -323,16 +372,17 @@ print("*********开始画图********")
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   str2 = "0" + ispan(1,3,1)
-   do i = 0,2
+   str2 = "0" + ispan(1,9,1)
+   do i = 0,8
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
    
+
   pres = True
   pres@gsnPanelLabelBar  = True
 
-  gsn_panel(wks, plot, (/3,1/), pres)
+  gsn_panel(wks, plot, (/3,3/), pres)
  
 
 
