@@ -63,8 +63,8 @@ begin
      copy_VarCoords(ssta, dsst)
      dsst_annual = month_to_annual(dsst(:,{lat1:lat2},{lon1:lon2}), 1)
      dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
-
     ;;;
+
     delete(date)
     delete(timeind)
 ;;;
@@ -308,9 +308,9 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -10
-  res@cnMaxLevelValF       =   10
-  res@cnLevelSpacingF      =  2
+  res@cnMinLevelValF       =   -10.0
+  res@cnMaxLevelValF       =   10.0
+  res@cnLevelSpacingF      =  2.0
  
 
   plot = new(9,graphic)
@@ -323,14 +323,31 @@ print("*********开始画图********")
   res@gsnLeftString = "Total ocean Heat Flux"
   plot(2) = gsn_csm_contour_map(wks, r_total_ocean, res)
   res@gsnLeftString = "Latent heating"
+    res@cnMinLevelValF       =   -30.0
+  res@cnMaxLevelValF       =   30.0
+  res@cnLevelSpacingF      =  6.0
   plot(3) = gsn_csm_contour_map(wks, r_lh, res)
   res@gsnLeftString = "Sensible heating"
+  res@cnMinLevelValF       =   -2.0
+  res@cnMaxLevelValF       =   2.0
+  res@cnLevelSpacingF      =  0.4
+ 
   plot(4) = gsn_csm_contour_map(wks, r_sh, res)
   res@gsnLeftString = "Net Longwave radiation"
+    res@cnMinLevelValF       =   -10.0
+  res@cnMaxLevelValF       =   10.0
+  res@cnLevelSpacingF      =  2.0
   plot(5) = gsn_csm_contour_map(wks, r_nl, res)
+
   res@gsnLeftString = "Net Shortwave radiation"
+  res@cnMinLevelValF       =   -40.0
+  res@cnMaxLevelValF       =   40.0
+  res@cnLevelSpacingF      =  10.0
   plot(6) = gsn_csm_contour_map(wks, r_ns, res)
   res@gsnLeftString = "ocean horizonal advction"
+   res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.2
   plot(7) = gsn_csm_contour_map(wks, r_hadv, res)
   res@gsnLeftString = "ocean Vertical advction"
   plot(8) = gsn_csm_contour_map(wks, r_vadv, res)

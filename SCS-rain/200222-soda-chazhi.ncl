@@ -24,7 +24,7 @@ undef("soda_chazhi")
 
       data = f1->$vNames(id_var_want)$(:,:,:)                     ; say "T" is (lat,lev,lon)  
     else
-      data = f1->$vNames(id_var_want)$(:,0:11,:,:)                     ; say "T" is (lat,lev,lon)
+      data = f1->$vNames(id_var_want)$(:,0:29,:,:)                     ; say "T" is (lat,lev,lon)
       depth = f1->depth
     end if
 
@@ -86,6 +86,7 @@ undef("soda_chazhi")
     outpath = outfilepath
        ;;-----------------------写入nc文件---------------------------
     system("rm " + outpath)   ; remove any pre-existing file
+    setfileoption("nc","Format","LargeFile")
     fout = addfile(outpath ,"c")  ; open output netCDF file
     setfileoption(fout,"DefineMode",True)
 

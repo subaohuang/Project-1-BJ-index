@@ -86,8 +86,10 @@ begin
     wt = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
     T = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
     mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
-
-
+   printMinMax(mlt, 1)
+   exit()
+   
+ 
     ;;;calculate Horizontal and Vertical advction
 
     gradLatLon  = grad_latlon_cfd (T, T&lat, T&lon, True, False)
