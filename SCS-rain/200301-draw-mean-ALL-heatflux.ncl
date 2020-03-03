@@ -119,8 +119,14 @@ begin
     print(z)    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
     copy_VarCoords(u(1,:,:,:), dz)
+ 
      
     dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
+    printVarSummary(dz_4d)
+    exit()
+
+    dz_4d = where(ismissing(hadv), dz_4d@_FillValue, dz_4d)
+
 
     hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
