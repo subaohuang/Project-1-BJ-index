@@ -15,11 +15,11 @@ NOW_DIR_ORG=/home/yangsong3/data-observation/SODA/3.3.1/
 modelname=soda3.3.1
 # modelname=cmip_10_ctl
 
-variable_total=(temp u v wt mlt taux tauy)     #often use
+variable_total=(temp u v wt mlt taux tauy net_heating)     #often use
 # variable_total=(tauy temp)
 
 
-for i in `seq 0 6` ;
+for i in `seq 0 7` ;
  do 
  variable=${variable_total[i]}
 # step1 : merge the cesm data into a whole data by using cdo
@@ -31,12 +31,12 @@ for i in `seq 0 6` ;
   fi
 
   # step2 : interpolate the data from hybird level to pressure level
-  if [ ! -e ${NOW_DIR_ORG}${modelname}_${variable}_mn_1980-2015_chazhi_new.nc ] ; then    ####判断差值的文件是否已经存在
+  if [ ! -e ${NOW_DIR_ORG}${modelname}_${variable}_mn_1980-2015_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
     echo "don't exit chazhi file, procecing..."
     cd /home/ys17-19/lsh/Project/SCS-rain/
     pwd
     ncl  -nQ inpath=\"${NOW_DIR_ORG}${modelname}_${variable}_mn_1980-2015.nc\" \
-         outpath=\"${NOW_DIR_ORG}${modelname}_${variable}_mn_1980-2015_chazhi_new.nc\" \
+         outpath=\"${NOW_DIR_ORG}${modelname}_${variable}_mn_1980-2015_chazhi.nc\" \
          var_need=\"${variable}\" \
        ./200222-soda-chazhi.ncl
     echo "finish soda chazhi"

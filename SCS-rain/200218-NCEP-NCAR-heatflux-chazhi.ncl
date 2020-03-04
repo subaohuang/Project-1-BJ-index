@@ -30,7 +30,7 @@ end
 ;;***************************************************************
 begin
  ;;;time span
-    startmon =197901
+    startmon =194801
     endmon = 201312
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
@@ -103,8 +103,8 @@ begin
     ;===================================================================
 
     fAtt               = True            ; assign file attributes
-    fAtt@title         = "1979-2013，精度为1乘1"    
-    fAtt@creation_date = "2020.2.18"
+    fAtt@title         = "1948-2013，精度为1乘1"    
+    fAtt@creation_date = "2020.3.04"
     fileattdef( fout, fAtt)            ; copy file attributes    
     ;----------------------------坐标变量的定义
     dimnames=(/"time","lat","lon"/)

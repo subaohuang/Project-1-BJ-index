@@ -17,7 +17,7 @@ undef("soda_chazhi")
     id_var_want = get1Dindex(vNames,var_need)
 
     
-    var_2d =(/"mlt","taux","tauy"/)
+    var_2d =(/"mlt","taux","tauy","net_heating"/)
     var_3d = (/"temp","u","v","wt"/)
 
     if any(var_2d.eq.vNames(id_var_want)) then 

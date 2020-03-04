@@ -18,6 +18,25 @@ begin
 
 return prob
 end
+function  wgt_annual(total_month)
+begin
+    weight1 = ispan(1,12,1)*1.0
+    weight1 = (2*weight1-1)/24
+
+    weight2 = ispan(1,12,1)*1.0
+    weight2 = (25-2*weight2)/24
+    total_annual_test = new(34,"float")
+    total_annual_test@_FillValue = default_fillvalue("float")
+    printVarSummary(total_annual_test)
+
+    do i =0,32,1
+      total_annual_test(i+1) = sum(total_month(i*12:(i+1)*12-1)*weight1) + sum(total_month((i+1)*12:(i+2)*12-1)*weight2)
+    end do    
+return total_annual_test
+end    
+    
+
+
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
@@ -59,10 +78,10 @@ begin
     ; ssta_annual =(/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
 
     ;;;sst 倾向值
-     dsst = center_finite_diff_n(ssta, 1, False, 0, 0) 
-     copy_VarCoords(ssta, dsst)
-     dsst_annual = month_to_annual(dsst(:,{lat1:lat2},{lon1:lon2}), 1)
-     ; dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
+    dsst = center_finite_diff_n(ssta, 1, False, 0, 0) 
+    copy_VarCoords(ssta, dsst)
+    dsst_annual = month_to_annual(dsst(:,{lat1:lat2},{lon1:lon2}), 1)
+    ; dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
     dsst_annual_mean = dim_avg_n_Wrap(dsst_annual(:,{0:15},{110:155}), (/1,2/))
     ;;;
     delete(date)
@@ -82,7 +101,8 @@ begin
     f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
     f4=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r")   
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r") 
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_net_heating_mn_1980-2015_chazhi.nc", "r")     
 
 
     indyear = (2013-1980+1)*12-1
@@ -91,7 +111,8 @@ begin
     wt = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
     T = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
     mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
-    
+    net_heating = f7->net_heating(0:indyear,{lat1:lat2},{lon1:lon2})
+   
     depth = T&depth(0:4)
 
 
@@ -110,7 +131,21 @@ begin
      dz = dpres_plevel(depth, 45.58, 0, 0)
      dz= dz(::-1)
 
-     Tbox = dim_avg_n_Wrap(T(:,{0:45.6},{0:15},{110:155}),(/1,2,3/))
+
+    
+     dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
+     dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
+
+
+     dx_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dx_3d_test)
+     dz_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dz_3d_test)
+     
+     volume = dim_sum_n(dx_3d_test*dz_3d_test*dy, (/1,2,3/))
+
+
+     Tbox =dim_sum_n_Wrap(T(:,{0:45.6},{0:15},{110:155})*dy*dx_3d_test*dz_3d_test, (/1,2,3/))/volume
+     copy_VarCoords(T(:,1,1,1), Tbox)
+
      ; volume = sum(45*dy*45.58*dx({0:15})) 
 
      dT = center_finite_diff_n(Tbox, 1, False, 0, 0)
@@ -119,30 +154,12 @@ begin
     
      Tbox_annual = month_to_annual(Tbox, 1)
 
+
+     dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
+     dT_wgt = dT_test
+     dT_wgt(1:33) = Tbox_annual(1:33) - Tbox_annual(0:32)
+   
      
-
-     dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
-     dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
-
-
-     
-    
-     dx_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dx_3d_test)
-     dz_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dz_3d_test)
-     
-     volume = dim_sum_n(dx_3d_test*dz_3d_test*dy, (/1,2,3/))
-
-     T_mean =dim_sum_n_Wrap(T(:,{0:45.6},{0:15},{110:155})*dy*dx_3d_test*dz_3d_test, (/1,2,3/))/volume
-     copy_VarCoords(T(:,1,1,1), T_mean)
-     T_mean_annual = month_to_annual(T_mean, 1)
-     dT_test = center_finite_diff_n(T_mean_annual, 1, False, 0, 0)
-     dT_test2 = dT_test
-     dT_test2(1:33) = T_mean_annual(1:33) - T_mean_annual(0:32)
-     
-     
-
-
-    ;;
 
     ;; lateral heat transport north and south v*(T -Tbox)dxdz,south: 0N ,110-155,north: 15N ,110-155
        x1 = 0
@@ -190,29 +207,33 @@ begin
        copy_VarCoords(Tbox, hadv_mean)
        copy_VarCoords(Tbox, vadv_mean)
 
-       ;;convert to ℃/year
-       hadv_mean = 365*86400*hadv_mean
-       vadv_mean = 365*86400*vadv_mean
-       ;;;
-
-
+       ;;convert to ℃/month
+       hadv_mean = 30*86400*hadv_mean
+       vadv_mean = 30*86400*vadv_mean
     ;;;
-    printVarSummary(hadv_mean)
+
 
 
 
     ;;;年平均
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
        ; vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
+       ; hadv_mean_annual = month_to_annual(hadv_mean, 0)
+       ; vadv_mean_annual = month_to_annual(vadv_mean, 0)
 
-       hadv_mean_annual = month_to_annual(hadv_mean, 1)
-       vadv_mean_annual = month_to_annual(vadv_mean, 1)
-       total_ocean_annual = hadv_mean_annual
-       total_ocean_annual = hadv_mean_annual + vadv_mean_annual
-
+    ;;;权重平均 from paper warming of the upper Equatorial indian ocean and changes
+       
+        hadv_mean_annual = wgt_annual(hadv_mean)
+        vadv_mean_annual = wgt_annual(vadv_mean)
 
    
+    ;;;
 
+    ;;;
+       
+    
+        total_ocean_annual = hadv_mean_annual
+        total_ocean_annual = hadv_mean_annual + vadv_mean_annual
     ;;;
 
 ;;;read NCEP-NCAR heat flux data
@@ -244,11 +265,11 @@ begin
       cp  = 3850         ;;j/kg℃
       coef  = density*cp
 
-      lhtfl = 365*86400*lhtfl/coef
-      shtfl = 365*86400*shtfl/coef
-      nswrs = 365*86400*nswrs/coef
-      nlwrs = 365*86400*nlwrs/coef
-      nswrs_pen = 365*86400*nswrs_pen/coef
+      lhtfl = 30*86400*lhtfl/coef
+      shtfl = 30*86400*shtfl/coef
+      nswrs = 30*86400*nswrs/coef
+      nlwrs = 30*86400*nlwrs/coef
+      nswrs_pen = 30*86400*nswrs_pen/coef
     ;;;
 
     ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
@@ -285,33 +306,78 @@ begin
 
     ;;;
     
-    Q_net_tr_annual = month_to_annual(Q_net_tr, 1)
+    ; Q_net_tr_annual = month_to_annual(Q_net_tr, 0)   ;;;这里是累加
+; 
+     Q_net_tr_annual = wgt_annual(Q_net_tr)
+
+;;ocena net_heating 
+        net_heating = 30*86400*net_heating/coef
+        net_heating_tr = dim_sum_n_Wrap(net_heating(:,{x1:x2},{y1:y2})*dx_3d*dy, (/1,2/))/volume
+        copy_VarCoords(Tbox, net_heating_tr)
+
+
+        net_heating_annual = wgt_annual(net_heating_tr)
+
   
 ;;;total 
 
-       weight1 = ispan(1,12,1)*1.0
-       weight1 = (2*weight1-1)/24
-       
-       weight2 = ispan(1,12,1)*1.0
-       weight2 = (25-2*weight2)/24
-
-      
-       
        total_month = Q_net_tr
        total_month = Q_net_tr + hadv_mean + vadv_mean
        
-       total_annual_test  = new(34,"float")
-       total_annual  = month_to_annual(total_month, 1)
-       printVarSummary(total_month)
- 
+       total_annual  = Q_net_tr_annual + hadv_mean_annual + vadv_mean_annual
+;;;
 
-       do i =0,32,1
-         total_annual_test(i+1) = sum(total_month(i*12:(i+1)*12-1)*weight1) + sum(total_month((i+1)*12:(i+2)*12-1)*weight2)
-       end do
 
-       printVarSummary(total_annual_test)
-       print(total_annual_test)
-       exit()
+;;;trend
+
+   rc_total  = regCoef_n(ispan(1, yearnum, 1),total_annual, 0, 0)
+   rc_atm = regCoef_n(ispan(1, yearnum, 1),Q_net_tr_annual, 0, 0)
+   rc_ocean = regCoef_n(ispan(1, yearnum, 1),total_ocean_annual, 0, 0)
+   rc_dt = regCoef_n(ispan(1, yearnum, 1),dT_wgt, 0, 0)
+
+   total_trend = rc_total*ispan(1, yearnum, 1)+ rc_total@yintercept 
+   atm_trend = rc_atm*ispan(1, yearnum, 1)+ rc_atm@yintercept 
+   ocean_trend = rc_ocean*ispan(1, yearnum, 1)+ rc_ocean@yintercept 
+   
+   print("total_rc="+rc_total)
+   print("atm_rc="+rc_atm)
+   print("ocean_rc="+rc_ocean)
+   print("dt="+rc_dt)
+;;;
+
+;;;;两段平均 80-97 98-13
+time = ispan(1980, 2013, 1)*1.0
+m = new(34,"float")
+
+Q_net_tr_annual_1 = time(0:16)
+Q_net_tr_annual_1= dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
+Q_net_tr_annual_2  =time(20:)
+Q_net_tr_annual_2= dim_avg_n_Wrap(Q_net_tr_annual(20:), 0)
+
+total_ocean_annual_1 = time(0:16)
+total_ocean_annual_1= dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
+total_ocean_annual_2 = time(20:)
+total_ocean_annual_2= dim_avg_n_Wrap(total_ocean_annual(20:), 0)
+
+total_annual_1 = time(0:16)
+total_annual_1=  dim_avg_n_Wrap(total_annual(0:16), 0)
+total_annual_2 = time(20:)
+total_annual_2=  dim_avg_n_Wrap(total_annual(20:), 0)
+
+dT_wgt_mean  =dim_avg_n_Wrap(dT_wgt, 0)
+print("dT_wgt_mean="+dT_wgt_mean)
+print(Q_net_tr_annual_1)
+print(Q_net_tr_annual_2)
+
+
+
+
+
+
+     
+    
+
+       
 
    
 
@@ -322,7 +388,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component")
   plot=new(1,graphic)
   
   resxy = True
@@ -337,11 +403,11 @@ print("*********开始画图:时间序列********")
   resxy@tmXBMinorOn = True
   resxy@tmXBMinorValues = ispan(1979,2013,1)
   
-   resxy@tmYLMode  =  "Explicit"
-  resxy@tmYLValues = ispan(-2, 10, 1)
-  resxy@tmYLLabels = ispan(-2,10,1)
-  resxy@trYMinF = -2
-  resxy@trYMaxF = 10
+  ;  resxy@tmYLMode  =  "Explicit"
+  ; resxy@tmYLValues = ispan(-2, 10, 1)
+  ; resxy@tmYLLabels = ispan(-2,10,1)
+  ; resxy@trYMinF = -2
+  ; resxy@trYMaxF = 10
 
   resxy@tmYLMinorOn = False
 
@@ -349,16 +415,48 @@ print("*********开始画图:时间序列********")
   resxy@vpWidthF = 0.6
 
 
-  resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2/)          ; make second line thicker
+  resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2,2/)          ; make second line thicker
   
   resxy@xyLineColors       =  (/"black","gray","blue","red","green","pink","purple"/)          ; change line color
   resxy@xyMonoDashPattern = False
-  resxy@xyDashPatterns =(/0,0,0,0,0,0/)
+  resxy@xyDashPatterns =(/0,0,0,0,0,0,0/)
   resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines","lines"/)
   
-  time = ispan(1980, 2013, 1)
 
-  plot = gsn_csm_xy(wks,time,(/dT_test,total_annual_test, Q_net_tr_annual,total_ocean_annual,hadv_mean_annual,vadv_mean_annual,total_annual/), resxy)
+
+  data_all = new((/7,34/),"float")
+  data_all(0,:)=dT_wgt
+  data_all(1,:)=total_annual
+  data_all(2,:)=Q_net_tr_annual
+  data_all(3,:)=total_ocean_annual
+  data_all(4,:)=hadv_mean_annual
+  data_all(5,:)=vadv_mean_annual
+  data_all(6,:)=net_heating_annual
+
+  ; data_all(6,:)=total_trend
+  ; data_all(7,:)=atm_trend
+  ; data_all(8,:)=ocean_trend
+
+
+  plot = gsn_csm_xy(wks,time,data_all, resxy)
+
+
+  ; ;;添加直线
+  ;  res= True
+  ; res@xyLineColor = "yellow"
+  ; plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
+  ; plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
+  ; plot4 = gsn_add_polyline(wks, plot,time(0:16), total_annual_1, res)
+  ; res@xyLineColor = "red"
+  ; plot5 = gsn_add_polyline(wks, plot,time(20:), Q_net_tr_annual_2, res)
+  ; plot6 = gsn_add_polyline(wks, plot,time(20:), total_ocean_annual_2, res)
+  ; plot7 = gsn_add_polyline(wks, plot,time(20:), total_annual_2, res)
+
+  
+
+
+
+
 
   ;;添加legend 
   gres = True
@@ -375,7 +473,7 @@ print("*********开始画图:时间序列********")
 
 
   textres = True
-  textres@lgLabels = (/"dT","total_annual_test","Q_net","Q_ocean","Horizontal advection","Vertical advection","total_annual"/)     ;加线的标注
+  textres@lgLabels = (/"dT","total","Q_net","Q_ocean","Horizontal advection","Vertical advection","net_heating"/)     ;加线的标注
 
   plot = simple_legend(wks,plot,gres,lineres,textres)   
   draw(plot)
