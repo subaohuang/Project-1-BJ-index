@@ -91,19 +91,40 @@ begin
 ;;;read NCEP-NCAR heat flux data
     
  
-    fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
-    f2 = addfile(fils2, "r")
+    ; fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
+    ; f2 = addfile(fils2, "r")
 
-    date:=cd_calendar(f2->time, 1)
+    ; date:=cd_calendar(f2->time, 1)
   
 
-    timeind:=ind(date.le.201312.and.date.ge.198001)
+    ; timeind:=ind(date.le.201312.and.date.ge.198001)
     
 
-    lhtfl = f2->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
-    shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
-    nswrs = f2->nswrs(timeind,{lat1:lat2},{lon1:lon2})
-    nlwrs = f2->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+    ; lhtfl = f2->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; nswrs = f2->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    ; nlwrs = f2->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
+    f3 := addfile(fils3, "r")
+
+    date:=cd_calendar(f3->time, 1)
+
+    timeind:=ind(date.le.201312.and.date.ge.198001)
+
+
+    lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    shtfl = f3->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+
+    lhtfl = (/lhtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    shtfl = (/shtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nswrs = (/nswrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nlwrs = (/nlwrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+
     
 
     ; fils1 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/lhtfl.sfc.mon.mean.nc"
@@ -169,8 +190,7 @@ begin
     nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
     total_annual = lhtfl_annual
     total_annual  = lhtfl_annual + shtfl_annual + nswrs_annual + nlwrs_annual -nswrs_pen_annual
-    printMinMax(total_annual, 1)
-    exit()
+  
 
 
 
@@ -208,7 +228,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "NCEP-NACR-Heatflux的long-term-mean-摄氏度")
+  wks   = gsn_open_wks("pdf", "ERAI-Heatflux的long-term-mean-摄氏度")
 
   res=True
   res@gsnFrame=False
