@@ -339,6 +339,13 @@ begin
    atm_trend = rc_atm*ispan(1, yearnum, 1)+ rc_atm@yintercept 
    ocean_trend = rc_ocean*ispan(1, yearnum, 1)+ rc_ocean@yintercept 
    
+   rc_total = rc_total*yearnum
+   rc_atm = rc_atm*yearnum
+   rc_ocean = rc_ocean*yearnum
+   rc_dt = rc_dt*yearnum
+
+
+
    print("total_rc="+rc_total)
    print("atm_rc="+rc_atm)
    print("ocean_rc="+rc_ocean)

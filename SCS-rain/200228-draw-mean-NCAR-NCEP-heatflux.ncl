@@ -114,29 +114,37 @@ begin
     timeind:=ind(date.le.201312.and.date.ge.198001)
 
 
-    lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
-    shtfl = f3->shtfl(timeind,{lat1:lat2},{lon1:lon2})
-    nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
-    nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+    ; lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; shtfl = f3->shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    ; nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    ; nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
 
-    lhtfl = (/lhtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    shtfl = (/shtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nswrs = (/nswrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nlwrs = (/nlwrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    ; lhtfl = (/lhtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    ; shtfl = (/shtfl/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    ; nswrs = (/nswrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    ; nlwrs = (/nlwrs/(12*3600)/)  ;;units j/m^2 (12hour) to w/m^2
 
     
 
-    ; fils1 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/lhtfl.sfc.mon.mean.nc"
-    ; fils2 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/shtfl.sfc.mon.mean.nc"
-    ; fils3 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nswrs.sfc.mon.mean.nc"
-    ; fils4 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nlwrs.sfc.mon.mean.nc"
+    fils1 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/lhtfl.sfc.mon.mean.nc"
+    fils2 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/shtfl.sfc.mon.mean.nc"
+    fils3 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nswrs.sfc.mon.mean.nc"
+    fils4 = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/hflx/nlwrs.sfc.mon.mean.nc"
 
 
-    ; f1 = addfile(fils1, "r")
-    ; f2 = addfile(fils2, "r")
-    ; f3 = addfile(fils3, "r")
-    ; f4 = addfile(fils4, "r")
+    f1 = addfile(fils1, "r")
+    f2 = addfile(fils2, "r")
+    f3 = addfile(fils3, "r")
+    f4 = addfile(fils4, "r")
+
+    lhtfl = f1->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
+    shtfl = f2>shtfl(timeind,{lat1:lat2},{lon1:lon2})
+    nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
+    nlwrs = f4->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+
+
     f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r") 
 
 
