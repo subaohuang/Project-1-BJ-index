@@ -18,6 +18,28 @@ begin
 
 return prob
 end
+function  wgt_annual(total_month)
+begin
+    weight1 = ispan(1,12,1)*1.0
+    weight1 = (2*weight1-1)/24
+
+    weight2 = ispan(1,12,1)*1.0
+    weight2 = (25-2*weight2)/24
+    dim = dimsizes(total_month)
+    total_annual_test = new((/34,dim(1),dim(2)/),"float")
+    total_annual_test@_FillValue = default_fillvalue("float")
+    printVarSummary(total_annual_test)
+    
+    weight1_3d = conform_dims((/12,dim(1),dim(2)/), weight1,0 )
+    weight2_3d = conform_dims((/12,dim(1),dim(2)/), weight2,0 )
+    do i =0,32,1
+      total_annual_test(i+1,:,:) = dim_sum_n(total_month(i*12:(i+1)*12-1,:,:)*weight1_3d,0) + dim_sum_n(total_month((i+1)*12:(i+2)*12-1,:,:)*weight2_3d,0)
+    end do    
+return total_annual_test
+end   
+
+
+ 
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
@@ -107,8 +129,8 @@ begin
     vadv = wt*T_grad_z
 
     ;;;convert to units degree ℃/year
-      hadv =365*86400*hadv
-      vadv =365*86400*vadv
+      hadv =30*86400*hadv
+      vadv =30*86400*vadv
     ;;;
     
     ;;;;垂直积分平均，在混合层内进行
@@ -132,8 +154,10 @@ begin
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
        ; vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
 
-       hadv_mean_annual = month_to_annual(hadv_mean, 1)
-       vadv_mean_annual = month_to_annual(vadv_mean, 1)
+       ; hadv_mean_annual = month_to_annual(hadv_mean, 1)
+       ; vadv_mean_annual = month_to_annual(vadv_mean, 1)
+       hadv_mean_annual = wgt_annual(hadv_mean)
+       vadv_mean_annual  = wgt_annual(vadv_mean)
        total_ocean_annual = hadv_mean_annual
        total_ocean_annual = hadv_mean_annual + vadv_mean_annual
 
@@ -169,11 +193,11 @@ begin
       cp  = 3850         ;;j/kg℃
       coef  = mlt*density*cp
 
-      lhtfl = 365*86400*lhtfl/coef
-      shtfl = 365*86400*shtfl/coef
-      nswrs = 365*86400*nswrs/coef
-      nlwrs = 365*86400*nlwrs/coef
-      nswrs_pen = 365*86400*nswrs_pen/coef
+      lhtfl = 30*86400*lhtfl/coef
+      shtfl = 30*86400*shtfl/coef
+      nswrs = 30*86400*nswrs/coef
+      nlwrs = 30*86400*nlwrs/coef
+      nswrs_pen = 30*86400*nswrs_pen/coef
     ;;;
 
     ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
@@ -191,11 +215,22 @@ begin
     nswrs_pen = (/-1*nswrs_pen/)
 
 
-    lhtfl_annual = month_to_annual(lhtfl, 1)
-    shtfl_annual = month_to_annual(shtfl, 1)
-    nswrs_annual = month_to_annual(nswrs, 1)
-    nlwrs_annual = month_to_annual(nlwrs, 1)
-    nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
+    ; lhtfl_annual = month_to_annual(lhtfl, 1)
+    ; shtfl_annual = month_to_annual(shtfl, 1)
+    ; nswrs_annual = month_to_annual(nswrs, 1)
+    ; nlwrs_annual = month_to_annual(nlwrs, 1)
+    ; nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
+     lhtfl_annual = wgt_annual(lhtfl)
+     shtfl_annual = wgt_annual(shtfl)
+     nswrs_annual = wgt_annual(nswrs)
+     nlwrs_annual = wgt_annual(nlwrs)
+     nswrs_pen_annual = wgt_annual(nswrs_pen)
+     
+
+
+
+
+
     total_annual = lhtfl_annual
     total_annual  = lhtfl_annual + shtfl_annual + nswrs_annual + nlwrs_annual -nswrs_pen_annual
 
@@ -258,7 +293,6 @@ print("*******开始计算趋势系数*****************")
 print("r_total="+r_total_mean)
 print("r_total_ocean="+r_total_ocean_mean)
 
-exit()
 
 
 ;;;;
@@ -307,7 +341,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-wgt")
 
   res=True
   res@gsnFrame=False
