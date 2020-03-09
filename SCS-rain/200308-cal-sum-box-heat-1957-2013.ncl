@@ -113,8 +113,8 @@ begin
     v1 = f3->v(timeind,0:4,{lat1:lat2},{lon1:lon2})
     wt1 = f4->w(timeind,0:4,{lat1:lat2},{lon1:lon2})
     T1 = f5->temp(timeind,0:4,{lat1:lat2},{lon1:lon2})
-    depth = T1&depth(0:4)
-    dim_u = dimsizes(u1)
+    
+     dim_u = dimsizes(u1)
 
     f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_u_mn_1980-2015_chazhi.nc", "r")   
     f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
@@ -127,6 +127,9 @@ begin
     v2 = f3->v(0:indyear,0:4,{lat1:lat2},{lon1:lon2})
     wt2 = f4->wt(0:indyear,0:4,{lat1:lat2},{lon1:lon2})
     T2 = f5->temp(0:indyear,0:4,{lat1:lat2},{lon1:lon2})
+    depth = T2&depth(0:4)
+
+   
 
     u = new((/684,dim_u(1),dim_u(2),dim_u(3)/),float)
     
@@ -134,7 +137,7 @@ begin
     u!1 = "depth"
     u!2 = "lat"
     u!3 = "lon"
-    u&depth = u1&depth
+    u&depth = u2&depth
     u&lat = u2&lat
     u&lon = u2&lon
 
@@ -179,19 +182,19 @@ begin
      dy = (pi/180)*1*6378388.
      dz = dpres_plevel(depth, 46.7, 0, 0)
      dz= dz(::-1)
-   
+    print(dz)
 
-     dx_3d_test = conform_dims(dimsizes(T(:,{0:46.61},{0:15},{110:155})) ,dx({0:15}) , 2)
-     dz_3d_test = conform_dims(dimsizes(T(:,{0:46.61},{0:15},{110:155})) ,dz , 1)
+     dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
+     dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
 
 
-     dx_3d_test  = where(ismissing(T(:,{0:46.61},{0:15},{110:155})), 0.0, dx_3d_test)
-     dz_3d_test  = where(ismissing(T(:,{0:46.61},{0:15},{110:155})), 0.0, dz_3d_test)
+     dx_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dx_3d_test)
+     dz_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dz_3d_test)
      
      volume = dim_sum_n(dx_3d_test*dz_3d_test*dy, (/1,2,3/))
 
 
-     Tbox =dim_sum_n_Wrap(T(:,{0:46.61},{0:15},{110:155})*dy*dx_3d_test*dz_3d_test, (/1,2,3/))/volume
+     Tbox =dim_sum_n_Wrap(T(:,{0:45.6},{0:15},{110:155})*dy*dx_3d_test*dz_3d_test, (/1,2,3/))/volume
      printVarSummary(Tbox)
      copy_VarCoords(T2(:,1,1,1), Tbox)
 
@@ -206,7 +209,7 @@ begin
 
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
      dT_wgt = dT_test
-     dT_wgt(1:21) = Tbox_annual(1:21) - Tbox_annual(0:20)
+     dT_wgt(1:) = Tbox_annual(1:) - Tbox_annual(0:55)
    
      
     ;; lateral heat transport north and south v*(T -Tbox)dxdz,south: 0N ,110-155,north: 15N ,110-155
@@ -214,16 +217,17 @@ begin
        x2 = 15
        y1  = 110.5
        y2 = 155
-       z1  = 46.61
- 
+       z1  = 45.6
+       
+    
        dim =dimsizes(v(:,{0:z1},{x1},{y1:y2}))
+       
 
        dz_3d =conform_dims(dim ,dz , 1)
        Tbox_3d = conform_dims(dim ,Tbox , 0)
        printVarSummary(dz_3d)  
        
 
-       
        v_lateral_south = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:y2})*(T(:,{0:z1},{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d, (/1,2/))/volume
        v_lateral_north = dim_sum_n_Wrap(v(:,{0:z1},{x2},{y1:y2})*(T(:,{0:z1},{x2},{y1:y2}) - Tbox_3d)*dx({15})*dz_3d, (/1,2/))/volume
        
@@ -237,17 +241,17 @@ begin
        Tbox_3d :=conform_dims(dim, Tbox, 0)
 
        u_lateral_west = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y1})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dx_3d*dz_3d, (/1,2/))/volume
-       u_lateral_east = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y2})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dx_3d*dz_3d, (/1,2/))/volume
+       u_lateral_east = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y2})*(T(:,{0:z1},{x1:x2},{y2}) - Tbox_3d)*dx_3d*dz_3d, (/1,2/))/volume
     ;;;
     
 
      ;; lateral heat transport vertical w*(T -Tbox)dxdy
-
-       dim:= dimsizes(wt(:,{z1},{x1:x2},{y1:y2}))
+    
+       dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
        dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
        Tbox_3d :=conform_dims(dim, Tbox, 0)       
   
-       w_bottom = dim_sum_n_Wrap(wt(:,{z1},{x1:x2},{y1:y2})*(T(:,{z1},{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
+       w_bottom = dim_sum_n_Wrap(wt(:,4,{x1:x2},{y1:y2})*(T(:,4,{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
     ;;;
     
     
@@ -304,7 +308,7 @@ begin
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     nswrs_pen =  0.05*nswrs
+     nswrs_pen =  0.1*nswrs
     ;;;
 
     ;;;convert to units degree ℃/year
@@ -334,7 +338,7 @@ begin
     nswrs_pen = (/-1*nswrs_pen/)
 
     Q_net = lhtfl
-    Q_net = lhtfl + shtfl + nswrs + nlwrs - nswrs_pen
+    Q_net = lhtfl + shtfl + 0.95*nswrs + nlwrs 
     copy_VarCoords(lhtfl, Q_net)
     ;;;
 
@@ -347,7 +351,7 @@ begin
 
 
 
-    Q_net(:,{x1:x2},{y1:y2}) = where(ismissing(sst(:,{x1:x2},{y1:y2})),Q_net@missing_value, Q_net(:,{x1:x2},{y1:y2}))  ;;;去掉陆地上的辐射 
+    Q_net(:,{x1:x2},{y1:y2}) = where(ismissing(sst(:,{0:15},{110:155})),Q_net@missing_value, Q_net(:,{x1:x2},{y1:y2}))  ;;;去掉陆地上的辐射 
    
     Q_net_tr = dim_sum_n_Wrap(Q_net(:,{x1:x2},{y1:y2})*dx_3d*dy, (/1,2/))/volume
     copy_VarCoords(Tbox, Q_net_tr)
@@ -402,6 +406,27 @@ begin
   print("Q_net_tr_mean="+Q_net_tr_mean)
   print("total_ocean_mean="+total_ocean_mean)
   print("dT_wgt_mean="+dT_wgt_mean)
+
+  Q_net_tr_annual_1 = new(22,float)
+  Q_net_tr_annual_1 = dim_avg_n_Wrap(Q_net_tr_annual(0:21), 0)
+
+  Q_net_tr_annual_2 = new(35,float)
+  Q_net_tr_annual_2 = dim_avg_n_Wrap(Q_net_tr_annual(22:), 0)
+
+
+  total_ocean_annual_1= new(22,float)
+  total_ocean_annual_1 = dim_avg_n_Wrap(total_ocean_annual(0:21), 0)
+
+  total_ocean_annual_2= new(35,float)
+  total_ocean_annual_2 = dim_avg_n_Wrap(total_ocean_annual(22:), 0)
+
+  print(Q_net_tr_annual_2)
+  print(total_ocean_annual_2)
+
+  
+;;;
+
+
 
 
 
@@ -465,20 +490,22 @@ print("*********开始画图:时间序列********")
 
 
   plot = gsn_csm_xy(wks,ispan(startyear,endyear,1),data_all, resxy)
+ 
+  time := ispan(1957, 2013, 1)
 
+  ;;添加直线
+  res= True
+  res@gsLineThicknessF = 5.0            ; line thickness   
+  res@gsLineColor      = "yellow"         ; color of lines
+  res@gsLineDashPattern=15
 
-  ; ;;添加直线
-  ;  res= True
-  ; res@xyLineColor = "yellow"
-  ; plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
-  ; plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
-  ; plot4 = gsn_add_polyline(wks, plot,time(0:16), total_annual_1, res)
-  ; res@xyLineColor = "red"
-  ; plot5 = gsn_add_polyline(wks, plot,time(20:), Q_net_tr_annual_2, res)
-  ; plot6 = gsn_add_polyline(wks, plot,time(20:), total_ocean_annual_2, res)
-  ; plot7 = gsn_add_polyline(wks, plot,time(20:), total_annual_2, res)
-
+  plot2 = gsn_add_polyline(wks, plot,time(0:21), Q_net_tr_annual_1, res)
+  plot3 = gsn_add_polyline(wks, plot,time(0:21), total_ocean_annual_1, res)
   
+  res@gsLineColor = "red"
+  plot5 = gsn_add_polyline(wks, plot,time(22:), Q_net_tr_annual_2, res)
+  plot6 = gsn_add_polyline(wks, plot,time(22:), total_ocean_annual_2, res)
+
 
 
 

@@ -6,6 +6,8 @@
 ;;NCEP-NCAR的精度为1.87×1.9
 ;;s
 ;;                                         lnshuheng 2020.02.18
+;;
+ ;; u_lateral_east is wrong ,modifyed in 2020.03.09
 ;**********************************************************
 function  rc_test(ssta_rc)
 begin
@@ -130,8 +132,7 @@ begin
      dy = (pi/180)*1*6378388.
      dz = dpres_plevel(depth, 45.58, 0, 0)
      dz= dz(::-1)
-    
-
+   
     
      dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
      dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
@@ -155,6 +156,7 @@ begin
      Tbox_annual = month_to_annual(Tbox, 1)
 
 
+  
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
      dT_wgt = dT_test
      dT_wgt(1:33) = Tbox_annual(1:33) - Tbox_annual(0:32)
@@ -164,11 +166,12 @@ begin
     ;; lateral heat transport north and south v*(T -Tbox)dxdz,south: 0N ,110-155,north: 15N ,110-155
        x1 = 0
        x2 = 15
-       y1  = 110
+       y1  = 110.5
        y2 = 155
        z1  = 45.6
- 
+    
        dim =dimsizes(v(:,{0:z1},{x1},{y1:y2}))
+     
 
        dz_3d =conform_dims(dim ,dz , 1)
        Tbox_3d = conform_dims(dim ,Tbox , 0)
@@ -181,22 +184,22 @@ begin
  
     ;; lateral heat transport west and east u*(T -Tbox)dydz,west: 0N ,110-155,north: 15N ,110-155
        dim := dimsizes(v(:,{0:z1},{x1:x2},{y1}))
-       dx_3d =conform_dims(dim ,dx({0:15}) , 2)
+       ; dx_3d =conform_dims(dim ,dx({0:15}) , 2)
        dz_3d := conform_dims(dim ,dz , 1)
        Tbox_3d :=conform_dims(dim, Tbox, 0)
 
-       u_lateral_west = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y1})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dx_3d*dz_3d, (/1,2/))/volume
-       u_lateral_east = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y2})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dx_3d*dz_3d, (/1,2/))/volume
+       u_lateral_west = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y1})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dy*dz_3d, (/1,2/))/volume
+       u_lateral_east = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y2})*(T(:,{0:z1},{x1:x2},{y2}) - Tbox_3d)*dy*dz_3d, (/1,2/))/volume
     ;;;
     
 
-     ;; lateral heat transport vertical w*(T -Tbox)dxdy
-
-       dim:= dimsizes(wt(:,{z1},{x1:x2},{y1:y2}))
+     ;; lateral heat transport vertical w*(T -Tbox)dxdy 
+       
+       dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
        dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
        Tbox_3d :=conform_dims(dim, Tbox, 0)       
   
-       w_bottom = dim_sum_n_Wrap(wt(:,{z1},{x1:x2},{y1:y2})*(T(:,{z1},{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
+       w_bottom = dim_sum_n_Wrap(wt(:,4,{x1:x2},{y1:y2})*(T(:,4,{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
     ;;;
     
     
@@ -258,12 +261,16 @@ begin
      L2 = 23
      nswrs_pen = nswrs
      nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+     ; nswrs_pen = 0.05*nswrs
+
+  
     ;;;
 
     ;;;convert to units degree ℃/year
-      density = 1025  ;;kg/m3
-      cp  = 3850         ;;j/kg℃
-      coef  = density*cp
+      ; density = 1025  ;;kg/m3
+      ; cp  = 3850         ;;j/kg℃
+      ; coef  = density*cp
+      coef = 4.088*10^6
 
       lhtfl = 30*86400*lhtfl/coef
       shtfl = 30*86400*shtfl/coef
@@ -350,31 +357,51 @@ begin
    print("atm_rc="+rc_atm)
    print("ocean_rc="+rc_ocean)
    print("dt="+rc_dt)
+   
+   rc_Tbox = regCoef_n(ispan(1, yearnum, 1),Tbox_annual, 0, 0)
+
+   print("rc_Tbox="+rc_Tbox)
+
+
+
 ;;;
 
-;;;;两段平均 80-97 98-13
+;;;;两段平均 80-96 97-13
 time = ispan(1980, 2013, 1)*1.0
 m = new(34,"float")
 
 Q_net_tr_annual_1 = time(0:16)
 Q_net_tr_annual_1= dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
-Q_net_tr_annual_2  =time(20:)
-Q_net_tr_annual_2= dim_avg_n_Wrap(Q_net_tr_annual(20:), 0)
+Q_net_tr_annual_2  =time(17:)
+Q_net_tr_annual_2= dim_avg_n_Wrap(Q_net_tr_annual(17:), 0)
 
 total_ocean_annual_1 = time(0:16)
 total_ocean_annual_1= dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
-total_ocean_annual_2 = time(20:)
-total_ocean_annual_2= dim_avg_n_Wrap(total_ocean_annual(20:), 0)
+total_ocean_annual_2 = time(17:)
+total_ocean_annual_2= dim_avg_n_Wrap(total_ocean_annual(17:), 0)
 
 total_annual_1 = time(0:16)
 total_annual_1=  dim_avg_n_Wrap(total_annual(0:16), 0)
-total_annual_2 = time(20:)
-total_annual_2=  dim_avg_n_Wrap(total_annual(20:), 0)
+total_annual_2 = time(17:)
+total_annual_2=  dim_avg_n_Wrap(total_annual(17:), 0)
 
-dT_wgt_mean  =dim_avg_n_Wrap(dT_wgt, 0)
-print("dT_wgt_mean="+dT_wgt_mean)
-print(Q_net_tr_annual_1)
-print(Q_net_tr_annual_2)
+dT_wgt_mean_1 = time(0:16)
+dT_wgt_mean_1  =dim_avg_n_Wrap(dT_wgt(0:16), 0)
+dT_wgt_mean_2 = time(17:)
+dT_wgt_mean_2  =dim_avg_n_Wrap(dT_wgt(17:), 0)
+
+print("dT_wgt_mean_1="+dim_avg_n_Wrap(dT_wgt(0:16), 0))
+print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(17:), 0))
+
+Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(17:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
+ocean_diff = dim_avg_n_Wrap(total_ocean_annual(17:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
+dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(17:), 0) - dim_avg_n_Wrap(dT_wgt(0:16), 0)
+
+
+print("Q_net_diff="+Q_net_diff)
+print("ocean_diff="+ocean_diff)
+print("dT_wgt_diff="+dT_wgt_diff)
+
 
 
 
@@ -388,8 +415,17 @@ print(Q_net_tr_annual_2)
   print("Q_net_tr_mean="+Q_net_tr_mean)
   print("total_ocean_mean="+total_ocean_mean)
   print("dT_wgt_mean="+dT_wgt_mean)
-exit()
 
+  hadv_clm = dim_avg_n_Wrap(hadv_mean_annual, 0) 
+  vadv_clm = dim_avg_n_Wrap(vadv_mean_annual, 0)
+
+  print("hadv_clm="+hadv_clm)
+  print("vadv_clm="+vadv_clm)
+
+
+
+
+;;;
 
 
 
@@ -436,21 +472,21 @@ print("*********开始画图:时间序列********")
 
   resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2,2/)          ; make second line thicker
   
-  resxy@xyLineColors       =  (/"black","gray","blue","red","green","pink","purple"/)          ; change line color
+  resxy@xyLineColors       =  (/"black","gray","blue","red","green","pink"/)          ; change line color
   resxy@xyMonoDashPattern = False
   resxy@xyDashPatterns =(/0,0,0,0,0,0,0/)
-  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines","lines"/)
+  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
   
 
 
-  data_all = new((/7,34/),"float")
+  data_all = new((/6,34/),"float")
   data_all(0,:)=dT_wgt
   data_all(1,:)=total_annual
   data_all(2,:)=Q_net_tr_annual
   data_all(3,:)=total_ocean_annual
   data_all(4,:)=hadv_mean_annual
   data_all(5,:)=vadv_mean_annual
-  data_all(6,:)=net_heating_annual
+  
 
   ; data_all(6,:)=total_trend
   ; data_all(7,:)=atm_trend
@@ -460,16 +496,23 @@ print("*********开始画图:时间序列********")
   plot = gsn_csm_xy(wks,time,data_all, resxy)
 
 
-  ; ;;添加直线
-  ;  res= True
-  ; res@xyLineColor = "yellow"
-  ; plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
-  ; plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
-  ; plot4 = gsn_add_polyline(wks, plot,time(0:16), total_annual_1, res)
-  ; res@xyLineColor = "red"
-  ; plot5 = gsn_add_polyline(wks, plot,time(20:), Q_net_tr_annual_2, res)
-  ; plot6 = gsn_add_polyline(wks, plot,time(20:), total_ocean_annual_2, res)
-  ; plot7 = gsn_add_polyline(wks, plot,time(20:), total_annual_2, res)
+  ;;添加直线
+
+  res= True
+  res@gsLineThicknessF = 5.0            ; line thickness   
+  res@gsLineColor      = "yellow"         ; color of lines
+  res@gsLineDashPattern=15
+
+  plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
+  plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
+ 
+  plot5 = gsn_add_polyline(wks, plot,time(17:), Q_net_tr_annual_2, res)
+  plot6 = gsn_add_polyline(wks, plot,time(17:), total_ocean_annual_2, res)
+  
+  res@gsLineColor      = "red"         ; color of lines
+  
+   plot4 = gsn_add_polyline(wks, plot,time(0:16), dT_wgt_mean_1, res)
+   plot7 = gsn_add_polyline(wks, plot,time(17:), dT_wgt_mean_2, res)
 
   
 
@@ -492,7 +535,7 @@ print("*********开始画图:时间序列********")
 
 
   textres = True
-  textres@lgLabels = (/"dT","total","Q_net","Q_ocean","Horizontal advection","Vertical advection","net_heating"/)     ;加线的标注
+  textres@lgLabels = (/"dT","total","Q_net","Q_ocean","Horizontal advection","Vertical advection"/)     ;加线的标注
 
   plot = simple_legend(wks,plot,gres,lineres,textres)   
   draw(plot)
