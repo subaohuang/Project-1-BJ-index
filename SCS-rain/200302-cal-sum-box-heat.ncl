@@ -116,6 +116,7 @@ begin
     net_heating = f7->net_heating(0:indyear,{lat1:lat2},{lon1:lon2})
    
     depth = T&depth(0:4)
+printVarSummary(wt)
 
 
 
@@ -213,6 +214,13 @@ begin
        ;;convert to ℃/month
        hadv_mean = 30*86400*hadv_mean
        vadv_mean = 30*86400*vadv_mean
+       v_lateral_north = 30*86400*v_lateral_north
+       v_lateral_south = 30*86400*v_lateral_south
+       u_lateral_east  = 30*86400*u_lateral_east
+       u_lateral_west = 30*86400*u_lateral_west
+
+
+
     ;;;
 
 
@@ -229,7 +237,11 @@ begin
         hadv_mean_annual = wgt_annual(hadv_mean)
         vadv_mean_annual = wgt_annual(vadv_mean)
 
-   
+        v_lateral_south_annual = wgt_annual(v_lateral_south)
+        v_lateral_north_annual = wgt_annual(v_lateral_north)
+
+        u_lateral_east_annual = wgt_annual(u_lateral_east)
+        u_lateral_west_annual = wgt_annual(u_lateral_west)
     ;;;
 
     ;;;
@@ -260,8 +272,8 @@ begin
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     ; nswrs_pen = 0.05*nswrs
+     ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+     nswrs_pen = 0.05*nswrs
 
   
     ;;;
@@ -342,6 +354,21 @@ begin
    rc_ocean = regCoef_n(ispan(1, yearnum, 1),total_ocean_annual, 0, 0)
    rc_dt = regCoef_n(ispan(1, yearnum, 1),dT_wgt, 0, 0)
 
+   rc_hadv = regCoef_n(ispan(1, yearnum, 1),hadv_mean_annual, 0, 0)
+   rc_vadv = regCoef_n(ispan(1, yearnum, 1),vadv_mean_annual, 0, 0)
+
+   rc_u_lateral_west = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_annual, 0, 0)
+   rc_u_lateral_east = regCoef_n(ispan(1, yearnum, 1),u_lateral_east_annual, 0, 0)
+
+   rc_v_lateral_south = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_annual, 0, 0)
+   rc_v_lateral_north = regCoef_n(ispan(1, yearnum, 1),v_lateral_north_annual, 0, 0)
+
+
+
+
+
+
+
    total_trend = rc_total*ispan(1, yearnum, 1)+ rc_total@yintercept 
    atm_trend = rc_atm*ispan(1, yearnum, 1)+ rc_atm@yintercept 
    ocean_trend = rc_ocean*ispan(1, yearnum, 1)+ rc_ocean@yintercept 
@@ -351,12 +378,38 @@ begin
    rc_ocean = rc_ocean*yearnum
    rc_dt = rc_dt*yearnum
 
+   rc_hadv  = rc_hadv*yearnum
+   rc_vadv  = rc_vadv*yearnum
+
+   rc_u_lateral_west = rc_u_lateral_west*yearnum
+   rc_u_lateral_east = rc_u_lateral_east*yearnum
+   
+   rc_v_lateral_south = rc_v_lateral_south*yearnum
+   rc_v_lateral_north = rc_v_lateral_north*yearnum
+   
+
 
 
    print("total_rc="+rc_total)
    print("atm_rc="+rc_atm)
    print("ocean_rc="+rc_ocean)
    print("dt="+rc_dt)
+
+   print("hadv_rc="+rc_hadv)
+   print("vadv_rc="+rc_vadv)
+
+   print("rc_u_lateral_east="+rc_u_lateral_east)
+   print("rc_u_lateral_west="+rc_u_lateral_west)
+
+   print("rc_v_lateral_south="+rc_v_lateral_south)
+    print("rc_v_lateral_north="+rc_v_lateral_north)
+
+
+
+
+
+
+
    
    rc_Tbox = regCoef_n(ispan(1, yearnum, 1),Tbox_annual, 0, 0)
 

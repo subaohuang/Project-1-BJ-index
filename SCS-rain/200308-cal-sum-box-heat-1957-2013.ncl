@@ -403,9 +403,15 @@ begin
   total_ocean_mean = dim_avg_n_Wrap(total_ocean_annual, 0)
   dT_wgt_mean = dim_avg_n_Wrap(dT_wgt, 0)
 
+  dT_wgt_mean_1 = dim_avg_n_Wrap(dT_wgt(0:21), 0)
+  dT_wgt_mean_2 = dim_avg_n_Wrap(dT_wgt(22:), 0)
+
   print("Q_net_tr_mean="+Q_net_tr_mean)
   print("total_ocean_mean="+total_ocean_mean)
   print("dT_wgt_mean="+dT_wgt_mean)
+  print("dT_wgt_mean_1="+dT_wgt_mean_1)
+  print("dT_wgt_mean_2="+dT_wgt_mean_2)
+  exit()
 
   Q_net_tr_annual_1 = new(22,float)
   Q_net_tr_annual_1 = dim_avg_n_Wrap(Q_net_tr_annual(0:21), 0)
@@ -420,11 +426,19 @@ begin
   total_ocean_annual_2= new(35,float)
   total_ocean_annual_2 = dim_avg_n_Wrap(total_ocean_annual(22:), 0)
 
-  print(Q_net_tr_annual_2)
-  print(total_ocean_annual_2)
 
-  
+  print(Q_net_tr_annual_2)
+  print(total_ocean_annual_2)  
 ;;;
+
+
+
+
+;;;
+
+
+
+
 
 
 

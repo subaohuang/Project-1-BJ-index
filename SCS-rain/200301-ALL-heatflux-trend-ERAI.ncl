@@ -1,11 +1,7 @@
-;;********************************************************
-;;计算SST倾向以及SST值与净长波辐射，短波辐射，感热，潜热以及平流和对流,
-;;其中热通量的方向都是向上为正，向下为负。。
-;;;的回归场，热通量数据是NCEP-NCAR数据，海洋数据是SODA2.2.4,SST是哈哈得来SST数据
-;;由于数据之间的精度不同，需要进行插值预处理,SODA精度是0.5×0.5,HADISST是1×1
-;;NCEP-NCAR的精度为1.87×1.9
-;;s
-;;                                         lnshuheng 2020.02.18
+;;;画ERA 的0-12小时forecast月平均的通量数据的趋势
+;;
+;;
+;;                                         lnshuheng 2020.03.10
 ;**********************************************************
 function  rc_test(ssta_rc)
 begin
@@ -142,7 +138,7 @@ begin
 ;;;read NCEP-NCAR heat flux data
     
  
-    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -155,14 +151,18 @@ begin
     nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
     nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
+    lhtfl = (/lhtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    shtfl = (/shtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nswrs = (/nswrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nlwrs = (/nlwrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+
 
     ;;;nswrs_pen 
      R = 0.58
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     nswrs_pen = 0.05*nswrs
+     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
     ;;;
 
     ;;;convert to units degree ℃/year
@@ -182,14 +182,6 @@ begin
     ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
-
-    ;;;转化成方向向下
-
-    lhtfl = (/-1*lhtfl/)
-    shtfl = (/-1*shtfl/)
-    nswrs = (/-1*nswrs/)
-    nlwrs = (/-1*nlwrs/)
-    nswrs_pen = (/-1*nswrs_pen/)
 
 
     lhtfl_annual = month_to_annual(lhtfl, 1)
@@ -308,7 +300,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-0.05swpen")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI")
 
   res=True
   res@gsnFrame=False

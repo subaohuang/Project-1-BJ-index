@@ -156,7 +156,7 @@ print("*********开始画图********")
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlueWhiteOrangeRed"
+  res@cnFillPalette="BlueRed"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
