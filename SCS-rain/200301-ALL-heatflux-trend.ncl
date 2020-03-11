@@ -116,10 +116,14 @@ begin
 
     z =  vadv&depth
     z&depth = z
-    print(z)    
+    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
+    dz2 = dpres_plevel(z, 43.38, 0, 0)
     copy_VarCoords(u(1,:,:,:), dz)
-     
+    print(dz(:,{10},{130}))
+    print(avg(mlt(:,{10},{130})))
+    print(dz2)
+     exit()
     dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
 
     hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
@@ -128,11 +132,15 @@ begin
     copy_VarCoords(u(:,1,:,:), hadv_mean)
     copy_VarCoords(u(:,1,:,:), vadv_mean)
 
+    
+
     ;;;年平均
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
        ; vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
 
        hadv_mean_annual = month_to_annual(hadv_mean, 1)
+       
+
        vadv_mean_annual = month_to_annual(vadv_mean, 1)
        total_ocean_annual = hadv_mean_annual
        total_ocean_annual = hadv_mean_annual + vadv_mean_annual
@@ -255,10 +263,15 @@ print("*******开始计算趋势系数*****************")
 
     r_total_mean = avg(dim_avg_n_Wrap(r_total({0:15},{110:155}), 1))
     r_total_ocean_mean = avg(dim_avg_n_Wrap(r_total_ocean({0:15},{110:155}), 1))
+    r_vadv_mean = avg(dim_avg_n_Wrap(r_vadv({0:15},{110:155}), 1))
+    r_hadv_mean = avg(dim_avg_n_Wrap(r_hadv({0:15},{110:155}), 1))
+
 
 print("r_total="+r_total_mean)
 print("r_total_ocean="+r_total_ocean_mean)
-
+print("r_vadv_mean="+r_vadv_mean)
+print("r_hadv_mean="+r_hadv_mean)
+exit()
 
 
 

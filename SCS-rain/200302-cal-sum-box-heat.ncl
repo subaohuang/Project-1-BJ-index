@@ -132,8 +132,9 @@ printVarSummary(wt)
 
      dy = (pi/180)*1*6378388.
      dz = dpres_plevel(depth, 45.58, 0, 0)
+     print(dz)
      dz= dz(::-1)
-   
+
     
      dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
      dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
@@ -178,11 +179,10 @@ printVarSummary(wt)
        Tbox_3d = conform_dims(dim ,Tbox , 0)
        printVarSummary(dz_3d)  
        
-
        
        v_lateral_south = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:y2})*(T(:,{0:z1},{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d, (/1,2/))/volume
        v_lateral_north = dim_sum_n_Wrap(v(:,{0:z1},{x2},{y1:y2})*(T(:,{0:z1},{x2},{y1:y2}) - Tbox_3d)*dx({15})*dz_3d, (/1,2/))/volume
- 
+
     ;; lateral heat transport west and east u*(T -Tbox)dydz,west: 0N ,110-155,north: 15N ,110-155
        dim := dimsizes(v(:,{0:z1},{x1:x2},{y1}))
        ; dx_3d =conform_dims(dim ,dx({0:15}) , 2)
@@ -194,7 +194,7 @@ printVarSummary(wt)
     ;;;
     
 
-     ;; lateral heat transport vertical w*(T -Tbox)dxdy 
+    ;;; lateral heat transport vertical w*(T -Tbox)dxdy 
        
        dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
        dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
@@ -203,6 +203,23 @@ printVarSummary(wt)
        w_bottom = dim_sum_n_Wrap(wt(:,4,{x1:x2},{y1:y2})*(T(:,4,{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
     ;;;
     
+    
+    ;;;;v_lateral_south west and east to define effect from ITF     
+        
+       dz_3d1 =conform_dims(dimsizes(v(:,{0:z1},{x1},{y1:130})), dz , 1)
+       Tbox_3d1 = conform_dims(dimsizes(v(:,{0:z1},{x1},{y1:130})) ,Tbox , 0)
+         
+    
+       v_lateral_south_west = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:130})*(T(:,{0:z1},{x1},{y1:130}) - Tbox_3d1)*dx({0})*dz_3d1, (/1,2/))/volume
+
+      
+
+       dz_3d2 =conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})), dz , 1)
+       Tbox_3d2 = conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})) ,Tbox , 0)
+         
+       v_lateral_south_east = dim_sum_n_Wrap(v(:,{0:z1},{x1},{130:y2})*(T(:,{0:z1},{x1},{130:y2}) - Tbox_3d2)*dx({0})*dz_3d2, (/1,2/))/volume
+
+
     
     ;;;平流项
        hadv_mean = v_lateral_north +v_lateral_south + u_lateral_west + u_lateral_east
@@ -219,11 +236,12 @@ printVarSummary(wt)
        u_lateral_east  = 30*86400*u_lateral_east
        u_lateral_west = 30*86400*u_lateral_west
 
-
+       v_lateral_south_west = 30*86400*v_lateral_south_west
+       v_lateral_south_east = 30*86400*v_lateral_south_east
 
     ;;;
 
-
+    
 
 
     ;;;年平均
@@ -242,11 +260,14 @@ printVarSummary(wt)
 
         u_lateral_east_annual = wgt_annual(u_lateral_east)
         u_lateral_west_annual = wgt_annual(u_lateral_west)
+
+        v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
+        v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
+       
+
     ;;;
 
     ;;;
-       
-    
         total_ocean_annual = hadv_mean_annual
         total_ocean_annual = hadv_mean_annual + vadv_mean_annual
     ;;;
@@ -363,7 +384,10 @@ printVarSummary(wt)
    rc_v_lateral_south = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_annual, 0, 0)
    rc_v_lateral_north = regCoef_n(ispan(1, yearnum, 1),v_lateral_north_annual, 0, 0)
 
+  
 
+   rc_v_lateral_south_west = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_west_annual, 0, 0)
+   rc_v_lateral_south_east = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_east_annual, 0, 0)
 
 
 
@@ -383,9 +407,12 @@ printVarSummary(wt)
 
    rc_u_lateral_west = rc_u_lateral_west*yearnum
    rc_u_lateral_east = rc_u_lateral_east*yearnum
-   
+    
    rc_v_lateral_south = rc_v_lateral_south*yearnum
    rc_v_lateral_north = rc_v_lateral_north*yearnum
+
+    rc_v_lateral_south_west = rc_v_lateral_south_west*yearnum
+    rc_v_lateral_south_east = rc_v_lateral_south_east*yearnum
    
 
 
@@ -402,14 +429,12 @@ printVarSummary(wt)
    print("rc_u_lateral_west="+rc_u_lateral_west)
 
    print("rc_v_lateral_south="+rc_v_lateral_south)
-    print("rc_v_lateral_north="+rc_v_lateral_north)
+   print("rc_v_lateral_north="+rc_v_lateral_north)
 
-
-
-
-
-
-
+   print("rc_v_lateral_south_west="+rc_v_lateral_south_west)
+   print("rc_v_lateral_south_east="+rc_v_lateral_south_east)
+   
+  
    
    rc_Tbox = regCoef_n(ispan(1, yearnum, 1),Tbox_annual, 0, 0)
 
@@ -449,11 +474,16 @@ print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(17:), 0))
 Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(17:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
 ocean_diff = dim_avg_n_Wrap(total_ocean_annual(17:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
 dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(17:), 0) - dim_avg_n_Wrap(dT_wgt(0:16), 0)
+ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
+ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean_annual(17:), 0) - dim_avg_n_Wrap(hadv_mean_annual(0:16), 0)
 
 
 print("Q_net_diff="+Q_net_diff)
 print("ocean_diff="+ocean_diff)
 print("dT_wgt_diff="+dT_wgt_diff)
+print("ocean_vadv_diff="+ocean_vadv_diff)
+print("ocean_hadv_diff="+ocean_hadv_diff)
+exit()
 
 
 

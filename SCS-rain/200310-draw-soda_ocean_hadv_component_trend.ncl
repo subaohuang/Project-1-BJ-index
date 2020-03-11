@@ -96,10 +96,14 @@ begin
      u_mon = u
      v_mon = v
      do i = 0,yearnum-1,1
-     T_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), T_bar(i,:,:,:), (/1,2,3/))
-     u_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), u_bar(i,:,:,:), (/1,2,3/))
-     v_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), v_bar(i,:,:,:), (/1,2,3/))
+     T_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), T_annual(i,:,:,:), (/1,2,3/))
+     u_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), u_annual(i,:,:,:), (/1,2,3/))
+     v_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), v_annual(i,:,:,:), (/1,2,3/))
      end do 
+     delete(u_annual)
+     delete(v_annual)
+     delete(T_annual)
+     delete(wt_annual)
      
       T_eddy = T 
       T_eddy = (/T - T_mon/)     ;;;;eddy term
@@ -107,9 +111,26 @@ begin
       u_eddy = (/u - u_mon/)     ;;;;eddy term
       v_eddy = v 
       v_eddy = (/v - v_mon/)     ;;;;eddy term
-
+      delete(T_mon)
+      delete(u_mon)
+      delete(v_mon)
+    
+      u_delta&lat@units = "degrees-north"
+      u_delta&lon@units = "degrees-east"
+      u_eddy&lat@units = "degrees-north"
+      u_eddy&lon@units = "degrees-east"
 
   ;;;calculate Horizontal and Vertical advction
+
+     ;;;total 
+      dT  = grad_latlon_cfd (T, T&lat, T&lon, True, False)
+      hadv_total_month = u
+      hadv_total_month = u*dT[1] + v*dT[0]
+      hadv_total_annual = month_to_annual(hadv_total_month, 1)
+      hadv_total = hadv_total_annual
+      hadv_total =  dim_rmvmean_n_Wrap(hadv_total_annual,0)
+      hadv_total = (/-1*hadv_total/)
+
 
      ;;;;σu*DT/dx + σv*DT/dy
 
@@ -117,7 +138,7 @@ begin
                            
       hadv_dynamic = u_delta
 
-      hadv_dynamic = u_delta*conform_dims(dimsizes(u_delta),dT_clm[0], (/1,2,3/)) + v_delta*conform_dims(dimsizes(v_delta),dT_clm[1], (/1,2,3/))
+      hadv_dynamic = u_delta*conform_dims(dimsizes(u_delta),dT_clm[1], (/1,2,3/)) + v_delta*conform_dims(dimsizes(v_delta),dT_clm[0], (/1,2,3/))
       hadv_dynamic = (/-1*hadv_dynamic/)
      ;;;;
 
@@ -125,63 +146,76 @@ begin
 
       dT_delta  = grad_latlon_cfd (T_delta, T_delta&lat, T_delta&lon, True, False)
       hadv_thermaldy = T_delta
-      hadv_thermaldy = dT_delta[0]*conform_dims(dimsizes(dT_delta[0]),u_clm, (/1,2,3/)) + dT_delta[1]*conform_dims(dimsizes(dT_delta[1]),v_clm, (/1,2,3/))  
+      hadv_thermaldy = dT_delta[1]*conform_dims(dimsizes(dT_delta[0]),u_clm, (/1,2,3/)) + dT_delta[0]*conform_dims(dimsizes(dT_delta[1]),v_clm, (/1,2,3/))  
       hadv_thermaldy = (/-1*hadv_thermaldy/)
 
      ;;;;σu*DσT/dx + σv*DσT/dy
       hadv_quad  = u_delta 
-      hadv_quad  = dT_delta[0]*u_delta + dT_delta[1]*v_delta
+      hadv_quad  = dT_delta[1]*u_delta + dT_delta[0]*v_delta
       hadv_quad = (/-1*hadv_quad/)
      ;;;;
 
      ;;;eddy 
       dT_eddy  = grad_latlon_cfd (T_eddy, T_eddy&lat, T_eddy&lon, True, False)
       hadv_e = u_eddy
-      hadv_e = u_eddy*dT_eddy[0] + v_eddy*dT_eddy[1]
+      hadv_e = u_eddy*dT_eddy[1] + v_eddy*dT_eddy[0]
       hadv_eddy = month_to_annual(hadv_e, 1)
       hadv_eddy = (/dim_rmvmean_n(hadv_eddy, 0) /)
+      hadv_eddy = (/-1*hadv_eddy/)
      ;;;
   ;;;
   
   ;;;垂直积分平均，在混合层内进行
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
-    z =  vadv&depth
+    z = u&depth
     z&depth = z
     print(z)    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
     copy_VarCoords(u(1,:,:,:), dz)
+   
      
-    dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
+    dz_4d = conform_dims(dimsizes(u_delta), dz, (/1,2,3/))
 
     hadv_dynamic_mean = dim_sum_n_Wrap(hadv_dynamic*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     hadv_thermaldy_mean  = dim_sum_n_Wrap(hadv_thermaldy*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     hadv_quad_mean  = dim_sum_n_Wrap(hadv_quad*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     hadv_eddy_mean  = dim_sum_n_Wrap(hadv_eddy*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+    hadv_total_mean = dim_sum_n_Wrap(hadv_total*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
    
    
-    copy_VarCoords(u(:,1,:,:), hadv_dynamic_mean)
-    copy_VarCoords(u(:,1,:,:), hadv_thermaldy_mean)
-    copy_VarCoords(u(:,1,:,:), hadv_quad_mean)
-    copy_VarCoords(u(:,1,:,:), hadv_eddy_mean)
+    copy_VarCoords(u_delta(:,1,:,:), hadv_dynamic_mean)
+    copy_VarCoords(u_delta(:,1,:,:), hadv_thermaldy_mean)
+    copy_VarCoords(u_delta(:,1,:,:), hadv_quad_mean)
+    copy_VarCoords(u_delta(:,1,:,:), hadv_eddy_mean)
+    copy_VarCoords(u_delta(:,1,:,:), hadv_total_mean)
 
       ;;;convert to units degree ℃/year
       hadv_dynamic_mean =365*86400*hadv_dynamic_mean
       hadv_thermaldy_mean =365*86400*hadv_thermaldy_mean
       hadv_quad_mean = 365*86400*hadv_quad_mean
       hadv_eddy_mean  = 365*86400*hadv_eddy_mean
+      hadv_total_mean  = 365*86400*hadv_total_mean
     ;;;
+
 ;;;
 
 
 ;;;;calculate trend 
 print("*******计算趋势*****************")
 ;;;calculate correlation coef
+    
+     ;;;total 
+    
+    r_hadv_total =   regCoef_n(ispan(1,yearnum,1), hadv_total_mean, 0, 0)  
+    copy_VarCoords(hadv_dynamic_mean(0,:,:), r_hadv_total)
+
 
     ;;;hadv dynamic
+    
     r_hadv_dynamic =   regCoef_n(ispan(1,yearnum,1), hadv_dynamic_mean, 0, 0)  
     copy_VarCoords(hadv_dynamic_mean(0,:,:), r_hadv_dynamic)
-    
+
     ;;;hadv_thermaldy
     r_hadv_thermaldy =   regCoef_n(ispan(1,yearnum,1), hadv_thermaldy_mean, 0, 0)    
     copy_VarCoords(hadv_thermaldy_mean(0,:,:), r_hadv_thermaldy)
@@ -196,10 +230,11 @@ print("*******计算趋势*****************")
     copy_VarCoords(hadv_eddy_mean(0,:,:), r_hadv_eddy)
     ;;;
    
-    r_hadv_dynamic = (/r_hadv_dynamic*yearnum*10^10/)
-    r_hadv_thermaldy = (/r_hadv_thermaldy*yearnum*10^10/)
-    r_hadv_quad = (/r_hadv_quad*yearnum*10^10/)
-    r_hadv_eddy = (/r_hadv_eddy*yearnum*10^10/)
+    r_hadv_dynamic = (/r_hadv_dynamic*yearnum/)
+    r_hadv_thermaldy = (/r_hadv_thermaldy*yearnum/)
+    r_hadv_quad = (/r_hadv_quad*yearnum/)
+    r_hadv_eddy = (/r_hadv_eddy*yearnum/)
+    r_hadv_total = (/r_hadv_total*yearnum/)
 
 
 ;;;;
@@ -207,19 +242,25 @@ print("*******计算趋势*****************")
 print("*******显著性检验*****************")
 
 ;;;t test 
-  prob_p1= rc_test(r_hadv_dynamicav)
-  copy_VarCoords(r_hadv_dynamicav, prob_p1)
+r_hadv_dynamic&lat@units = "degrees-north"
+r_hadv_dynamic&lon@units = "degrees-east"
+  prob_p1= rc_test(r_hadv_dynamic)
+  copy_VarCoords(r_hadv_dynamic, prob_p1)
 
   printVarSummary(prob_p1)
   prob_p2= rc_test(r_hadv_thermaldy)
 
-  copy_VarCoords(r_hadv_thermaldy, prob_p2)
+  copy_VarCoords(r_hadv_dynamic, prob_p2)
 
    prob_p3= rc_test(r_hadv_quad)
-  copy_VarCoords(r_hadv_quad, prob_p3)
+  copy_VarCoords(r_hadv_dynamic, prob_p3)
   
   prob_p4= rc_test(r_hadv_eddy)
-  copy_VarCoords(r_hadv_eddy, prob_p4)
+  copy_VarCoords(r_hadv_dynamic, prob_p4)
+
+
+  prob_p5= rc_test(r_hadv_total)
+  copy_VarCoords(r_hadv_dynamic, prob_p5)
 
 
 
@@ -268,12 +309,12 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
+  res@cnMinLevelValF       =   -1
+  res@cnMaxLevelValF       =   1
   res@cnLevelSpacingF      =  0.1
- 
 
-  plot = new(4,graphic)
+
+  plot = new(5,graphic)
   res@gsnLeftString = "hadv_dynamic"
   plot(0) = gsn_csm_contour_map(wks, r_hadv_dynamic, res)
  
@@ -286,7 +327,9 @@ print("*********开始画图********")
   res@gsnLeftString = "hadv_eddy"
   plot(3) = gsn_csm_contour_map(wks, r_hadv_eddy, res)
   
-
+  res@gsnLeftString = "hadv_total"
+  plot(4) = gsn_csm_contour_map(wks, r_hadv_total, res)
+  
 
   ;;;添加赤道直线
     pgx=ispan(30,390,10)
@@ -298,9 +341,9 @@ print("*********开始画图********")
     pgres@gsLineThicknessF=1.0
     pgres@gsLineDashPattern=1
   
-    str = "" + ispan(1,4,1)
+    str = "" + ispan(1,5,1)
 
-   do i = 0,3
+   do i = 0,4
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
    end do
 
@@ -322,8 +365,8 @@ print("*********开始画图********")
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   str2 = "0" + ispan(1,4,1)
-   do i = 0,3
+   str2 = "0" + ispan(1,5,1)
+   do i = 0,4
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
@@ -342,13 +385,14 @@ print("*********开始画图********")
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
 
-    iplot=new(4,graphic)
+    iplot=new(5,graphic)
 
     
       iplot(0) = gsn_csm_contour(wks,prob_p1,res_pro)
       iplot(1) = gsn_csm_contour(wks,prob_p2,res_pro)
       iplot(2) = gsn_csm_contour(wks,prob_p3,res_pro)
       iplot(3) = gsn_csm_contour(wks,prob_p4,res_pro)
+      iplot(4) = gsn_csm_contour(wks,prob_p5,res_pro)
       
 
   
@@ -361,19 +405,19 @@ print("*********开始画图********")
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
 
-    do i = 0,3
+    do i = 0,4
      iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
     end do
 
     ;;;  
-    do i = 0,3
+    do i = 0,4
       overlay(plot(i), iplot(i))
     end do 
 
   pres = True
   pres@gsnPanelLabelBar  = True
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/3,2/), pres)
  
 
 
