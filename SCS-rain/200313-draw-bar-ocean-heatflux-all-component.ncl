@@ -298,17 +298,59 @@ printVarSummary(wt)
            eddy_west_change = total_west_change - dynamic_west_change - thermaldy_west_change - quad_west_change 
            eddy_east_change = total_east_change - dynamic_east_change - thermaldy_east_change - quad_east_change 
 
-;;;;;;;
+;;;;;;;垂直扩散变化项
+     
+    ;;; lateral heat transport vertical w*(T -Tbox)dxdy 
+       
+       dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
+       dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
+       Tbox_3d :=conform_dims(dim, Tbox, 0)       
+  
+       vadv = dim_sum_n_Wrap(wt(:,4,{x1:x2},{y1:y2})*(T(:,4,{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
+       total_vertical_change  =  dim_avg_n_Wrap(vadv(12*17:), 0) - dim_avg_n_Wrap(vadv(0:12*17-1), 0)
+
+    ;;;σW*T
+       dx_2d :=conform_dims(dimsizes(wt(1,4,{x1:x2},{y1:y2})) ,dx({0:15}) , 0)
+
+       wt_delta = dim_avg_n_Wrap(wt(12*17:,{z1},{x1:x2},{y1:y2}), 0) - dim_avg_n_Wrap(wt(0:12*17-1,{z1},{x1:x2},{y1:y2}), 0)
+       T_clm_vertical =dim_avg_n_Wrap((T(0:12*17-1,{z1},{x1:x2},{y1:y2}) - Tbox_3d(0:12*17-1,:,:)),0)
+       dynamic_vertical_change = sum(wt_delta*T_clm_vertical*dy*dx_2d)/volume(0)
+    ;;;wσT
+
+       T_delta =   dim_avg_n_Wrap((T(12*17:,{z1},{x1:x2},{y1:y2}) - Tbox_3d(12*17:,:,:)),0)-\
+                      dim_avg_n_Wrap((T(0:12*17-1,{z1},{x1:x2},{y1:y2}) - Tbox_3d(0:12*17-1,:,:)),0)
+
+       wt_clm =dim_avg_n_Wrap(wt(0:12*17-1,{z1},{x1:x2},{y1:y2}),0)
+       thermaldy_vertical_change = sum(wt_clm*T_delta*dy*dx_2d)/volume(0)
+    ;;;
+
+    ;;;quad 
+       quad_vertical_change = sum(wt_delta*T_delta*dy*dx_2d)/volume(0)
+    ;;;;
+  
+    ;;;eddy
+
+           dx_3d1 =conform_dims(dimsizes(v(0:12*17-1,{z1},{x1:x2},{y1:y2})) ,dx({0:15}) , 1)
+           dx_3d2 =conform_dims(dimsizes(v(12*17:,{z1},{x1:x2},{y1:y2})) ,dx({0:15}), 1)
+
+           T_diff_vertical = T(:,{z1},{x1:x2},{y1:y2})
+           T_diff_vertical = T(:,{z1},{x1:x2},{y1:y2}) - Tbox_3d
+
+           wt_eddy_vertical1  = wt(0:12*17-1,{z1},{x1:x2},{y1:y2}) - conform_dims(dimsizes(dx_3d1), wt_clm, (/1,2/))
+
+           T_eddy_vertical1  = T_diff_vertical(0:12*17-1,:,:) - conform_dims(dimsizes(dx_3d1), T_clm_vertical, (/1,2/))
+
+           wt_eddy_vertical2  = wt(12*17:,{z1},{x1:x2},{y1:y2}) - conform_dims(dimsizes(dx_3d2), dim_avg_n_Wrap(wt(12*17:,{z1},{x1:x2},{y1:y2}),0), (/1,2/))
+
+           T_eddy_vertical2  = T_diff_vertical(12*17:,:,:) - conform_dims(dimsizes(dx_3d2), dim_avg_n_Wrap((T(12*17:,{z1},{x1:x2},{y1:y2})-Tbox_3d(12*17:,:,:)),0), (/1,2/))
+
+           eddy_vertical_change = avg(dim_sum_n_Wrap(wt_eddy_vertical2*T_eddy_vertical2*dy*dx_3d2,(/1,2/))/volume(0)) - \
+                              avg(dim_sum_n_Wrap(wt_eddy_vertical1*T_eddy_vertical1*dy*dx_3d1,(/1,2/))/volume(0))
 
 
+       eddy_vertical_change2 = total_vertical_change - dynamic_vertical_change - thermaldy_vertical_change - quad_vertical_change
 
-
-
-
-
-
-
-
+    ;;;
 
  ;;convert to ℃/year
     total_south_change = 365*86400*total_south_change
@@ -337,6 +379,13 @@ printVarSummary(wt)
     quad_east_change = 365*86400*quad_east_change
     eddy_east_change = 365*86400*eddy_east_change
 
+    total_vertical_change = 365*86400*total_vertical_change
+    dynamic_vertical_change =  365*86400*dynamic_vertical_change
+    thermaldy_vertical_change = 365*86400*thermaldy_vertical_change
+    quad_vertical_change = 365*86400*quad_vertical_change
+    eddy_vertical_change = 365*86400*eddy_vertical_change
+    eddy_vertical_change2 = 365*86400*eddy_vertical_change2
+
 
   
     
@@ -344,9 +393,12 @@ print("*********开始画图********")
  
   ;;;
 
-  number = new((/5,2/),float)
+  number = new((/5,5/),float)
   number(:,0) = (/total_south_change,dynamic_south_change,thermaldy_south_change,quad_south_change,eddy_south_change/) 
   number(:,1) = (/total_north_change,dynamic_north_change,thermaldy_north_change,quad_north_change,eddy_north_change/) 
+  number(:,2) = (/total_west_change,dynamic_west_change,thermaldy_west_change,quad_west_change,eddy_west_change/) 
+  number(:,3) = (/total_east_change,dynamic_east_change,thermaldy_east_change,quad_east_change,eddy_east_change/) 
+  number(:,4) = (/total_vertical_change,dynamic_vertical_change,thermaldy_vertical_change,quad_vertical_change,eddy_vertical_change/) 
 
  
 ;;;
@@ -354,57 +406,63 @@ print("*********开始画图********")
 ; Mission 5. bar plot
 ; ==============================================================
   
-    wks = gsn_open_wks("pdf","海洋水平平流变化项的bar图-热力与动力项")          ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","海洋各个通量变化项的bar图-热力与动力项")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7
      sres@vpHeightF = 0.5
      sres@vpXF = .15
      sres@trXMinF = 0.5
-     sres@trXMaxF = 2.25
-     sres@trYMinF = -0.1
-     sres@trYMaxF = 0.1
+     sres@trXMaxF = 5.5
+     sres@trYMinF = -0.08
+     sres@trYMaxF = 0.08
+
      sres@gsnDraw = True
      sres@gsnFrame = False
      sres@gsnXYBarChart = True
-     sres@gsnXYBarChartBarWidth = 0.1           ; change bar widths
+     sres@gsnXYBarChartBarWidth = 0.15           ; change bar widths
      sres@tmXBMode          = "Explicit"         ; explicit labels
-     sres@tmXBValues        = (/1,2/)
-     sres@tmXBLabels = (/"South","North"/)
+     sres@tmXBValues        = (/1,2,3,4,5/)
+     sres@tmXBLabels = (/"South","North","West","East","Vertical"/)
+     ; sres@tmYLPrecision = 1
+      sres@tmYLMode   = "Explicit"        ; explicitly set Y-axis labels
+      sres@tmYLValues = ispan(-8, 8, 2)*0.01
+      sres@tmYLLabels = ispan(-8, 8, 2)*0.01
+     
      sres@tmXBLabelFontHeightF = 0.0205
      sres@tmXTLabelFontHeightF = 0.0205
      sres@tmYLLabelFontHeightF = 0.0225
      sres@tiMainFontHeightF = 0.025
      sres@gsnRightString = ""
      sres@tiYAxisString = "(~S~o~N~C/year)"
+     sres@tiYAxisFontHeightF  =0.02
      sres@gsnYRefLine = 0.      ; set the reference line equal to 0
         
 
      str = ispan(1,5,1)
-     color = (/"red","lightblue","green","blue","gray"/)
+     color = (/"black","blue","red","green","gray"/)
      plot = new(5,graphic)
      do i = 0,4
      sres@gsnXYBarChartColors = color(i)
-     plot(i) = gsn_csm_xy(wks,(/0.75+0.1*i,1.75+0.1*i/),number(i,:),sres)   ; draw each time series
+     plot(i) = gsn_csm_xy(wks,(/0.75+0.15*i,1.75+0.15*i,2.75+0.15*i,3.75+0.15*i,4.75+0.15*i/),number(i,:),sres)   ; draw each time series
      end do
 
-
-     ; lbres                    = True          ; labelbar only resources
-     ; lbres@vpWidthF           = 0.3           ; labelbar width
-     ; lbres@vpHeightF          = 0.1           ; labelbar height
-     ; lbres@lbBoxMajorExtentF  = 0.36          ; puts space between color boxes
-     ; lbres@lbFillColors       = (/"red","lightblue","green"/)
-     ; lbres@lbMonoFillPattern  = True          ; Solid fill pattern
-     ; lbres@lbLabelFontHeightF = 0.035         ; font height. default is small
-     ; lbres@lbLabelJust        = "CenterLeft"  ; left justify labels
-     ; lbres@lbPerimOn          = False
-     ; lbres@lgPerimColor    = "white"
-     ; labels = (/"VT","VT'","V'T"/)
-     ; gsn_labelbar_ndc(wks,3,labels,0.17,0.33,lbres) ; draw right labelbar column
+     lbres                    = True          ; labelbar only resources
+     lbres@vpWidthF           = 0.3           ; labelbar width
+     lbres@vpHeightF          = 0.1           ; labelbar height
+     lbres@lbBoxMajorExtentF  = 0.36          ; puts space between color boxes
+     lbres@lbFillColors       = (/"red","blue","black"/)
+     lbres@lbMonoFillPattern  = True          ; Solid fill pattern
+     lbres@lbLabelFontHeightF = 0.015         ; font height. default is small
+     lbres@lbLabelJust        = "CenterLeft"  ; left justify labels
+     lbres@lbPerimOn          = False
+     lbres@lgPerimColor    = "white"
+     labels = (/"d(VT)","dV.Tclm","dT.Vclm"/)
+     gsn_labelbar_ndc(wks,3,labels(::-1),0.17,0.23,lbres) ; draw right labelbar column
   
-     ; lbres@lbFillColors       := (/"blue","gray"/)
-     ; labels := (/"V'T'","eddy"/)
-     ; gsn_labelbar_ndc(wks,2,labels,0.52,0.33,lbres) ; draw left labelbar column
+     lbres@lbFillColors       := (/"gray","green"/)
+     labels := (/"dV.dT","d(V'T')"/)
+     gsn_labelbar_ndc(wks,2,labels(::-1),0.52,0.23,lbres) ; draw left labelbar column
      frame(wks)      
 end
 

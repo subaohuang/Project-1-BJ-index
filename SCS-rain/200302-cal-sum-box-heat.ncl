@@ -212,12 +212,25 @@ printVarSummary(wt)
     
        v_lateral_south_west = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:130})*(T(:,{0:z1},{x1},{y1:130}) - Tbox_3d1)*dx({0})*dz_3d1, (/1,2/))/volume
 
-      
-
        dz_3d2 =conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})), dz , 1)
        Tbox_3d2 = conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})) ,Tbox , 0)
          
        v_lateral_south_east = dim_sum_n_Wrap(v(:,{0:z1},{x1},{130:y2})*(T(:,{0:z1},{x1},{130:y2}) - Tbox_3d2)*dx({0})*dz_3d2, (/1,2/))/volume
+    
+
+        dz_3d3 =conform_dims(dimsizes(v(:,{0:z1},{7.5:x2},{y1})), dz , 1)
+        Tbox_3d3 = conform_dims(dimsizes(v(:,{0:z1},{7.5:x2},{y1})) ,Tbox , 0)
+       
+        u_lateral_west_north = dim_sum_n_Wrap(u(:,{0:z1},{7.5:x2},{y1})*(T(:,{0:z1},{7.5:x2},{y1}) - Tbox_3d3)*dy*dz_3d3, (/1,2/))/volume
+        
+        dz_3d4 =conform_dims(dimsizes(v(:,{0:z1},{x1:7.5},{y1})), dz , 1)
+        Tbox_3d4 = conform_dims(dimsizes(v(:,{0:z1},{x1:7.5},{y1})) ,Tbox , 0)
+
+        u_lateral_west_south = dim_sum_n_Wrap(u(:,{0:z1},{x1:7.5},{y1})*(T(:,{0:z1},{x1:7.5},{y1}) - Tbox_3d4)*dy*dz_3d4, (/1,2/))/volume
+
+    ;;;
+
+
 
 
     
@@ -238,6 +251,10 @@ printVarSummary(wt)
 
        v_lateral_south_west = 30*86400*v_lateral_south_west
        v_lateral_south_east = 30*86400*v_lateral_south_east
+
+       u_lateral_west_north = 30*86400*u_lateral_west_north
+       u_lateral_west_south = 30*86400*u_lateral_west_south
+       
 
     ;;;
 
@@ -263,6 +280,9 @@ printVarSummary(wt)
 
         v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
         v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
+
+        u_lateral_west_south_annual = wgt_annual(u_lateral_west_south)
+        u_lateral_west_north_annual = wgt_annual(u_lateral_west_north)
        
 
     ;;;
@@ -390,6 +410,10 @@ printVarSummary(wt)
    rc_v_lateral_south_east = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_east_annual, 0, 0)
 
 
+   rc_u_lateral_west_south = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_south_annual, 0, 0)
+   rc_u_lateral_west_north = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_north_annual, 0, 0)
+
+
 
 
 
@@ -413,6 +437,10 @@ printVarSummary(wt)
 
     rc_v_lateral_south_west = rc_v_lateral_south_west*yearnum
     rc_v_lateral_south_east = rc_v_lateral_south_east*yearnum
+
+    rc_u_lateral_west_south = rc_u_lateral_west_south*yearnum
+    rc_u_lateral_west_north = rc_u_lateral_west_north*yearnum
+   
    
 
 
@@ -433,6 +461,10 @@ printVarSummary(wt)
 
    print("rc_v_lateral_south_west="+rc_v_lateral_south_west)
    print("rc_v_lateral_south_east="+rc_v_lateral_south_east)
+
+   print("rc_u_lateral_west_south="+rc_u_lateral_west_south)
+   print("rc_u_lateral_west_north="+rc_u_lateral_west_north)
+   
    
   
    
@@ -474,7 +506,9 @@ print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(17:), 0))
 Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(17:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
 ocean_diff = dim_avg_n_Wrap(total_ocean_annual(17:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
 dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(17:), 0) - dim_avg_n_Wrap(dT_wgt(0:16), 0)
-ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
+; ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
+ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean(12*17:), 0) - dim_avg_n_Wrap(vadv_mean(0:12*17-1), 0)
+; ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean(12*17:), 0) - dim_avg_n_Wrap(hadv_mean(0:12*17-1), 0)
 ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean_annual(17:), 0) - dim_avg_n_Wrap(hadv_mean_annual(0:16), 0)
 
 
