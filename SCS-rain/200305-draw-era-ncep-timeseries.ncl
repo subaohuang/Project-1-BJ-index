@@ -7,7 +7,7 @@ begin
  
 ;;;read NCEP-NCAR heat flux data
 
-    fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP_DOE-heatflux-1degree.nc"
+    fils2 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
     f2 = addfile(fils2, "r")
 
     date:=cd_calendar(f2->time, 1)
@@ -19,6 +19,11 @@ begin
     shtfl = f2->shtfl(timeind,{lat1:lat2},{lon1:lon2})
     nswrs = f2->nswrs(timeind,{lat1:lat2},{lon1:lon2})
     nlwrs = f2->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
+
+    lhtfl = (/-1*lhtfl/)
+    shtfl = (/-1*shtfl/)
+    nswrs = (/-1*nswrs/)
+    nlwrs = (/-1*nlwrs/)
     
 
    lhtfl_a = dim_avg_n_Wrap(lhtfl(:,{0:15},{110:155}), (/1,2/))
@@ -32,10 +37,14 @@ begin
     shtfl_annual = month_to_annual(shtfl_a, 1)
     nswrs_annual = month_to_annual(nswrs_a, 1)
     nlwrs_annual = month_to_annual(nlwrs_a, 1)
+
+
+  
+    
     
 
     total_annual = shtfl_annual
-    total_annual =  nswrs_annual +nlwrs_annual - lhtfl_annual - shtfl_annual
+    total_annual =  nswrs_annual +nlwrs_annual + lhtfl_annual + shtfl_annual
     total_annual = total_annual
 ;;;;
 
@@ -82,7 +91,7 @@ print("***********画时间序列***************")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "Q-ncep-doeandQ-era-total")
+  wks   = gsn_open_wks("pdf", "Q-ncepandQ-era-total")
   plot=new(1,graphic)
   
   resxy = True

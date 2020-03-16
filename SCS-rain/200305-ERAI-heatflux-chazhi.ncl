@@ -55,26 +55,35 @@ begin
     date=cd_calendar(f3[:]->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
     time = f3[:]->time(timeind)
-
-    
+    lat = f3[1]->latitude
+    lon = f3[1]->longitude
+   print(f3)
+   exit()
     ;;;region 
       lat1 = -90
       lat2 = 90
       lon1 = 0
       lon2 = 360
     ;;;
-    
-    lhtfl = short2flt(f3[:]->slhf(timeind,{lat1:lat2},{lon1:lon2}))
-    shtfl = short2flt(f3[:]->sshf(timeind,{lat1:lat2},{lon1:lon2}))
-    nswrs = short2flt(f3[:]->ssr(timeind,{lat1:lat2},{lon1:lon2}))
-    nlwrs = short2flt(f3[:]->str(timeind,{lat1:lat2},{lon1:lon2}))
-    
+
+      lhtfl = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+      shtfl = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+      nswrs = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+      nlwrs = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+
+    do i = 0,dimsizes(timeind)/12-1
+      lhtfl(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->slhf(:,{lat1:lat2},{lon1:lon2}))
+      shtfl(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->sshf(:,{lat1:lat2},{lon1:lon2}))
+      nswrs(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->ssr(:,{lat1:lat2},{lon1:lon2}))
+      nlwrs(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->str(:,{lat1:lat2},{lon1:lon2}))
+    end do
+
   
 
 
     ;;;chazhi 
      
-     lhtfl_chazhi = chazhi(lhtfl
+     lhtfl_chazhi = chazhi(lhtfl)
      shtfl_chazhi = chazhi(shtfl)
 
      nswrs_chazhi = chazhi(nswrs)
