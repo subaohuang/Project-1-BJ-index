@@ -69,19 +69,40 @@ begin
 ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
 ;;;averaged in mixed layer
     
-    f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_u_mn_1980-2015_chazhi.nc", "r")   
-    f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
-    f4=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_wt_mn_1980-2015_chazhi.nc", "r")   
-    f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r")   
+     
+    f2=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_u_mn_1980-2015_chazhi.nc", "r")   
+    f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
+    f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
+    f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+    
 
 
     indyear = (2013-1980+1)*12-1
-    u = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    v = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    wt = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    T = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    u_r = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    v_r = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    wt_r = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    T_r = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    
+    u = tofloat(u_r)
+    v = tofloat(v_r)
+    wt = tofloat(wt_r)
+    T = tofloat(T_r)
+    mlt = tofloat(mlt_r)
+
+   copy_VarCoords(u_r, u) 
+   copy_VarCoords(v_r, v)
+   copy_VarCoords(wt_r, wt)
+   copy_VarCoords(T_r, T)
+   copy_VarCoords(mlt_r, mlt)
+
+    delete(u_r)
+    delete(v_r)
+    delete(wt_r)
+    delete(mlt_r)
+    delete(T_r)
+
 
  
     ;;;calculate Horizontal and Vertical advction
@@ -98,9 +119,9 @@ begin
 
     
     T_grad_z = center_finite_diff_n(T, T&depth,False,0,1)
-    
+
     vadv = wt
-    vadv = wt*T_grad_z
+    vadv = wt*tofloat(T_grad_z)
 
     ;;;convert to units degree ℃/year
       hadv =365*86400*hadv
@@ -110,7 +131,8 @@ begin
     ;;;;垂直积分平均，在混合层内进行
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
-    z =  vadv&depth
+    z =  tofloat(vadv&depth) 
+    z!0 = "depth"
     z&depth = z
     print(z)    
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)

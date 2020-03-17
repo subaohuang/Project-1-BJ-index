@@ -314,7 +314,8 @@ printVarSummary(wt)
      L2 = 23
      nswrs_pen = nswrs
      ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     nswrs_pen = 0.05*nswrs
+     mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
+     nswrs_pen = mo*nswrs
 
   
     ;;;
@@ -506,8 +507,8 @@ print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(17:), 0))
 Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(17:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
 ocean_diff = dim_avg_n_Wrap(total_ocean_annual(17:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
 dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(17:), 0) - dim_avg_n_Wrap(dT_wgt(0:16), 0)
-; ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
-ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean(12*17:), 0) - dim_avg_n_Wrap(vadv_mean(0:12*17-1), 0)
+ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
+; ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean(12*17:), 0) - dim_avg_n_Wrap(vadv_mean(0:12*17-1), 0)
 ; ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean(12*17:), 0) - dim_avg_n_Wrap(hadv_mean(0:12*17-1), 0)
 ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean_annual(17:), 0) - dim_avg_n_Wrap(hadv_mean_annual(0:16), 0)
 
@@ -517,7 +518,7 @@ print("ocean_diff="+ocean_diff)
 print("dT_wgt_diff="+dT_wgt_diff)
 print("ocean_vadv_diff="+ocean_vadv_diff)
 print("ocean_hadv_diff="+ocean_hadv_diff)
-exit()
+
 
 
 
@@ -539,7 +540,7 @@ exit()
   print("hadv_clm="+hadv_clm)
   print("vadv_clm="+vadv_clm)
 
-
+exit()
 
 
 ;;;

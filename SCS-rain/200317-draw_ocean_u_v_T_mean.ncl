@@ -1,5 +1,5 @@
 ;;********************************************************
-;;回归SODA的u,v趋势
+;;回归SODA的u,v，T的气候态
 ;;
 ;**********************************************************
 function  rc_test(ssta_rc)
@@ -86,35 +86,29 @@ begin
    v_annual  = month_to_annual(v_mean, 1)
    T_annual  = month_to_annual(T_mean, 1)
 
-  ;;计算趋势
-    rc_u = regCoef_n(ispan(1,34, 1), u_annual, 0, 0)
-    rc_v = regCoef_n(ispan(1,34, 1), v_annual, 0, 0)
-    rc_T = regCoef_n(ispan(1,34, 1), T_annual, 0, 0)
+  ;;;
+
+  ;;;计算平均
+
+    rc_u = dim_avg_n_Wrap(u_annual, 0)
+    rc_v = dim_avg_n_Wrap(v_annual, 0)
+    rc_T = dim_avg_n_Wrap(T_annual, 0)
   ;;;
    
-   rc_u = yearnum*rc_u
-   rc_v = yearnum*rc_v
-   rc_T = yearnum*rc_T
    copy_VarCoords(u(1,1,:,:), rc_u)
    copy_VarCoords(v(1,1,:,:), rc_v)
    copy_VarCoords(T(1,1,:,:), rc_T)
    
   ;;;
 
-  prob_T = rc_test(rc_T)
-  prob_u = rc_test(rc_u)
-  prob_v = rc_test(rc_v)
-  rc_T = where(prob_T.le.0.05, rc_T, rc_T@_FillValue)
-  ; rc_v = where(prob_v.le.0.1, rc_v, rc_T@_FillValue)
-  ; rc_u = where(prob_u.le.0.1, rc_u, rc_T@_FillValue)
-
+  
 
 
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "海洋u,v,T的趋势-SCS")
+  wks   = gsn_open_wks("pdf", "海洋u,v,T的气候态-SCS")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False
@@ -124,10 +118,10 @@ begin
   res@cnFillPalette="BlueWhiteOrangeRed"
 
   res@cnFillOn=True
-  res@cnLinesOn=False
- res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1
-  res@cnMaxLevelValF       =   1
+  res@cnLinesOn=True
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnMinLevelValF       =   28
+  res@cnMaxLevelValF       =   30
   res@cnLevelSpacingF      =  0.1
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
@@ -163,10 +157,10 @@ begin
   ; res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.01           ; thin vectors
-  res@vcMinMagnitudeF          =0.01
-  ; res@vcMaxMagnitudeF          =0.1
-  res@vcRefLengthF             = 0.015 ; define length of v
-  res@vcRefMagnitudeF = 0.05
+  ; res@vcMinMagnitudeF          =0.01
+  res@vcMaxMagnitudeF          =1
+  res@vcRefLengthF             = 0.03 ; define length of v
+  res@vcRefMagnitudeF = 0.2
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.5
 
