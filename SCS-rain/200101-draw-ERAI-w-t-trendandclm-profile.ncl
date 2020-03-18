@@ -84,6 +84,7 @@ begin
 
     ;;将温度处理成位势温度
      pt = pot_temp(level*100, t, 1, False)
+     copy_VarCoords(t, pt)
      
   
     p=level*100
@@ -102,7 +103,7 @@ begin
      ; dtdp_annual = month_to_season(dtdp, MONTH)
      
       w_annual = month_to_annual(w, 1) 
-      t_annual = month_to_annual(t, 1)
+      t_annual = month_to_annual(pt, 1)
       dtdp_annual = month_to_annual(dtdp, 1)
 
 

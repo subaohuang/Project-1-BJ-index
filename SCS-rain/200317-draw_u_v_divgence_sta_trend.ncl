@@ -31,10 +31,10 @@ begin
     ; ;;;
     
     ;;;region
-     lat1 = -5
-     lat2 = 45
+     lat1 = -30
+     lat2 = 30
      lon1 = 90
-     lon2 = 160
+     lon2 = 270
 
     ;;;time span
     startmon =197901
@@ -88,20 +88,24 @@ begin
    ;;;计算大气不稳定度 ：假相当位温：difference between 1000 and 700 hPa
       p = t&level
       pre = p*100.0
+      printVarSummary(t)
+      printVarSummary(q)
+
       sigmae = pot_temp_equiv(pre,t,q,1,"q")
       printVarSummary(sigmae)
       
-     sta_s = sigmae(:,{1000},:,:) - sigmae(:,{700},:,:) 
+     sta_s = sigmae(:,{1000},:,:) - sigmae(:,{950},:,:) 
+   
      copy_VarCoords(u(:,:,:), sta_s)
      printVarSummary(sta_s)
     ;;;
 
     
-   ;;;处理成年异常数据
+   ;;;处理成年异常数据  
      u = (/rmMonAnnCycTLL(u)/)
      v = (/rmMonAnnCycTLL(v)/)
      d = (/rmMonAnnCycTLL(d)/)
-     sta_s = (/rmMonAnnCycTLL(sta_s)/)
+     ; sta_s = (/rmMonAnnCycTLL(sta_s)/)
 
 
 
@@ -110,6 +114,34 @@ begin
      d_annual = month_to_annual(d, 1)
      sta_s_annual = month_to_annual(sta_s, 1)
    ;;;
+
+   ;;;区域平均 
+      sigmae_scs = dim_avg_n_Wrap(sigmae(:,{1000:200},{20:35},{110:125}), (/2,3/))
+      sigmae_scs_clm  = dim_avg_n_Wrap(sigmae_scs, 0)
+      rc = regCoef_n(ispan(1, yearnum*12, 1),sigmae_scs, 0, 0)
+      sigmae_scs_change = rc*yearnum*12 + sigmae_scs_clm
+    ;;;
+
+    wks = gsn_open_wks("pdf","ERA-In华南地区相当位温的气候态和趋势的profile")                  ; send graphics to PNG file
+    resxy = True
+    resxy@gsnDraw = False
+    resxy@gsnFrame  =False
+    resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
+    resxy@xyMonoLineThickness = True
+    resxy@xyLineColors       =  (/"black","blue"/)          ; change line color
+    resxy@xyMarkLineModes    =  (/"lines","lines"/)
+    resxy@xyExplicitLegendLabels  =  (/"main","dyn"/)     ;加线的标注
+    resxy@trYReverse        = True               
+    ; resxy@trYMinF = 100        ; reverse Y-axis
+
+    plot1 = gsn_csm_xy(wks, (/sigmae_scs_clm,sigmae_scs_change/),sigmae_scs&level,resxy)
+    draw(plot1)
+    frame(wks)
+
+ 
+
+ 
+
   
    ;;回归
    u_rc = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
@@ -127,6 +159,8 @@ begin
    v_rc = (/v_rc*yearnum/)
    sta_s_rc = (/sta_s_rc*yearnum/)
 
+   ; sta_s_rc = dim_avg_n_Wrap(sta_s_annual, 0)
+
 
    ;;;
 
@@ -138,27 +172,28 @@ begin
     prob_sta_s = rc_test(sta_s_rc)
    ;;;
  
-   ; slp_rc = where(prob_slp.le.0.1, slp_rc, slp_rc@_FillValue)
+   ; d_rc = where(prob_d.le.0.1, d_rc, d_rc@_FillValue)
+   ; sta_s_rc = where(prob_sta_s.le.0.1, sta_s_rc, sta_s_rc@_FillValue)
    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
   wks   = gsn_open_wks("pdf", "散度,uv以及大气净力稳定度_trend")
-  plot=new(1,graphic)
+
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
-  res@cnFillPalette="BlueRed"
+  res@cnFillPalette="BlueWhiteOrangeRed"
 
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -5.0
-  res@cnMaxLevelValF       =   5.0
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -80.0
+  res@cnMaxLevelValF       =   80.0
+  res@cnLevelSpacingF      =  10.0
   ;   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1
   ; res@cnMaxLevelValF       =   1
@@ -208,10 +243,17 @@ begin
   ; res@vpWidthF=0.8
   plot = new(2, graphic)
   plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,d_rc ,res)
-
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -2.0
+  ; res@cnMaxLevelValF       =   8.0
+  ; res@cnLevelSpacingF      =  2.0
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnMinLevelValF       =   -2.0
+  res@cnMaxLevelValF       =   2.0
+  res@cnLevelSpacingF      =  0.2
 
   plot(1) = gsn_csm_contour_map(wks,sta_s_rc,res)
-
+ 
 
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
@@ -233,46 +275,50 @@ begin
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   i = 0
+   do i =0,1
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   end do
+
+   ;;;打点
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
+
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.003
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    ; res_pro@cnLevels = ispan(-6,6,1)
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
+    iplot = new(2,graphic)
+  
+    iplot(0)=gsn_csm_contour(wks,prob_d,res_pro)
+    iplot(1)=gsn_csm_contour(wks,prob_sta_s,res_pro)
    
 
-   ; ;;;打点
-   ;  res_pro=True
-   ;  res_pro@gsnAddCyclic = False
-   ;  res_pro@gsnDraw=False
-   ;  res_pro@gsnFrame=False
-   ;  res_pro@cnFillOn = True
+    do i =0,1
+    overlay(plot(i), iplot(i))
+    end do
+    pres = True
+    pres@gsnPanelLabelBar  = True
 
-   ;  res_pro@cnLevelSelectionMode = "ExplicitLevels"
-   ;  res_pro@cnLevels = (/0,0.1/)
-   ;  res_pro@lbLabelBarOn = False
-   ;  res_pro@cnLinesOn=False
-   ;  ; res_pro@cnMonoLineColor =False
-   ;  ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    gsn_panel(wks, plot, (/2,1/), pres)
 
-   ;  res_pro@cnMonoFillPattern = True
-   ;  res_pro@cnFillPattern = 17
-   ;  res_pro@cnFillDotSizeF = 0.0045
-   ;  res_pro@cnMonoFillColor = False
-   ;  res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-   ;  ; res_pro@cnLevels = ispan(-6,6,1)
-   ;  res_pro@cnLineLabelsOn=False
-   ;  res_pro@tmYRMode = "Automatic"
-   ;  res_pro@cnInfoLabelOn=False
-   ;  ; res_pro@cnLineLabelBackgroundColor="Transparent"
-   ;  ; res_pro@cnLineThicknessF = 3.
-   ;  ; res_pro@cnFillOn        = True
-   ;  iplot = new(1,graphic)
-
-   ;  iplot(0)=gsn_csm_contour(wks,prob_slp,res_pro)
-   
-
-   ;  i = 0
-   ;  overlay(plot(i), iplot(i))
-    
-    draw(plot)
-    frame(wks)
 
 end
     
