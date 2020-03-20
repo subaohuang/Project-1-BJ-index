@@ -341,6 +341,8 @@ printVarSummary(wt)
      ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
      ; mo = R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2)
      nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
+     ; nswrs_pen = 0.05*nswrs
+
 
   
     ;;;
@@ -359,7 +361,7 @@ printVarSummary(wt)
     ;;;
 
     ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
-    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
+    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)s
     ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
@@ -367,7 +369,7 @@ printVarSummary(wt)
     ;;;转化成方向向下
 
     Q_net = lhtfl
-    Q_net = lhtfl + shtfl + nswrs + nlwrs 
+    Q_net = lhtfl + shtfl + nswrs + nlwrs -nswrs_pen
     copy_VarCoords(lhtfl, Q_net)
     ;;;
 

@@ -304,25 +304,86 @@ printVarSummary(wt)
 
     timeind:=ind(date.le.200712.and.date.ge.198401)
   
-    
+   
+
     qnet = short2flt(f3[:]->qnet(timeind,{lat1:lat2},{lon1:lon2}))
-    ; qnet = qnet_r*0.01
-    ; copy_VarCoords(qnet_r, qnet)
-    ; delete(qnet_r)
+  
+    qnet@_FillValue = 1e+20
+    qnet@missing_value = 1e+20
+    printVarSummary(qnet)
+    qnet = where(qnet.eq.3276.6, qnet@_FillValue, qnet)
+
+fils4 = "/home/yangsong3/data-observation/OAflux/monthly/radiation/sw_isccp_"+oayear+".nc"
+f4 := addfiles(fils4, "r")
+
+nswrs  = short2flt(f4[:]->nswrs(:,{lat1:lat2},{lon1:lon2}))
+nswrs@_FillValue = 1e+20
+nswrs@missing_value = 1e+20
+printVarSummary(nswrs)
+nswrs = where(nswrs.eq.3276.6, nswrs@_FillValue, nswrs)
+
+fils5 = "/home/yangsong3/data-observation/OAflux/monthly/radiation/lw_isccp_"+oayear+".nc"
+f5 := addfiles(fils5, "r")
+
+nlwrs  = short2flt(f5[:]->nlwrs(:,{lat1:lat2},{lon1:lon2}))
+nlwrs@_FillValue = 1e+20
+nlwrs@missing_value = 1e+20
+printVarSummary(nlwrs)
+nlwrs = where(nlwrs.eq.3276.6, nlwrs@_FillValue, nlwrs)
+
+
+fils6 = "/home/yangsong3/data-observation/OAflux/monthly/turbulence/lh_oaflux_"+oayear+".nc"
+f6 := addfiles(fils6, "r")
+
+lhtfl  = short2flt(f6[:]->lhtfl(:,{lat1:lat2},{lon1:lon2}))
+lhtfl@_FillValue = 1e+20
+lhtfl@missing_value = 1e+20
+printVarSummary(lhtfl)
+lhtfl = where(lhtfl.eq.3276.6, lhtfl@_FillValue, lhtfl)
+
+
+fils7 = "/home/yangsong3/data-observation/OAflux/monthly/turbulence/sh_oaflux_"+oayear+".nc"
+f7:= addfiles(fils7, "r")
+
+shtfl  = short2flt(f7[:]->shtfl(:,{lat1:lat2},{lon1:lon2}))
+shtfl@_FillValue = 1e+20
+shtfl@missing_value = 1e+20
+printVarSummary(shtfl)
+shtfl = where(shtfl.eq.3276.6, shtfl@_FillValue, shtfl)
+
+
+
     ;;;convert to units degree ℃/year
       ; density = 1025  ;;kg/m3
       ; cp  = 3850         ;;j/kg℃
       ; coef  = density*cp
       coef = 4.088*10^6
+         ;;;nswrs_pen 
+     R = 0.58
+     L1 = 0.35
+     L2 = 23
+     nswrs_pen = nswrs
+     ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+     mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
+     nswrs_pen = mo*nswrs
+      
 
     
       qnet = 30*86400*qnet/coef
+      
+      lhtfl = 30*86400*lhtfl/coef
+      shtfl = 30*86400*shtfl/coef
+      nswrs = 30*86400*nswrs/coef
+      nlwrs = 30*86400*nlwrs/coef
+      nswrs_pen = 30*86400*nswrs_pen/coef
     ;;;
-
-    Q_net = qnet
-  printVarSummary(Q_net)
+    Q_net = lhtfl
+    Q_net = nswrs - nlwrs - lhtfl -shtfl - nswrs_pen
+    Q_net = qnet - nswrs_pen
+     printVarSummary(Q_net)
     
     ;;;
+
 
     ;;; Heat transport 
 
@@ -332,7 +393,7 @@ printVarSummary(wt)
 
 
     
-    ; Q_net(:,{x1:x2},{y1:y2}) = where(ismissing(sst(:,{0:15},{110:155})),Q_net@missing_value, Q_net(:,{x1:x2},{y1:y2}))  ;;;去掉陆地上的辐射 
+    Q_net(:,{x1:x2},{y1:y2}) = where(ismissing(sst(12*4:12*28-1,{0:15},{110:155})),Q_net@missing_value, Q_net(:,{x1:x2},{y1:y2}))  ;;;去掉陆地上的辐射 
     dim:= dimsizes(Q_net(:,{x1:x2},{y1:y2}))
     dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
     
@@ -341,7 +402,7 @@ printVarSummary(wt)
 
     ;;;
     
-    ; Q_net_tr_annual = month_to_annual(Q_net_tr, 0)   ;;;这里是累加
+    ; Q_net_tr_annual = (/month_to_annual(Q_net_tr, 0)/)   ;;;这里是累加
 ; 
      Q_net_tr_annual = wgt_annual(Q_net_tr)
      printVarSummary(Q_net_tr_annual)
