@@ -555,7 +555,7 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
   print("hadv_clm="+hadv_clm)
   print("vadv_clm="+vadv_clm)
 
-
+exit()
 
 
 ;;;
@@ -589,7 +589,7 @@ print("*********开始画图:时间序列********")
   resxy@tmXBValues = ispan(1979,2013,5)
   resxy@tmXBLabels = ispan(1979,2013,5)
   resxy@tmXBMinorOn = True
-  resxy@tmXBMinorValues = ispan(1979,2013,1)
+  resxy@tmXBMinorValues = ispan(1979,2013,1)  
   
   ;  resxy@tmYLMode  =  "Explicit"
   ; resxy@tmYLValues = ispan(-2, 10, 1)

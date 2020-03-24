@@ -51,10 +51,10 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 160
+   lat1 = 0
+   lat2 = 15
+   lon1 = 110
+   lon2 = 280
  
 
 
@@ -66,7 +66,7 @@ begin
 
 
     indyear = (2013-1980+1)*12-1
-    T = f5->temp(0:indyear,{0:2000},{lat1:lat2},{lon1:lon2})
+    T = f5->temp(0:indyear,{0:1000},{lat1:lat2},{lon1:lon2})
 
     T_mean = dim_avg_n_Wrap(T, 2)
     T_annual = month_to_annual(T_mean, 1)
@@ -77,8 +77,8 @@ print("*******计算趋势*****************")
 ;;;calculate correlation coef
 
     ;;;hadv correlation with sst
-    ; r_T =   regCoef_n(ispan(1,yearnum,1), T_annual, 0, 0) 
-    r_T = dim_avg_n_Wrap(T_annual, 0)
+    r_T =   regCoef_n(ispan(1,yearnum,1), T_annual, 0, 0) 
+    ; r_T = dim_avg_n_Wrap(T_annual, 0)
     copy_VarCoords(T_annual(0,:,:), r_T)
 
 
@@ -132,10 +132,10 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -0.1
-  ; res@cnMaxLevelValF       =   0.1
-  ; res@cnLevelSpacingF      =  0.01
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnMinLevelValF       =   -0.05
+  res@cnMaxLevelValF       =   0.05
+  res@cnLevelSpacingF      =  0.01
  
 
    plot=gsn_csm_contour(wks, r_T, res)

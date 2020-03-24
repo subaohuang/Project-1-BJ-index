@@ -114,12 +114,21 @@ begin
     z =  vadv&depth
     z&depth = z
     
-    dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
-   
-    dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
+    
+    ; dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
+    ; dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
+    ; print(avg(dim_avg_n_Wrap(mlt(:,{0:15},{110:155}), (/1,2/))))
+    ; exit()
 
-    hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
-    vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+    dz_4d = new(dimsizes(hadv),float)
+      do i = 0,dimsizes(mlt&time)-1
+        dz_4d(i,:,:,:) = dpres_plevel(z, mlt(i,:,:), 0, 0)
+      end do 
+      copy_VarCoords(hadv, dz_4d)
+    
+   
+      hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+      vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
    
     copy_VarCoords(u(:,1,:,:), hadv_mean)
     copy_VarCoords(u(:,1,:,:), vadv_mean)
@@ -194,6 +203,7 @@ begin
     
     Q_net_month = lhtfl_month
     Q_net_month  = lhtfl_month + shtfl_month + nswrs_month + nlwrs_month -nswrs_pen_month
+    ; Q_net_month  = lhtfl_month + shtfl_month + nswrs_month + nlwrs_month 
      
     Q_net_month_scs = dim_avg_n_Wrap(Q_net_month(:,{4:8},{106:112}), (/1,2/)) 
 ;;;
@@ -214,7 +224,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "ERAI-all-heat-flux-season-cycle")
+  wks   = gsn_open_wks("pdf", "ERAI-all-heat-flux-season-cycle-nscs")
   plot=new(1,graphic)
   
   resxy = True

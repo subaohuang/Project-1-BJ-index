@@ -114,9 +114,14 @@ begin
     z =  vadv&depth
     z&depth = z
     
-    dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
+    ; dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
+    ; dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
+
+      dz_4d = new(dimsizes(hadv),float)
+      do i = 0,dimsizes(mlt&time)-1
+        dz_4d(i,:,:,:) = dpres_plevel(z, mlt(i,:,:), 0, 0)
+      end do 
    
-    dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
 
     hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
     vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
@@ -188,27 +193,19 @@ begin
       nswrs_pen = 31*86400*nswrs_pen/coef
       qnet = (/qnet - nswrs_pen/)
 
-      ; lhtfl = 31*86400*lhtfl/coef
-      ; shtfl = 31*86400*shtfl/coef
-      ; nswrs = 31*86400*nswrs/coef
-      ; nlwrs = 31*86400*nlwrs/coef
-      ; nswrs_pen = 31*86400*nswrs_pen/coef
-    ;;;
+
+      ;;
 
     
-    ;;;转化成方向向下
-    ; lhtfl_month =clmMonTLL(lhtfl)
-    ; shtfl_month = clmMonTLL(shtfl)
-    ; nswrs_month = clmMonTLL(nswrs)
-    ; nlwrs_month = clmMonTLL(nlwrs)
-    ; nswrs_pen_month = clmMonTLL(nswrs_pen) 
-    ; Q_net_month = lhtfl_month
-    ; Q_net_month  = lhtfl_month + shtfl_month + nswrs_month + nlwrs_month -nswrs_pen_month
+  
 
      Q_net_month = clmMonTLL(qnet)
+     nswrs_pen_month = clmMonTLL(nswrs_pen)
 
-     
-    Q_net_month_scs = dim_avg_n_Wrap(Q_net_month(:,{4:8},{106:112}), (/1,2/)) 
+     Q_net_month_scs = dim_avg_n_Wrap(Q_net_month(:,{4:8},{106:112}), (/1,2/)) 
+     nswrs_pen_month_scs = dim_avg_n_Wrap(nswrs_pen_month(:,{4:8},{106:112}), (/1,2/)) 
+     print(sum(Q_net_month_scs))
+
 ;;;
 
 ;;;total 
@@ -249,22 +246,23 @@ print("*********开始画图:时间序列********")
   resxy@vpWidthF = 0.7
 
 
-  resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2/)          ; make second line thicker
+  resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2,2/)          ; make second line thicker
   
-  resxy@xyLineColors       =  (/"black","gray","blue","red","orange","green"/)          ; change line color
+  resxy@xyLineColors       =  (/"black","gray","blue","red","orange","green","pink"/)          ; change line color
   resxy@xyMonoDashPattern = False
-  resxy@xyDashPatterns =(/0,0,0,0,0,0/)
-  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
+  resxy@xyDashPatterns =(/0,0,0,0,0,0,0/)
+  resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines","lines"/)
   
 
 
-  data_all = new((/6,12/),"float")
+  data_all = new((/7,12/),"float")
   data_all(0,:) = dsst_month_scs
   data_all(1,:) = total_month_scs
   data_all(2,:) = Q_net_month_scs
   data_all(3,:) = hadv_month_scs
   data_all(4,:) = vadv_month_scs
   data_all(5,:) = ocean_eddy
+  data_all(6,:) = nswrs_pen_month_scs
   
 
   time = ispan(0, 11, 1)  
@@ -281,13 +279,13 @@ print("*********开始画图:时间序列********")
   lineres = True
   ; lineres@lgLineColors = (/"black"，/) ; line colors
   lineres@lgLineColors       = resxy@xyLineColors
-  lineres@lgLineThicknesses = (/ 5,5,5,5,5,5/)
+  lineres@lgLineThicknesses = (/ 5,5,5,5,5,5,5/)
   lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
   lineres@lgDashIndexes = resxy@xyDashPatterns
 
 
   textres = True
-  textres@lgLabels = (/"dT","total","Q_net","Horizontal advection","Vertical advection","ocean_eddy"/)     ;加线的标注
+  textres@lgLabels = (/"dT","total","Q_net","Horizontal advection","Vertical advection","ocean_eddy","nswrs_pen"/)     ;加线的标注
 
   plot = simple_legend(wks,plot,gres,lineres,textres)   
   draw(plot)

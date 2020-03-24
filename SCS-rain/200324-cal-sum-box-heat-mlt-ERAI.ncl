@@ -99,23 +99,43 @@ begin
 ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
 ;;;averaged in mixed layer
     
-    f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_u_mn_1980-2015_chazhi.nc", "r")   
-    f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
-    f4=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_wt_mn_1980-2015_chazhi.nc", "r")   
-    f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r") 
-    f7=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_net_heating_mn_1980-2015_chazhi.nc", "r")     
+    ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
+;;;averaged in mixed layer
+    
+    f2=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_u_mn_1980-2015_chazhi.nc", "r")   
+    f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
+    f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
+    f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+    
 
 
     indyear = (2013-1980+1)*12-1
-    u = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    v = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    wt = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    T = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
-    net_heating = f7->net_heating(0:indyear,{lat1:lat2},{lon1:lon2})
-   
-    depth = T&depth(0:4)
+    u_r = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    v_r = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    wt_r = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    T_r = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    
+    u = tofloat(u_r)
+    v = tofloat(v_r)
+    wt = tofloat(wt_r)
+    T = tofloat(T_r)
+    mlt = tofloat(mlt_r)
+
+   copy_VarCoords(u_r, u) 
+   copy_VarCoords(v_r, v)
+   copy_VarCoords(wt_r, wt)
+   copy_VarCoords(T_r, T)
+   copy_VarCoords(mlt_r, mlt)
+
+   delete(u_r)
+   delete(v_r)
+   delete(wt_r)
+   delete(mlt_r)
+   delete(T_r)
+    
+    depth = T&depth
 printVarSummary(wt)
 
 
@@ -131,24 +151,27 @@ printVarSummary(wt)
      copy_VarCoords(u(1,1,:,1), dx)
 
      dy = (pi/180)*1*6378388.
-     dz = dpres_plevel(depth, 45.58, 0, 0)
-     print(dz)
-     print(depth)
-     dz= dz(::-1)
-   
+ 
+
+      dz_3d_test = new(dimsizes(u),float)
+      do i = 0,dimsizes(mlt&time)-1
+        dz_3d_test(i,:,:,:) = dpres_plevel(depth, mlt(i,:,:), 0, 0)
+      end do 
+      copy_VarCoords(u, dz_3d_test)
+      printVarSummary(dz_3d_test)
+  
+    
 
     
-     dx_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dx({0:15}) , 2)
-     dz_3d_test = conform_dims(dimsizes(T(:,{0:45.6},{0:15},{110:155})) ,dz , 1)
+     dx_3d_test = conform_dims(dimsizes(T(:,:,{0:15},{110:155})) ,dx({0:15}) , 2)
 
 
-     dx_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dx_3d_test)
-     dz_3d_test  = where(ismissing(T(:,{0:45.6},{0:15},{110:155})), 0.0, dz_3d_test)
+     dx_3d_test  = where(ismissing(T(:,:,{0:15},{110:155})), 0.0, dx_3d_test)
+     dz_3d_test  = where(ismissing(T), 0.0, dz_3d_test)
      
-     volume = dim_sum_n(dx_3d_test*dz_3d_test*dy, (/1,2,3/))
+     volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{0:15},{110:155})*dy, (/1,2,3/))
 
-
-     Tbox =dim_sum_n_Wrap(T(:,{0:45.6},{0:15},{110:155})*dy*dx_3d_test*dz_3d_test, (/1,2,3/))/volume
+     Tbox =dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
      copy_VarCoords(T(:,1,1,1), Tbox)
 
      ; volume = sum(45*dy*45.58*dx({0:15})) 
@@ -174,25 +197,26 @@ printVarSummary(wt)
        y2 = 155
        z1  = 45.6
     
-       dim =dimsizes(v(:,{0:z1},{x1},{y1:y2}))
-     
+       dim =dimsizes(v(:,:,{x1},{y1:y2}))
 
-       dz_3d =conform_dims(dim ,dz , 1)
+       dz_3d1 = dz_3d_test(:,:,{x1},{y1:y2})
+       dz_3d2 = dz_3d_test(:,:,{x2},{y1:y2})
        Tbox_3d = conform_dims(dim ,Tbox , 0)
-       printVarSummary(dz_3d)  
        
        
-       v_lateral_south = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:y2})*(T(:,{0:z1},{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d, (/1,2/))/volume
-       v_lateral_north = dim_sum_n_Wrap(v(:,{0:z1},{x2},{y1:y2})*(T(:,{0:z1},{x2},{y1:y2}) - Tbox_3d)*dx({15})*dz_3d, (/1,2/))/volume
+       
+       v_lateral_south = dim_sum_n_Wrap(v(:,:,{x1},{y1:y2})*(T(:,:,{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d1, (/1,2/))/volume
+       v_lateral_north = dim_sum_n_Wrap(v(:,:,{x2},{y1:y2})*(T(:,:,{x2},{y1:y2}) - Tbox_3d)*dx({15})*dz_3d2, (/1,2/))/volume
 
     ;; lateral heat transport west and east u*(T -Tbox)dydz,west: 0N ,110-155,north: 15N ,110-155
-       dim := dimsizes(v(:,{0:z1},{x1:x2},{y1}))
+       dim := dimsizes(v(:,:,{x1:x2},{y1}))
        ; dx_3d =conform_dims(dim ,dx({0:15}) , 2)
-       dz_3d := conform_dims(dim ,dz , 1)
+       dz_3d1 := dz_3d_test(:,:,{x1:x2},{y1})
+       dz_3d2 := dz_3d_test(:,:,{x1:x2},{y2})
        Tbox_3d :=conform_dims(dim, Tbox, 0)
 
-       u_lateral_west = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y1})*(T(:,{0:z1},{x1:x2},{y1}) - Tbox_3d)*dy*dz_3d, (/1,2/))/volume
-       u_lateral_east = dim_sum_n_Wrap(u(:,{0:z1},{x1:x2},{y2})*(T(:,{0:z1},{x1:x2},{y2}) - Tbox_3d)*dy*dz_3d, (/1,2/))/volume
+       u_lateral_west = dim_sum_n_Wrap(u(:,:,{x1:x2},{y1})*(T(:,:,{x1:x2},{y1}) - Tbox_3d)*dy*dz_3d1, (/1,2/))/volume
+       u_lateral_east = dim_sum_n_Wrap(u(:,:,{x1:x2},{y2})*(T(:,:,{x1:x2},{y2}) - Tbox_3d)*dy*dz_3d2, (/1,2/))/volume
     ;;;
     
 
@@ -200,42 +224,33 @@ printVarSummary(wt)
        
        dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
        dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
-       Tbox_3d :=conform_dims(dim, Tbox, 0)       
+
+       Tbox_3d :=conform_dims(dim, Tbox, 0)   
+
+       wtT = wt(:,4,{x1:x2},{y1:y2})
+       mlt_scs = mlt(:,{x1:x2},{y1:y2})
+       printVarSummary(mlt_scs)
+      
+       mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
+       print("start triple loops")
+       printMinMax(mlt_scs, 1)
+       ; print(mlt_scs)
+       ; exit()
+    
+        do i = 0,dim(0)-1
+         do j = 0,dim(1)-1
+           do k = 0,dim(2)-1
+              wtT(i,:,:) = wt(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+           end do 
+          end do
+        end do
+        
   
-       w_bottom = dim_sum_n_Wrap(wt(:,4,{x1:x2},{y1:y2})*(T(:,4,{x1:x2},{y1:y2}) - Tbox_3d)*dx_3d*dy, (/1,2/))/volume
+       w_bottom = dim_sum_n_Wrap(wtT*dx_3d*dy, (/1,2/))/volume
     ;;;
     
     
-    ;;;;v_lateral_south west and east to define effect from ITF     
-        
-       dz_3d1 =conform_dims(dimsizes(v(:,{0:z1},{x1},{y1:130})), dz , 1)
-       Tbox_3d1 = conform_dims(dimsizes(v(:,{0:z1},{x1},{y1:130})) ,Tbox , 0)
-         
-    
-       v_lateral_south_west = dim_sum_n_Wrap(v(:,{0:z1},{x1},{y1:130})*(T(:,{0:z1},{x1},{y1:130}) - Tbox_3d1)*dx({0})*dz_3d1, (/1,2/))/volume
-
-       dz_3d2 =conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})), dz , 1)
-       Tbox_3d2 = conform_dims(dimsizes(v(:,{0:z1},{x1},{130:y2})) ,Tbox , 0)
-         
-       v_lateral_south_east = dim_sum_n_Wrap(v(:,{0:z1},{x1},{130:y2})*(T(:,{0:z1},{x1},{130:y2}) - Tbox_3d2)*dx({0})*dz_3d2, (/1,2/))/volume
-    
-
-        dz_3d3 =conform_dims(dimsizes(v(:,{0:z1},{7.5:x2},{y1})), dz , 1)
-        Tbox_3d3 = conform_dims(dimsizes(v(:,{0:z1},{7.5:x2},{y1})) ,Tbox , 0)
-       
-        u_lateral_west_north = dim_sum_n_Wrap(u(:,{0:z1},{7.5:x2},{y1})*(T(:,{0:z1},{7.5:x2},{y1}) - Tbox_3d3)*dy*dz_3d3, (/1,2/))/volume
-        
-        dz_3d4 =conform_dims(dimsizes(v(:,{0:z1},{x1:7.5},{y1})), dz , 1)
-        Tbox_3d4 = conform_dims(dimsizes(v(:,{0:z1},{x1:7.5},{y1})) ,Tbox , 0)
-
-        u_lateral_west_south = dim_sum_n_Wrap(u(:,{0:z1},{x1:7.5},{y1})*(T(:,{0:z1},{x1:7.5},{y1}) - Tbox_3d4)*dy*dz_3d4, (/1,2/))/volume
-
-    ;;;
-
-
-
-
-    
+   
     ;;;平流项
        hadv_mean = v_lateral_north +v_lateral_south + u_lateral_west + u_lateral_east
        vadv_mean = w_bottom
@@ -251,11 +266,11 @@ printVarSummary(wt)
        u_lateral_east  = 30*86400*u_lateral_east
        u_lateral_west = 30*86400*u_lateral_west
 
-       v_lateral_south_west = 30*86400*v_lateral_south_west
-       v_lateral_south_east = 30*86400*v_lateral_south_east
+       ; v_lateral_south_west = 30*86400*v_lateral_south_west
+       ; v_lateral_south_east = 30*86400*v_lateral_south_east
 
-       u_lateral_west_north = 30*86400*u_lateral_west_north
-       u_lateral_west_south = 30*86400*u_lateral_west_south
+       ; u_lateral_west_north = 30*86400*u_lateral_west_north
+       ; u_lateral_west_south = 30*86400*u_lateral_west_south
        
 
     ;;;
@@ -280,11 +295,13 @@ printVarSummary(wt)
         u_lateral_east_annual = wgt_annual(u_lateral_east)
         u_lateral_west_annual = wgt_annual(u_lateral_west)
 
-        v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
-        v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
+        ; v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
+        ; v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
 
-        u_lateral_west_south_annual = wgt_annual(u_lateral_west_south)
-        u_lateral_west_north_annual = wgt_annual(u_lateral_west_north)
+        ; u_lateral_west_south_annual = wgt_annual(u_lateral_west_south)
+        ; u_lateral_west_north_annual = wgt_annual(u_lateral_west_north)
+       
+
     ;;;
 
     ;;;
@@ -294,7 +311,10 @@ printVarSummary(wt)
 
 ;;;read NCEP-NCAR heat flux data
   
-    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
+   
+;;;read NCEP-NCAR heat flux data
+  
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -308,19 +328,28 @@ printVarSummary(wt)
     nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
 
+    lhtfl = (/lhtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    shtfl = (/shtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nswrs = (/nswrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    nlwrs = (/nlwrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+
+
+
     ;;;nswrs_pen 
      R = 0.58
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
      ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
-     nswrs_pen = mo*nswrs
+     ; mo = R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2)
+     nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
+     ; nswrs_pen = 0.05*nswrs
+
 
   
     ;;;
 
-    ;;;convert to units degree ℃/year
+    ;;;convert to units degree ℃/yeara
       ; density = 1025  ;;kg/m3
       ; cp  = 3850         ;;j/kg℃
       ; coef  = density*cp
@@ -332,20 +361,6 @@ printVarSummary(wt)
       nlwrs = 30*86400*nlwrs/coef
       nswrs_pen = 30*86400*nswrs_pen/coef
     ;;;
-
-    ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
-    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
-    ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
-    ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
-    ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
-
-    ;;;转化成方向向下
-
-    lhtfl = (/-1*lhtfl/)
-    shtfl = (/-1*shtfl/)
-    nswrs = (/-1*nswrs/)
-    nlwrs = (/-1*nlwrs/)
-    nswrs_pen = (/-1*nswrs_pen/)
 
     Q_net = lhtfl
     Q_net = lhtfl + shtfl + nswrs + nlwrs - nswrs_pen
@@ -371,13 +386,7 @@ printVarSummary(wt)
 ; 
      Q_net_tr_annual = wgt_annual(Q_net_tr)
 
-;;ocena net_heating 
-        net_heating = 30*86400*net_heating/coef
-        net_heating_tr = dim_sum_n_Wrap(net_heating(:,{x1:x2},{y1:y2})*dx_3d*dy, (/1,2/))/volume
-        copy_VarCoords(Tbox, net_heating_tr)
 
-
-        net_heating_annual = wgt_annual(net_heating_tr)
 
   
 ;;;total 
@@ -407,15 +416,12 @@ printVarSummary(wt)
 
   
 
-   rc_v_lateral_south_west = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_west_annual, 0, 0)
-   rc_v_lateral_south_east = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_east_annual, 0, 0)
+   ; rc_v_lateral_south_west = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_west_annual, 0, 0)
+   ; rc_v_lateral_south_east = regCoef_n(ispan(1, yearnum, 1),v_lateral_south_east_annual, 0, 0)
 
 
-   rc_u_lateral_west_south = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_south_annual, 0, 0)
-   rc_u_lateral_west_north = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_north_annual, 0, 0)
-
-
-
+   ; rc_u_lateral_west_south = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_south_annual, 0, 0)
+   ; rc_u_lateral_west_north = regCoef_n(ispan(1, yearnum, 1),u_lateral_west_north_annual, 0, 0)
 
 
    total_trend = rc_total*ispan(1, yearnum, 1)+ rc_total@yintercept 
@@ -436,15 +442,12 @@ printVarSummary(wt)
    rc_v_lateral_south = rc_v_lateral_south*yearnum
    rc_v_lateral_north = rc_v_lateral_north*yearnum
 
-    rc_v_lateral_south_west = rc_v_lateral_south_west*yearnum
-    rc_v_lateral_south_east = rc_v_lateral_south_east*yearnum
+    ; rc_v_lateral_south_west = rc_v_lateral_south_west*yearnum
+    ; rc_v_lateral_south_east = rc_v_lateral_south_east*yearnum
 
-    rc_u_lateral_west_south = rc_u_lateral_west_south*yearnum
-    rc_u_lateral_west_north = rc_u_lateral_west_north*yearnum
+    ; rc_u_lateral_west_south = rc_u_lateral_west_south*yearnum
+    ; rc_u_lateral_west_north = rc_u_lateral_west_north*yearnum
    
-   
-
-
 
    print("total_rc="+rc_total)
    print("atm_rc="+rc_atm)
@@ -460,14 +463,11 @@ printVarSummary(wt)
    print("rc_v_lateral_south="+rc_v_lateral_south)
    print("rc_v_lateral_north="+rc_v_lateral_north)
 
-   print("rc_v_lateral_south_west="+rc_v_lateral_south_west)
-   print("rc_v_lateral_south_east="+rc_v_lateral_south_east)
+   ; print("rc_v_lateral_south_west="+rc_v_lateral_south_west)
+   ; print("rc_v_lateral_south_east="+rc_v_lateral_south_east)
 
-   print("rc_u_lateral_west_south="+rc_u_lateral_west_south)
-   print("rc_u_lateral_west_north="+rc_u_lateral_west_north)
-   
-   
-  
+   ; print("rc_u_lateral_west_south="+rc_u_lateral_west_south)
+   ; print("rc_u_lateral_west_north="+rc_u_lateral_west_north)
    
    rc_Tbox = regCoef_n(ispan(1, yearnum, 1),Tbox_annual, 0, 0)
 
@@ -539,14 +539,10 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
 
   print("hadv_clm="+hadv_clm)
   print("vadv_clm="+vadv_clm)
-
-
-
-
 ;;;
 
 
-
+exit()
      
     
 
@@ -561,7 +557,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI")
   plot=new(1,graphic)
   
   resxy = True
