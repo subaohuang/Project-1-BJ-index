@@ -99,42 +99,22 @@ begin
 ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
 ;;;averaged in mixed layer
     
-    ;;;read soda data and then calculate ocean dynamic : bar(v*σT)， bar(w*σT)，bar denotes 
-;;;averaged in mixed layer
-    
-    f2=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_u_mn_1980-2015_chazhi.nc", "r")   
-    f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
-    f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
-    f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
-    
+    f2=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_u_mn_1980-2015_chazhi.nc", "r")   
+    f3=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_v_mn_1980-2015_chazhi.nc", "r")   
+    f4=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_wt_mn_1980-2015_chazhi.nc", "r")   
+    f5=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_temp_mn_1980-2015_chazhi.nc", "r")
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_mlt_mn_1980-2015_chazhi.nc", "r") 
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_net_heating_mn_1980-2015_chazhi.nc", "r")     
 
 
     indyear = (2013-1980+1)*12-1
-    u_r = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    v_r = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    wt_r = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    T_r = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
-    
-    u = tofloat(u_r)
-    v = tofloat(v_r)
-    wt = tofloat(wt_r)
-    T = tofloat(T_r)
-    mlt = tofloat(mlt_r)
-
-   copy_VarCoords(u_r, u) 
-   copy_VarCoords(v_r, v)
-   copy_VarCoords(wt_r, wt)
-   copy_VarCoords(T_r, T)
-   copy_VarCoords(mlt_r, mlt)
-
-   delete(u_r)
-   delete(v_r)
-   delete(wt_r)
-   delete(mlt_r)
-   delete(T_r)
-    
+    u = f2->u(0:indyear,{0:288},{lat1:lat2},{lon1:lon2})
+    v = f3->v(0:indyear,{0:288},{lat1:lat2},{lon1:lon2})
+    wt = f4->wt(0:indyear,{0:288},{lat1:lat2},{lon1:lon2})
+    T = f5->temp(0:indyear,{0:288},{lat1:lat2},{lon1:lon2})
+    mlt = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    net_heating = f7->net_heating(0:indyear,{lat1:lat2},{lon1:lon2})
+   
     depth = T&depth
 printVarSummary(wt)
 
@@ -230,14 +210,12 @@ printVarSummary(wt)
        wtT = wt(:,4,{x1:x2},{y1:y2})
        mlt_scs = mlt(:,{x1:x2},{y1:y2})
        printVarSummary(mlt_scs)
-      
+       
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
        print("start triple loops")
        printMinMax(mlt_scs, 1)
-       ; print(mlt_scs)
-       ; exit()
-    
-       ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+
+        ;;;将wt进行垂直方向差值，为了得到更加精确的结果
            print("开始差值")
             xi  = wt&depth 
             xo = ispan(5,285,5)
@@ -258,6 +236,9 @@ printVarSummary(wt)
          end do
        ; print(mlt_scs)
        ; exit()
+    
+
+        
   
        w_bottom = dim_sum_n_Wrap(wtT*dx_3d*dy, (/1,2/))/volume
     ;;;
@@ -324,10 +305,7 @@ printVarSummary(wt)
 
 ;;;read NCEP-NCAR heat flux data
   
-   
-;;;read NCEP-NCAR heat flux data
-  
-    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/MERRA-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -341,28 +319,19 @@ printVarSummary(wt)
     nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
 
-    lhtfl = (/lhtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    shtfl = (/shtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nswrs = (/nswrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nlwrs = (/nlwrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-
-
-
     ;;;nswrs_pen 
      R = 0.58
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
      nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     ; mo = R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2)
-     ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
-     ; nswrs_pen = 0.05*nswrs
-
+     ; mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
+     nswrs_pen = mo*nswrs
 
   
     ;;;
 
-    ;;;convert to units degree ℃/yeara
+    ;;;convert to units degree ℃/year
       ; density = 1025  ;;kg/m3
       ; cp  = 3850         ;;j/kg℃
       ; coef  = density*cp
@@ -374,6 +343,18 @@ printVarSummary(wt)
       nlwrs = 30*86400*nlwrs/coef
       nswrs_pen = 30*86400*nswrs_pen/coef
     ;;;
+
+    ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
+    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
+    ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
+    ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
+    ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
+
+    ;;;转化成方向向下
+
+    lhtfl = (/-1*lhtfl/)
+    shtfl = (/-1*shtfl/)
+   
 
     Q_net = lhtfl
     Q_net = lhtfl + shtfl + nswrs + nlwrs - nswrs_pen
@@ -399,7 +380,13 @@ printVarSummary(wt)
 ; 
      Q_net_tr_annual = wgt_annual(Q_net_tr)
 
+;;ocena net_heating 
+        net_heating = 30*86400*net_heating/coef
+        net_heating_tr = dim_sum_n_Wrap(net_heating(:,{x1:x2},{y1:y2})*dx_3d*dy, (/1,2/))/volume
+        copy_VarCoords(Tbox, net_heating_tr)
 
+
+        net_heating_annual = wgt_annual(net_heating_tr)
 
   
 ;;;total 
@@ -555,7 +542,7 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
 ;;;
 
 
-exit()
+
      
     
 
@@ -570,7 +557,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-MERRA")
   plot=new(1,graphic)
   
   resxy = True

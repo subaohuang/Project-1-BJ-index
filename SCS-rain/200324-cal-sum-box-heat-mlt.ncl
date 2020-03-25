@@ -210,20 +210,34 @@ printVarSummary(wt)
        wtT = wt(:,4,{x1:x2},{y1:y2})
        mlt_scs = mlt(:,{x1:x2},{y1:y2})
        printVarSummary(mlt_scs)
-       exit()
+       
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
        print("start triple loops")
        printMinMax(mlt_scs, 1)
+
+        ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+           print("开始差值")
+            xi  = wt&depth 
+            xo = ispan(5,285,5)
+
+            wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            
+
+            delete(wt)
+            delete(T)
+
+         do i = 0,dim(0)-1
+            do j = 0,dim(1)-1
+               do k = 0,dim(2)-1
+                  wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+               end do 
+              end do
+         end do
        ; print(mlt_scs)
        ; exit()
     
-        do i = 0,dim(0)-1
-         do j = 0,dim(1)-1
-           do k = 0,dim(2)-1
-              wtT(i,:,:) = wt(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-           end do 
-          end do
-        end do
+
         
   
        w_bottom = dim_sum_n_Wrap(wtT*dx_3d*dy, (/1,2/))/volume
@@ -310,9 +324,9 @@ printVarSummary(wt)
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
-     nswrs_pen = mo*nswrs
+     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+     ; mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
+     ; nswrs_pen = mo*nswrs
 
   
     ;;;
@@ -545,7 +559,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-test")
   plot=new(1,graphic)
   
   resxy = True
