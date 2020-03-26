@@ -116,6 +116,7 @@ begin
     net_heating = f7->net_heating(0:indyear,{lat1:lat2},{lon1:lon2})
    
     depth = T&depth
+   
 printVarSummary(wt)
 
 
@@ -324,9 +325,10 @@ printVarSummary(wt)
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
+     mo = R*exp(-1*mlt/20)
+     ; nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
      ; mo = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))
-     ; nswrs_pen = mo*nswrs
+     nswrs_pen = mo*nswrs
 
   
     ;;;

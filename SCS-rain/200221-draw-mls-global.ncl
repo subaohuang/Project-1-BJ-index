@@ -59,23 +59,27 @@ begin
 
 ;;;读入HadiSST海温数据
     diri="/home/yangsong3/data-observation/SODA/3.3.1/"
-    fils1=systemfunc("ls "+diri+"soda3.3.1_mn_ocean_reg_1980.nc")
+    fils1=systemfunc("ls "+diri+"soda3.3.1_mlt_mn_1980-2015_chazhi.nc")
     f1=addfile(fils1, "r")
     ; date:=cd_calendar(f1->time, 1)
 
     ; timeind:=ind(date.le.201312.and.date.ge.197901)
 
     mlt = f1->mlt
+    mlt&lat@units = "degrees_north"
+    mlt&lon@units = "degrees_east"
+    printVarSummary(mlt)
+
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
-    mlt_clm_region = avg(dim_avg_n_Wrap(mlt_clm({0:15},{110:155}), (/0/)))
-    print(mlt_clm_region)
+    mlt_clm_region = mlt_clm({lat1:lat2},{lon1:lon2})
+    
 
    
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "全球mlt的分布")
+  wks   = gsn_open_wks("pdf", "scs-mlt的分布-soda.3.3.1")
 
   res=True
   res@gsnFrame=False
@@ -91,10 +95,10 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -90
-  res@mpMaxLatF             = 90
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLatF             = lat1
+  res@mpMaxLatF             = lat2
+  res@mpMinLonF             =lon1
+  res@mpMaxLonF             = lon2
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -114,8 +118,8 @@ begin
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   0
-  res@cnMaxLevelValF       =   500
-  res@cnLevelSpacingF      =  50
+  res@cnMaxLevelValF       =   50
+  res@cnLevelSpacingF      =  10
  
 
   plot = new(1,graphic)

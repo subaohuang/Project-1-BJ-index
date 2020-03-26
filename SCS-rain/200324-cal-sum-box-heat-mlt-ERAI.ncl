@@ -111,10 +111,10 @@ begin
 
 
     indyear = (2013-1980+1)*12-1
-    u_r = f2->u(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    v_r = f3->v(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    wt_r = f4->wt(0:indyear,:,{lat1:lat2},{lon1:lon2})
-    T_r = f5->temp(0:indyear,:,{lat1:lat2},{lon1:lon2})
+    u_r = f2->u(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
     
     u = tofloat(u_r)
@@ -234,25 +234,34 @@ printVarSummary(wt)
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
        print("start triple loops")
        printMinMax(mlt_scs, 1)
-       ; print(mlt_scs)
+       
        ; exit()
     
        ;;;将wt进行垂直方向差值，为了得到更加精确的结果
            print("开始差值")
             xi  = wt&depth 
-            xo = ispan(5,285,5)
+            xo = ispan(5,330,5)
 
             wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
             T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-            
 
+            dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
+            dhdt!0 = "time"
+            dhdt!1 = "lat"
+            dhdt!2 = "lon"
+            copy_VarCoords(mlt, dhdt)
+            printVarSummary(dhdt)
+      
             delete(wt)
             delete(T)
+
+            ;;;mlt变化引起温度的变化，可以不考虑 
 
          do i = 0,dim(0)-1
             do j = 0,dim(1)-1
                do k = 0,dim(2)-1
-                  wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+                  ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+                   wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
                end do 
               end do
          end do
@@ -353,20 +362,22 @@ printVarSummary(wt)
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
-     ; mo = R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2)
+     ; mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
+     mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
+     nswrs_pen =  nswrs*mo
      ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
      ; nswrs_pen = 0.05*nswrs
+     
 
 
   
     ;;;
 
     ;;;convert to units degree ℃/yeara
-      ; density = 1025  ;;kg/m3
-      ; cp  = 3850         ;;j/kg℃
-      ; coef  = density*cp
-      coef = 4.088*10^6
+      density = 1025  ;;kg/m3
+      cp  = 3850         ;;j/kg℃
+      coef  = density*cp
+      ; coef = 4.088*10^6
 
       lhtfl = 30*86400*lhtfl/coef
       shtfl = 30*86400*shtfl/coef
@@ -554,8 +565,6 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
   print("vadv_clm="+vadv_clm)
 ;;;
 
-
-exit()
      
     
 
