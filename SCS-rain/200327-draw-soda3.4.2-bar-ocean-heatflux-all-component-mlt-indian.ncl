@@ -54,10 +54,10 @@ begin
   ;;
 ;;;region
 ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 160
+   lat1 = -10
+   lat2 = 10
+   lon1 = 40
+   lon2 = 110
 ;;;
 
    
@@ -123,21 +123,28 @@ printVarSummary(wt)
       end do 
       copy_VarCoords(u, dz_3d_test)
       printVarSummary(dz_3d_test)
-  
+    ;;;;;
+
+    ;;;;
+       x1 = -6
+       x2 = 9
+       y1  = 50
+       y2 = 100
+       z1  = 45.6
    
-     dx_3d_test = conform_dims(dimsizes(T(:,:,{0:15},{110:155})) ,dx({0:15}) , 2)
+     dx_3d_test = conform_dims(dimsizes(T(:,:,{x1:x2},{y1:y2})) ,dx({-6:9}) , 2)
 
 
-     dx_3d_test  = where(ismissing(T(:,:,{0:15},{110:155})), 0.0, dx_3d_test)
+     dx_3d_test  = where(ismissing(T(:,:,{x1:x2},{y1:y2})), 0.0, dx_3d_test)
      dz_3d_test  = where(ismissing(T), 0.0, dz_3d_test)
      
-     volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{0:15},{110:155})*dy, (/1,2,3/))
+     volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{x1:x2},{y1:y2})*dy, (/1,2,3/))
 
 
-     Tbox =dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
+     Tbox =dim_sum_n_Wrap(T(:,:,{x1:x2},{y1:y2})*dy*dx_3d_test*dz_3d_test(:,:,{x1:x2},{y1:y2}), (/1,2,3/))/volume
      copy_VarCoords(T(:,1,1,1), Tbox)
 
-     ; volume = sum(45*dy*45.58*dx({0:15})) 
+     ; volume = sum(45*dy*45.58*dx({-6:9})) 
 
      dT = center_finite_diff_n(Tbox, 1, False, 0, 0)
      copy_VarCoords(Tbox, dT)
@@ -154,11 +161,7 @@ printVarSummary(wt)
      
 
     ;; lateral heat transport north and south v*(T -Tbox)dxdz,south: 0N ,110-155,north: 15N ,110-155
-       x1 = 0
-       x2 = 15
-       y1  = 110.5
-       y2 = 155
-       z1  = 45.6
+    
     
        dim =dimsizes(v(:,:,{x1},{y1:y2}))
     
@@ -169,8 +172,8 @@ printVarSummary(wt)
 
        ;;;total long-term mean change : 1980-1996, 1997-2013
 
-          v_lateral_south = dim_sum_n_Wrap(v(:,:,{x1},{y1:y2})*(T(:,:,{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d1, (/1,2/))/volume
-          v_lateral_north = dim_sum_n_Wrap(v(:,:,{x2},{y1:y2})*(T(:,:,{x2},{y1:y2}) - Tbox_3d)*dx({15})*dz_3d2, (/1,2/))/volume
+          v_lateral_south = dim_sum_n_Wrap(v(:,:,{x1},{y1:y2})*(T(:,:,{x1},{y1:y2}) - Tbox_3d)*dx({-6})*dz_3d1, (/1,2/))/volume
+          v_lateral_north = dim_sum_n_Wrap(v(:,:,{x2},{y1:y2})*(T(:,:,{x2},{y1:y2}) - Tbox_3d)*dx({9})*dz_3d2, (/1,2/))/volume
           copy_VarCoords(Tbox, v_lateral_south)
           copy_VarCoords(Tbox, v_lateral_north)
 
@@ -189,12 +192,12 @@ printVarSummary(wt)
 
           v_delta_south = dim_avg_n_Wrap(v(12*17:,:,{x1},{y1:y2}), 0) - dim_avg_n_Wrap(v(0:12*17-1,:,{x1},{y1:y2}), 0)
           T_clm_south =dim_avg_n_Wrap((T(0:12*17-1,:,{x1},{y1:y2}) - Tbox_3d(0:12*17-1,:,:)),0)
-          dynamic_south_change = sum(v_delta_south*T_clm_south*dx({0})*dz_2d1)/volume_clm
+          dynamic_south_change = sum(v_delta_south*T_clm_south*dx({-6})*dz_2d1)/volume_clm
 
         
           v_delta_north = dim_avg_n_Wrap(v(12*17:,:,{x2},{y1:y2}), 0) - dim_avg_n_Wrap(v(0:12*17-1,:,{x2},{y1:y2}), 0)
           T_clm_north =dim_avg_n_Wrap((T(0:12*17-1,:,{x2},{y1:y2}) - Tbox_3d(0:12*17-1,:,:)),0)
-          dynamic_north_change = sum(v_delta_north*T_clm_north*dx({15})*dz_2d2)/volume_clm
+          dynamic_north_change = sum(v_delta_north*T_clm_north*dx({9})*dz_2d2)/volume_clm
         ;;;;
         
         ;;;;V*σT long-term mean change : 1980-1996, 1997-2013
@@ -205,7 +208,7 @@ printVarSummary(wt)
 
           v_clm_south =dim_avg_n_Wrap(v(0:12*17-1,:,{x1},{y1:y2}),0) 
 
-          thermaldy_south_change = sum(T_delta_south*v_clm_south*dx({0})*dz_2d1)/volume_clm
+          thermaldy_south_change = sum(T_delta_south*v_clm_south*dx({-6})*dz_2d1)/volume_clm
 
 
           T_delta_north =dim_avg_n_Wrap((T(12*17:,:,{x2},{y1:y2}) - Tbox_3d(12*17:,:,:)),0)-\
@@ -213,16 +216,16 @@ printVarSummary(wt)
 
           v_clm_north =dim_avg_n_Wrap(v(0:12*17-1,:,{x2},{y1:y2}),0) 
 
-          thermaldy_north_change = sum(T_delta_north*v_clm_north*dx({15})*dz_2d2)/volume_clm
+          thermaldy_north_change = sum(T_delta_north*v_clm_north*dx({9})*dz_2d2)/volume_clm
         ;;;;;
 
 
 
         ;;;;σV*σT long-term mean change : 1980-1996, 1997-2013
 
-          quad_south_change = sum(T_delta_south*v_delta_south*dx({0})*dz_2d1)/volume_clm
+          quad_south_change = sum(T_delta_south*v_delta_south*dx({-6})*dz_2d1)/volume_clm
 
-          quad_north_change = sum(T_delta_north*v_delta_north*dx({15})*dz_2d2)/volume_clm
+          quad_north_change = sum(T_delta_north*v_delta_north*dx({9})*dz_2d2)/volume_clm
         ;;;
 
 
@@ -247,8 +250,8 @@ printVarSummary(wt)
 
            T_eddy_south2  = T_diff_south(12*17:,:,:) - conform_dims(dimsizes(dz_3d2), dim_avg_n_Wrap((T(12*17:,:,{x1},{y1:y2})-Tbox_3d(12*17:,:,:)),0), (/1,2/))
 
-           eddy_south_change = avg(dim_sum_n_Wrap(v_eddy_south2*T_eddy_south2*dx({0})*dz_3d2,(/1,2/))/volume_clm) - \
-                              avg(dim_sum_n_Wrap(v_eddy_south1*T_eddy_south1*dx({0})*dz_3d1,(/1,2/))/volume_clm)
+           eddy_south_change = avg(dim_sum_n_Wrap(v_eddy_south2*T_eddy_south2*dx({-6})*dz_3d2,(/1,2/))/volume_clm) - \
+                              avg(dim_sum_n_Wrap(v_eddy_south1*T_eddy_south1*dx({-6})*dz_3d1,(/1,2/))/volume_clm)
 
            
 
@@ -266,8 +269,8 @@ printVarSummary(wt)
 
           T_eddy_north2  = T_diff_north(12*17:,:,:) - conform_dims(dimsizes(dz_3d2), dim_avg_n_Wrap((T(12*17:,:,{x2},{y1:y2})-Tbox_3d(12*17:,:,:)),0), (/1,2/))
 
-          eddy_north_change = avg(dim_sum_n_Wrap(v_eddy_north2*T_eddy_north2*dx({15})*dz_3d3,(/1,2/))/volume_clm) - \
-                          avg(dim_sum_n_Wrap(v_eddy_north1*T_eddy_north1*dx({15})*dz_3d4,(/1,2/))/volume_clm)
+          eddy_north_change = avg(dim_sum_n_Wrap(v_eddy_north2*T_eddy_north2*dx({9})*dz_3d3,(/1,2/))/volume_clm) - \
+                          avg(dim_sum_n_Wrap(v_eddy_north1*T_eddy_north1*dx({9})*dz_3d4,(/1,2/))/volume_clm)
         ;;;
         
 
@@ -354,7 +357,7 @@ printVarSummary(wt)
     ;;; lateral heat transport vertical w*(T -Tbox)dxdy 
        
        dim:= dimsizes(wt(:,4,{x1:x2},{y1:y2}))
-       dx_3d :=conform_dims(dim ,dx({0:15}) , 1)
+       dx_3d :=conform_dims(dim ,dx({-6:9}) , 1)
        Tbox_3d :=conform_dims(dim, Tbox, 0)       
 
        wtT = wt(:,4,{x1:x2},{y1:y2})
@@ -366,41 +369,72 @@ printVarSummary(wt)
       
        printMinMax(mlt_scs, 1)
        
-       ; ;;;将wt进行垂直方向差值，为了得到更加精确的结果
-       ;     print("开始差值")
-       ;      xi  = wt&depth 
-       ;      xo = ispan(5,330,5)
+       ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+           print("开始差值")
+            xi  = wt&depth 
+            xo = ispan(5,330,5)
 
-       ;      wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-       ;      T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
 
-       ;      wt_mlt = wt_chazhi(:,1,:,:)
-       ;      T_mlt = T_chazhi(:,1,:,:)
+            wt_mlt = wt_chazhi(:,1,:,:)
+            T_mlt = T_chazhi(:,1,:,:)
+            T_mlt_diff = T_chazhi(:,1,:,:)
 
-       ;      delete(wt)
-       ;      delete(T)
-       ;  print("start triple loops")
-       ;   do i = 0,dim(0)-1
-       ;      do j = 0,dim(1)-1
-       ;         do k = 0,dim(2)-1
-       ;            wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-       ;            wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
-       ;            T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
-       ;         end do 
-       ;        end do
-       ;   end do
+            delete(wt)
+            delete(T)
+            dim = dimsizes(mlt_scs)
+        print("start triple loops")
+         do i = 0,dim(0)-1
+            do j = 0,dim(1)-1
+               do k = 0,dim(2)-1
+                  ; wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+                  wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+                  T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+                  T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
+               end do 
+              end do
+         end do
+           ;;;;写nc文件,简单的方法  
+           system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_indian.nc")   ; remove any pre-existing file
+            
+          ncdf = addfile("SODA3.4.2_wt_T_in_MLD_indian.nc" ,"c")  ; open output netCDF file
 
-      f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
+          ;===================================================================
+          ; create global attributes of the file (optional)
+          ;===================================================================
+             fAtt               = True            ; assign file attributes
+             fAtt@title         = "SODA3.4.2 wt and T in mld"
+             fAtt@Conventions   = "None"
+             fAtt@creation_date = systemfunc ("date")
+             fileattdef( ncdf, fAtt )            ; copy file attributes
 
-      wt_mlt = f1->wt_mlt
-      T_mlt = f1->T_mlt
-      T_mlt_diff  = f1->T_mlt_diff
+          ;===================================================================
+          ; make time an UNLIMITED dimension; recommended  for most applications
+          ;===================================================================
+             filedimdef(ncdf,"time",-1,True) 
 
-      wtT = wt_mlt
-      wtT = wt_mlt*T_mlt_diff
+          ;===================================================================
+          ; output variables directly; NCL will call appropriate functions
+          ; to write the meta data associated with each variable
+          ;===================================================================
+             ncdf->wt_mlt  = wt_mlt                          ; 4D               
+             ncdf->T_mlt = T_mlt  
+             ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
+          ;;;;
+          exit()
 
-      wtT&lat@units = "degrees_north"
-      wtT&lon@units = "degrees_east"
+      ; f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_indian.nc", "r")
+
+      ; wt_mlt = f1->wt_mlt
+      ; T_mlt = f1->T_mlt
+      ; T_mlt_diff  = f1->T_mlt_diff
+
+      ; wtT = wt_mlt
+      ; wtT = wt_mlt*T_mlt_diff
+
+      ; wtT&lat@units = "degrees_north"
+      ; wtT&lon@units = "degrees_east"
 
 
 
@@ -409,7 +443,7 @@ printVarSummary(wt)
        total_vertical_change  =  dim_avg_n_Wrap(vadv(12*17:), 0) - dim_avg_n_Wrap(vadv(0:12*17-1), 0)
 
     ;;;σW*T
-       dx_2d :=conform_dims(dimsizes(wt(1,4,{x1:x2},{y1:y2})) ,dx({0:15}) , 0)
+       dx_2d :=conform_dims(dimsizes(wt(1,4,{x1:x2},{y1:y2})) ,dx({-6:9}) , 0)
 
 
        wt_delta = dim_avg_n_Wrap(wt_mlt(12*17:,{x1:x2},{y1:y2}), 0) - dim_avg_n_Wrap(wt_mlt(0:12*17-1,{x1:x2},{y1:y2}), 0)
@@ -431,8 +465,8 @@ printVarSummary(wt)
   
     ;;;eddy
 
-           ; dx_3d1 =conform_dims(dimsizes(v(0:12*17-1,{z1},{x1:x2},{y1:y2})) ,dx({0:15}) , 1)
-           ; dx_3d2 =conform_dims(dimsizes(v(12*17:,{z1},{x1:x2},{y1:y2})) ,dx({0:15}), 1)
+           ; dx_3d1 =conform_dims(dimsizes(v(0:12*17-1,{z1},{x1:x2},{y1:y2})) ,dx({-6:9}) , 1)
+           ; dx_3d2 =conform_dims(dimsizes(v(12*17:,{z1},{x1:x2},{y1:y2})) ,dx({-6:9}), 1)
 
            ; T_diff_vertical = T(:,{z1},{x1:x2},{y1:y2})
            ; T_diff_vertical = T(:,{z1},{x1:x2},{y1:y2}) - Tbox_3d
@@ -491,7 +525,7 @@ printVarSummary(wt)
     print(thermaldy_vertical_change)
     print(quad_vertical_change)
     print(eddy_vertical_change)
-    exit()
+    
 print("*********开始画图********")
  
   ;;;
@@ -509,7 +543,7 @@ print("*********开始画图********")
 ; Mission 5. bar plot
 ; ==============================================================
   
-    wks = gsn_open_wks("pdf","SODA3.4.2-海洋各个通量变化项的bar图-热力与动力项")          ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","SODA3.4.2-海洋各个通量变化项的bar图-热力与动力项-indian")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7

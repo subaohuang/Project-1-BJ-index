@@ -154,46 +154,27 @@ begin
           y2 = 155
           mlt_scs = mlt(:,{x1:x2},{y1:y2})
           printVarSummary(mlt_scs)
-
-          mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
+          
+        ;   do i = 0,dimsizes(mlt&time)-1
+        ;   mlt_scs(i,:,:) = where(ismissing(mlt_scs(i,:,:)),dim_avg_n_Wrap(mlt_scs, 0), mlt_scs(i,:,:))
+        ; end do 
+        mlt_scs = where(ismissing(mlt_scs),avg(mlt_scs), mlt_scs) 
           
           printMinMax(mlt_scs, 1)
           dim  =dimsizes(mlt_scs)
-          wt_mlt =  wt(:,4,{x1:x2},{y1:y2})
-          T_mlt = T(:,4,{x1:x2},{y1:y2}) 
-           print("开始差值")
-            xi  = wt&depth 
-            xo = ispan(5,330,5)
 
-            wt_chazhi = linint1_n_Wrap(xi,wt,False,xo,0,1)
-            T_chazhi = linint1_n_Wrap(xi,T,False,xo,0,1)
 
-            dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
-            dhdt!0 = "time"
-            dhdt!1 = "lat"
-            dhdt!2 = "lon"
-            copy_VarCoords(mlt, dhdt)
-            printVarSummary(dhdt)
-      
-            delete(wt)
-            delete(T)
+    f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
+       
+       wt_mlt = f1->wt_mlt
+       T_mlt = f1->T_mlt
 
-         print("start triple loops")
-         do i = 0,dim(0)-1
-            do j = 0,dim(1)-1
-               do k = 0,dim(2)-1
-                  wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2})
-                  T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2})
-               end do 
-              end do
-         end do
-       ; print(mlt_scs)
-       ; exit()
+
        vadv  = mlt_scs
        vadv = wt_mlt*(T_mean(:,{x1:x2},{y1:y2}) - T_mlt)/mlt_scs
 
-    vadv = (-1*vadv)
-
+    vadv = (/-1*vadv/)
+    printVarSummary(vadv)
 
     ;;;convert to units degree ℃/year
       hadv =365*86400*hadv
@@ -206,11 +187,19 @@ begin
 
 
 
-    hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
-    vadv_mean  = dim_sum_n_Wrap(vadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+    hadv_mean = hadv
+    vadv_mean  = vadv
    
     copy_VarCoords(u(:,1,:,:), hadv_mean)
-    copy_VarCoords(u(:,1,:,:), vadv_mean)
+    copy_VarCoords(u(:,1,{x1:x2},{y1:y2}), vadv_mean)
+
+    hadv_mean&lat@units = "degrees_north"
+    hadv_mean&lon@units = "degrees_east"
+    
+    vadv_mean&lat@units = "degrees_north"
+    vadv_mean&lon@units = "degrees_east"
+ 
+
 
     ;;;年平均
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
@@ -218,8 +207,12 @@ begin
 
        hadv_mean_annual = month_to_annual(hadv_mean, 1)
        vadv_mean_annual = month_to_annual(vadv_mean, 1)
-       total_ocean_annual = hadv_mean_annual
-       total_ocean_annual = hadv_mean_annual + vadv_mean_annual
+       total_ocean_annual = vadv_mean_annual
+       total_ocean_annual = hadv_mean_annual(:,{x1:x2},{y1:y2}) + vadv_mean_annual
+
+       total_ocean_annual&lat@units = "degrees_north"
+       total_ocean_annual&lon@units = "degrees_east"
+ 
 
     ;;;
 
@@ -287,8 +280,8 @@ begin
        ; printMinMax(vadv_mean_annual, 1)
 
  total_ocean_mean = dim_avg_n_Wrap(total_ocean_annual, 0)
- total_mean = dim_avg_n_Wrap(total_annual, 0)
- total = total_ocean_mean + total_mean
+ ; total_mean = dim_avg_n_Wrap(total_annual, 0)
+ ; total = total_ocean_mean + total_mean
 
 ;;;
 
@@ -318,9 +311,9 @@ print("*******开始计算趋势系数*****************")
     r_vadv   = regCoef_n(ispan(1, yearnum, 1), vadv_mean_annual, 0, 0)
     r_total_ocean   = regCoef_n(ispan(1, yearnum, 1), total_ocean_annual, 0, 0)    
 
-    copy_VarCoords(ssta_annual(0,:,:), r_hadv)
-    copy_VarCoords(ssta_annual(0,:,:), r_vadv)
-    copy_VarCoords(ssta_annual(0,:,:), r_total_ocean)
+    copy_VarCoords(hadv_mean(0,:,:), r_hadv)
+    copy_VarCoords(vadv_mean(0,:,:), r_vadv)
+    copy_VarCoords(vadv_mean(0,:,:), r_total_ocean)
     ;;;;;
 
     r_lh = (/r_lh*yearnum/)
@@ -333,11 +326,11 @@ print("*******开始计算趋势系数*****************")
     r_vadv = (/r_vadv*yearnum/)
     r_total_ocean = (/r_total_ocean*yearnum/)
 
-    r_total_mean = avg(dim_avg_n_Wrap(r_total({0:15},{110:155}), 1))
-    r_total_ocean_mean = avg(dim_avg_n_Wrap(r_total_ocean({0:15},{110:155}), 1))
-
-print("r_total="+r_total_mean)
-print("r_total_ocean="+r_total_ocean_mean)
+    ; r_total_mean = avg(dim_avg_n_Wrap(r_total({0:15},{110:155}), 1))
+    ; r_total_ocean_mean = avg(dim_avg_n_Wrap(r_total_ocean({0:15},{110:155}), 1))
+; 
+; print("r_total="+r_total_mean)
+; print(data)t("r_total_ocean="+r_total_ocean_mean)
 
 
 
@@ -437,6 +430,7 @@ print("*********开始画图********")
   plot(0) = gsn_csm_contour_map(wks, r_total, res)
   res@gsnLeftString = "Total ocean Heat Flux"
   plot(1) = gsn_csm_contour_map(wks, r_total_ocean, res)
+  
   res@gsnLeftString = "Latent heating"
   plot(2) = gsn_csm_contour_map(wks, r_lh, res)
   res@gsnLeftString = "Sensible heating"
@@ -445,8 +439,10 @@ print("*********开始画图********")
   plot(4) = gsn_csm_contour_map(wks, r_nl, res)
   res@gsnLeftString = "Net Shortwave radiation"
   plot(5) = gsn_csm_contour_map(wks, r_ns, res)
+
   res@gsnLeftString = "ocean horizonal advction"
   plot(6) = gsn_csm_contour_map(wks, r_hadv, res)
+  
   res@gsnLeftString = "ocean Vertical advction"
   plot(7) = gsn_csm_contour_map(wks, r_vadv, res)
 

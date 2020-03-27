@@ -58,15 +58,25 @@ begin
 ;;;read soda data and then calculate EKMAN transport and curl of wind stress
     
        
-    f7=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_taux_mn_1980-2015_chazhi.nc", "r")   
-    f8=addfile("/home/yangsong3/data-observation/SODA/3.3.1/soda3.3.1_tauy_mn_1980-2015_chazhi.nc", "r")   
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
 
 
     indyear = (2013-1980+1)*12-1
    
 
-    taux = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
-    tauy = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+   copy_VarCoords(taux_r, taux) 
+   copy_VarCoords(tauy_r, tauy)
+   
+    delete(taux_r)
+    delete(tauy_r)
+    
     
     ; taux = tofloat(taux_r)
     ; tauy = tofloat(tauy_r)
@@ -208,7 +218,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "风应力旋度和风应力的趋势")
+  wks   = gsn_open_wks("pdf", "风应力旋度和风应力的趋势-SODA.3.4.2")
 
   res=True
   res@gsnFrame=False
