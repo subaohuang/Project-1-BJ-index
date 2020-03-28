@@ -369,72 +369,72 @@ printVarSummary(wt)
       
        printMinMax(mlt_scs, 1)
        
-       ;;;将wt进行垂直方向差值，为了得到更加精确的结果
-           print("开始差值")
-            xi  = wt&depth 
-            xo = ispan(5,330,5)
+       ; ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+       ;     print("开始差值")
+       ;      xi  = wt&depth 
+       ;      xo = ispan(5,330,5)
 
-            wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-            T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+       ;      wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+       ;      T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
 
-            wt_mlt = wt_chazhi(:,1,:,:)
-            T_mlt = T_chazhi(:,1,:,:)
-            T_mlt_diff = T_chazhi(:,1,:,:)
+       ;      wt_mlt = wt_chazhi(:,1,:,:)
+       ;      T_mlt = T_chazhi(:,1,:,:)
+       ;      T_mlt_diff = T_chazhi(:,1,:,:)
 
-            delete(wt)
-            delete(T)
-            dim = dimsizes(mlt_scs)
-        print("start triple loops")
-         do i = 0,dim(0)-1
-            do j = 0,dim(1)-1
-               do k = 0,dim(2)-1
-                  ; wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-                  wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
-                  T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
-                  T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
-               end do 
-              end do
-         end do
-           ;;;;写nc文件,简单的方法  
-           system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_indian.nc")   ; remove any pre-existing file
+       ;      delete(wt)
+       ;      delete(T)
+       ;      dim = dimsizes(mlt_scs)
+       ;  print("start triple loops")
+       ;   do i = 0,dim(0)-1
+       ;      do j = 0,dim(1)-1
+       ;         do k = 0,dim(2)-1
+       ;            ; wtT(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+       ;            wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+       ;            T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+       ;            T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
+       ;         end do 
+       ;        end do
+       ;   end do
+       ;     ;;;;写nc文件,简单的方法  
+       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_indian.nc")   ; remove any pre-existing file
             
-          ncdf = addfile("SODA3.4.2_wt_T_in_MLD_indian.nc" ,"c")  ; open output netCDF file
+       ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_indian.nc" ,"c")  ; open output netCDF file
 
-          ;===================================================================
-          ; create global attributes of the file (optional)
-          ;===================================================================
-             fAtt               = True            ; assign file attributes
-             fAtt@title         = "SODA3.4.2 wt and T in mld"
-             fAtt@Conventions   = "None"
-             fAtt@creation_date = systemfunc ("date")
-             fileattdef( ncdf, fAtt )            ; copy file attributes
+       ;    ;===================================================================
+       ;    ; create global attributes of the file (optional)
+       ;    ;===================================================================
+       ;       fAtt               = True            ; assign file attributes
+       ;       fAtt@title         = "SODA3.4.2 wt and T in mld"
+       ;       fAtt@Conventions   = "None"
+       ;       fAtt@creation_date = systemfunc ("date")
+       ;       fileattdef( ncdf, fAtt )            ; copy file attributes
 
-          ;===================================================================
-          ; make time an UNLIMITED dimension; recommended  for most applications
-          ;===================================================================
-             filedimdef(ncdf,"time",-1,True) 
+       ;    ;===================================================================
+       ;    ; make time an UNLIMITED dimension; recommended  for most applications
+       ;    ;===================================================================
+       ;       filedimdef(ncdf,"time",-1,True) 
 
-          ;===================================================================
-          ; output variables directly; NCL will call appropriate functions
-          ; to write the meta data associated with each variable
-          ;===================================================================
-             ncdf->wt_mlt  = wt_mlt                          ; 4D               
-             ncdf->T_mlt = T_mlt  
-             ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
-          ;;;;
-          exit()
+       ;    ;===================================================================
+       ;    ; output variables directly; NCL will call appropriate functions
+       ;    ; to write the meta data associated with each variable
+       ;    ;===================================================================
+       ;       ncdf->wt_mlt  = wt_mlt                          ; 4D               
+       ;       ncdf->T_mlt = T_mlt  
+       ;       ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
+       ;    ;;;;
+       ;    exit()
 
-      ; f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_indian.nc", "r")
+      f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_indian.nc", "r")
 
-      ; wt_mlt = f1->wt_mlt
-      ; T_mlt = f1->T_mlt
-      ; T_mlt_diff  = f1->T_mlt_diff
+      wt_mlt = f1->wt_mlt
+      T_mlt = f1->T_mlt
+      T_mlt_diff  = f1->T_mlt_diff
 
-      ; wtT = wt_mlt
-      ; wtT = wt_mlt*T_mlt_diff
+      wtT = wt_mlt
+      wtT = wt_mlt*T_mlt_diff
 
-      ; wtT&lat@units = "degrees_north"
-      ; wtT&lon@units = "degrees_east"
+      wtT&lat@units = "degrees_north"
+      wtT&lon@units = "degrees_east"
 
 
 
@@ -551,8 +551,8 @@ print("*********开始画图********")
      sres@vpXF = .15
      sres@trXMinF = 0.5
      sres@trXMaxF = 5.5
-     sres@trYMinF = -0.6
-     sres@trYMaxF = 0.6
+     sres@trYMinF = -0.2
+     sres@trYMaxF = 0.2
 
      sres@gsnDraw = True
      sres@gsnFrame = False
@@ -563,8 +563,8 @@ print("*********开始画图********")
      sres@tmXBLabels = (/"South","North","West","East","Vertical"/)
      ; sres@tmYLPrecision = 1
       sres@tmYLMode   = "Explicit"        ; explicitly set Y-axis labels
-      sres@tmYLValues = ispan(-6, 6, 1)*0.1
-      sres@tmYLLabels = ispan(-6, 6, 1)*0.1
+      sres@tmYLValues = ispan(-2, 2, 1)*0.1
+      sres@tmYLLabels = ispan(-2, 2, 1)*0.1
      
      sres@tmXBLabelFontHeightF = 0.0205
      sres@tmXTLabelFontHeightF = 0.0205

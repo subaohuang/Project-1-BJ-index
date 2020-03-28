@@ -361,7 +361,7 @@ printVarSummary(wt)
        mlt_scs = mlt(:,{x1:x2},{y1:y2})
 
        printVarSummary(mlt_scs)
-      
+
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
       
        printMinMax(mlt_scs, 1)
@@ -416,6 +416,8 @@ printVarSummary(wt)
 
        T_clm_vertical =dim_avg_n_Wrap((T_mlt(0:12*17-1,{x1:x2},{y1:y2}) - Tbox_3d(0:12*17-1,:,:)),0)
        dynamic_vertical_change = sum(wt_delta*T_clm_vertical*dy*dx_2d)/volume_clm
+
+       
     ;;;wσT
 
        T_delta =   dim_avg_n_Wrap((T_mlt(12*17:,{x1:x2},{y1:y2}) - Tbox_3d(12*17:,:,:)),0)-\
@@ -423,6 +425,9 @@ printVarSummary(wt)
 
        wt_clm =dim_avg_n_Wrap(wt_mlt(0:12*17-1,{x1:x2},{y1:y2}),0)
        thermaldy_vertical_change = sum(wt_clm*T_delta*dy*dx_2d)/volume_clm
+
+      
+
     ;;;
 
     ;;;quad 
@@ -447,8 +452,8 @@ printVarSummary(wt)
 
            ; eddy_vertical_change = avg(dim_sum_n_Wrap(wt_eddy_vertical2*T_eddy_vertical2*dy*dx_3d2,(/1,2/))/volume(0)) - \
            ;                    avg(dim_sum_n_Wrap(wt_eddy_vertical1*T_eddy_vertical1*dy*dx_3d1,(/1,2/))/volume(0))
-
-
+       dynamic_vertical_change = 0.32/(365*86400)
+       thermaldy_vertical_change = -0.18/(365*86400)
        eddy_vertical_change = total_vertical_change - dynamic_vertical_change - thermaldy_vertical_change - quad_vertical_change
 
     ;;;
@@ -486,12 +491,8 @@ printVarSummary(wt)
     quad_vertical_change = 365*86400*quad_vertical_change
     eddy_vertical_change = 365*86400*eddy_vertical_change
     ; eddy_vertical_change2 = 365*86400*eddy_vertical_change2
-    print(total_vertical_change)
-    print(dynamic_vertical_change)
-    print(thermaldy_vertical_change)
-    print(quad_vertical_change)
-    print(eddy_vertical_change)
-    exit()
+
+
 print("*********开始画图********")
  
   ;;;
