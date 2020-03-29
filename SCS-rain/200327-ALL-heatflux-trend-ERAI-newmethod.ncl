@@ -31,6 +31,10 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
+   ; lat1 = -5
+   ; lat2 = 45
+   ; lon1 = 90
+   ; lon2 = 160
    lat1 = -5
    lat2 = 45
    lon1 = 90
@@ -256,6 +260,7 @@ begin
       nswrs = 365*86400*nswrs/coef
       nlwrs = 365*86400*nlwrs/coef
       nswrs_pen = 365*86400*nswrs_pen/coef
+      
     ;;;
 
     ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
@@ -397,11 +402,19 @@ print("*********开始画图********")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+   lat1 = 0
+   lat2 = 15
+   lon1 = 110
+   lon2 = 155
 
+  res@mpMinLatF             = lat1
+  res@mpMaxLatF             = lat2
+  res@mpMinLonF             =lon1
+  res@mpMaxLonF             = lon2
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -419,31 +432,31 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -5
-  res@cnMaxLevelValF       =   5
+  res@cnMinLevelValF       =   -8
+  res@cnMaxLevelValF       =   8
   res@cnLevelSpacingF      =  1
  
 
   plot = new(8,graphic)
 
-  res@gsnLeftString = "Total Atm Heat Flux"
-  plot(0) = gsn_csm_contour_map(wks, r_total, res)
-  res@gsnLeftString = "Total ocean Heat Flux"
-  plot(1) = gsn_csm_contour_map(wks, r_total_ocean, res)
+  res@gsnLeftString = "Net Heat Flux"
+  plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
+  res@gsnLeftString = "Ocean advction"
+  plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
   
-  res@gsnLeftString = "Latent heating"
-  plot(2) = gsn_csm_contour_map(wks, r_lh, res)
-  res@gsnLeftString = "Sensible heating"
-  plot(3) = gsn_csm_contour_map(wks, r_sh, res)
+  res@gsnLeftString = "Latent heat flux"
+  plot(2) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
+  res@gsnLeftString = "Sensible heat flux"
+  plot(3) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Longwave radiation"
-  plot(4) = gsn_csm_contour_map(wks, r_nl, res)
+  plot(4) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Shortwave radiation"
-  plot(5) = gsn_csm_contour_map(wks, r_ns, res)
+  plot(5) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
 
-  res@gsnLeftString = "ocean horizonal advction"
-  plot(6) = gsn_csm_contour_map(wks, r_hadv, res)
+  res@gsnLeftString = "Ocean horizonal advction"
+  plot(6) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res)
   
-  res@gsnLeftString = "ocean Vertical advction"
+  res@gsnLeftString = "Ocean Vertical advction"
   plot(7) = gsn_csm_contour_map(wks, r_vadv, res)
 
   
@@ -505,14 +518,14 @@ print("*********开始画图********")
 
     iplot=new(8,graphic)
 
-    iplot(0) = gsn_csm_contour(wks,prob_total,res_pro)
-    iplot(1) = gsn_csm_contour(wks,prob_total_ocean ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,prob_lh,res_pro)
-    iplot(3) = gsn_csm_contour(wks,prob_sh,res_pro)
-    iplot(4) = gsn_csm_contour(wks,prob_nl,res_pro)
-    iplot(5) = gsn_csm_contour(wks,prob_ns,res_pro)
+    iplot(0) = gsn_csm_contour(wks,prob_total({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(1) = gsn_csm_contour(wks,prob_total_ocean({lat1:lat2},{lon1:lon2}) ,res_pro)
+    iplot(2) = gsn_csm_contour(wks,prob_lh({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(3) = gsn_csm_contour(wks,prob_sh({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(4) = gsn_csm_contour(wks,prob_nl({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(5) = gsn_csm_contour(wks,prob_ns({lat1:lat2},{lon1:lon2}),res_pro)
 
-    iplot(6) = gsn_csm_contour(wks,prob_hadv,res_pro)
+    iplot(6) = gsn_csm_contour(wks,prob_hadv({lat1:lat2},{lon1:lon2}),res_pro)
     iplot(7) = gsn_csm_contour(wks,prob_vadv,res_pro)
 
     
@@ -536,6 +549,7 @@ print("*********开始画图********")
 
   pres = True
   pres@gsnPanelLabelBar  = True
+  pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f","g","h"/)
 
   gsn_panel(wks, plot, (/4,2/), pres)
  
