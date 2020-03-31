@@ -277,6 +277,17 @@ begin
     nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
     total_annual = lhtfl_annual
     total_annual  = lhtfl_annual + shtfl_annual + nswrs_annual + nlwrs_annual -nswrs_pen_annual
+    printVarSummary(lhtfl_annual)
+ print(lhtfl_annual(0,{10},{140}))
+ print(lhtfl_annual(33,{10},{140}))
+lhtfl_annual_scs = dim_avg_n_Wrap(lhtfl_annual(:,{x1:x2},{y1:y2}), (/1,2/))
+wks = gsn_open_wks("pdf", "era-潜热随时间的变化")
+res = True
+plot= gsn_csm_xy(wks, ispan(1980,2013,1), lhtfl_annual_scs, res)
+draw(plot)
+frame(wks)
+ exit()
+
 
 
        ; printMinMax(total_ocean_annual, 1)

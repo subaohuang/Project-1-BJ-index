@@ -120,10 +120,7 @@ begin
     dz = dpres_plevel(z, dim_avg_n_Wrap(mlt, 0), 0, 0)
     dz2 = dpres_plevel(z, 43.38, 0, 0)
     copy_VarCoords(u(1,:,:,:), dz)
-    print(dz(:,{10},{130}))
-    print(avg(mlt(:,{10},{130})))
-    print(dz2)
-     exit()
+  
     dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
 
     hadv_mean = dim_sum_n_Wrap(hadv*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
@@ -217,6 +214,17 @@ begin
  total_ocean_mean = dim_avg_n_Wrap(total_ocean_annual, 0)
  total_mean = dim_avg_n_Wrap(total_annual, 0)
  total = total_ocean_mean + total_mean
+ x1 = 0
+ x2 = 15
+ y1 = 110
+ y2 = 155
+ lhtfl_annual_scs = dim_avg_n_Wrap(lhtfl_annual(:,{x1:x2},{y1:y2}), (/1,2/))
+wks = gsn_open_wks("pdf", "NCEP-NCAR-潜热随时间的变化")
+res = True
+plot= gsn_csm_xy(wks, ispan(1980,2013,1), lhtfl_annual_scs, res)
+draw(plot)
+frame(wks)
+ exit()
 
 ;;;
 
