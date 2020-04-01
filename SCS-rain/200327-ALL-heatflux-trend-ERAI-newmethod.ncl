@@ -254,12 +254,13 @@ begin
       density = 1025  ;;kg/m3
       cp  = 3850         ;;j/kg℃
       coef  = mlt*density*cp
+   
 
-      lhtfl = 365*86400*lhtfl/coef
-      shtfl = 365*86400*shtfl/coef
-      nswrs = 365*86400*nswrs/coef
-      nlwrs = 365*86400*nlwrs/coef
-      nswrs_pen = 365*86400*nswrs_pen/coef
+      lhtfl = 365*86400*lhtfl
+      shtfl = 365*86400*shtfl
+      nswrs = 365*86400*nswrs
+      nlwrs = 365*86400*nlwrs
+      nswrs_pen = 365*86400*nswrs_pen
       
     ;;;
 
@@ -268,28 +269,20 @@ begin
     ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
-
+    total = lhtfl
+    total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
+    total = (/total/coef/)
 
     lhtfl_annual = month_to_annual(lhtfl, 1)
     shtfl_annual = month_to_annual(shtfl, 1)
     nswrs_annual = month_to_annual(nswrs, 1)
     nlwrs_annual = month_to_annual(nlwrs, 1)
     nswrs_pen_annual = month_to_annual(nswrs_pen, 1)
+
+
     total_annual = lhtfl_annual
-    total_annual  = lhtfl_annual + shtfl_annual + nswrs_annual + nlwrs_annual -nswrs_pen_annual
+    total_annual  = month_to_annual(total, 1)
     printVarSummary(lhtfl_annual)
- print(lhtfl_annual(0,{10},{140}))
- print(lhtfl_annual(33,{10},{140}))
-lhtfl_annual_scs = dim_avg_n_Wrap(lhtfl_annual(:,{x1:x2},{y1:y2}), (/1,2/))
-wks = gsn_open_wks("pdf", "era-潜热随时间的变化")
-res = True
-plot= gsn_csm_xy(wks, ispan(1980,2013,1), lhtfl_annual_scs, res)
-draw(plot)
-frame(wks)
- exit()
-
-
-
        ; printMinMax(total_ocean_annual, 1)
        ; printMinMax(total_annual, 1)
        ; printMinMax(hadv_mean_annual, 1)
@@ -306,7 +299,13 @@ frame(wks)
 
 print("*******开始计算趋势系数*****************")
 ;;;calculate correlation coef
+      lhtfl_annual = lhtfl_annual/(365*86400)
+      shtfl_annual = shtfl_annual/(365*86400)
+      nswrs_annual = nswrs_annual/(365*86400)
+      nlwrs_annual = nlwrs_annual/(365*86400)
+;;;
 
+;;;
     ;;;大气
     r_lh =  regCoef_n(ispan(1, yearnum, 1), lhtfl_annual, 0, 0)
     r_sh   = regCoef_n(ispan(1, yearnum, 1), shtfl_annual, 0, 0)
@@ -413,6 +412,7 @@ print("*********开始画图********")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
+  res@mpFillDrawOrder = "PostDraw"
   ; res@mpMinLatF             = -5
   ; res@mpMaxLatF             = 45
   ; res@mpMinLonF             =90
@@ -443,8 +443,8 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -8
-  res@cnMaxLevelValF       =   8
+  res@cnMinLevelValF       =   -12
+  res@cnMaxLevelValF       =   12
   res@cnLevelSpacingF      =  1
  
 
@@ -454,21 +454,23 @@ print("*********开始画图********")
   plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Ocean advction"
   plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
-  
-  res@gsnLeftString = "Latent heat flux"
-  plot(2) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Sensible heat flux"
-  plot(3) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Longwave radiation"
-  plot(4) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Shortwave radiation"
-  plot(5) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
-
   res@gsnLeftString = "Ocean horizonal advction"
-  plot(6) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res)
+  plot(2) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res)
   
   res@gsnLeftString = "Ocean Vertical advction"
-  plot(7) = gsn_csm_contour_map(wks, r_vadv, res)
+  plot(3) = gsn_csm_contour_map(wks, r_vadv, res)
+
+
+  res@gsnLeftString = "Latent heat flux"
+  plot(4) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
+  res@gsnLeftString = "Sensible heat flux"
+  plot(5) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
+  res@gsnLeftString = "Net Longwave radiation"
+  plot(6) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
+  res@gsnLeftString = "Net Shortwave radiation"
+  plot(7) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
+
+
 
   
 
@@ -531,13 +533,14 @@ print("*********开始画图********")
 
     iplot(0) = gsn_csm_contour(wks,prob_total({lat1:lat2},{lon1:lon2}),res_pro)
     iplot(1) = gsn_csm_contour(wks,prob_total_ocean({lat1:lat2},{lon1:lon2}) ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,prob_lh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(3) = gsn_csm_contour(wks,prob_sh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(4) = gsn_csm_contour(wks,prob_nl({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(5) = gsn_csm_contour(wks,prob_ns({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(2) = gsn_csm_contour(wks,prob_hadv({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(3) = gsn_csm_contour(wks,prob_vadv,res_pro)
+    iplot(4) = gsn_csm_contour(wks,prob_lh({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(5) = gsn_csm_contour(wks,prob_sh({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(6) = gsn_csm_contour(wks,prob_nl({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(7) = gsn_csm_contour(wks,prob_ns({lat1:lat2},{lon1:lon2}),res_pro)
 
-    iplot(6) = gsn_csm_contour(wks,prob_hadv({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(7) = gsn_csm_contour(wks,prob_vadv,res_pro)
+ 
 
     
 

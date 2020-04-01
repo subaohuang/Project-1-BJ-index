@@ -115,6 +115,15 @@ begin
    delete(shum)
 
 
+    q_diff_scs = dim_avg_n_Wrap(q_diff_annual(:,:,:), (/1,2/))
+    wks = gsn_open_wks("pdf", "era-q随时间的变化")
+    res = True
+    plot= gsn_csm_xy(wks, ispan(1980,2013,1), q_diff_scs, res)
+    draw(plot)
+    frame(wks)
+    exit()
+
+
 
    ;;;显著性检验
     

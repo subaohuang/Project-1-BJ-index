@@ -95,15 +95,13 @@ begin
      
      q_diff = shum
      printVarSummary(shum)
-     q_diff = (/shum - qs/)
-     ; q_diff = (/qs - shum/)
+     q_diff = (/qs - shum/)
+     
     
 
    ;;;处理成年数据 
       q_diff_annual = month_to_annual(q_diff(:,{lat1:lat2},{lon1:lon2}), 1)
        q_diff_scs = dim_avg_n_Wrap(q_diff(:,{0:15},{110:155}), 0)
-       ; print(q_diff_scs)
-       ; exit()
    ;;;
 
     
@@ -117,7 +115,9 @@ begin
 
 
    ;;;;云量的数据以及趋势
-    f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
+    ; f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
+    f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/cldc.mean.nc", "r")
+
     date:=cd_calendar(f4->time, 1)
     timeind:=ind(date.ge.198001.and.date.le.201312)
     cldc = short2flt(f4->cldc(timeind,:,:))
@@ -135,12 +135,21 @@ begin
     delete(opt)
     cldc_annual  = month_to_annual(cldc, 1)
 
+
+
     cldc_annual&year = ispan(1, 34, 1)
     printVarSummary(cldc_annual)
+
+    cldc_annual_tropical=dim_avg_n_Wrap(cldc_annual(:,{30:-30},:), (/1,2/))
+    do i=0,dimsizes(cldc_annual&year)-1
+        cldc_annual(i,:,:)=(/cldc_annual(i,:,:)-cldc_annual_tropical(i)/)
+    end do
+    ;;
 
     cldc_rc = regCoef_n(ispan(1, yearnum, 1), cldc_annual, 0, 0)
     copy_VarCoords(cldc_annual(1,:,:), cldc_rc)
     cldc_rc = (/cldc_rc*yearnum/)
+    
 
 
 
@@ -152,14 +161,14 @@ begin
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
 
     ; u = short2flt(f1->si10(timeind,{lat1:lat2},{lon1:lon2}))
-    u_r = short2flt(f1->si10(timeind,{-90:90},{0:360}))
-     print("*****************开始水平插值************************")  
-    xo  =  sst&longitude
-    yo  =  sst&latitude
-    u = linint2_Wrap(u_r&longitude, u_r&latitude, u_r, \
-                  True, xo, yo, 0)
-    printVarSummary(u)
-    delete(u_r)
+    u = short2flt(f1->si10(timeind,{-90:90},{0:360}))
+    ;  print("*****************开始水平插值************************")  
+    ; xo  =  sst&longitude
+    ; yo  =  sst&latitude
+    ; u = linint2_Wrap(u_r&longitude, u_r&latitude, u_r, \
+    ;               True, xo, yo, 0)
+    ; printVarSummary(u)
+    ; delete(u_r)
     
 
 
@@ -194,10 +203,10 @@ begin
     delete(t_r)
     
     t_diff = t
-    t_diff = t - sst-273.6
+    t_diff = sst+273.6 - t
     t_diff_scs = dim_avg_n_Wrap(t_diff(:,{0:15},{110:155}), 0)
 
-    t_diff = (/t_diff*u/)
+    
    
 
 
@@ -285,7 +294,7 @@ begin
   plot = new(4, graphic)
 
   plot(0) = gsn_csm_contour_map(wks,cldc_rc,res)
-  res@gsnLeftString  = "Ta - Ts"
+  res@gsnLeftString  = "Ts - Ta"
   res@cnMinLevelValF       =   -1.0
   res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.2
@@ -295,7 +304,7 @@ begin
   res@cnLevelSpacingF      =  0.2
     res@gsnLeftString  = "10-m Wind Speed"
   plot(2) = gsn_csm_contour_map(wks,u_rc,res)
-    res@gsnLeftString  = "qa - qs"
+    res@gsnLeftString  = "qs - qa"
      res@cnMinLevelValF       =   -0.001
   res@cnMaxLevelValF       =   0.001
   res@cnLevelSpacingF      =  0.0002

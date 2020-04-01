@@ -467,6 +467,8 @@ printVarSummary(wt)
        total_month = Q_net_tr + hadv_mean + vadv_mean
        
        total_annual  = Q_net_tr_annual + hadv_mean_annual + vadv_mean_annual
+
+       resi_annual = dT_wgt - Q_net_tr_annual - hadv_mean_annual - vadv_mean_annual
 ;;;
 
 
@@ -637,16 +639,16 @@ print("*********开始画图:时间序列********")
   resxy@tmXBMode  =  "Explicit"
   resxy@trXMaxF = 2013
   resxy@trXMinF = 1979
-  resxy@tmXBValues = ispan(1979,2013,5)
-  resxy@tmXBLabels = ispan(1979,2013,5)
+  resxy@tmXBValues = ispan(1980,2013,5)
+  resxy@tmXBLabels = ispan(1980,2013,5)
   resxy@tmXBMinorOn = True
   resxy@tmXBMinorValues = ispan(1979,2013,1)
   
-  ;  resxy@tmYLMode  =  "Explicit"
-  ; resxy@tmYLValues = ispan(-2, 10, 1)
-  ; resxy@tmYLLabels = ispan(-2,10,1)
-  ; resxy@trYMinF = -2
-  ; resxy@trYMaxF = 10
+  resxy@tmYLMode  =  "Explicit"
+  resxy@tmYLValues = ispan(-3, 3, 1)
+  resxy@tmYLLabels = ispan(-3,3,1)
+  resxy@trYMinF = -3
+  resxy@trYMaxF = 3
 
   resxy@tmYLMinorOn = False
 
@@ -654,9 +656,9 @@ print("*********开始画图:时间序列********")
   resxy@vpWidthF = 0.6
 
 
-  resxy@xyLineThicknesses =  (/ 5,3,2,2,2,2,2/)          ; make second line thicker
+  resxy@xyLineThicknesses =  (/ 5,5,5,5,3,3,3/)          ; make second line thicker
   
-  resxy@xyLineColors       =  (/"black","gray","blue","red","green","pink"/)          ; change line color
+  resxy@xyLineColors       =  (/"black","blue","red","gray","green","pink"/)          ; change line color
   resxy@xyMonoDashPattern = False
   resxy@xyDashPatterns =(/0,0,0,0,0,0,0/)
   resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
@@ -665,9 +667,9 @@ print("*********开始画图:时间序列********")
 
   data_all = new((/6,34/),"float")
   data_all(0,:)=dT_wgt
-  data_all(1,:)=total_annual
-  data_all(2,:)=Q_net_tr_annual
-  data_all(3,:)=total_ocean_annual
+  data_all(1,:)=Q_net_tr_annual
+  data_all(2,:)=total_ocean_annual
+  data_all(3,:)=resi_annual
   data_all(4,:)=hadv_mean_annual
   data_all(5,:)=vadv_mean_annual
   
@@ -683,26 +685,24 @@ print("*********开始画图:时间序列********")
   ;;添加直线
 
   res= True
-  res@gsLineThicknessF = 5.0            ; line thickness   
-  res@gsLineColor      = "yellow"         ; color of lines
+  res@gsLineThicknessF = 3.0            ; line thickness   
+  res@gsLineColor      = "blue"         ; color of lines
   res@gsLineDashPattern=15
 
   plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
+  res@gsLineColor      = "red"         ; color of lines
   plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
- 
+  res@gsLineColor      = "blue"         ; color of lines
   plot5 = gsn_add_polyline(wks, plot,time(17:), Q_net_tr_annual_2, res)
+  res@gsLineColor      = "red"         ; color of lines
   plot6 = gsn_add_polyline(wks, plot,time(17:), total_ocean_annual_2, res)
   
-  res@gsLineColor      = "red"         ; color of lines
+  res@gsLineColor      = "black"         ; color of lines
   
    plot4 = gsn_add_polyline(wks, plot,time(0:16), dT_wgt_mean_1, res)
    plot7 = gsn_add_polyline(wks, plot,time(17:), dT_wgt_mean_2, res)
 
   
-
-
-
-
 
   ;;添加legend 
   gres = True
@@ -713,13 +713,15 @@ print("*********开始画图:时间序列********")
   lineres = True
   ; lineres@lgLineColors = (/"black"，/) ; line colors
   lineres@lgLineColors       = resxy@xyLineColors
-  lineres@lgLineThicknesses = (/ 5,5,5,5,5,5/)
+  lineres@lgLineThicknesses = (/ 3,3,3,3,3,3/)
   lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
   lineres@lgDashIndexes = resxy@xyDashPatterns
 
 
   textres = True
-  textres@lgLabels = (/"dT","total","Q_net","Q_ocean","Horizontal advection","Vertical advection"/)     ;加线的标注
+  textres@lgLabels = (/"dT","Q_net","Ocean advection","Residual","Horizontal advection","Vertical advection"/)     ;加线的标注
+  textres@lgLineLabelFontHeights = 0.005
+
 
   plot = simple_legend(wks,plot,gres,lineres,textres)   
   draw(plot)
