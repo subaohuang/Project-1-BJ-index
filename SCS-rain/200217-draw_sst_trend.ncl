@@ -44,6 +44,8 @@ begin
     ssta_rc=regCoef_n(ispan(1, dim(0), 1), ssta_annual, 0, 0)
     copy_VarCoords(ssta_annual(1,:,:), ssta_rc)
     prob_p=rc_test(ssta_rc)
+
+    ssta_rc = where(prob_p.le.0.01, ssta_rc, ssta_rc@_FillValue)
     ssta_rc=(/ssta_rc*dim(0)/)
     
     wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS")
@@ -55,7 +57,10 @@ begin
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlueWhiteOrangeRed"
+  res@cnFillPalette="MPL_YlOrRd"
+  res@cnFillPalette = "NCV_jaisnd"
+  res@gsnSpreadColorStart = 130
+  res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -64,10 +69,16 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+
+  res@mpMinLatF             = 0
+  res@mpMaxLatF             = 15
+  res@mpMinLonF             =110
+  res@mpMaxLonF             = 155
+
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -96,13 +107,28 @@ begin
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   0.2
+  res@cnMaxLevelValF       =   0.6
+  res@cnLevelSpacingF      =  0.05
+
 
   res@gsnLeftString="HadISST sst trend"
   plot = gsn_csm_contour_map(wks, ssta_rc, res)
-  
+
+  res2 = res
+  res2@cnLevelSelectionMode = "ExplicitLevels"
+  res2@cnFillOn = False
+  res2@cnLinesOn = True
+  res2@cnLevels = (/0.55/)
+  res2@cnLineColors = "black"
+  res2@cnMonoLineColor  = True
+  res2@cnLineThicknessF = 5
+  res2@cnMonoLineThickness  = True
+  res2@gsnLeftString = ""
+  res2@cnInfoLabelOn = False
+
+  plot1 = gsn_csm_contour(wks, ssta_rc, res2)
+  overlay(plot, plot1)  
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
@@ -142,41 +168,40 @@ begin
 
 
 
-    ;;;打点
+    
+    
+   ;;;打点
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
+    res_pro@cnFillOn = True
 
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.01/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.003
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-
-    iplot=new(1,graphic)
-
-    
- 
-    iplot = gsn_csm_contour(wks,prob_p,res_pro)
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
   
-    iplot = gsn_contour_shade(iplot , 0,0.05,opt)
+  
+     ; iplot = gsn_csm_contour(wks,prob_p  ,res_pro)
 
     ;;;  
-    overlay(plot, iplot)
+    ; overlay(plot, iplot)
 draw(plot)
 frame(wks)
 

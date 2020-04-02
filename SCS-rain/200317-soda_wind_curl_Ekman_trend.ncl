@@ -96,18 +96,12 @@ begin
     f = 2*omega*sin(pi*lat/180)
     density = 1025
     f_3d = conform_dims(dimsizes(taux), f, 1)
+    
+    ue = tauy
+    ve = taux  
+    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
 
-    taux = (/taux/(density*f_3d)/)
-    tauy = (/tauy/(density*f_3d)/)
-
-    ;;parameter 
-     dx = lat
-     dx = 6378388.*cos(0.0174533*lat)
-     dx!0 = "lat"
-     copy_VarCoords(taux(1,:,1), dx)
-
-     dy = (pi/180)*1*6378388.
-     
 
     ;;;calculate Horizontal and Vertical advction
 
@@ -122,7 +116,8 @@ begin
 
     ; vr = dydx - dxdy
 
-    vr = uv2vr_cfd(taux,tauy,taux&lat,taux&lon,2)
+    ; vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+     vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)
 
 
 
@@ -135,16 +130,10 @@ begin
     wg = vr 
     copy_VarCoords(taux, wg)
 
-     ue = tauy              ;;;Ekman volume transport
-     ve = taux              ;;;Ekman volume transport
-     ; ve = -1*ve
-     
-    ue = taux*density*f_3d
-    ve = tauy*density*f_3d
 
     ;;;年平均
-       ue_annual = month_to_annual(ue, 1)
-       ve_annual = month_to_annual(ve, 1)
+       ue_annual = month_to_annual(taux, 1)
+       ve_annual = month_to_annual(tauy, 1)
        wg_annnual = month_to_annual(wg, 1)
     ;;;
 
@@ -255,11 +244,21 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -0.2
+  ; res@cnMaxLevelValF       =   0.2
+  ; res@cnLevelSpacingF      =  0.05
+
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.1
-  res@cnMaxLevelValF       =   0.1
-  res@cnLevelSpacingF      =  0.01
- 
+  res@cnMinLevelValF       =   -0.0026
+  res@cnMaxLevelValF       =   0.0026
+  res@cnLevelSpacingF      =  0.0002
+
+
+
+
+
+
   res@gsnScalarContour        = True
    ;;;;;;;LineArrow
   res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors

@@ -452,7 +452,8 @@ printVarSummary(wt)
 
            ; eddy_vertical_change = avg(dim_sum_n_Wrap(wt_eddy_vertical2*T_eddy_vertical2*dy*dx_3d2,(/1,2/))/volume(0)) - \
            ;                    avg(dim_sum_n_Wrap(wt_eddy_vertical1*T_eddy_vertical1*dy*dx_3d1,(/1,2/))/volume(0))
-       dynamic_vertical_change = 0.32/(365*86400)
+     ;;;自己修改
+       dynamic_vertical_change = 0.25/(365*86400)
        thermaldy_vertical_change = -0.18/(365*86400)
        eddy_vertical_change = total_vertical_change - dynamic_vertical_change - thermaldy_vertical_change - quad_vertical_change
 
@@ -510,7 +511,7 @@ print("*********开始画图********")
 ; Mission 5. bar plot
 ; ==============================================================
   
-    wks = gsn_open_wks("pdf","SODA3.4.2-海洋各个通量变化项的bar图-热力与动力项")          ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","SODA3.4.2-海洋各个通量变化项的bar图-热力与动力项-original")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7

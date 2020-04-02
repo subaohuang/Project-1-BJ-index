@@ -114,8 +114,8 @@ begin
 
 
 
-   ;;;;云量的数据以及趋势
-    ; f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
+   ;;;云量的数据以及趋势
+    f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
     f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/cldc.mean.nc", "r")
 
     date:=cd_calendar(f4->time, 1)
@@ -124,6 +124,27 @@ begin
     delete(cldc&time)
     cldc&time=date(timeind)
     printVarSummary(cldc)
+
+    
+    ; yearin  = ispan(1980, 2013, 1)
+    ; fils4 = "/home/yangsong3/data-observation/ERA-interim/monthly/cloud/cloud_monthly_" + yearin + ".nc"
+    ; f4 = addfiles(fils4, "r")
+
+    ; date:=cd_calendar(f4[:]->time, 1)
+    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    ; time = f4[:]->time(timeind)
+    ; lat = f4[1]->latitude
+    ; lon = f4[1]->longitude
+  
+
+    ;   cldc = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+   
+    ; do i = 0,dimsizes(timeind)/12-1
+    ;   cldc(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
+    ; end do
+
+
+
     
     ;;;插值，missing value值给去掉，只能限制longitude的5点和纬向的1点
     opt=(/0,5/)
@@ -133,14 +154,15 @@ begin
     opt=(/0,1/)
     cldc=(/linmsg_n(cldc, opt, 1)/)
     delete(opt)
-    cldc_annual  = month_to_annual(cldc, 1)
+    cldc_annual  = month_to_annual(cldc(:,{lat1:lat2},{lon1:lon2}), 1)
+    ;;;
 
 
 
     cldc_annual&year = ispan(1, 34, 1)
     printVarSummary(cldc_annual)
 
-    cldc_annual_tropical=dim_avg_n_Wrap(cldc_annual(:,{30:-30},:), (/1,2/))
+    cldc_annual_tropical=dim_avg_n_Wrap(month_to_annual(cldc(:,{-30:30},:),1), (/1,2/))
     do i=0,dimsizes(cldc_annual&year)-1
         cldc_annual(i,:,:)=(/cldc_annual(i,:,:)-cldc_annual_tropical(i)/)
     end do
@@ -255,14 +277,16 @@ begin
 
   res@cnFillOn=True
   res@cnLinesOn=False
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -80.0
-  ; res@cnMaxLevelValF       =   80.0
-  ; res@cnLevelSpacingF      =  10.0
+
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -1.0
   res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.2
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -0.03
+  ; res@cnMaxLevelValF       =   0.03
+  ; res@cnLevelSpacingF      =  0.01
+
 
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
@@ -360,6 +384,7 @@ begin
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot = new(4,graphic)
+  
   
     iplot(0) = gsn_csm_contour(wks,prob_cldc,res_pro)
     iplot(1) = gsn_csm_contour(wks,prob_t,res_pro)

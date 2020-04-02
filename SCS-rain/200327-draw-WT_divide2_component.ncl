@@ -333,10 +333,16 @@ printVarSummary(wt)
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+
+  res@mpMinLatF             = 0
+  res@mpMaxLatF             = 15
+  res@mpMinLonF             = 110
+  res@mpMaxLonF             = 155
+
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -364,13 +370,13 @@ printVarSummary(wt)
 
   res@gsnLeftString = "Total"
   plot(0) = gsn_csm_contour_map(wks, dwt, res)
-  res@gsnLeftString = "tdw"
+  res@gsnLeftString = "dW.Tclm"
   plot(1) = gsn_csm_contour_map(wks, tdw, res)
-  res@gsnLeftString = "wdt"
+  res@gsnLeftString = "dT.Wclm"
   plot(2) = gsn_csm_contour_map(wks, wdt, res)
-  res@gsnLeftString = "dwdt"
+  res@gsnLeftString = "dT.dW"
   plot(3) = gsn_csm_contour_map(wks, dwdt, res)
-  res@gsnLeftString = "eddy"
+  res@gsnLeftString = "EDDY"
   plot(4) = gsn_csm_contour_map(wks, eddy, res)
   
   
