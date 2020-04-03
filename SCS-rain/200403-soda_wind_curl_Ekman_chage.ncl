@@ -134,56 +134,39 @@ begin
     ;;;年平均
        ue_annual = month_to_annual(taux, 1)
        ve_annual = month_to_annual(tauy, 1)
-       wg_annnual = month_to_annual(wg, 1)
+       wg_annual = month_to_annual(wg, 1)
     ;;;
     
 
     ;;;clm diff 
-    ue_annual_1 = dim_avg_n_Wrap(ue_annual_1(0:12*17-1,:,:), 0)
-    ue_annual_2 = dim_avg_n_Wrap(ue_annual_1(12*17:,:,:), 0)
+    
+    ue_annual_1 = dim_avg_n_Wrap(ue_annual(0:12,:,:), 0)
+    ue_annual_2 = dim_avg_n_Wrap(ue_annual(13:,:,:), 0)
 
     ue_annual_diff = ue_annual_1 
-    ue_annual_diff = (/ue_annual_2 - ue_annual_2/)
+    ue_annual_diff = (/ue_annual_2 - ue_annual_1/)
 
-    ve_annual_1 = dim_avg_n_Wrap(ve_annual_1(0:12*17-1,:,:), 0)
-    ve_annual_2 = dim_avg_n_Wrap(ve_annual_1(12*17:,:,:), 0)
+    ve_annual_1 = dim_avg_n_Wrap(ve_annual(0:12,:,:), 0)
+    ve_annual_2 = dim_avg_n_Wrap(ve_annual(13:,:,:), 0)
 
     ve_annual_diff = ve_annual_1 
-    ve_annual_diff = (/ve_annual_2 - ve_annual_2/)
+    ve_annual_diff = (/ve_annual_2 - ve_annual_1/)
 
 
-    wg_annual_1 = dim_avg_n_Wrap(wg_annual_1(0:12*17-1,:,:), 0)
-    wg_annual_2 = dim_avg_n_Wrap(wg_annual_1(12*17:,:,:), 0)
+    wg_annual_1 = dim_avg_n_Wrap(wg_annual(0:12,:,:), 0)
+    wg_annual_2 = dim_avg_n_Wrap(wg_annual(13:,:,:), 0)
 
     wg_annual_diff = wg_annual_1 
-    wg_annual_diff = (/wg_annual_2 - wg_annual_2/)
+    wg_annual_diff = (/wg_annual_2 - wg_annual_1/)
 
 
   
  
-print("*******计算趋势*****************")
 ;;;calculate correlation coef
 
-    ;;;hadv correlation with sst
-    rc_ue =   regCoef_n(ispan(1,yearnum,1), ue_annual, 0, 0)  
-    copy_VarCoords(ue(0,:,:), rc_ue)
-    
-    ;;;hadv correlation with sst
-    rc_ve =   regCoef_n(ispan(1,yearnum,1), ve_annual, 0, 0)    
-    copy_VarCoords(ve(0,:,:), rc_ve)
-    
-    rc_wg =   regCoef_n(ispan(1,yearnum,1), wg_annnual, 0, 0)    
-    copy_VarCoords(wg(0,:,:), rc_wg)
-  
-    ;;;
-   
-    rc_ue = (/rc_ue*yearnum/)
-    rc_ve = (/rc_ve*yearnum/)
-    rc_wg = (/rc_wg*yearnum/)
-
-    ;;;
-
-    
+   rc_ue = ue_annual_diff
+   rc_ve = ve_annual_diff
+   rc_wg = wg_annual_diff
 
 
     ; rc_ue  = (/rc_ue*10^5/)
@@ -191,49 +174,13 @@ print("*******计算趋势*****************")
     rc_wg  = (/rc_wg*10^5/)
    ;;;;
 
-
-  
-       
-
-
-;;;;
-
-print("*******显著性检验*****************")
-
-;;;t test 
-  prob_p1= rc_test(rc_ue)
-  copy_VarCoords(rc_ue, prob_p1)
-
-  prob_p2= rc_test(rc_ve)
-  copy_VarCoords(rc_ve, prob_p2)
-  prob_p3= rc_test(rc_wg)
-  copy_VarCoords(rc_wg, prob_p3)
-
-
-  ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
-  ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-
-  ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
-  ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
-
-;;;;
-
- ; r_sst_hadv = where(prob_p1.le.0.5,r_sst_hadv, r_sst_hadv@_FillValue)
- ; r_dsst_hadv = where(prob_p2.le.0.5,r_dsst_hadv, r_dsst_hadv@_FillValue)
- ; r_sst_vadv = where(prob_p3.le.0.5,r_sst_vadv, r_sst_vadv@_FillValue)
- ; r_dsst_vadv = where(prob_p4.le.0.5,r_dsst_vadv, r_dsst_vadv@_FillValue)
- ; rc_ue = where(prob_p1.le.0.1.or.prob_p2.le.0.1, rc_ue,rc_ue@_FillValue)
- ; rc_ve = where(prob_p1.le.0.1.or.prob_p2.le.0.1, rc_ve,rc_ve@_FillValue) 
-
-
-
 print("*********开始画图********")
 
     
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "风应力旋度和风应力的趋势-SODA.3.4.2-除f")
+  wks   = gsn_open_wks("pdf", "风应力旋度和风应力的变化-SODA.3.4.2-除f")
 
   res=True
   res@gsnFrame=False
@@ -280,27 +227,19 @@ print("*********开始画图********")
   res@cnMaxLevelValF       =   0.05
   res@cnLevelSpacingF      =  0.01
 
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -0.0026
-  ; res@cnMaxLevelValF       =   0.0026
-  ; res@cnLevelSpacingF      =  0.0002
-
-
-
-
 
 
   res@gsnScalarContour        = True
    ;;;;;;;LineArrow
   res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  ; res@vcGlyphStyle="CurlyVector"
+  res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.01           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.01
+  res@vcMinMagnitudeF          =0.002
   ; res@vcMaxMagnitudeF          =0.1
   res@vcRefLengthF             = 0.02 ; define length of v
 
-  res@vcRefMagnitudeF = 0.008
+  res@vcRefMagnitudeF = 0.005
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.5
 
@@ -354,74 +293,7 @@ print("*********开始画图********")
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    
 
-    ; ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLinesOn=False
-    ; res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    ; res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    ; res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    ; res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
-
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
-
-    ;   iplot=new(3,graphic)
-
-    
-    ;   iplot(0) = gsn_csm_contour(wks,prob_p3,res_pro)
-    
-
-
-    ; opt                      = True
-    ; opt@gsnShadeFillType     = "pattern"
-    ; opt@gsnShadeMid     = 6         ; stipple
-    ; ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; ; opt@gsnShadeHigh   = "green"
-    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-
-    ; i = 0
-    ;  iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
-    
-
-     ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
-
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-    iplot = new(1,graphic)
-  
-  
-    iplot(0) = gsn_csm_contour(wks,prob_p3,res_pro)
-
-    ;;;  
-     i = 0
-      overlay(plot(i), iplot(i))
+ 
   draw(plot)
   frame(wks)   
 
