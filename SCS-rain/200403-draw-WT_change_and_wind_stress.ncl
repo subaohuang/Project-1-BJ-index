@@ -183,64 +183,7 @@ printVarSummary(wt)
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
       
        printMinMax(mlt_scs, 1)
-       
-;        ;;;将wt进行垂直方向差值，为了得到更加精确的结果
-;            print("开始差值")
-;             xi  = wt&depth 
-;             xo = ispan(5,330,5)
-
-;             wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-;             T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-
-;             wt_mlt = wt_chazhi(:,1,:,:)
-;             T_mlt = T_chazhi(:,1,:,:)
-;             T_mlt_diff = T_chazhi(:,1,:,:)
-
-;             delete(wt)
-;             delete(T)
-        
-;         print("start triple loops")
-;          do i = 0,dim(0)-1
-;             do j = 0,dim(1)-1
-;                do k = 0,dim(2)-1
-;                   wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
-;                   T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) 
-;                   T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
-;                end do 
-;               end do
-;          end do
-;        ;;;
-; ;;;;;;
-
-; ;;;;写nc文件,简单的方法  
-;      system("/bin/rm -f SODA3.4.2_wt_T_in_MLD.nc")   ; remove any pre-existing file
-      
-;     ncdf = addfile("SODA3.4.2_wt_T_in_MLD.nc" ,"c")  ; open output netCDF file
-
-;     ;===================================================================
-;     ; create global attributes of the file (optional)
-;     ;===================================================================
-;        fAtt               = True            ; assign file attributes
-;        fAtt@title         = "SODA3.4.2 wt and T in mld"
-;        fAtt@Conventions   = "None"
-;        fAtt@creation_date = systemfunc ("date")
-;        fileattdef( ncdf, fAtt )            ; copy file attributes
-
-;     ;===================================================================
-;     ; make time an UNLIMITED dimension; recommended  for most applications
-;     ;===================================================================
-;        filedimdef(ncdf,"time",-1,True) 
-
-;     ;===================================================================
-;     ; output variables directly; NCL will call appropriate functions
-;     ; to write the meta data associated with each variable
-;     ;===================================================================
-;        ncdf->wt_mlt  = wt_mlt                          ; 4D               
-;        ncdf->T_mlt = T_mlt  
-;        ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
-; exit()
-;  ;;;;;;
-  
+ 
   
    ;;δ(WT)
     f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
@@ -299,11 +242,11 @@ printVarSummary(wt)
 
    ;;
   
-  dwt = (/dwt*10^5/)
-  wdt = (/wdt*10^5/)
-  tdw = (/tdw*10^5/)
-  dwdt = (/dwdt*10^5/)
-  eddy = (/eddy*10^5/)
+    dwt = (/dwt*10^5/)
+    wdt = (/wdt*10^5/)
+    tdw = (/tdw*10^5/)
+    dwdt = (/dwdt*10^5/)
+    eddy = (/eddy*10^5/)
   ;;
 
 
@@ -315,21 +258,121 @@ printVarSummary(wt)
   copy_VarCoords(T_clm, w_delta )
   copy_VarCoords(T_clm, w_clm )
 
+  w_clm = (/w_clm*10^5/)
+  w_delta = (/w_delta*10^5/)
 
-;;;;draw
+
+;;;;wind stress
+
+  
+;;;read soda data and then calculate EKMAN transport and curl of wind stress
+    
+       
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
+
+
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+    copy_VarCoords(taux_r, taux) 
+    copy_VarCoords(tauy_r, tauy)
+   
+    delete(taux_r)
+    delete(tauy_r)
+    
+    taux&lat@units = "degrees_north"
+    taux&lon@units = "degrees_east"
+    tauy&lat@units = "degrees_north"
+    tauy&lon@units = "degrees_east"
+
+    lat = taux&lat
+    pi = get_pi("float")
+    omega = 2*pi/86400
+    f = 2*omega*sin(pi*lat/180)
+    density = 1025
+    f_3d = conform_dims(dimsizes(taux), f, 1)
+    
+    ue = tauy
+    ve = taux  
+    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
+
+
+    vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+     ; vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)
+
+    copy_VarCoords(taux, vr)
+    printVarSummary(vr)
+    
+    wg = vr 
+    copy_VarCoords(taux, wg)
+
+
+    ;;;年平均
+       ue_annual = month_to_annual(taux, 1)
+       ve_annual = month_to_annual(tauy, 1)
+       wg_annual = month_to_annual(wg, 1)
+    ;;;
+    
+
+    ;;;clm diff 
+    
+    ue_annual_1 = dim_avg_n_Wrap(ue_annual(0:12,:,:), 0)
+    ue_annual_2 = dim_avg_n_Wrap(ue_annual(13:,:,:), 0)
+
+    ue_annual_diff = ue_annual_1 
+    ue_annual_diff = (/ue_annual_2 - ue_annual_1/)
+
+    ve_annual_1 = dim_avg_n_Wrap(ve_annual(0:12,:,:), 0)
+    ve_annual_2 = dim_avg_n_Wrap(ve_annual(13:,:,:), 0)
+
+    ve_annual_diff = ve_annual_1 
+    ve_annual_diff = (/ve_annual_2 - ve_annual_1/)
+
+
+    wg_annual_1 = dim_avg_n_Wrap(wg_annual(0:12,:,:), 0)
+    wg_annual_2 = dim_avg_n_Wrap(wg_annual(13:,:,:), 0)
+
+    wg_annual_diff = wg_annual_1 
+    wg_annual_diff = (/wg_annual_2 - wg_annual_1/)
+    ;;;;
+
+
+    ;;;;clm 
+    ue_clm = dim_avg_n_Wrap(ue_annual, 0)
+    ve_clm = dim_avg_n_Wrap(ve_annual, 0)
+    wg_clm = dim_avg_n_Wrap(wg_annual, 0)
+    wg_clm  = (/wg_clm*10^5/)
+    ;;;
+
+
+  
+ 
+;;;calculate correlation coef
+
+   rc_ue = ue_annual_diff
+   rc_ve = ve_annual_diff
+   rc_wg = wg_annual_diff
+   rc_wg  = (/rc_wg*10^5/)
+   ;;;;
+
 
 
     
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "WT的变化以及气候态")
+  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress")
 
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlRe"
+  res@cnFillPalette="MPL_RdYlBu"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -367,32 +410,86 @@ printVarSummary(wt)
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -3.0*10^-5
-  res@cnMaxLevelValF       =   3.0*10^-5
-  res@cnLevelSpacingF      =  1.0*10^-5
+  res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.2
  
 
-  plot = new(4,graphic)
+  plot = new(6,graphic)
 
   res@gsnLeftString = "Wclm"
   plot(0) = gsn_csm_contour_map(wks, w_clm, res)
+  
+  res@gsnLeftString = "dW"
+  res@cnMinLevelValF       =   -0.2
+  res@cnMaxLevelValF       =   0.2
+  res@cnLevelSpacingF      =  0.04  
+  plot(1) = gsn_csm_contour_map(wks, w_delta, res)
+  
   res@gsnLeftString = "Tclm"
-   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -4
-  res@cnMaxLevelValF       =   4
-  res@cnLevelSpacingF      =  1
-  plot(1) = gsn_csm_contour_map(wks, T_clm, res)
+  res@cnMaxLevelValF       =   0
+  res@cnLevelSpacingF      =  0.5
+  
+  res@cnFillPalette = "MPL_PuBu"
+  res@gsnSpreadColorStart = 110
+  res@gsnSpreadColorEnd = 3
+
+  plot(2) = gsn_csm_contour_map(wks, T_clm, res)
+
   res@gsnLeftString = "dT"
   res@cnMinLevelValF       =   -0.4
-  res@cnMaxLevelValF       =   0.4
-  res@cnLevelSpacingF      =  0.1
+  res@cnMaxLevelValF       =   0.0
+  res@cnLevelSpacingF      =  0.05
+  plot(3) = gsn_csm_contour_map(wks, T_delta, res)
+   
+  ;;;;;draw wind stress
+  res2 = res
+  res2@gsnLeftString = "Wind stress and curl climatology "
+
+
+  res2@gsnScalarContour        = True
+   ;;;;;;;LineArrow
+  res2@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  res2@vcGlyphStyle="CurlyVector"
+
+
+  res2@vcRefMagnitudeF = 0.05
+  res2@vcMinDistanceF           = 0.017         ; thin vectors
+  res2@vcRefLengthF             = 0.025 ; define length of v
+ 
+  res2@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  res2@vcLineArrowThicknessF=1.0
+
+  res2@vcLineArrowHeadMaxSizeF=0.005
+  res2@vcLineArrowHeadMinSizeF=0.005
+  res2@vcVectorDrawOrder="PostDraw"
+  res2@mpFillOn =False
+
+
+  res2@cnMinLevelValF       =   -0.5
+  res2@cnMaxLevelValF       =   0.5
+  res2@cnLevelSpacingF      =  0.1
+  delete(res2@gsnSpreadColorEnd)
+  delete(res2@gsnSpreadColorStart)
+
+  res2@cnFillPalette = "GMT_polar"
+  plot(4) = gsn_csm_vector_scalar_map(wks, ue_clm ,ve_clm,wg_clm ,res2)
+
+  res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res2@cnMinLevelValF       =   -0.05
+  res2@cnMaxLevelValF       =   0.05
+  res2@cnLevelSpacingF      =  0.01
   
-  plot(2) = gsn_csm_contour_map(wks, T_delta, res)
-  res@gsnLeftString = "dW"
-   res@cnMinLevelValF       =   -0.4*10^-5
-  res@cnMaxLevelValF       =   0.4*10^-5
-  res@cnLevelSpacingF      =  0.1*10^-5
-  plot(3) = gsn_csm_contour_map(wks, w_delta, res)
+  res2@vcRefMagnitudeF = 0.005
+  res2@vcMinMagnitudeF          =0.002
+  res2@vcMinDistanceF = 0.01
+  
+ 
+  res2@gsnLeftString = "Wind stress and curl change "
+  plot(5) = gsn_csm_vector_scalar_map(wks,rc_ue ,rc_ve,rc_wg ,res2)
+
   
   
 
@@ -407,9 +504,9 @@ printVarSummary(wt)
     pgres@gsLineThicknessF=1.0
     pgres@gsLineDashPattern=1
   
-    str = "" + ispan(1,4,1)
+    str = "" + ispan(1,dimsizes(plot),1)
 
-   do i = 0,3
+   do i = 0,dimsizes(str)-1
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
    end do
 
@@ -431,16 +528,16 @@ printVarSummary(wt)
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   str2 = "0" + ispan(1,4,1)
-   do i = 0,3
+   str2 = "0" + ispan(1,dimsizes(plot),1)
+   do i = 0,dimsizes(str2)-1
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
 
   pres = True
-  pres@gsnPanelLabelBar  = True
+  pres@gsnPanelLabelBar  = False
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/3,2/), pres)
  
 
 

@@ -158,6 +158,15 @@ begin
 
     wg_annual_diff = wg_annual_1 
     wg_annual_diff = (/wg_annual_2 - wg_annual_1/)
+    ;;;;
+
+
+    ;;;;clm 
+    ue_clm = dim_avg_n_Wrap(ue_annual, 0)
+    ve_clm = dim_avg_n_Wrap(ve_annual, 0)
+    wg_clm = dim_avg_n_Wrap(wg_annual, 0)
+    wg_clm  = (/wg_clm*10^5/)
+    ;;;
 
 
   
@@ -248,8 +257,22 @@ print("*********开始画图********")
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
 
-  
-  plot = gsn_csm_vector_scalar_map(wks,rc_ue ,rc_ve,rc_wg ,res)
+  plot = new(2,graphic)
+  plot(0) = gsn_csm_vector_scalar_map(wks,rc_ue ,rc_ve,rc_wg ,res)
+
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnMinLevelValF       =   -0.5
+  res@cnMaxLevelValF       =   0.5
+  res@cnLevelSpacingF      =  0.1
+  res@vcRefMagnitudeF = 0.04
+  res@vcMinDistanceF           = 0.015         ; thin vectors
+  ;   res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+  plot(1) = gsn_csm_vector_scalar_map(wks,ue_clm ,ve_clm,wg_clm ,res)
+
+
 
   
 
@@ -266,9 +289,9 @@ print("*********开始画图********")
   
     str = "" + ispan(1,3,1)
 
-   i = 0
+    do i = 0,1
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   
+    end do
 
 
   ;;;添加indo-pacific warm pool
@@ -288,14 +311,14 @@ print("*********开始画图********")
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   str2 = "0" + ispan(1,3,1)
-   
+   str2 = "0" + ispan(1,2,1)
+   do i = 0,1 
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-   
+  end do
 
  
-  draw(plot)
-  frame(wks)   
+  pres = True
+  gsn_panel(wks, plot, (/2,1/), pres)
 
  
 
