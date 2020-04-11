@@ -56,10 +56,10 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
 
-    u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{925},{lat1:lat2},{lon1:lon2}))
 
     f2 = addfile(filein(1),"r")
-    v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f2->v(timeind,{925},{lat1:lat2},{lon1:lon2}))
 
     
     f3 = addfile(filein(2),"r")
@@ -176,20 +176,21 @@ begin
    ;;;
  
    ; d_rc = where(prob_d.le.0.1, d_rc, d_rc@_FillValue)
+   ; cape_rc = where(prob_cape_rc.le.0.1, cape_rc, cape_rc@_FillValue)
    ; sta_s_rc = where(prob_sta_s.le.0.1, sta_s_rc, sta_s_rc@_FillValue)
    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "散度,uv以及cape_trend")
+  wks   = gsn_open_wks("pdf", "散度,uv以及cape_trend-925hpa-scs")
 
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
-  res@cnFillPalette="GMT_polar"
+  res@cnFillPalette="CBR_coldhot"
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -197,7 +198,7 @@ begin
   res@cnMinLevelValF       =   -80.0
   res@cnMaxLevelValF       =   80.0
   res@cnLevelSpacingF      =  10.0
-  ;   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ;res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1
   ; res@cnMaxLevelValF       =   1
   ; res@cnLevelSpacingF      =  .1
@@ -205,11 +206,17 @@ begin
   res@lbLabelBarOn=True
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
+  res@lbLabelStride = 2 
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = lat1
-  res@mpMaxLatF             = lat2
-  res@mpMinLonF             = lon1
-  res@mpMaxLonF             = lon2
+  ; res@mpMinLatF             = lat1
+  ; res@mpMaxLatF             = lat2
+  ; res@mpMinLonF             = lon1
+  ; res@mpMaxLonF             = lon2
+  res@mpMinLatF             = 0
+  res@mpMaxLatF             = 15
+  res@mpMinLonF             = 110
+  res@mpMaxLonF             = 155
+
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False
@@ -231,9 +238,9 @@ begin
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
-  ; res@vcRefMagnitudeF          = 1.0
+  res@vcRefMagnitudeF          = 3.0
   ; res@vcRefMagnitudeF          = 0.1
-  res@vcRefLengthF             = 0.08     ; define length of v
+  res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0
   res@vcLineArrowHeadMaxSizeF=0.005
@@ -245,22 +252,24 @@ begin
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
   plot = new(2, graphic)
+  res@gsnLeftString  = "925 hPa Divergence trend"
   plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,d_rc ,res)
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -2.0
   ; res@cnMaxLevelValF       =   8.0
   ; res@cnLevelSpacingF      =  2.0
- res@cnFillPalette  = "ViBlGrWhYeOrRe"
+    res@cnFillPalette  = "ViBlGrWhYeOrRe"
 
-res@gsnSpreadColors      = True               ; use full color map
-res@gsnSpreadColorStart  = 40              ; start at color 17
-res@gsnSpreadColorEnd    = 100                ; end at color 200
+    res@gsnSpreadColors      = True               ; use full color map
+    res@gsnSpreadColorStart  = 40              ; start at color 17
+    res@gsnSpreadColorEnd    = 100                ; end at color 200
 
- res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
- res@cnMinLevelValF        = -100         ; set min contour level
- res@cnMaxLevelValF        = 200          ; set max contour level
- res@cnLevelSpacingF       = 25          ; set contour interval
+    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res@cnMinLevelValF        = -100         ; set min contour level
+    res@cnMaxLevelValF        = 200          ; set max contour level
+    res@cnLevelSpacingF       = 25          ; set contour interval
 
+  res@gsnLeftString  = "Convective available potential energy trend"
   plot(1) = gsn_csm_contour_map(wks,cape_rc,res)
  
 
@@ -324,8 +333,7 @@ res@gsnSpreadColorEnd    = 100                ; end at color 200
     overlay(plot(i), iplot(i))
     end do
     pres = True
-    pres@gsnPanelLabelBar  = True
-
+    pres@gsnPanelLabelBar  = False
     gsn_panel(wks, plot, (/2,1/), pres)
 
 

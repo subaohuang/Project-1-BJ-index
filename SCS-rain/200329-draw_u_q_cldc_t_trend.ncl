@@ -115,45 +115,45 @@ begin
 
 
    ;;;云量的数据以及趋势
-    f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
-    f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/cldc.mean.nc", "r")
+    ; f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
+    ; f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/cldc.mean.nc", "r")
 
-    date:=cd_calendar(f4->time, 1)
-    timeind:=ind(date.ge.198001.and.date.le.201312)
-    cldc = short2flt(f4->cldc(timeind,:,:))
-    delete(cldc&time)
-    cldc&time=date(timeind)
-    printVarSummary(cldc)
+    ; date:=cd_calendar(f4->time, 1)
+    ; timeind:=ind(date.ge.198001.and.date.le.201312)
+    ; cldc = short2flt(f4->cldc(timeind,:,:))
+    ; delete(cldc&time)
+    ; cldc&time=date(timeind)
+    ; printVarSummary(cldc)
 
     
-    ; yearin  = ispan(1980, 2013, 1)
-    ; fils4 = "/home/yangsong3/data-observation/ERA-interim/monthly/cloud/cloud_monthly_" + yearin + ".nc"
-    ; f4 = addfiles(fils4, "r")
+    yearin  = ispan(1980, 2013, 1)
+    fils4 = "/home/yangsong3/data-observation/ERA-interim/monthly/cloud/cloud_monthly_" + yearin + ".nc"
+    f4 = addfiles(fils4, "r")
 
-    ; date:=cd_calendar(f4[:]->time, 1)
-    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    ; time = f4[:]->time(timeind)
-    ; lat = f4[1]->latitude
-    ; lon = f4[1]->longitude
+    date:=cd_calendar(f4[:]->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    time = f4[:]->time(timeind)
+    lat = f4[1]->latitude
+    lon = f4[1]->longitude
   
 
-    ;   cldc = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+      cldc = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
    
-    ; do i = 0,dimsizes(timeind)/12-1
-    ;   cldc(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
-    ; end do
+    do i = 0,dimsizes(timeind)/12-1
+      cldc(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
+    end do
 
 
 
     
-    ;;;插值，missing value值给去掉，只能限制longitude的5点和纬向的1点
-    opt=(/0,5/)
-    ;;先插值lon方向的
-    cldc=(/linmsg_n(cldc, opt, 2)/)
-    ;;插值lat方向的
-    opt=(/0,1/)
-    cldc=(/linmsg_n(cldc, opt, 1)/)
-    delete(opt)
+    ; ;;;插值，missing value值给去掉，只能限制longitude的5点和纬向的1点
+    ; opt=(/0,5/)
+    ; ;;先插值lon方向的
+    ; cldc=(/linmsg_n(cldc, opt, 2)/)
+    ; ;;插值lat方向的
+    ; opt=(/0,1/)
+    ; cldc=(/linmsg_n(cldc, opt, 1)/)
+    ; delete(opt)
     cldc_annual  = month_to_annual(cldc(:,{lat1:lat2},{lon1:lon2}), 1)
     ;;;
 
@@ -266,7 +266,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "云量,湿度,风速,温差在南海区域的趋势")
+  wks   = gsn_open_wks("pdf", "云量,湿度,风速,温差在南海区域的趋势-era云量数据")
 
   res=True
   res@gsnFrame=False
@@ -279,9 +279,12 @@ begin
   res@cnLinesOn=False
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.2
+  ; res@cnMinLevelValF       =   -1.0
+  ; res@cnMaxLevelValF       =   1.0
+  ; res@cnLevelSpacingF      =  0.2
+  res@cnMinLevelValF       =   -0.05
+  res@cnMaxLevelValF       =   0.05
+  res@cnLevelSpacingF      =  0.01
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -0.03
   ; res@cnMaxLevelValF       =   0.03
@@ -316,7 +319,7 @@ begin
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
   plot = new(4, graphic)
-
+  
   plot(0) = gsn_csm_contour_map(wks,cldc_rc,res)
   res@gsnLeftString  = "Ts - Ta"
   res@cnMinLevelValF       =   -1.0
@@ -328,10 +331,17 @@ begin
   res@cnLevelSpacingF      =  0.2
     res@gsnLeftString  = "10-m Wind Speed"
   plot(2) = gsn_csm_contour_map(wks,u_rc,res)
-    res@gsnLeftString  = "qs - qa"
-     res@cnMinLevelValF       =   -0.001
+  res@gsnLeftString  = "qs - qa"
+  res@cnMinLevelValF       =   -0.001
   res@cnMaxLevelValF       =   0.001
   res@cnLevelSpacingF      =  0.0002
+  ; res@lbAutoManage = False
+  ; res@lbLabelAutoStride = False
+  ; res@lbLabelStride = 2
+  ; res@lbLabelStrings =  sprintf("%2.1e", fspan(res@cnMinLevelValF,res@cnMaxLevelValF,11))
+
+
+
   plot(3) = gsn_csm_contour_map(wks,q_rc,res)
 
 
@@ -358,31 +368,20 @@ begin
    end do 
 
    ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
+     res_pro=True
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-    res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    res_pro@cnLevelSpacingF     = 0.1      ; set contour spacing
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
+
     iplot = new(4,graphic)
   
   
@@ -390,6 +389,19 @@ begin
     iplot(1) = gsn_csm_contour(wks,prob_t,res_pro)
     iplot(2) = gsn_csm_contour(wks,prob_u,res_pro)
     iplot(3) = gsn_csm_contour(wks,prob_q,res_pro)
+
+    opt                      = True
+    opt@gsnShadeFillType     = "pattern"
+    opt@gsnShadeMid     = 6         ; stipple
+    ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; opt@gsnShadeHigh   = "green"
+    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+
+
+    do i = 0,3
+     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
+    end do
+
 
     do i =0,3
     overlay(plot(i), iplot(i))

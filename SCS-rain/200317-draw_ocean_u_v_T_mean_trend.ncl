@@ -90,38 +90,55 @@ begin
 
   ;;;计算平均
 
-    rc_u = dim_avg_n_Wrap(u_annual, 0)
-    rc_v = dim_avg_n_Wrap(v_annual, 0)
-    rc_T = dim_avg_n_Wrap(T_annual, 0)
+    u_clm = dim_avg_n_Wrap(u_annual, 0)
+    v_clm = dim_avg_n_Wrap(v_annual, 0)
+    T_clm = dim_avg_n_Wrap(T_annual, 0)
+  ;;;
+
+
+  ;;;计算趋势
+
+    rc_u = regCoef_n(ispan(1,34, 1), u_annual, 0, 0)
+    rc_v = regCoef_n(ispan(1,34, 1), v_annual, 0, 0)
+    rc_T = regCoef_n(ispan(1,34, 1), T_annual, 0, 0)
   ;;;
    
+   rc_u = yearnum*rc_u
+   rc_v = yearnum*rc_v
+   rc_T = yearnum*rc_T
    copy_VarCoords(u(1,1,:,:), rc_u)
    copy_VarCoords(v(1,1,:,:), rc_v)
    copy_VarCoords(T(1,1,:,:), rc_T)
-   
-  ;;;
 
-  
+    prob_T = rc_test(rc_T)
+    prob_u = rc_test(rc_u)
+    prob_v = rc_test(rc_v)
+    rc_T = where(prob_T.le.0.05, rc_T, rc_T@_FillValue)
+    rc_v = where(prob_v.le.0.1.or.prob_u.le.0.1, rc_v, rc_T@_FillValue)
+    rc_u = where(prob_u.le.0.1.or.prob_v.le.0.1, rc_u, rc_T@_FillValue)
+
+  ;;;
 
 
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "海洋u,v,T的气候态-SCS")
-  plot=new(1,graphic)
+  wks   = gsn_open_wks("pdf", "海洋u,v,T的气候态及趋势-SCS")
+
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
   res@cnFillPalette="BlueWhiteOrangeRed"
+  res@cnFillPalette = "NCV_blue_red"
 
   res@cnFillOn=True
   res@cnLinesOn=True
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   28
-  res@cnMaxLevelValF       =   30
+  res@cnMinLevelValF       =   28.0
+  res@cnMaxLevelValF       =   30.0
   res@cnLevelSpacingF      =  0.1
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
@@ -130,8 +147,8 @@ begin
 
   res@mpLimitMode           = "LatLon"
   res@mpMinLatF             = lat1
-  res@mpMaxLatF             = lat2
-  res@mpMinLonF             = lon1
+  res@mpMaxLatF             = 20
+  res@mpMinLonF             = 105
   res@mpMaxLonF             = lon2 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -156,11 +173,11 @@ begin
   res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
   ; res@vcGlyphStyle="CurlyVector"
 
-  res@vcMinDistanceF           = 0.01           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.01
-  res@vcMaxMagnitudeF          =1
+  res@vcMinDistanceF           = 0.015           ; thin vectors
+  
+  res@vcMaxMagnitudeF          =1.0
   res@vcRefLengthF             = 0.03 ; define length of v
-  res@vcRefMagnitudeF = 0.2
+  res@vcRefMagnitudeF = 0.4
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.5
 
@@ -168,9 +185,23 @@ begin
   res@vcLineArrowHeadMinSizeF=0.005
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
-
   
-  plot = gsn_csm_vector_scalar_map(wks,rc_u,rc_v,rc_T ,res)
+  plot = new(2,graphic)
+
+  res@gsnLeftString = "Climatology of ocean temperature and current averaged in Mixed layer "
+  plot(0) = gsn_csm_vector_scalar_map(wks,u_clm,v_clm,T_clm ,res)
+  res@cnFillPalette = "WhiteYellowOrangeRed"
+  res@cnMinLevelValF       =   0.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.1
+  res@vcRefMagnitudeF = 0.1
+  res@vcMaxMagnitudeF = 0.2
+  res@vcRefLengthF             = 0.04 ; define length of v
+  res@gsnLeftString = "Linear trend  of ocean temperature and current averaged in Mixed layer "
+  plot(1) = gsn_csm_vector_scalar_map(wks,rc_u,rc_v,rc_T ,res)
+
+
+
 
 
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
@@ -194,9 +225,9 @@ begin
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   i = 0
+   do i = 0,1 
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-   
+   end do
 
    ; ;;;打点
    ;  res_pro=True
@@ -230,10 +261,12 @@ begin
    
 
    ;  i = 0
-   ;  overlay(plot(i), iplot(i))
+   ;  overlay(plot(i+1), iplot(i))
     
-    draw(plot)
-    frame(wks)
+    
+  pres = True
+  pres@gsnPanelFigureStrings = (/"a","b"/)
+  gsn_panel(wks, plot, (/2,1/), pres)
 
 end
     
