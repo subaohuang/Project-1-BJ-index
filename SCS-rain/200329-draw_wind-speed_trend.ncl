@@ -34,6 +34,17 @@ begin
    lat2 = 15
    lon1 = 110
    lon2 = 155
+   ;;;
+
+  ;;;region
+   lat1 = -90
+   lat2 = 90
+   lon1 = 0
+   lon2 = 360
+   ;;;
+
+
+
 
 
     ;;;time span
@@ -58,7 +69,7 @@ begin
     u = short2flt(f1->si10(timeind,{lat1:lat2},{lon1:lon2}))
 
     printMinMax(u, 1)
-    exit()
+  
 
 
     print("=====finish read data==========")
@@ -98,7 +109,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "wind-speed在南海区域的趋势")
+  wks   = gsn_open_wks("pdf", "wind-speed在全球区域的趋势")
 
   res=True
   res@gsnFrame=False

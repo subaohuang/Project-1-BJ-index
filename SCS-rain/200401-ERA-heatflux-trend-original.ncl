@@ -35,10 +35,10 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 160
+   lat1 = -90
+   lat2 = 90
+   lon1 = 0
+   lon2 = 360
  
 
 ;;;读入HadiSST海温数据
@@ -191,7 +191,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "ERA-Heatflux的线性趋势")
+  wks   = gsn_open_wks("pdf", "ERA-Heatflux的线性趋势-global")
 
   res=True
   res@gsnFrame=False
@@ -207,10 +207,10 @@ print("*********开始画图********")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  res@mpMinLatF             = lat1
+  res@mpMaxLatF             = lat2
+  res@mpMinLonF             =lon1
+  res@mpMaxLonF             = lon2
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
