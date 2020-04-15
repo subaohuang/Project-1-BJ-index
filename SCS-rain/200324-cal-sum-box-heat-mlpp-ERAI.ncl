@@ -106,8 +106,12 @@ begin
     f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlp_mn_1980-2015_chazhi.nc", "r") 
 
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
+
+    
 
 
     indyear = (2013-1980+1)*12-1
@@ -115,15 +119,22 @@ begin
     v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
-    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    mlt_r = f6->mlp(0:indyear,{lat1:lat2},{lon1:lon2})
 
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+    
     u = tofloat(u_r)
     v = tofloat(v_r)
     wt = tofloat(wt_r)
     T = tofloat(T_r)
     mlt = tofloat(mlt_r)
 
-  
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+   copy_VarCoords(taux_r, taux) 
+   copy_VarCoords(tauy_r, tauy)
 
    copy_VarCoords(u_r, u) 
    copy_VarCoords(v_r, v)
@@ -143,7 +154,22 @@ begin
     
     depth = T&depth
    printVarSummary(wt)
-;;;
+
+
+;;;计算EKman速度
+ 
+    lat = taux&lat
+    pi = get_pi("float")
+    omega = 2*pi/86400
+    f = 2*omega*sin(pi*lat/180)
+    density = 1025
+    f_3d = conform_dims(dimsizes(taux), f, 1)
+    
+    ue = tauy
+    ve = taux  
+    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
+    vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
 
 
 ;;;calculate lateral  and bottom boundaries of the domain Heat transport, bottom is 45m , lateral is 
@@ -208,7 +234,7 @@ begin
        dz_3d1 = dz_3d_test(:,:,{x1},{y1:y2})
        dz_3d2 = dz_3d_test(:,:,{x2},{y1:y2})
        Tbox_3d = conform_dims(dim ,Tbox , 0)
-       
+      
        
        
        v_lateral_south = dim_sum_n_Wrap(v(:,:,{x1},{y1:y2})*(T(:,:,{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d1, (/1,2/))/volume
@@ -238,6 +264,8 @@ begin
        printVarSummary(mlt_scs)
       
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
+       mlt_scs = where(mlt_scs.lt.5, 5, mlt_scs)
+
        print("start triple loops")
        printMinMax(mlt_scs, 1)
 
@@ -265,7 +293,8 @@ begin
       
             delete(wt)
             delete(T)
-
+          printVarSummary(wt_chazhi)
+        
          ;    ;;mlt变化引起温度的变化，可以不考虑 
 
          ; do i = 0,dim(0)-1
@@ -273,7 +302,9 @@ begin
          ;       do k = 0,dim(2)-1
          ;          ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
          ;           ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+         ;           ; print(mlt_scs(i,j,k))
          ;           wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+
          ;           T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) 
          ;           T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
          ;           wt_mlt_dh(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) + dhdt(i,{x1:x2},{y1:y2})
@@ -282,9 +313,9 @@ begin
          ; end do
          ;  ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
          ;  ;;;;写nc文件,简单的方法  
-         ;   system("/bin/rm -f SODA3.4.2_wt_T_in_MLD.nc")   ; remove any pre-existing file
+         ;   system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density.nc")   ; remove any pre-existing file
             
-         ;  ncdf = addfile("SODA3.4.2_wt_T_in_MLD.nc" ,"c")  ; open output netCDF file
+         ;  ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density.nc" ,"c")  ; open output netCDF file
 
          ;  ;===================================================================
          ;  ; create global attributes of the file (optional)
@@ -317,7 +348,7 @@ begin
        
        wt_mlt = f1->wt_mlt_dh
        printVarSummary(wt_mlt)
-       wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
+       ; wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
 
        T_mlt_diff = f1->T_mlt_diff
 
@@ -424,9 +455,9 @@ begin
      nswrs_pen = nswrs
      ; mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
      mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
-    
-     
-     nswrs_pen =  nswrs*mo
+     ; nswrs_pen =  nswrs*0.05
+
+
      ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
      ; nswrs_pen = 0.05*nswrs
      
@@ -643,7 +674,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI-include-dh")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-ERAI")
   plot=new(1,graphic)
   
   resxy = True

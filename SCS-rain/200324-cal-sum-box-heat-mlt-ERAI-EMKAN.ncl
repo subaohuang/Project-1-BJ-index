@@ -109,6 +109,10 @@ begin
     f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
 
 
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
+
+
 
     indyear = (2013-1980+1)*12-1
     u_r = f2->u(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
@@ -117,11 +121,22 @@ begin
     T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
 
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+
     u = tofloat(u_r)
     v = tofloat(v_r)
     wt = tofloat(wt_r)
     T = tofloat(T_r)
     mlt = tofloat(mlt_r)
+
+
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+   copy_VarCoords(taux_r, taux) 
+   copy_VarCoords(tauy_r, tauy)
+
 
   
 
@@ -136,14 +151,38 @@ begin
    delete(wt_r)
    delete(mlt_r)
    delete(T_r)
+   delete(taux_r)
+   delete(tauy_r)
 
-
-    delete(taux_r)
-    delete(tauy_r)
     
     depth = T&depth
    printVarSummary(wt)
 ;;;
+
+
+  ;;;计算EKMAN速度
+        lat = taux&lat
+        pi = get_pi("float")
+        omega = 2*pi/86400
+        f = 2*omega*sin(pi*lat/180)
+        density = 1025
+        f_3d = conform_dims(dimsizes(taux), f, 1)
+        
+        ue = tauy
+        ve = taux  
+        ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+        ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
+        
+
+        vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+        vr!0 = "time"
+        vr!1 = "lat"
+        vr!2 = "lon"
+        copy_VarCoords(taux, vr)
+        printVarSummary(vr)
+   
+
+
 
 
 ;;;calculate lateral  and bottom boundaries of the domain Heat transport, bottom is 45m , lateral is 
@@ -317,15 +356,19 @@ begin
        
        wt_mlt = f1->wt_mlt_dh
        printVarSummary(wt_mlt)
-       wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
+       ; wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
 
        T_mlt_diff = f1->T_mlt_diff
 
+        wtT = mlt_scs
+        ; vrlat = conform_dims(dimsizes(vr), vr&lat, 1)
+        ; vr = where(vrlat.le.8, vr@_FillValue, vr)
+        wtT  = vr(:,{x1:x2},{y1:y2})*T_mlt_diff
+        ; wtT = wt_mlt*T_mlt_diff   
+        ; wtT = wt_mlt*T_mlt_diff   ;;;用EKMAN速度替代原来的速度
+        ;;;
 
-       wtT = mlt_scs
-       wtT = wt_mlt*T_mlt_diff
-
-
+  
 ;  ;;;;;;
   
        w_bottom = dim_sum_n_Wrap(wtT*dx_3d*dy, (/1,2/))/volume
@@ -643,7 +686,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI-include-dh")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI-ekman速度")
   plot=new(1,graphic)
   
   resxy = True
@@ -659,10 +702,10 @@ print("*********开始画图:时间序列********")
   resxy@tmXBMinorValues = ispan(1979,2013,1)
   
   resxy@tmYLMode  =  "Explicit"
-  resxy@tmYLValues = ispan(-6, 6, 1)
-  resxy@tmYLLabels = ispan(-6,6,1)
-  resxy@trYMinF = -6
-  resxy@trYMaxF = 6
+  resxy@tmYLValues = ispan(-3, 3, 1)
+  resxy@tmYLLabels = ispan(-3,3,1)
+  resxy@trYMinF = -3
+  resxy@trYMaxF = 3
 
   resxy@tmYLMinorOn = False
 
