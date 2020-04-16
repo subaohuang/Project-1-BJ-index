@@ -344,9 +344,9 @@ begin
          ;  exit()
 
 ;;;;;;
-       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
+       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density.nc", "r")
        
-       wt_mlt = f1->wt_mlt_dh
+       wt_mlt = f1->wt_mlt
        printVarSummary(wt_mlt)
        ; wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
 
@@ -453,9 +453,12 @@ begin
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     ; mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
-     mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
-     ; nswrs_pen =  nswrs*0.05
+     mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
+     ; mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
+     ; nswrs_pen = mo*nswrs
+     print(mo)
+     exit()
+     nswrs_pen =  nswrs*0.05
 
 
      ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs

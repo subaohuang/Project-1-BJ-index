@@ -58,9 +58,11 @@ begin
  
 
 ;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/SODA/3.3.1/"
-    fils1=systemfunc("ls "+diri+"soda3.3.1_mlt_mn_1980-2015_chazhi.nc")
+    diri="/home/yangsong3/data-observation/SODA/3.4.2/"
+    fils1=systemfunc("ls "+diri+"soda3.4.2_mlt_mn_1980-2015_chazhi.nc")
     f1=addfile(fils1, "r")
+    fils2=systemfunc("ls "+diri+"soda3.4.2_mlp_mn_1980-2015_chazhi.nc")
+    f2=addfile(fils2, "r")
     ; date:=cd_calendar(f1->time, 1)
 
     ; timeind:=ind(date.le.201312.and.date.ge.197901)
@@ -69,17 +71,32 @@ begin
     mlt&lat@units = "degrees_north"
     mlt&lon@units = "degrees_east"
     printVarSummary(mlt)
+    
+    mlp = f2->mlp
+    mlp&lat@units = "degrees_north"
+    mlp&lon@units = "degrees_east"
+    printVarSummary(mlp)
 
     mlt_clm = dim_avg_n_Wrap(mlt, 0)
 
     mlt_clm_region = mlt_clm({lat1:lat2},{lon1:lon2})
+
+    mlp_clm = dim_avg_n_Wrap(mlp, 0)
+
+    mlp_clm_region = mlp_clm({lat1:lat2},{lon1:lon2})
+
+    blt = mlt_clm
+    blt = mlt_clm - mlp_clm
+
+    blt_clm_region = blt({lat1:lat2},{lon1:lon2})
+    
     
 
    
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "scs-mlt的分布-soda.3.3.1")
+  wks   = gsn_open_wks("pdf", "scs-mlp的分布-soda.3.4.2")
 
   res=True
   res@gsnFrame=False
@@ -124,7 +141,7 @@ begin
 
   plot = new(1,graphic)
   
-  plot(0) = gsn_csm_contour_map(wks, mlt_clm, res)
+  plot(0) = gsn_csm_contour_map(wks, mlp_clm, res)
   
   
   

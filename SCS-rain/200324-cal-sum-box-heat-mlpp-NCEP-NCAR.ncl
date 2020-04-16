@@ -106,24 +106,35 @@ begin
     f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlp_mn_1980-2015_chazhi.nc", "r") 
 
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
+
+    
 
 
     indyear = (2013-1980+1)*12-1
-    u_r = f2->u(0:indyear,{0:382},{lat1:lat2},{lon1:lon2})
-    v_r = f3->v(0:indyear,{0:382},{lat1:lat2},{lon1:lon2})
-    wt_r = f4->wt(0:indyear,{0:382},{lat1:lat2},{lon1:lon2})
-    T_r = f5->temp(0:indyear,{0:382},{lat1:lat2},{lon1:lon2})
-    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    u_r = f2->u(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
+    mlt_r = f6->mlp(0:indyear,{lat1:lat2},{lon1:lon2})
 
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+    
     u = tofloat(u_r)
     v = tofloat(v_r)
     wt = tofloat(wt_r)
     T = tofloat(T_r)
     mlt = tofloat(mlt_r)
 
-  
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+   copy_VarCoords(taux_r, taux) 
+   copy_VarCoords(tauy_r, tauy)
 
    copy_VarCoords(u_r, u) 
    copy_VarCoords(v_r, v)
@@ -136,10 +147,29 @@ begin
    delete(wt_r)
    delete(mlt_r)
    delete(T_r)
+
+
+    delete(taux_r)
+    delete(tauy_r)
     
     depth = T&depth
    printVarSummary(wt)
-;;;
+
+
+;;;计算EKman速度
+ 
+    lat = taux&lat
+    pi = get_pi("float")
+    omega = 2*pi/86400
+    f = 2*omega*sin(pi*lat/180)
+    density = 1025
+    f_3d = conform_dims(dimsizes(taux), f, 1)
+    
+    ue = tauy
+    ve = taux  
+    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
+    vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
 
 
 ;;;calculate lateral  and bottom boundaries of the domain Heat transport, bottom is 45m , lateral is 
@@ -204,7 +234,7 @@ begin
        dz_3d1 = dz_3d_test(:,:,{x1},{y1:y2})
        dz_3d2 = dz_3d_test(:,:,{x2},{y1:y2})
        Tbox_3d = conform_dims(dim ,Tbox , 0)
-       
+      
        
        
        v_lateral_south = dim_sum_n_Wrap(v(:,:,{x1},{y1:y2})*(T(:,:,{x1},{y1:y2}) - Tbox_3d)*dx({0})*dz_3d1, (/1,2/))/volume
@@ -234,6 +264,8 @@ begin
        printVarSummary(mlt_scs)
       
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
+       mlt_scs = where(mlt_scs.lt.5, 5, mlt_scs)
+
        print("start triple loops")
        printMinMax(mlt_scs, 1)
 
@@ -244,82 +276,82 @@ begin
        
        ; exit()
     
-       ; ;;;将wt进行垂直方向差值，为了得到更加精确的结果
-       ;     print("开始差值")
-       ;      xi  = wt&depth 
-       ;      xo = ispan(5,382,5)
+       ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+           print("开始差值")
+            xi  = wt&depth 
+            xo = ispan(5,330,5)
 
-       ;      wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-       ;      T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
 
-       ;      dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
-       ;      dhdt!0 = "time"
-       ;      dhdt!1 = "lat"
-       ;      dhdt!2 = "lon"
-       ;      copy_VarCoords(mlt, dhdt)
-       ;      printVarSummary(dhdt)
+            dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
+            dhdt!0 = "time"
+            dhdt!1 = "lat"
+            dhdt!2 = "lon"
+            copy_VarCoords(mlt, dhdt)
+            printVarSummary(dhdt)
       
-       ;      delete(wt)
-       ;      delete(T)
+            delete(wt)
+            delete(T)
+          printVarSummary(wt_chazhi)
+        
+         ;    ;;mlt变化引起温度的变化，可以不考虑 
 
-       ;   ;    ;;mlt变化引起温度的变化，可以不考虑 
+         ; do i = 0,dim(0)-1
+         ;    do j = 0,dim(1)-1
+         ;       do k = 0,dim(2)-1
+         ;          ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+         ;           ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+         ;           ; print(mlt_scs(i,j,k))
+         ;           wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
 
-       ;   do i = 0,dim(0)-1
-       ;      do j = 0,dim(1)-1
-       ;         do k = 0,dim(2)-1
-       ;            ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-       ;             ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-       ;             wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2})
-       ;             T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2}) 
-       ;             T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2}) - Tbox(i)
-       ;             wt_mlt_dh(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)+5},{x1:x2},{y1:y2}) + dhdt(i,{x1:x2},{y1:y2})
-       ;         end do 
-       ;        end do
-       ;   end do
-       ;    ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
-       ;    ;;;;写nc文件,简单的方法  
-       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_5m.nc")   ; remove any pre-existing file
+         ;           T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) 
+         ;           T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
+         ;           wt_mlt_dh(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) + dhdt(i,{x1:x2},{y1:y2})
+         ;       end do 
+         ;      end do
+         ; end do
+         ;  ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
+         ;  ;;;;写nc文件,简单的方法  
+         ;   system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density.nc")   ; remove any pre-existing file
             
-       ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_5m.nc" ,"c")  ; open output netCDF file
+         ;  ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density.nc" ,"c")  ; open output netCDF file
 
-       ;    ;===================================================================
-       ;    ; create global attributes of the file (optional)
-       ;    ;===================================================================
-       ;       fAtt               = True            ; assign file attributes
-       ;       fAtt@title         = "SODA3.4.2 wt and T in mld"
-       ;       fAtt@Conventions   = "None"
-       ;       fAtt@creation_date = systemfunc ("date")
-       ;       fileattdef( ncdf, fAtt )            ; copy file attributes
+         ;  ;===================================================================
+         ;  ; create global attributes of the file (optional)
+         ;  ;===================================================================
+         ;     fAtt               = True            ; assign file attributes
+         ;     fAtt@title         = "SODA3.4.2 wt and T in mld"
+         ;     fAtt@Conventions   = "None"
+         ;     fAtt@creation_date = systemfunc ("date")
+         ;     fileattdef( ncdf, fAtt )            ; copy file attributes
 
-       ;    ;===================================================================
-       ;    ; make time an UNLIMITED dimension; recommended  for most applications
-       ;    ;===================================================================
-       ;       filedimdef(ncdf,"time",-1,True) 
+         ;  ;===================================================================
+         ;  ; make time an UNLIMITED dimension; recommended  for most applications
+         ;  ;===================================================================
+         ;     filedimdef(ncdf,"time",-1,True) 
 
-       ;    ;===================================================================
-       ;    ; output variables directly; NCL will call appropriate functions
-       ;    ; to write the meta data associated with each variable
-       ;    ;===================================================================
-       ;       ncdf->wt_mlt  = wt_mlt                          ; 4D      
-       ;       ncdf->wt_mlt_dh  = wt_mlt_dh                          ; 4D            
-       ;       ncdf->T_mlt = T_mlt  
-       ;       ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
+         ;  ;===================================================================
+         ;  ; output variables directly; NCL will call appropriate functions
+         ;  ; to write the meta data associated with each variable
+         ;  ;===================================================================
+         ;     ncdf->wt_mlt  = wt_mlt                          ; 4D      
+         ;     ncdf->wt_mlt_dh  = wt_mlt_dh                          ; 4D            
+         ;     ncdf->T_mlt = T_mlt  
+         ;     ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
 
-       ;    ;;;;
-       ;    exit()
+         ;  ;;;;
+         ;  exit()
 
 ;;;;;;
-       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_5m.nc", "r")
+       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density.nc", "r")
        
-       ; wt_mlt = f1->wt_mlt_dh
        wt_mlt = f1->wt_mlt
        printVarSummary(wt_mlt)
-       ; dhdt  = where(dhdt.lt.0, 0, dhdt)
-       ; wt_mlt  = wt_mlt + dhdt(:,{x1:x2},{y1:y2})
-       ; ; wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
+       ; wt_mlt = where(wt_mlt.le.0, 0, wt_mlt)
 
        T_mlt_diff = f1->T_mlt_diff
-       
+
 
        wtT = mlt_scs
        wtT = wt_mlt*T_mlt_diff
@@ -392,10 +424,11 @@ begin
 
 ;;;read NCEP-NCAR heat flux data
   
-   
+
+
 ;;;read NCEP-NCAR heat flux data
   
-    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/NCEP-NCAR-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -409,13 +442,6 @@ begin
     nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
 
 
-    lhtfl = (/lhtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    shtfl = (/shtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nswrs = (/nswrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-    nlwrs = (/nlwrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
-
-
-
     ;;;nswrs_pen 
      R = 0.58
      L1 = 0.35
@@ -423,9 +449,11 @@ begin
      nswrs_pen = nswrs
      ; mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
      mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
+     nswrs_pen = mo*nswrs
     
-     
-     nswrs_pen =  nswrs*mo
+     ; nswrs_pen =  nswrs*0.05
+
+
      ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
      ; nswrs_pen = 0.05*nswrs
      
@@ -445,6 +473,16 @@ begin
       nswrs = 30*86400*nswrs/coef
       nlwrs = 30*86400*nlwrs/coef
       nswrs_pen = 30*86400*nswrs_pen/coef
+    ;;;
+
+    
+    ;;;转化成方向向下
+
+    lhtfl = (/-1*lhtfl/)
+    shtfl = (/-1*shtfl/)
+    nswrs = (/-1*nswrs/)
+    nlwrs = (/-1*nlwrs/)
+    nswrs_pen = (/-1*nswrs_pen/)
     ;;;
 
     Q_net = lhtfl
@@ -642,7 +680,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlt-ERAI-5m")
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-ncep-ncar")
   plot=new(1,graphic)
   
   resxy = True
@@ -658,10 +696,10 @@ print("*********开始画图:时间序列********")
   resxy@tmXBMinorValues = ispan(1979,2013,1)
   
   resxy@tmYLMode  =  "Explicit"
-  resxy@tmYLValues = ispan(-3, 3, 1)
-  resxy@tmYLLabels = ispan(-3,3,1)
-  resxy@trYMinF = -3
-  resxy@trYMaxF = 3
+  resxy@tmYLValues = ispan(-6, 6, 1)
+  resxy@tmYLLabels = ispan(-6,6,1)
+  resxy@trYMinF = -6
+  resxy@trYMaxF = 6
 
   resxy@tmYLMinorOn = False
 
