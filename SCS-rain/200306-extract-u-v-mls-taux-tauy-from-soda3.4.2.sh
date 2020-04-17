@@ -15,11 +15,11 @@ NOW_DIR_ORG=/home/yangsong3/data-observation/SODA/3.4.2/
 modelname=soda3.4.2
 # modelname=cmip_10_ctl
 
-variable_total=(mlp temp u v wt mlt taux tauy)     #often use
+variable_total=(salt prho mlp temp u v wt mlt taux tauy)     #often use
 # variable_total=(tauy temp)
 
 
-for i in `seq 0 7` ;
+for i in `seq 0 9` ;
  do 
  variable=${variable_total[i]}
 # step1 : merge the cesm data into a whole data by using cdo

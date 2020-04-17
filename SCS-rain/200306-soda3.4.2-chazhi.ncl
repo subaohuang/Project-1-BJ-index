@@ -17,15 +17,20 @@ undef("soda_chazhi")
     id_var_want = get1Dindex(vNames,var_need)
 
     
-    var_2d =(/"mlp","mlt","taux","tauy"/)
-    var_3d = (/"temp","u","v","wt"/)
+    var_2d =(/"salt","mlp","mlt","taux","tauy"/)
+    var_3d = (/"prob","temp","u","v","wt"/)
+    ; var_other = (/"salt","prho"/)
 
-    if any(var_2d.eq.vNames(id_var_want)) then 
-
+    if any(var_2d.eq.vNames(id_var_want)) then       
+      if vNames(id_var_want).eq."salt"  then
+      data = f1->$vNames(id_var_want)$(:,0,:,:)                     ; say "T" is (lat,lev,lon)  
+      else
       data = f1->$vNames(id_var_want)$(:,:,:)                     ; say "T" is (lat,lev,lon)  
+      end if
     else
       data = f1->$vNames(id_var_want)$(:,0:29,:,:)                     ; say "T" is (lat,lev,lon)
-      depth = f1->sw_ocean
+      ; depth = f1->sw_ocean
+      depth = f1->st_ocean
     end if
      
 
@@ -167,8 +172,9 @@ undef("soda_chazhi")
 begin 
    ; inpath = "~/lsh/CESM-data/f19_f19_FAMIP_rmindian/f19_f19_FAMIP_rmindian.cam.h0.197901-200611.nc"
    ; outpath = "~/lsh/CESM-data/f19_f19_FAMIP_rmindian/f19_f19_FAMIP_rmindian.cam.h0.197901-200611_chazhi.nc"
-   ; inpath = "/home/ys17-19/lsh/HEAT_MC_SON.cam.h0.25001-28912.nc"
-   ; outpath = "/home/ys17-19/lsh/HEAT_MC_SON.cam.h0.25001-28912_chazhi.nc"
+   inpath = "/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_prho_mn_1980-2015.nc"
+   outpath = "/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_prho_mn_1980-2015_chazhi.nc"
+   var_need = "prho"
    m = soda_chazhi(inpath,outpath,var_need)
 end 
 

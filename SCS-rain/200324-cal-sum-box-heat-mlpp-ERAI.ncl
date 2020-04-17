@@ -453,12 +453,12 @@ begin
      L1 = 0.35
      L2 = 23
      nswrs_pen = nswrs
-     mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
-     ; mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
-     ; nswrs_pen = mo*nswrs
-     print(mo)
-     exit()
-     nswrs_pen =  nswrs*0.05
+     ; mo = (R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2)) 
+     mo = (1-R)*exp(-1*mlt/20)   ;;;;follow by paper
+     nswrs_pen = mo*nswrs
+     ; print(mo)
+     ; exit()
+     ; nswrs_pen =  nswrs*0.05
 
 
      ; nswrs_pen = (R*exp(-1*45.6/L1)+ (1-R)*exp(-1*45.6/L2))*nswrs
