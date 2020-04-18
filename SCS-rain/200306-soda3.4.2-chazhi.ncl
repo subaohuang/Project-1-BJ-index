@@ -18,7 +18,7 @@ undef("soda_chazhi")
 
     
     var_2d =(/"salt","mlp","mlt","taux","tauy"/)
-    var_3d = (/"prob","temp","u","v","wt"/)
+    var_3d = (/"prho","temp","u","v","wt"/)
     ; var_other = (/"salt","prho"/)
 
     if any(var_2d.eq.vNames(id_var_want)) then       

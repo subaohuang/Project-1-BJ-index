@@ -53,10 +53,18 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
+
+; ;;;region
+;    lat1 = -5
+;    lat2 = 45
+;    lon1 = 90
+;    lon2 = 160
+; ;;;
+
 ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
+   lat1 = -10
+   lat2 = 20
+   lon1 = 100
    lon2 = 160
 ;;;
 
@@ -68,7 +76,9 @@ begin
     f3=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_v_mn_1980-2015_chazhi.nc", "r")   
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
-    f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+    ; f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
+     f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_1.0.nc", "r")  
+
   
 
 
@@ -77,25 +87,26 @@ begin
     v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     T_r= f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
-    mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    ; mlt_r = f6->mlt(0:indyear,{lat1:lat2},{lon1:lon2})
+    mlt = f6->mld(0:indyear,{lat1:lat2},{lon1:lon2})
     
 
     u = tofloat(u_r)
     v = tofloat(v_r)
     wt = tofloat(wt_r)
     T = tofloat(T_r)
-    mlt = tofloat(mlt_r)
+    ; mlt = tofloat(mlt_r)
     copy_VarCoords(u_r, u)
     copy_VarCoords(v_r, v)
     copy_VarCoords(wt_r, wt)
     copy_VarCoords(T_r, T)
-    copy_VarCoords(mlt_r, mlt)
+    ; copy_VarCoords(mlt_r, mlt)
 
     delete(u_r)
     delete(v_r)
     delete(wt_r)
     delete(T_r)
-    delete(mlt_r)
+    ; delete(mlt_r)
 
    
     depth = T&depth
@@ -186,7 +197,8 @@ printVarSummary(wt)
  
   
    ;;δ(WT)
-    f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
+    ; f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
+    f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_1.0.nc", "r")
 
     wt_mlt = f1->wt_mlt
     T_mlt = f1->T_mlt_diff
@@ -366,7 +378,7 @@ printVarSummary(wt)
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress")
+  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-1.0-define")
 
   res=True
   res@gsnFrame=False
