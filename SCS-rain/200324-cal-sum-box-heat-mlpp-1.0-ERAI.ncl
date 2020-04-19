@@ -708,10 +708,10 @@ print("*********开始画图:时间序列********")
   resxy@tmXBMinorValues = ispan(1979,2013,1)
   
   resxy@tmYLMode  =  "Explicit"
-  resxy@tmYLValues = ispan(-6, 6, 1)
-  resxy@tmYLLabels = ispan(-6,6,1)
-  resxy@trYMinF = -6
-  resxy@trYMaxF = 6
+  resxy@tmYLValues = ispan(-3, 3, 1)
+  resxy@tmYLLabels = ispan(-3,3,1)
+  resxy@trYMinF = -3
+  resxy@trYMaxF = 3
 
   resxy@tmYLMinorOn = False
 
@@ -782,7 +782,7 @@ print("*********开始画图:时间序列********")
 
 
   textres = True
-  textres@lgLabels = (/"dT","Q_net","Ocean advection","Residual","Horizontal advection","Vertical advection"/)     ;加线的标注
+  textres@lgLabels = (/"dT","Qnet","Ocean advection","Residual","Horizontal advection","Vertical advection"/)     ;加线的标注
   textres@lgLineLabelFontHeights = 0.005
 
 

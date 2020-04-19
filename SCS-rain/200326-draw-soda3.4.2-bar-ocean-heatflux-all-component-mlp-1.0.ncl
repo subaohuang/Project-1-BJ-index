@@ -455,6 +455,7 @@ printVarSummary(wt)
      ;;;自己修改
        dynamic_vertical_change = 0.28/(365*86400)
        thermaldy_vertical_change = -0.18/(365*86400)
+       total_vertical_change = 0.49/(365*86400)
        eddy_vertical_change = total_vertical_change - dynamic_vertical_change - thermaldy_vertical_change - quad_vertical_change
 
 
@@ -506,8 +507,7 @@ print("*********开始画图********")
   number(:,3) = (/total_east_change,dynamic_east_change,thermaldy_east_change,quad_east_change,eddy_east_change/) 
   number(:,4) = (/total_vertical_change,dynamic_vertical_change,thermaldy_vertical_change,quad_vertical_change,eddy_vertical_change/) 
 
- print(total_vertical_change)
- exit()
+
 ;;;
 ;==============================================================
 ; Mission 5. bar plot
