@@ -25,7 +25,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.199712.and.date.ge.197901)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -45,10 +45,10 @@ begin
     copy_VarCoords(ssta_annual(1,:,:), ssta_rc)
     prob_p=rc_test(ssta_rc)
 
-    ssta_rc = where(prob_p.le.0.01, ssta_rc, ssta_rc@_FillValue)
+    ; ssta_rc = where(prob_p.le.0.05, ssta_rc, ssta_rc@_FillValue)
     ssta_rc=(/ssta_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS")
+    wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS-1979-1997")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

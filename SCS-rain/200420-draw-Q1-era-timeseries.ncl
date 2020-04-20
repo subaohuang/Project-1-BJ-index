@@ -36,15 +36,31 @@ begin
    lon2 = 160
  
  
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
-    date=cd_calendar(f2->time, 1)
- 
-    timeind=ind(date.ge.197901.and.date.le.201312)
-    p=f2->precip(timeind,:,:)
-    p=(/rmMonAnnCycTLL(p)/)
-    p_annual = month_to_annual(p(time|:,lat|:,lon|:), 1)
-    ;;注意点
+   
     
+
+;;;read Q1 monthly data from linshuheng
+  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/Q_time_era.nc")
+  f3 = addfile(fils, "r")
+  date = cd_calendar(f3->time, 1)
+
+  timeind = ind(date.le.201312.and.date.ge.197901)
+
+  q1 = f3->Q_time(timeind,:,:,:)
+
+  printVarSummary(q1)
+
+  q1_annual = month_to_annual(q1, 1)
+  ; q1_annual = month_to_season(q1, "MAM")
+
+  dim = dimsizes(q1_annual)
+
+  q1_annual_rc = regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)
+  copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
+  q1_annual_rc = q1_annual_rc*dim(0)
+
+  q1_clm = dim_avg_n_Wrap(q1_annual, 0)
+
 
 
 
@@ -56,7 +72,7 @@ begin
    ; lat2 = 15
    ; lon1 = 110
    ; lon2 = 155
-   ssta_index = dim_avg_n_Wrap(p_annual(:,{0:15},{110:155}), (/1,2/))
+   ssta_index = dim_avg_n_Wrap(q1_annual(:,:,{0:15},{110:155}), (/1,2,3/))
 
    ssta_index_rc1 = regCoef_n(ispan(0,18,1), ssta_index(0:18), 0, 0)
    ssta_index_rc2 = regCoef_n(ispan(0,yearnum-18-1,1), ssta_index(18:), 0, 0)
@@ -75,7 +91,7 @@ print("***********画时间序列***************")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "GPCP的时间序列")
+  wks   = gsn_open_wks("pdf", "Q1的时间序列")
   plot=new(1,graphic)
   
   resxy = True
