@@ -18,7 +18,7 @@ end
 
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.199712)
+    timeind=ind(date.ge.197901.and.date.le.201312)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -44,7 +44,7 @@ end
     prob_p=rc_test(p_rc)
     p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-1997")
+    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-2013")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -62,14 +62,14 @@ end
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
-  ; res@mpMinLatF             = -60
-  ; res@mpMaxLatF             = 60
-  ; res@mpMinLonF             =0
-  ; res@mpMaxLonF             = 360
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =90
+  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -60
+  res@mpMaxLatF             = 60
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
 
 
 

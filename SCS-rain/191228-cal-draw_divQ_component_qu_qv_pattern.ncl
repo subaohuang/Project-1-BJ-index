@@ -223,7 +223,7 @@ begin
    
 
     era_dynamic_q = uv2dv_cfd(era_dyna_qu,era_dyna_qv,g_lat,g_lon,2)
-    era_dynamic_q = (/sqrt(era_dyna_qu^2+era_dyna_qv^2)/)
+    era_dynamic_q = sqrt(era_dyna_qu^2+era_dyna_qv^2)
 
     dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
 
@@ -518,7 +518,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0,0.2/)
     res_pro@lbLabelBarOn = False
 
     ; res_pro@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels

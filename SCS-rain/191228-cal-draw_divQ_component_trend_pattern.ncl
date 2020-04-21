@@ -386,8 +386,9 @@ begin
     prob_qv_eddy = rc_test(qv_eddy_rc)
     ;;;
     
-    ; qu_rc = where(prob_qu.le.0.2, qu_rc,qu_rc@_FillValue)
-    ; qv_rc = where(prob_qv.le.0.2, qv_rc,qv_rc@_FillValue)
+    qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+    ; qv_rc = where(prob_qv.le.0.1.or.prob_qu.le.0.1, qv_rc,qv_rc@_FillValue)
+    
 
 
 ;==============================================================
@@ -412,10 +413,18 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             = 90
-  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             = 90
+  ; res@mpMaxLonF             = 160
+
+    ;;;global region
+   res@mpMinLatF             = -10
+   res@mpMaxLatF             = 50
+   res@mpMinLonF             = 60
+   res@mpMaxLonF             = 160
+  ; ;;;
+
   
   ; ;;;global region
   ;  res@mpMinLatF             = -30

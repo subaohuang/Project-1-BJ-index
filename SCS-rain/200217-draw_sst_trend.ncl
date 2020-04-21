@@ -25,7 +25,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.199712.and.date.ge.197901)
+    timeind:=ind(date.le.201312.and.date.ge.199801)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -48,7 +48,7 @@ begin
     ; ssta_rc = where(prob_p.le.0.05, ssta_rc, ssta_rc@_FillValue)
     ssta_rc=(/ssta_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS-1979-1997")
+    wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS-1998-2013-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -57,10 +57,12 @@ begin
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="MPL_YlOrRd"
-  res@cnFillPalette = "NCV_jaisnd"
-  res@gsnSpreadColorStart = 130
-  res@gsnSpreadColorEnd = 253
+  
+  ; res@cnFillPalette = "NCV_jaisnd"
+ res@cnFillPalette = "BlueWhiteOrangeRed"
+
+  ; res@gsnSpreadColorStart = 130
+  ; res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -69,15 +71,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =90
-  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -30
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
 
-  res@mpMinLatF             = 0
-  res@mpMaxLatF             = 15
-  res@mpMinLonF             =110
-  res@mpMaxLonF             = 155
+  ; res@mpMinLatF             = 0
+  ; res@mpMaxLatF             = 15
+  ; res@mpMinLonF             =110
+  ; res@mpMaxLonF             = 155
 
 
 
@@ -107,7 +109,11 @@ begin
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   0.2
+  ; res@cnMinLevelValF       =   0.2
+  ; res@cnMaxLevelValF       =   0.6
+  ; res@cnLevelSpacingF      =  0.05
+  
+  res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.6
   res@cnLevelSpacingF      =  0.05
 
