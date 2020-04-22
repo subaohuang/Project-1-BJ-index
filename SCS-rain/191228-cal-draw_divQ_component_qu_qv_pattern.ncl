@@ -123,7 +123,7 @@ begin
     DivQ = uv2dv_cfd(era_wgt_qu,era_wgt_qv,g_lat,g_lon,2)
     DivQ = (/sqrt(era_wgt_qu^2 + era_wgt_qv^2)/)
     ; DivQ = uv2dvF_Wrap(era_wgt_qu(:,::-1,:),era_wgt_qv(:,::-1,:)) 
-    DivQ   =   (/DivQ*86400/) 
+    ; DivQ   =   (/DivQ*86400/) 
     copy_VarCoords(era_wgt_qu, DivQ)
     printVarSummary(DivQ)
     ; print(DivQ(0,:,:))
@@ -141,8 +141,8 @@ begin
       era_wgt_qv_annual = month_to_annual(era_wgt_qv, 1)
       era_wgt_qv_delta =  dim_rmvmean_n_Wrap(era_wgt_qv_annual, 0)
 
-      era_wgt_qu_delta = (/era_wgt_qu_delta*9.8/)
-      era_wgt_qv_delta = (/era_wgt_qv_delta*9.8/)
+      ; era_wgt_qu_delta = (/era_wgt_qu_delta*9.8/)
+      ; era_wgt_qv_delta = (/era_wgt_qv_delta*9.8/)
 
     ;;;
 
@@ -220,24 +220,27 @@ begin
 
     era_dyna_qu = u_delta*q_clm_cfm
     era_dyna_qv = v_delta*q_clm_cfm
-   
-
-    era_dynamic_q = uv2dv_cfd(era_dyna_qu,era_dyna_qv,g_lat,g_lon,2)
-    era_dynamic_q = sqrt(era_dyna_qu^2+era_dyna_qv^2)
 
     dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
 
-    era_wgt_dyna_q = (/dim_sum_n(dp_cfm_new*era_dynamic_q,1)/)               ; sum(var*dp)
-    era_wgt_dyna_q = (/era_wgt_dyna_q*86400/(9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_q)
-    
-    ;;;得到他们的箭头项
+
+     ;;;得到他们的箭头项
     era_wgt_dyna_qu = (/dim_sum_n(dp_cfm_new*era_dyna_qu,1)/)               ; sum(var*dp)
-    era_wgt_dyna_qv = (/dim_sum_n(dp_cfm_new*era_dyna_qv,1)/)               ; sum(var*dp)   
+    era_wgt_dyna_qv = (/dim_sum_n(dp_cfm_new*era_dyna_qv,1)/)               ; sum(var*dp)
+
+    era_wgt_dyna_qu = (/era_wgt_dyna_qu/(9.8)/)       
+    era_wgt_dyna_qv = (/era_wgt_dyna_qv/(9.8)/)       
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_qu)
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_qv)
  
+    ;;;得到magnitude项 
+    era_wgt_dyna_q = era_wgt_dyna_qu
+    era_wgt_dyna_q = sqrt(era_wgt_dyna_qu^2 + era_wgt_dyna_qv^2)
+
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_q)
+    
+
   
 
     ;;;;
@@ -252,23 +255,24 @@ begin
     
     era_thermaldyna_qu = u_clm_cfm*q_delta
     era_thermaldyna_qv = v_clm_cfm*q_delta
-   
-    era_thermaldyna_q = uv2dv_cfd(era_thermaldyna_qu,era_thermaldyna_qv,g_lat,g_lon,2)
-    era_thermaldyna_q = sqrt(era_thermaldyna_qu^2 + era_thermaldyna_qv^2)
-    
-    era_wgt_thermaldyna_q = (/dim_sum_n(dp_cfm_new*era_thermaldyna_q,1)/)               ; sum(var*dp)
-    era_wgt_thermaldyna_q = (/era_wgt_thermaldyna_q*86400/(9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_q)
 
     ;;;得到他们的箭头项
     era_wgt_thermaldyna_qu = (/dim_sum_n(dp_cfm_new*era_thermaldyna_qu,1)/)               ; sum(var*dp)
-    era_wgt_thermaldyna_qv = (/dim_sum_n(dp_cfm_new*era_thermaldyna_qv,1)/)               ; sum(var*dp)   
+    era_wgt_thermaldyna_qv = (/dim_sum_n(dp_cfm_new*era_thermaldyna_qv,1)/)               ; sum(var*dp)
 
-    ; era_wgt_thermaldyna_qu = (/era_wgt_thermaldyna_qu*86400/9.8/)
-    ; era_wgt_thermaldyna_qv = (/era_wgt_thermaldyna_qv*86400/9.8/)
+    era_wgt_thermaldyna_qu = (/era_wgt_thermaldyna_qu/(9.8)/)       
+    era_wgt_thermaldyna_qv = (/era_wgt_thermaldyna_qv/(9.8)/)       
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_qu)
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_qv)
+ 
+    ;;;得到magnitude项 
+    era_wgt_thermaldyna_q = era_wgt_thermaldyna_qu
+    era_wgt_thermaldyna_q = sqrt(era_wgt_thermaldyna_qu^2 + era_wgt_thermaldyna_qv^2)
+
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_q)
+
+    
     ;;;;
      print("=====end thermaldynamic componte calculate==========")
 
@@ -278,20 +282,23 @@ begin
     era_quad_qu = u_delta*q_delta
     era_quad_qv = v_delta*q_delta
 
-    era_quad_q = uv2dv_cfd(era_quad_qu,era_quad_qv,g_lat,g_lon,2)
-    era_quad_q = (/sqrt(era_quad_qu^2 + era_quad_qv^2)/)
-    era_wgt_quad_q = (/dim_sum_n(dp_cfm_new*era_quad_q,1)/)               ; sum(var*dp)
-    era_wgt_quad_q = (/era_wgt_quad_q*86400/(9.8)/)   
-        ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_q)
-
      ;;;得到他们的箭头项
     era_wgt_quad_qu = (/dim_sum_n(dp_cfm_new*era_quad_qu,1)/)               ; sum(var*dp)
-    era_wgt_quad_qv = (/dim_sum_n(dp_cfm_new*era_quad_qv,1)/)               ; sum(var*dp)   
+    era_wgt_quad_qv = (/dim_sum_n(dp_cfm_new*era_quad_qv,1)/)               ; sum(var*dp)
 
+    era_wgt_quad_qu = (/era_wgt_quad_qu/(9.8)/)       
+    era_wgt_quad_qv = (/era_wgt_quad_qv/(9.8)/)       
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_qu)
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_qv)
+ 
+    ;;;得到magnitude项 
+    era_wgt_quad_q = era_wgt_quad_qu
+    era_wgt_quad_q = sqrt(era_wgt_quad_qu^2 + era_wgt_quad_qv^2)
+
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_q)
+ 
+  
     ;;;;
      print("=====end quadratic componte calculate==========")
   ;;;
@@ -314,24 +321,26 @@ begin
        print("=====end quandratic clmate componte calculate==========")
 
   ;;;eddy term δd((bar(v'q'))
-
-    era_eddy_q = uv2dv_cfd(uq_eddy_delta,vq_eddy_delta,g_lat,g_lon,2)
-    era_eddy_q = sqrt(uq_eddy_delta^2 + vq_eddy_delta^2)
-
-    era_wgt_eddy_q = (/dim_sum_n(dp_cfm_new*era_eddy_q,1)/)               ; sum(var*dp)
-    era_wgt_eddy_q = (/era_wgt_eddy_q*86400/(9.8)/)       ;;convert to day
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_q)
-
-
+    
     ;;;得到他们的箭头项
     era_wgt_eddy_qu = (/dim_sum_n(dp_cfm_new*uq_eddy_delta,1)/)               ; sum(var*dp)
-    era_wgt_eddy_qv = (/dim_sum_n(dp_cfm_new*vq_eddy_delta,1)/)               ; sum(var*dp)   
+    era_wgt_eddy_qv = (/dim_sum_n(dp_cfm_new*vq_eddy_delta,1)/)               ; sum(var*dp) 
 
+
+    era_wgt_eddy_qu = (/era_wgt_eddy_qu/(9.8)/)       
+    era_wgt_eddy_qv = (/era_wgt_eddy_qv/(9.8)/)       
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_qu)
-    copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_qv)
-    ;;;;
-     print("=====end eddy componte calculate==========")
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_qv)  
+
+    ;;;得到magnitude项 
+    era_wgt_eddy_q = era_wgt_eddy_qu
+    era_wgt_eddy_q = sqrt(era_wgt_eddy_qu^2 + era_wgt_eddy_qv^2)
+
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_q)
+
+    print("=====end eddy componte calculate==========")
+    ;;;
 
 
 
@@ -411,9 +420,9 @@ begin
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -4.0*10^6
-  res@cnMaxLevelValF       =   4.0*10^6
-  res@cnLevelSpacingF      = 0.5*10^6 
+  res@cnMinLevelValF       =   -40.0
+  res@cnMaxLevelValF       =   40.0
+  res@cnLevelSpacingF      = 10.0
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=True
   res@lbLabelStride=2
@@ -452,40 +461,46 @@ begin
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
-  ; res@vcRefMagnitudeF          = 1.0
  
-  res@vcRefLengthF             = 0.08     ; define length of v
+  res@vcRefLengthF             = 0.025     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0
   res@vcVectorDrawOrder="PostDraw"
-  res@vcRefMagnitudeF          = 1000.0
+  res@vcRefMagnitudeF          = 20.0
   res@gsnLeftString = "Moisture Transport"
+
+
+  
   plot(0)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
   res@gsnLeftString = "Dynamic component"
-  res@vcRefMagnitudeF          = 1000.0
-  res@cnMinLevelValF       =   -2.0*10^6
-  res@cnMaxLevelValF       =   2.0*10^6
-  res@cnLevelSpacingF      = 0.25*10^6 
+  res@vcRefMagnitudeF          = 20.0
+  res@cnMinLevelValF       =   -20.0
+  res@cnMaxLevelValF       =   20.0
+  res@cnLevelSpacingF      = 5.0
   plot(1)=gsn_csm_vector_scalar_map(wks,qu_dyna_rc ,qv_dyna_rc, q_dyna_rc, res)
   res@gsnLeftString = "Thermaldynamic component"
-  res@vcRefMagnitudeF          = 200.0
-  res@cnMinLevelValF       =   -4.0*10^5
-  res@cnMaxLevelValF       =   4.0*10^5
-  res@cnLevelSpacingF      = 0.5*10^5
- res@lbAutoManage = False
- res@lbLabelAutoStride = False
- res@lbLabelStride = 4
-  res@lbLabelStrings =  sprintf("%2.1e", fspan(res@cnMinLevelValF,res@cnMaxLevelValF,17))
-  m = res@lbLabelStrings 
-  m(8) = "0"
-  res@lbLabelStrings = m
+  res@vcRefMagnitudeF          = 4.0
+  res@cnMinLevelValF       =   -4.0
+  res@cnMaxLevelValF       =   4.0
+  res@cnLevelSpacingF      = 1.0
+
+; res@lbAutoManage = False
+; res@lbLabelAutoStride = False
+; res@lbLabelStride = 4
+; ; res@lbLabelStrings =  sprintf("%2.1e", fspan(res@cnMinLevelValF,res@cnMaxLevelValF,17))
+; ; m = res@lbLabelStrings 
+; ; m(8) = "0"
+; ; res@lbLabelStrings = m
+
 
   plot(2)=gsn_csm_vector_scalar_map(wks,qu_thermaldyna_rc ,qv_thermaldyna_rc, q_thermaldyna_rc, res)
   res@gsnLeftString = "Quadratic component"
-    res@vcRefMagnitudeF          = 30.0
+  res@vcRefMagnitudeF          = 1.0
+    
   plot(3)=gsn_csm_vector_scalar_map(wks,qu_quad_rc ,qv_quad_rc, q_quad_rc, res)
+  res@vcRefMagnitudeF          = 4.0
   res@gsnLeftString = "Transient component"
-    res@vcRefMagnitudeF          = 250.0
+    
   plot(4)=gsn_csm_vector_scalar_map(wks,qu_eddy_rc ,qv_eddy_rc, q_eddy_rc, res)
  
 
