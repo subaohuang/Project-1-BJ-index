@@ -105,8 +105,8 @@ print("finish read data")
     dimz = dimsizes(var2_annual)
     yr_length = dimz(0)
     var2_annual_area = var2_annual(:,:,1,1)
-    var2_annual_rc_area = wgt_areaave_Wrap(var2_annual(:,:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+    var2_annual_area = wgt_areaave_Wrap(var2_annual(:,:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
 
-    ncdf->deepcon_q_time = y2
+    ncdf->deepcon_q_time = var2_annual_area
 ;;;;
 end 
