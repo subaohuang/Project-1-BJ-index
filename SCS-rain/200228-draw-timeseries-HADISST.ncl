@@ -47,8 +47,14 @@ begin
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
 
-    ssta=(/rmMonAnnCycTLL(sst)/)
-    copy_VarCoords(sst, ssta)
+    ; ssta=(/rmMonAnnCycTLL(sst)/)
+    ; copy_VarCoords(sst, ssta)
+    ssta  = sst
+
+    sst_area = dim_avg_n_Wrap(ssta(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
+    
+    
+    ; ssta = sst - conform_dims(dimsizes(ssta), sst_area, 0)
 
     ssta_annual = month_to_annual(ssta(:,{lat1:lat2},{lon1:lon2}), 1)
     ; ssta_annual =(/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
@@ -77,7 +83,7 @@ print("***********画时间序列***************")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "SST的时间序列")
+  wks   = gsn_open_wks("pdf", "SST的时间序列-没去年循环")
   plot=new(1,graphic)
   
   resxy = True

@@ -485,7 +485,7 @@ begin
     ;;;
 
     ;;;convert to units degree ℃/yeara
-      density = 1025  ;;kg/m3
+      density = 1026  ;;kg/m3
       cp  = 3993         ;;j/kg℃
       coef  = density*cp
       ; coef = 4.088*10^6

@@ -29,21 +29,21 @@ begin
 
     sst=lonFlip(f1->sst(timeind,{-90:90},{-180:180}))
     printVarSummary(sst)
+ exit()
 
-
-    ; ;;;region 
-    ;   lat1 = -10
-    ;   lat2 = 90
-    ;   lon1 = 0
-    ;   lon2 = 360
-    ; ;;;
-    
-   ;;;region
-   lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
-   ;;;
+      ; ;;;region 
+      ;   lat1 = -10
+      ;   lat2 = 90
+      ;   lon1 = 0
+      ;   lon2 = 360
+      ; ;;;
+      
+     ;;;region
+     lat1 = 0
+     lat2 = 15
+     lon1 = 110
+     lon2 = 155
+     ;;;
 
 
     ;;;time span
@@ -59,31 +59,105 @@ begin
     yearnum = endyear - startyear +1
     ;;
 
-    path_wind = "/home/yangsong3/data-observation/NCEP_DOE/monthly/shum.2m.mon.mean.nc"
-    f1 = addfile(path_wind,"r")
+    ;;;;Ta - Ts的趋势
+    path_t = "/home/yangsong3/data-observation/ERA-interim/monthly/2_metre_temperature.mon.mean.nc"
+    f1 = addfile(path_t,"r")
 
     date:=cd_calendar(f1->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
 
-    shum_r = short2flt(f1->shum(timeind,0,{-90:90},:))
+    t_r = short2flt(f1->t2m(timeind,{-90:90},{0:360}))
 
-  
-    print("=====finish read data==========")
-
-    
 
     print("*****************开始水平插值************************")  
     xo  =  sst&longitude
     yo  =  sst&latitude
-    shum = linint2_Wrap(shum_r&lon, shum_r&lat, shum_r, \
+    t = linint2_Wrap(t_r&longitude, t_r&latitude, t_r, \
                   True, xo, yo, 0)
+    printVarSummary(t)
+    delete(t_r)
+    
+    t_diff = t
+    t_diff = sst+273.6 - t
+    t_diff_scs = dim_avg_n_Wrap(t_diff(:,{0:15},{110:155}), 0)
 
     
-    printVarSummary(shum)
+
+   ;;;处理成年数据 
+     t_annual = month_to_annual(t_diff, 1)
    ;;;
 
+
+   ;;回归
+    t_rc = regCoef_n(ispan(1, yearnum, 1), t_annual, 0, 0)
+    copy_VarCoords(t_annual(1,:,:), t_rc)
+    t_rc = (/t_rc*yearnum/)
+   ;;;
+
+ 
+
+   ;;;;相对湿度
+
+     ;;;读入NCEP_DOE的数据
+     ;  path_wind = "/home/yangsong3/data-observation/NCEP_DOE/monthly/shum.2m.mon.mean.nc"
+     ;  f1 = addfile(path_wind,"r")
+
+     ;  date:=cd_calendar(f1->time, 1)
+     ;  timeind:=ind(date.ge.startmon.and.date.le.endmon)
+
+     ;  shum_r = short2flt(f1->shum(timeind,0,{-90:90},:))
+
+
+     ;  print("=====finish read data==========")
+
+      
+
+     ;  print("*****************开始水平插值************************")  
+     ;  xo  =  sst&longitude
+     ;  yo  =  sst&latitude
+     ;  shum = linint2_Wrap(shum_r&lon, shum_r&lat, shum_r, \
+     ;                True, xo, yo, 0)
+
+      
+     ;  printVarSummary(shum)
+   ; ;;;
+
+    yearin  = ispan(1980, 2013, 1)
+    fils3 = "/home/yangsong3/data-observation/ERA-interim/monthly/2m_dew_tem/2m_dew_temp_monthly_" + yearin + ".nc"
+    f3 = addfiles(fils3, "r")
+
+    date:=cd_calendar(f3[:]->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    time = f3[:]->time(timeind)
+    lat = f3[1]->latitude
+    lon = f3[1]->longitude
   
-  ;;;计算大气的饱和比湿
+
+      d2m_r = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+   
+    do i = 0,dimsizes(timeind)/12-1
+      d2m_r(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d2m(:,{-90:90},{0:360}))
+    end do
+
+
+    print("*****************开始水平插值************************")  
+    xo  =  sst&longitude
+    yo  =  sst&latitude
+    d2m = linint2_Wrap(d2m_r&longitude, d2m_r&latitude, d2m_r, \
+                  True, xo, yo, 0)
+    printVarSummary(t)
+    delete(d2m_r)
+
+    ;;;通过露点温度计算实际水气压
+    actvpr = satvpr_tdew_fao56(d2m,(/1,2/))
+    ;;实际比湿
+     shum = actvpr
+     shum =   0.622*actvpr/(100 - 0.378*actvpr)
+     printVarSummary(shum)
+    
+   
+
+  ;;;计算海洋的饱和比湿
      es = sst
      es =satvpr_temp_fao56(sst,(/0,2/))             ;;;先计算饱和水气压,输出的单位是kpa
      p = 100 ;; 100kpa,地面气压
@@ -91,8 +165,9 @@ begin
    
      qs =   0.622*es/(p - 0.378*es)
      printVarSummary(qs)
-     
-     
+      
+
+      ;;;
      q_diff = shum
      printVarSummary(shum)
      q_diff = (/qs - shum/)
@@ -100,17 +175,17 @@ begin
     
 
    ;;;处理成年数据 
-      q_diff_annual = month_to_annual(q_diff(:,{lat1:lat2},{lon1:lon2}), 1)
+       q_diff_annual = month_to_annual(q_diff(:,{lat1:lat2},{lon1:lon2}), 1)
        q_diff_scs = dim_avg_n_Wrap(q_diff(:,{0:15},{110:155}), 0)
    ;;;
 
     
    ;;趋势
-   q_rc = regCoef_n(ispan(1, yearnum, 1), q_diff_annual, 0, 0)
-   copy_VarCoords(q_diff_annual(1,:,:), q_rc)
-   q_rc = (/q_rc*yearnum/)
+       q_rc = regCoef_n(ispan(1, yearnum, 1), q_diff_annual, 0, 0)
+       copy_VarCoords(q_diff_annual(1,:,:), q_rc)
+       q_rc = (/q_rc*yearnum/)
    ;;;
-   delete(shum)
+       delete(shum)
 
 
 
@@ -142,10 +217,6 @@ begin
     do i = 0,dimsizes(timeind)/12-1
       cldc(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
     end do
-
-
-
-    
     ; ;;;插值，missing value值给去掉，只能限制longitude的5点和纬向的1点
     ; opt=(/0,5/)
     ; ;;先插值lon方向的
@@ -206,50 +277,7 @@ begin
     u_rc = (/u_rc*yearnum/)
    ;;;
 
-     ;;;;Ta - Ts的趋势
-    path_t = "/home/yangsong3/data-observation/ERA-interim/monthly/2_metre_temperature.mon.mean.nc"
-    f1 = addfile(path_t,"r")
-
-    date:=cd_calendar(f1->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
-
-    t_r = short2flt(f1->t2m(timeind,{-90:90},{0:360}))
-
-
-    print("*****************开始水平插值************************")  
-    xo  =  sst&longitude
-    yo  =  sst&latitude
-    t = linint2_Wrap(t_r&longitude, t_r&latitude, t_r, \
-                  True, xo, yo, 0)
-    printVarSummary(t)
-    delete(t_r)
-    
-    t_diff = t
-    t_diff = sst+273.6 - t
-    t_diff_scs = dim_avg_n_Wrap(t_diff(:,{0:15},{110:155}), 0)
-
-    
-   
-
-
-
-   ;;;处理成年数据 
-
-     t_annual = month_to_annual(t_diff, 1)
-   ;;;
-
-
-   ;;回归
-    t_rc = regCoef_n(ispan(1, yearnum, 1), t_annual, 0, 0)
-    copy_VarCoords(t_annual(1,:,:), t_rc)
-    t_rc = (/t_rc*yearnum/)
-   ;;;
-
-
-
-
-
-
+  
    ;;;显著性检验
     prob_q = rc_test(q_rc)
     prob_u = rc_test(u_rc)
@@ -266,7 +294,7 @@ begin
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "云量,湿度,风速,温差在南海区域的趋势-era云量数据")
+  wks   = gsn_open_wks("pdf", "云量,湿度,风速,温差在南海区域的趋势-era云量数据-露点温度计算的ERA湿度")
 
   res=True
   res@gsnFrame=False
