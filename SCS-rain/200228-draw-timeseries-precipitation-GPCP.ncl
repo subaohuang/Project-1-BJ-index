@@ -19,7 +19,7 @@ end
 begin
  ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201712
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -39,7 +39,7 @@ begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
  
-    timeind=ind(date.ge.197901.and.date.le.201312)
+    timeind=ind(date.ge.197901.and.date.le.201712)
     p=f2->precip(timeind,:,:)
     p=(/rmMonAnnCycTLL(p)/)
     p_annual = month_to_annual(p(time|:,lat|:,lon|:), 1)

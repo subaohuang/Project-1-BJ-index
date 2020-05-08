@@ -54,6 +54,7 @@ begin
     u = short2flt(f1->si10(timeind,{lat1:lat2},{lon1:lon2}))
     u_annual = month_to_annual(u, 1)
     printVarSummary(u)
+    u_clm = dim_avg_n_Wrap(u, 0)
 
 ;;;;
 
@@ -93,9 +94,11 @@ begin
 
     timeind:=ind(date.le.201312.and.date.ge.198001)
 
-    sst_r = lonFlip(f2->sst(timeind,{lat1-1:lat2+1},{lon1-1:lon2+1}))
-   
-    
+    sst_r1 = lonFlip(f2->sst)
+    sst_r = sst_r1(timeind,{lat1-1:lat2+1},{lon1-1:lon2+1})
+    delete(sst_r1)
+    printVarSummary(sst_r)
+
     print("*****************开始水平插值************************")  
     xo  =  u&longitude
     yo  =  u&latitude
@@ -133,12 +136,15 @@ begin
     do i = 0,dimsizes(timeind)/12-1
       d2m(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d2m(:,{lat1:lat2},{lon1:lon2}))
     end do
-   printVarSummary(d2m)
 
    ;;;计算相对湿度
     rh =  relhum_ttd(sst+273.6,d2m,1)
+    copy_VarMeta(d2m, rh)
     printVarSummary(rh)
     rh_annual = month_to_annual(rh, 1)
+    rh_clm = dim_avg_n_Wrap(rh_annual, 0)
+
+    
    ;;;
 ;;;
 
@@ -159,6 +165,7 @@ begin
     t_diff = t - sst -273.6
 
     t_diff_annual  = month_to_annual(t_diff, 1)
+    t_diff_clm = dim_avg_n_Wrap(t_diff_annual, 0)
 
 print("*******开始计算趋势系数*****************")
 ;;;calculate correlation coef
@@ -190,8 +197,10 @@ print("*******开始计算趋势系数*****************")
  
     ;;;相对湿度的变化
     r_rh =  regCoef_n(ispan(1, yearnum, 1), rh_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), rh_annual)
-    rh_annual = (/rh_annual*yearnum/)
+    printVarSummary(r_rh)
+
+    copy_VarCoords(ssta_annual(0,:,:), r_rh)
+    r_rh = (/r_rh*yearnum/)
     ;;;
 ;;;
 
@@ -199,34 +208,46 @@ print("*******开始计算趋势系数*****************")
   alfa = 0.06 ;;;k-1
   ;;;牛顿冷却
    Qo = r_sst
-   Qo = alfa*lhtfl_clm*r_sst
+   Qo = (/alfa*lhtfl_clm*r_sst/)
+
   ;;;
 
+  ;;;风速的效应
+   Qw = u_clm
+   Qw = lhtfl_clm*r_w/(u_clm)
+   
+  ;;;
+
+  ;;;相对湿度效应
+    alfa2 = exp(-1*alfa*t_diff_clm)  ;;; alfa2 = exp(beta(T)/beta(T+S)) ;;beta(T) = alfa*T
+    Qrh = rh_clm
+    Qrh  = lhtfl_clm*r_rh/(rh_clm - alfa2)
+   ;;;
+
+   ;;;稳定度(海表温差的作用)
+    Qs = rh_clm
+    Qs = alfa*lhtfl_clm*rh_clm*r_t/(rh_clm - alfa2)
+   ;;;
 
 
-
-  
-
-;;;;
+; ;;;;
 
 print("*******显著性检验*****************")
 
 ;;;t test 
    prob_lh= rc_test(r_lh)
-   prob_sh= rc_test(r_sh)
-   prob_nl= rc_test(r_nl)
-   prob_ns= rc_test(r_ns)
-   prob_total= rc_test(r_total)
+   prob_sst = rc_test(r_sst)
+   prob_w = rc_test(r_w)
+   prob_rh = rc_test(r_rh)
+   prob_s = rc_test(r_t)
 
 
-  copy_VarCoords(r_lh, prob_lh)
-  copy_VarCoords(r_lh, prob_sh)
-  copy_VarCoords(r_lh, prob_nl)
-  copy_VarCoords(r_lh, prob_ns)
-  copy_VarCoords(r_total, prob_total)
+    copy_VarCoords(r_lh, prob_lh)
+    copy_VarCoords(r_sst, prob_sst)
+    copy_VarCoords(r_w, prob_w)
+    copy_VarCoords(r_rh, prob_rh)
+    copy_VarCoords(r_t, prob_s)
 
-
-  
 
 
 
@@ -236,7 +257,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8")
+  wks   = gsn_open_wks("pdf", "ERA-潜热通量及各机制分解的趋势")
 
   res=True
   res@gsnFrame=False
@@ -248,7 +269,7 @@ print("*********开始画图********")
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
+  res@lbLabelBarOn=True
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
@@ -283,37 +304,40 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -12
-  res@cnMaxLevelValF       =   12
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -10.0
+  res@cnMaxLevelValF       =   10.0
+  res@cnLevelSpacingF      =  2.5
  
 
-  plot = new(8,graphic)
+  plot = new(5,graphic)
 
-  res@gsnLeftString = "Net Heat Flux"
-  plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Ocean advction"
-  plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Ocean horizonal advction"
-  plot(2) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res)
+  res@gsnRightString = ""
+  res@gsnLeftString = "Latent Heat Flux"
+  plot(0) = gsn_csm_contour_map(wks, r_lh, res)
+ 
+  res@cnMinLevelValF       =   -7.0
+  res@cnMaxLevelValF       =   0.0
+  res@cnLevelSpacingF      =  1.0
+  res@gsnSpreadColorStart = 4
+  res@gsnSpreadColorEnd = 41
+
+  res@gsnLeftString = "Newtonian cooling effect"
+  plot(1) = gsn_csm_contour_map(wks,Qo, res)
+  res@cnMinLevelValF       =   -10.0
+  res@cnMaxLevelValF       =   10.0
+  res@cnLevelSpacingF      =  2.5
+  delete(res@gsnSpreadColorStart)
+  delete(res@gsnSpreadColorEnd)
+  res@gsnLeftString = "WES effect"
+  plot(2) = gsn_csm_contour_map(wks, Qw, res)
   
-  res@gsnLeftString = "Ocean Vertical advction"
-  plot(3) = gsn_csm_contour_map(wks, r_vadv, res)
+  res@gsnLeftString = "Relative humidity effect"
+  plot(3) = gsn_csm_contour_map(wks, Qrh, res)
 
-
-  res@gsnLeftString = "Latent heat flux"
-  plot(4) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Sensible heat flux"
-  plot(5) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Longwave radiation"
-  plot(6) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Shortwave radiation"
-  plot(7) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
-
-
-
+  res@gsnLeftString = "Stability effect"
+  plot(4) = gsn_csm_contour_map(wks, Qs, res)
   
-
+  
 
   ;;;添加赤道直线
     pgx=ispan(30,390,10)
@@ -325,9 +349,9 @@ print("*********开始画图********")
     pgres@gsLineThicknessF=1.0
     pgres@gsLineDashPattern=1
   
-    str = "" + ispan(1,8,1)
+    str = "" + ispan(1,dimsizes(plot),1)
 
-   do i = 0,7
+   do i = 0,4
      plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
    end do
 
@@ -349,8 +373,8 @@ print("*********开始画图********")
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   str2 = "0" + ispan(1,8,1)
-   do i = 0,7
+   str2 = "0" + ispan(1,dimsizes(plot),1)
+   do i = 0,dimsizes(plot)-1
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
@@ -369,21 +393,15 @@ print("*********开始画图********")
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
 
-    iplot=new(8,graphic)
+    iplot=new(5,graphic)
 
-    iplot(0) = gsn_csm_contour(wks,prob_total({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(1) = gsn_csm_contour(wks,prob_total_ocean({lat1:lat2},{lon1:lon2}) ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,prob_hadv({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(3) = gsn_csm_contour(wks,prob_vadv,res_pro)
-    iplot(4) = gsn_csm_contour(wks,prob_lh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(5) = gsn_csm_contour(wks,prob_sh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(6) = gsn_csm_contour(wks,prob_nl({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(7) = gsn_csm_contour(wks,prob_ns({lat1:lat2},{lon1:lon2}),res_pro)
+    iplot(0) = gsn_csm_contour(wks,prob_lh({0:15},{110:155}),res_pro)
+    iplot(1) = gsn_csm_contour(wks,prob_sst({0:15},{110:155}),res_pro)
+    iplot(2) = gsn_csm_contour(wks,prob_w({0:15},{110:155}),res_pro)
+    iplot(3) = gsn_csm_contour(wks,prob_rh({0:15},{110:155}),res_pro)
+    iplot(4) = gsn_csm_contour(wks,prob_s({0:15},{110:155}),res_pro)
 
  
-
-    
-
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
     opt@gsnShadeMid     = 6         ; stipple
@@ -392,20 +410,20 @@ print("*********开始画图********")
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
 
-    do i = 0,7
+    do i = 0,4
      iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
     end do
 
     ;;;  
-    do i = 0,7
+    do i = 0,4
       overlay(plot(i), iplot(i))
     end do 
 
   pres = True
-  pres@gsnPanelLabelBar  = True
+  pres@gsnPanelLabelBar  = False
   pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f","g","h"/)
 
-  gsn_panel(wks, plot, (/4,2/), pres)
+  gsn_panel(wks, plot, (/3,2/), pres)
  
 
 
