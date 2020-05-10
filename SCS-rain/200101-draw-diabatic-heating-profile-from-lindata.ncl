@@ -37,7 +37,7 @@ begin
   f3 = addfile(fils, "r")
   date = cd_calendar(f3->time, 1)
 
-  timeind = ind(date.le.201312.and.date.ge.197901)
+  timeind = ind(date.le.201512.and.date.ge.197901)
 
   q1 = f3->Q_time(timeind,:,:,:)
 
@@ -76,7 +76,7 @@ begin
 ;;;;
 
   
-    wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era")                  ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2015")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False

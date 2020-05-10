@@ -33,7 +33,7 @@ end
 begin
  ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -57,8 +57,7 @@ begin
     time = f3[:]->time(timeind)
     lat = f3[1]->latitude
     lon = f3[1]->longitude
-   print(f3)
-   exit()
+  
     ;;;region 
       lat1 = -90
       lat2 = 90
@@ -109,7 +108,7 @@ begin
     ;===================================================================
 
     fAtt               = True            ; assign file attributes
-    fAtt@title         = "1979-2013，精度为1乘1"    
+    fAtt@title         = "1979-2015，精度为1乘1"    
     fAtt@creation_date = "2020.3.04"
     fileattdef( fout, fAtt)            ; copy file attributes    
     ;----------------------------坐标变量的定义

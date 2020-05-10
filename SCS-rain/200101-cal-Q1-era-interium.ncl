@@ -10,7 +10,7 @@ begin
  lat=f1->latitude
  level=f1->level
  date=cd_calendar(time, 1)
- timeind=ind(date.ge.197901.and.date.le.201312)
+ timeind=ind(date.ge.197901.and.date.le.201612)
  levind=ind(level.ge.0.and.level.le.1000)
 
  w_r=f1->w(timeind,levind,:,:)

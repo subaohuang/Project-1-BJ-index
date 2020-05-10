@@ -19,7 +19,7 @@ end
 begin
  ;;;time span
     startmon =197901
-    endmon = 201712
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -39,7 +39,7 @@ begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
  
-    timeind=ind(date.ge.197901.and.date.le.201712)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
     p=(/rmMonAnnCycTLL(p)/)
     p_annual = month_to_annual(p(time|:,lat|:,lon|:), 1)
@@ -63,6 +63,9 @@ begin
    
    line1 = ssta_index_rc1*ispan(0,18,1) + ssta_index_rc1@yintercept
    line2 = ssta_index_rc2*ispan(0,yearnum-17,1) + ssta_index_rc2@yintercept
+
+  ssta_index_rc3 = regCoef_n(ispan(0,yearnum-1,1), ssta_index, 0, 0)
+  line3 = ssta_index_rc3*ispan(0,yearnum,1) + ssta_index_rc3@yintercept
 
 
 
@@ -115,6 +118,7 @@ print("***********画时间序列***************")
   
    dum1 = gsn_add_polyline(wks, plot, ispan(1979,1997,1), line1, res)
    dum2 = gsn_add_polyline(wks, plot, ispan(1998,2013,1), line2, res)
+   dum3 = gsn_add_polyline(wks, plot, ispan(1979,2015,1), line3, res)
 
 
 
