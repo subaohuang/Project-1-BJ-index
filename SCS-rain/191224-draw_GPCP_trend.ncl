@@ -18,7 +18,7 @@ end
 
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201312)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -44,7 +44,7 @@ end
     prob_p=rc_test(p_rc)
     p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-2013")
+    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

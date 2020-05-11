@@ -19,7 +19,7 @@ end
 begin
  ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -41,7 +41,7 @@ begin
   f1 = addfile(fils, "r")
   date = cd_calendar(f1->time, 1)
 
-  timeind = ind(date.le.201312.and.date.ge.197901)
+  timeind = ind(date.le.201612.and.date.ge.197901)
 
   q1 = f1->Q_time(timeind,{1000:200},{lat1:lat2},{lon1:lon2})
   level = f1->level({1000:200})
@@ -61,7 +61,7 @@ begin
 ;;;;read GPCP data
   f2  = addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
   date := cd_calendar(f2->time, 1)
-  timeind := ind(date.ge.197901.and.date.le.201312)
+  timeind := ind(date.ge.197901.and.date.le.201612)
   p = f2->precip(timeind,{lat1:lat2},{lon1:lon2})
   p_annual = month_to_annual(p, 1)
 ;;;
@@ -69,12 +69,13 @@ begin
 
 ;;;;read CFSR diabatic and deep convection data 
 
-    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/diabatic_and_deepcon_heating_CFSR_ANN_SCS.nc", "r")
+    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/diabatic_and_deepcon_heating_CFSR_ANN_SCS_timeseries.nc", "r")
   
     deepcon_q_time = f2->deepcon_q_time(:,{100000:20000})
     diab_q_time = f2->diab_q_time(:,{100000:20000})
     lev = f2->lev({100000:20000})
- 
+    printVarSummary(deepcon_q_time)
+  
     ; printMinMax(diab_q_time, 1)
     deepcon_q_time = deepcon_q_time*86400.0
     diab_q_time = diab_q_time*86400.0
@@ -114,11 +115,11 @@ printVarSummary(diab_q_wgt)
    diab_q_wgt_std = dim_standardize(diab_q_wgt, 1)
    deepcon_q_wgt_std = dim_standardize(deepcon_q_wgt, 1)
 
-  data_all = new((/4,35/),"float")
+  data_all = new((/4,dimsizes(timeind)/12/),"float")
   data_all(0,:)=q1_wgt_std
   data_all(1,:)=p_scs_std
-  data_all(2,0:29)=diab_q_wgt_std
-  data_all(3,0:29)=deepcon_q_wgt_std
+  data_all(2,0:31)=diab_q_wgt_std
+  data_all(3,0:31)=deepcon_q_wgt_std
 
   
 
@@ -130,7 +131,7 @@ print("***********画时间序列***************")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "q1-CFSR_diabatic-deepconvection-GPCP降水的时间序列")
+  wks   = gsn_open_wks("pdf", "q1-CFSR_diabatic-deepconvection-GPCP降水的时间序列-2016")
   plot=new(1,graphic)
   
   resxy = True

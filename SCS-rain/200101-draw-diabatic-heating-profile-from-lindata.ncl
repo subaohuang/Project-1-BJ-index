@@ -10,7 +10,7 @@ begin
 ; Mission 1. read data
 ; ==============================================================
 ;;read diabatic data 
-  f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/diabatic_heating_CFSR_ANN_clm_change_profile.nc", "r")
+  f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/diabatic_heating_CFSR_ANN_clm_change_profile_2010.nc", "r")
 
   diabatic_heat_change = f1->diab_q(1,:)
   diabatic_heat_clm = f1->diab_q(0,:) 
@@ -22,7 +22,7 @@ begin
 ;;;
 
 ;;read deep convection data
-  f2 = addfile("/home/ys17-19/lsh/Project/SCS-rain/deepcon_heating_CFSR_ANN_clm_change_profile.nc", "r")
+  f2 = addfile("/home/ys17-19/lsh/Project/SCS-rain/deepcon_heating_CFSR_ANN_clm_change_profile_2010.nc", "r")
 
   deepcon_heat_change = f2->deepcon_q(1,:)
   deepcon_heat_clm = f2->deepcon_q(0,:) 
