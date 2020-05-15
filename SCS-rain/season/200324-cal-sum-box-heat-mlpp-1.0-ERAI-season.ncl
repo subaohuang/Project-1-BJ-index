@@ -20,23 +20,56 @@ begin
 
 return prob
 end
-function  wgt_annual(total_month)
-begin
-    weight1 = ispan(1,12,1)*1.0
-    weight1 = (2*weight1-1)/24
 
-    weight2 = ispan(1,12,1)*1.0
-    weight2 = (25-2*weight2)/24
+
+function  wgt_annual(total_month,season)
+begin
+
+    if season.eq."MAM"
+       h = 3
+    else if season.eq."JJA"
+        h=6
+       else if season.eq."SON"
+          h = 9
+      else 
+          h = 0
+       end if 
+    end if
+    end if
+   
+    weight1 = ispan(h,h+2,1)*1.0
+    weight1 = (weight1-h+0.5)/3.0
+
+    weight2 = ispan(h,h+2,1)*1.0
+    weight2 = (h-weight2+2.5)/3.0
+
     total_annual_test = new(34,"float")
     total_annual_test@_FillValue = default_fillvalue("float")
     printVarSummary(total_annual_test)
 
     do i =0,32,1
-      total_annual_test(i+1) = sum(total_month(i*12:(i+1)*12-1)*weight1) + sum(total_month((i+1)*12:(i+2)*12-1)*weight2)
+      total_annual_test(i+1) = sum(total_month(h+i*12:h+2+i*12)*weight1) + sum(total_month(h+(i+1)*12:h+2+(i+1)*12)*weight2) + \
+                              sum(total_month(h+3+i*12:(i+1)*12-1)) +  sum(total_month((i+1)*12:h-1+(i+1)*12))
     end do    
+   
+
+    ;;;12月的情况为
+    DT12 = new(34,"float")
+    DT1 = DT12
+    DT2 = DT12
+
+    if season.eq."DJF" then
+      do i =0,31,1
+          DT12(i+1) = 0.5*total_month(i*12+11) + 0.5*total_month((i+1)*12+11) + sum(total_month(i*12:i*12+10))
+          DT1(i+1) = 0.5*total_month((i+1)*12) + 0.5*total_month((i+2)*12) + sum(total_month((i+1)*12+1:(i+1)*12+11))
+          DT2(i+1) = 0.5*total_month((i+1)*12+1) + 0.5*total_month((i+2)*12+1) + sum(total_month((i+1)*12+2:(i+1)*12+11)) + total_month((i+2)*12)
+          total_annual_test(i+1) = (DT12(i+1)+DT1(i+1)+DT2(i+1))/3.0
+      end do    
+     total_annual_test(33) =  default_fillvalue("float")
+
+    end if
 return total_annual_test
 end    
-    
 
 
 ;;**************************************************************
@@ -63,7 +96,12 @@ begin
    lon2 = 160
 ;;;
 
-season = "JJA"
+;;;选择季节
+season = "DJF"
+;;;
+
+
+
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
@@ -223,12 +261,23 @@ season = "JJA"
      dT_annual  = month_to_season(dT, season) 
     
      Tbox_annual = month_to_season(Tbox, season)
+    
+
+      if season.eq."DJF" then
+      ;;注意点
+        Tbox_annual(0:dimsizes(Tbox_annual&time)-2)=(/Tbox_annual(1:)/)
+        Tbox_annual(dimsizes(Tbox_annual&time)-1)=(/Tbox(dimsizes(Tbox&time)-1)/)
+       ;;;
+      end if
 
 
   
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
      dT_wgt = dT_test
      dT_wgt(1:33) = Tbox_annual(1:33) - Tbox_annual(0:32)
+
+
+
    
      
 
@@ -356,7 +405,7 @@ season = "JJA"
        ;    exit()
 
 ;;;;;;
-       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/season/SODA3.4.2_wt_T_in_MLD_density_defined_0.8_"+season+".nc", "r")
+       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc", "r")
        
        wt_mlt = f1->wt_mlt
        printVarSummary(wt_mlt)
@@ -410,14 +459,14 @@ season = "JJA"
 
     ;;;权重平均 from paper warming of the upper Equatorial indian ocean and changes
        
-        hadv_mean_annual = wgt_annual(hadv_mean)
-        vadv_mean_annual = wgt_annual(vadv_mean)
+        hadv_mean_annual = wgt_annual(hadv_mean,season)
+        vadv_mean_annual = wgt_annual(vadv_mean,season)
 
-        v_lateral_south_annual = wgt_annual(v_lateral_south)
-        v_lateral_north_annual = wgt_annual(v_lateral_north)
+        v_lateral_south_annual = wgt_annual(v_lateral_south,season)
+        v_lateral_north_annual = wgt_annual(v_lateral_north,season)
 
-        u_lateral_east_annual = wgt_annual(u_lateral_east)
-        u_lateral_west_annual = wgt_annual(u_lateral_west)
+        u_lateral_east_annual = wgt_annual(u_lateral_east,season)
+        u_lateral_west_annual = wgt_annual(u_lateral_west,season)
 
         ; v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
         ; v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
@@ -522,7 +571,7 @@ season = "JJA"
     
     ; Q_net_tr_annual = month_to_season(Q_net_tr, 0)   ;;;这里是累加
 ; 
-     Q_net_tr_annual = wgt_annual(Q_net_tr)
+     Q_net_tr_annual = wgt_annual(Q_net_tr,season)
 
 
 
