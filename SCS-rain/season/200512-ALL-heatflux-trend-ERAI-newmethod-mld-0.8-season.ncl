@@ -14,6 +14,66 @@ begin
 
 return prob
 end
+;;;;
+
+function  wgt_annual(total_month,season)
+begin
+
+    if season.eq."MAM"
+       h = 3
+    else if season.eq."JJA"
+        h=6
+       else if season.eq."SON"
+          h = 9
+      else 
+          h = 0
+       end if 
+    end if
+    end if
+   
+    weight1 = ispan(h,h+2,1)*1.0
+    weight1 = (weight1-h+0.5)/3.0
+
+    weight2 = ispan(h,h+2,1)*1.0
+    weight2 = (h-weight2+2.5)/3.0
+    
+    dim = dimsizes(total_month)
+    printVarSummary(total_month)
+
+
+
+    weight1_3d = conform_dims(dimsizes(total_month(1:3,:,:)), weight1, 0)
+    weight2_3d = conform_dims(dimsizes(total_month(1:3,:,:)), weight2, 0)
+
+
+    total_annual_test = new((/dim(0)/12,dim(1),dim(2)/),"float")
+    total_annual_test@_FillValue = default_fillvalue("float")
+    printVarSummary(total_annual_test)
+
+    do i =0,32,1
+      total_annual_test(i+1,:,:) =  dim_sum_n((total_month(h+i*12:h+2+i*12,:,:)*weight1_3d),0) + dim_sum_n(total_month(h+(i+1)*12:h+2+(i+1)*12,:,:)*weight2_3d,0) + \
+                              dim_sum_n(total_month(h+3+i*12:(i+1)*12-1,:,:),0) +  dim_sum_n(total_month((i+1)*12:h-1+(i+1)*12,:,:),0)
+    end do    
+   
+
+    ;;;12月的情况为
+    DT12 = total_annual_test
+    DT1 = DT12
+    DT2 = DT12
+
+    if season.eq."DJF" then
+      do i =0,31,1
+          DT12(i+1,:,:) = 0.5*total_month(i*12+11,:,:) + 0.5*total_month((i+1)*12+11,:,:) + dim_sum_n(total_month(i*12:i*12+10,:,:),0)
+          DT1(i+1,:,:) = 0.5*total_month((i+1)*12,:,:) + 0.5*total_month((i+2)*12,:,:) + dim_sum_n(total_month((i+1)*12+1:(i+1)*12+11),0)
+          DT2(i+1,:,:) = 0.5*total_month((i+1)*12+1,:,:) + 0.5*total_month((i+2)*12+1,:,:) + dim_sum_n(total_month((i+1)*12+2:(i+1)*12+11),0) + total_month((i+2)*12,:,:)
+          total_annual_test(i+1,:,:) = (DT12(i+1,:,:)+DT1(i+1,:,:)+DT2(i+1,:,:))/3.0
+      end do    
+     total_annual_test(33,:,:) =  default_fillvalue("float")
+    end if
+    
+
+return total_annual_test
+end    
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
@@ -41,7 +101,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "JJA"
+ season = "MAM"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -209,6 +269,12 @@ begin
 
        hadv_mean_annual = month_to_season(hadv_mean, season)
        vadv_mean_annual = month_to_season(vadv_mean, season)
+       
+       hadv_mean_annual = (/wgt_annual(hadv_mean,season)/)
+       vadv_mean_annual = (/wgt_annual(vadv_mean,season)/)
+
+
+
        total_ocean_annual = vadv_mean_annual
        total_ocean_annual = hadv_mean_annual(:,{x1:x2},{y1:y2}) + vadv_mean_annual
 
@@ -277,10 +343,23 @@ begin
     nlwrs_annual = month_to_season(nlwrs, season)
     nswrs_pen_annual = month_to_season(nswrs_pen, season)
 
+    lhtfl_annual = wgt_annual(lhtfl,season)
+    shtfl_annual = wgt_annual(shtfl,season)
+    nswrs_annual = wgt_annual(nswrs,season)
+    nlwrs_annual = wgt_annual(nlwrs,season)
+    nswrs_pen_annual = wgt_annual(nswrs_pen,season)
+
 
     total_annual = lhtfl_annual
     total_annual  = month_to_season(total, season)
     printVarSummary(lhtfl_annual)
+
+    total_annual = (/wgt_annual(total,season)/)
+
+
+
+
+
        ; printMinMax(total_ocean_annual, 1)
        ; printMinMax(total_annual, 1)
        ; printMinMax(hadv_mean_annual, 1)
@@ -404,7 +483,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season)
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt")
 
   res=True
   res@gsnFrame=False
@@ -450,10 +529,15 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -12
+  ; res@cnMaxLevelValF       =   12
+  ; res@cnLevelSpacingF      =  1
+
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -12
-  res@cnMaxLevelValF       =   12
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -120
+  res@cnMaxLevelValF       =   120
+  res@cnLevelSpacingF      =  10
  
 
   plot = new(8,graphic)

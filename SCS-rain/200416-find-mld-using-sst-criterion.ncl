@@ -10,7 +10,7 @@
 begin
  ;;;time span
     startmon =198001
-    endmon = 201312
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -33,7 +33,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.198001)
+    timeind:=ind(date.le.201512.and.date.ge.198001)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
@@ -52,7 +52,7 @@ begin
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
     f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
 
-    indyear = (2013-1980+1)*12-1
+    indyear = (2015-1980+1)*12-1
   
     T_r = f5->temp(0:indyear,0,:,:)
 
@@ -67,9 +67,9 @@ begin
    copy_VarCoords(mlt_r, mlt)
 
        ;;;;写nc文件,简单的方法  
-           system("/bin/rm -f SODA3.4.2_temp_5m.nc")   ; remove any pre-existing file
+           system("/bin/rm -f SODA3.4.2_temp_5m_2015.nc")   ; remove any pre-existing file
             
-          ncdf = addfile("SODA3.4.2_temp_5m.nc" ,"c")  ; open output netCDF file
+          ncdf = addfile("SODA3.4.2_temp_5m_2015.nc" ,"c")  ; open output netCDF file
 
           ;===================================================================
           ; create global attributes of the file (optional)

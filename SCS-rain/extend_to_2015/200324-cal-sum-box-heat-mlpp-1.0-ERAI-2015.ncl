@@ -20,56 +20,26 @@ begin
 
 return prob
 end
-
-
-function  wgt_annual(total_month,season)
+function  wgt_annual(total_month)
 begin
+    weight1 = ispan(1,12,1)*1.0
+    weight1 = (2*weight1-1)/24
 
-    if season.eq."MAM"
-       h = 3
-    else if season.eq."JJA"
-        h=6
-       else if season.eq."SON"
-          h = 9
-      else 
-          h = 0
-       end if 
-    end if
-    end if
-   
-    weight1 = ispan(h,h+2,1)*1.0
-    weight1 = (weight1-h+0.5)/3.0
+    weight2 = ispan(1,12,1)*1.0
+    weight2 = (25-2*weight2)/24
 
-    weight2 = ispan(h,h+2,1)*1.0
-    weight2 = (h-weight2+2.5)/3.0
+    dim  = dimsizes(total_month)
 
-    total_annual_test = new(34,"float")
+    total_annual_test = new(dim(0)/12,"float")
     total_annual_test@_FillValue = default_fillvalue("float")
     printVarSummary(total_annual_test)
 
-    do i =0,32,1
-      total_annual_test(i+1) = sum(total_month(h+i*12:h+2+i*12)*weight1) + sum(total_month(h+(i+1)*12:h+2+(i+1)*12)*weight2) + \
-                              sum(total_month(h+3+i*12:(i+1)*12-1)) +  sum(total_month((i+1)*12:h-1+(i+1)*12))
+    do i =0,(dim(0)/12)-2,1
+      total_annual_test(i+1) = sum(total_month(i*12:(i+1)*12-1)*weight1) + sum(total_month((i+1)*12:(i+2)*12-1)*weight2)
     end do    
-   
-
-    ;;;12月的情况为
-    DT12 = new(34,"float")
-    DT1 = DT12
-    DT2 = DT12
-
-    if season.eq."DJF" then
-      do i =0,31,1
-          DT12(i+1) = 0.5*total_month(i*12+11) + 0.5*total_month((i+1)*12+11) + sum(total_month(i*12:i*12+10))
-          DT1(i+1) = 0.5*total_month((i+1)*12) + 0.5*total_month((i+2)*12) + sum(total_month((i+1)*12+1:(i+1)*12+11))
-          DT2(i+1) = 0.5*total_month((i+1)*12+1) + 0.5*total_month((i+2)*12+1) + sum(total_month((i+1)*12+2:(i+1)*12+11)) + total_month((i+2)*12)
-          total_annual_test(i+1) = (DT12(i+1)+DT1(i+1)+DT2(i+1))/3.0
-      end do    
-     total_annual_test(33) =  default_fillvalue("float")
-
-    end if
 return total_annual_test
 end    
+    
 
 
 ;;**************************************************************
@@ -78,7 +48,7 @@ end
 begin
  ;;;time span
     startmon =198001
-    endmon = 201312
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -93,22 +63,15 @@ begin
    lat1 = -5
    lat2 = 45
    lon1 = 90
-   lon2 = 160
-;;;
-
-;;;选择季节
-season = "SON"
-;;;
-
-
+   lon2 = 170
 
 ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
+    diri="/home/ys18-19/lsh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.198001)
+    timeind:=ind(date.le.201512.and.date.ge.198001)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
@@ -116,13 +79,13 @@ season = "SON"
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
 
-    ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season)
+    ssta_annual = month_to_annual(ssta(:,{lat1:lat2},{lon1:lon2}), 1)
     ; ssta_annual =(/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
 
     ;;;sst 倾向值
     dsst = center_finite_diff_n(ssta, 1, False, 0, 0) 
     copy_VarCoords(ssta, dsst)
-    dsst_annual = month_to_season(dsst(:,{lat1:lat2},{lon1:lon2}), season)
+    dsst_annual = month_to_annual(dsst(:,{lat1:lat2},{lon1:lon2}), 1)
     ; dsst_annual =(/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
     dsst_annual_mean = dim_avg_n_Wrap(dsst_annual(:,{0:15},{110:155}), (/1,2/))
     ;;;
@@ -147,7 +110,7 @@ season = "SON"
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
 
-    f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_0.8.nc", "r")  
+    f6=addfile("/home/ys18-19/lsh/Project/SCS-rain/extend_to_2015/SODA3.4.2_mld_density_criterion_0.8_2015.nc", "r")  
 
     f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
     f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
@@ -155,7 +118,7 @@ season = "SON"
     
 
 
-    indyear = (2013-1980+1)*12-1
+    indyear = (2015-1980+1)*12-1
     u_r = f2->u(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
@@ -217,14 +180,14 @@ season = "SON"
     ;;parameter 
      pi = get_pi("float")
      dx = u&lat
-     dx = 6378388.*cos(0.0174533*u&lat)
+     dx = 6378388.*cos(0.0184533*u&lat)
      dx!0 = "lat"
      copy_VarCoords(u(1,1,:,1), dx)
 
      dy = (pi/180)*1*6378388.
  
 
-      dz_3d_test = new(dimsizes(u(:,:,{-5:20},{100:160})),float)
+      dz_3d_test = new(dimsizes(u(:,:,{-5:20},{100:170})),float)
   
 
       printVarSummary(dz_3d_test)
@@ -233,7 +196,7 @@ season = "SON"
       do i = 0,dimsizes(mlt&time)-1
         dz_3d_test(i,:,:,:) = dpres_plevel(depth, mlt(i,{-5:20},:), 0, 0)
       end do 
-      copy_VarCoords(u(:,:,{-5:20},{100:160}), dz_3d_test)
+      copy_VarCoords(u(:,:,{-5:20},{100:170}), dz_3d_test)
       printVarSummary(dz_3d_test)
       ; print(mlt(227,{10},{120}))
     
@@ -245,7 +208,7 @@ season = "SON"
 
 
      dx_3d_test  = where(ismissing(T(:,:,{0:15},{110:155})), 0.0, dx_3d_test)
-     dz_3d_test  = where(ismissing(T(:,:,{-5:20},{100:160})), 0.0, dz_3d_test)
+     dz_3d_test  = where(ismissing(T(:,:,{-5:20},{100:170})), 0.0, dz_3d_test)
   
    
      volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{0:15},{110:155})*dy, (/1,2,3/))
@@ -258,26 +221,15 @@ season = "SON"
 
      dT = center_finite_diff_n(Tbox, 1, False, 0, 0)
      copy_VarCoords(Tbox, dT)
-     dT_annual  = month_to_season(dT, season) 
+     dT_annual  = month_to_annual(dT, 1) 
     
-     Tbox_annual = month_to_season(Tbox, season)
-    
-
-      if season.eq."DJF" then
-      ;;注意点
-        Tbox_annual(0:dimsizes(Tbox_annual&time)-2)=(/Tbox_annual(1:)/)
-        Tbox_annual(dimsizes(Tbox_annual&time)-1)=(/Tbox(dimsizes(Tbox&time)-1)/)
-       ;;;
-      end if
+     Tbox_annual = month_to_annual(Tbox, 1)
 
 
   
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
      dT_wgt = dT_test
-     dT_wgt(1:33) = Tbox_annual(1:33) - Tbox_annual(0:32)
-
-
-
+     dT_wgt(1:35) = Tbox_annual(1:35) - Tbox_annual(0:34)
    
      
 
@@ -334,9 +286,7 @@ season = "SON"
        wt_mlt_dh  = wt(:,4,{x1:x2},{y1:y2})
        
        ; exit()
-
-
-       ; ;;;下面的文件输出后可以注释掉
+    
        ; ;;;将wt进行垂直方向差值，为了得到更加精确的结果
        ;     print("开始差值")
        ;      xi  = wt&depth 
@@ -374,15 +324,15 @@ season = "SON"
        ;   end do
        ;    ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
        ;    ;;;;写nc文件,简单的方法  
-       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8_"+season+".nc")   ; remove any pre-existing file
+       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc")   ; remove any pre-existing file
             
-       ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density_defined_0.8_"+season+".nc","c")  ; open output netCDF file
+       ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc" ,"c")  ; open output netCDF file
 
        ;    ;===================================================================
        ;    ; create global attributes of the file (optional)
        ;    ;===================================================================
        ;       fAtt               = True            ; assign file attributes
-       ;       fAtt@title         = "SODA3.4.2 wt and T in mld,mld is defined by 0.8 density criterion"
+       ;       fAtt@title         = "SODA3.4.2 wt and T in mld,mld is defined by 1.0 density criterion"
        ;       fAtt@Conventions   = "None"
        ;       fAtt@creation_date = systemfunc ("date")
        ;       fileattdef( ncdf, fAtt )            ; copy file attributes
@@ -405,7 +355,7 @@ season = "SON"
        ;    exit()
 
 ;;;;;;
-       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc", "r")
+       f1 = addfile("/home/ys18-19/lsh/Project/SCS-rain//extend_to_2015/SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc", "r")
        
        wt_mlt = f1->wt_mlt
        printVarSummary(wt_mlt)
@@ -419,6 +369,7 @@ season = "SON"
 
 
 ;  ;;;;;;
+  
        w_bottom = dim_sum_n_Wrap(wtT*dx_3d*dy, (/1,2/))/volume
     ;;;
     
@@ -454,19 +405,19 @@ season = "SON"
     ;;;年平均
        ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
        ; vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
-       ; hadv_mean_annual = month_to_season(hadv_mean, 0)
-       ; vadv_mean_annual = month_to_season(vadv_mean, 0)
+       ; hadv_mean_annual = month_to_annual(hadv_mean, 0)
+       ; vadv_mean_annual = month_to_annual(vadv_mean, 0)
 
     ;;;权重平均 from paper warming of the upper Equatorial indian ocean and changes
        
-        hadv_mean_annual = wgt_annual(hadv_mean,season)
-        vadv_mean_annual = wgt_annual(vadv_mean,season)
+        hadv_mean_annual = wgt_annual(hadv_mean)
+        vadv_mean_annual = wgt_annual(vadv_mean)
 
-        v_lateral_south_annual = wgt_annual(v_lateral_south,season)
-        v_lateral_north_annual = wgt_annual(v_lateral_north,season)
+        v_lateral_south_annual = wgt_annual(v_lateral_south)
+        v_lateral_north_annual = wgt_annual(v_lateral_north)
 
-        u_lateral_east_annual = wgt_annual(u_lateral_east,season)
-        u_lateral_west_annual = wgt_annual(u_lateral_west,season)
+        u_lateral_east_annual = wgt_annual(u_lateral_east)
+        u_lateral_west_annual = wgt_annual(u_lateral_west)
 
         ; v_lateral_south_west_annual = wgt_annual(v_lateral_south_west)
         ; v_lateral_south_east_annual = wgt_annual(v_lateral_south_east)
@@ -487,18 +438,18 @@ season = "SON"
    
 ;;;read NCEP-NCAR heat flux data
   
-    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
+    fils3 = "/home/ys18-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.198001)
+    timeind:=ind(date.le.201512.and.date.ge.198001)
   
     ;;;region
    lat1 = -10
    lat2 = 20
    lon1 = 100
-   lon2 = 160
+   lon2 = 170
    ;;;
 
 
@@ -569,9 +520,9 @@ season = "SON"
 
     ;;;
     
-    ; Q_net_tr_annual = month_to_season(Q_net_tr, 0)   ;;;这里是累加
+    ; Q_net_tr_annual = month_to_annual(Q_net_tr, 0)   ;;;这里是累加
 ; 
-     Q_net_tr_annual = wgt_annual(Q_net_tr,season)
+     Q_net_tr_annual = wgt_annual(Q_net_tr)
 
 
 
@@ -667,39 +618,39 @@ season = "SON"
 ;;;
 
 ;;;;两段平均 80-96 97-13
-time = ispan(1980, 2013, 1)*1.0
+time = ispan(1980, 2015, 1)*1.0
 m = new(34,"float")
 
-Q_net_tr_annual_1 = time(0:16)
-Q_net_tr_annual_1= dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
-Q_net_tr_annual_2  =time(17:)
-Q_net_tr_annual_2= dim_avg_n_Wrap(Q_net_tr_annual(17:), 0)
+Q_net_tr_annual_1 = time(0:17)
+Q_net_tr_annual_1= dim_avg_n_Wrap(Q_net_tr_annual(0:17), 0)
+Q_net_tr_annual_2  =time(18:)
+Q_net_tr_annual_2= dim_avg_n_Wrap(Q_net_tr_annual(18:), 0)
 
-total_ocean_annual_1 = time(0:16)
-total_ocean_annual_1= dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
-total_ocean_annual_2 = time(17:)
-total_ocean_annual_2= dim_avg_n_Wrap(total_ocean_annual(17:), 0)
+total_ocean_annual_1 = time(0:17)
+total_ocean_annual_1= dim_avg_n_Wrap(total_ocean_annual(0:17), 0)
+total_ocean_annual_2 = time(18:)
+total_ocean_annual_2= dim_avg_n_Wrap(total_ocean_annual(18:), 0)
 
-total_annual_1 = time(0:16)
-total_annual_1=  dim_avg_n_Wrap(total_annual(0:16), 0)
-total_annual_2 = time(17:)
-total_annual_2=  dim_avg_n_Wrap(total_annual(17:), 0)
+total_annual_1 = time(0:17)
+total_annual_1=  dim_avg_n_Wrap(total_annual(0:17), 0)
+total_annual_2 = time(18:)
+total_annual_2=  dim_avg_n_Wrap(total_annual(18:), 0)
 
-dT_wgt_mean_1 = time(0:16)
-dT_wgt_mean_1  =dim_avg_n_Wrap(dT_wgt(0:16), 0)
-dT_wgt_mean_2 = time(17:)
-dT_wgt_mean_2  =dim_avg_n_Wrap(dT_wgt(17:), 0)
+dT_wgt_mean_1 = time(0:17)
+dT_wgt_mean_1  =dim_avg_n_Wrap(dT_wgt(0:17), 0)
+dT_wgt_mean_2 = time(18:)
+dT_wgt_mean_2  =dim_avg_n_Wrap(dT_wgt(18:), 0)
 
-print("dT_wgt_mean_1="+dim_avg_n_Wrap(dT_wgt(0:16), 0))
-print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(17:), 0))
+print("dT_wgt_mean_1="+dim_avg_n_Wrap(dT_wgt(0:17), 0))
+print("dT_wgt_mean_2="+dim_avg_n_Wrap(dT_wgt(18:), 0))
 
-Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(17:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:16), 0)
-ocean_diff = dim_avg_n_Wrap(total_ocean_annual(17:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:16), 0)
-dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(17:), 0) - dim_avg_n_Wrap(dT_wgt(0:16), 0)
-ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(17:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:16), 0)
-; ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean(12*17:), 0) - dim_avg_n_Wrap(vadv_mean(0:12*17-1), 0)
-; ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean(12*17:), 0) - dim_avg_n_Wrap(hadv_mean(0:12*17-1), 0)
-ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean_annual(17:), 0) - dim_avg_n_Wrap(hadv_mean_annual(0:16), 0)
+Q_net_diff  = dim_avg_n_Wrap(Q_net_tr_annual(18:), 0) - dim_avg_n_Wrap(Q_net_tr_annual(0:17), 0)
+ocean_diff = dim_avg_n_Wrap(total_ocean_annual(18:), 0) - dim_avg_n_Wrap(total_ocean_annual(0:17), 0)
+dT_wgt_diff = dim_avg_n_Wrap(dT_wgt(18:), 0) - dim_avg_n_Wrap(dT_wgt(0:17), 0)
+ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean_annual(18:), 0) - dim_avg_n_Wrap(vadv_mean_annual(0:17), 0)
+; ocean_vadv_diff = dim_avg_n_Wrap(vadv_mean(12*18:), 0) - dim_avg_n_Wrap(vadv_mean(0:12*18-1), 0)
+; ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean(12*18:), 0) - dim_avg_n_Wrap(hadv_mean(0:12*18-1), 0)
+ocean_hadv_diff = dim_avg_n_Wrap(hadv_mean_annual(18:), 0) - dim_avg_n_Wrap(hadv_mean_annual(0:17), 0)
 
 
 print("Q_net_diff="+Q_net_diff)
@@ -744,7 +695,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-0.8-ERAI-"+season)
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-0.8-ERAI-2015")
   plot=new(1,graphic)
   
   resxy = True
@@ -752,12 +703,12 @@ print("*********开始画图:时间序列********")
   resxy@gsnFrame = False
     
   resxy@tmXBMode  =  "Explicit"
-  resxy@trXMaxF = 2013
+  resxy@trXMaxF = 2015
   resxy@trXMinF = 1979
-  resxy@tmXBValues = ispan(1980,2013,5)
-  resxy@tmXBLabels = ispan(1980,2013,5)
+  resxy@tmXBValues = ispan(1980,2015,5)
+  resxy@tmXBLabels = ispan(1980,2015,5)
   resxy@tmXBMinorOn = True
-  resxy@tmXBMinorValues = ispan(1979,2013,1)
+  resxy@tmXBMinorValues = ispan(1979,2015,1)
   
   resxy@tmYLMode  =  "Explicit"
   resxy@tmYLValues = ispan(-3, 3, 1)
@@ -780,7 +731,7 @@ print("*********开始画图:时间序列********")
   
 
 
-  data_all = new((/6,34/),"float")
+  data_all = new((/6,36/),"float")
   data_all(0,:)=dT_wgt
   data_all(1,:)=Q_net_tr_annual
   data_all(2,:)=total_ocean_annual
@@ -804,18 +755,18 @@ print("*********开始画图:时间序列********")
   res@gsLineColor      = "blue"         ; color of lines
   res@gsLineDashPattern=15
 
-  plot2 = gsn_add_polyline(wks, plot,time(0:16), Q_net_tr_annual_1, res)
+  plot2 = gsn_add_polyline(wks, plot,time(0:17), Q_net_tr_annual_1, res)
   res@gsLineColor      = "red"         ; color of lines
-  plot3 = gsn_add_polyline(wks, plot,time(0:16), total_ocean_annual_1, res)
+  plot3 = gsn_add_polyline(wks, plot,time(0:17), total_ocean_annual_1, res)
   res@gsLineColor      = "blue"         ; color of lines
-  plot5 = gsn_add_polyline(wks, plot,time(17:), Q_net_tr_annual_2, res)
+  plot5 = gsn_add_polyline(wks, plot,time(18:), Q_net_tr_annual_2, res)
   res@gsLineColor      = "red"         ; color of lines
-  plot6 = gsn_add_polyline(wks, plot,time(17:), total_ocean_annual_2, res)
+  plot6 = gsn_add_polyline(wks, plot,time(18:), total_ocean_annual_2, res)
   
   res@gsLineColor      = "black"         ; color of lines
   
-   plot4 = gsn_add_polyline(wks, plot,time(0:16), dT_wgt_mean_1, res)
-   plot7 = gsn_add_polyline(wks, plot,time(17:), dT_wgt_mean_2, res)
+   plot4 = gsn_add_polyline(wks, plot,time(0:17), dT_wgt_mean_1, res)
+   plot7 = gsn_add_polyline(wks, plot,time(18:), dT_wgt_mean_2, res)
 
   
 
