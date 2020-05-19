@@ -14,7 +14,7 @@ begin
    lat1 = -10
    lat2 = 20
    lon1 = 100
-   lon2 = 160
+   lon2 = 170
 ;;;
 
 

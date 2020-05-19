@@ -66,7 +66,7 @@ begin
    lon2 = 170
 
 ;;;读入HadiSST海温数据
-    diri="/home/ys18-19/lsh/data/sst/"
+    diri="/home/ys17-19/lsh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -110,7 +110,7 @@ begin
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
 
-    f6=addfile("/home/ys18-19/lsh/Project/SCS-rain/extend_to_2015/SODA3.4.2_mld_density_criterion_0.8_2015.nc", "r")  
+    f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/SODA3.4.2_mld_density_criterion_0.8_2015.nc", "r")  
 
     f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
     f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
@@ -124,6 +124,7 @@ begin
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     mlt = f6->mld(0:indyear,:,:)
+
 
     taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
     tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
@@ -355,7 +356,7 @@ begin
        ;    exit()
 
 ;;;;;;
-       f1 = addfile("/home/ys18-19/lsh/Project/SCS-rain//extend_to_2015/SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc", "r")
+       f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain//extend_to_2015/SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc", "r")
        
        wt_mlt = f1->wt_mlt
        printVarSummary(wt_mlt)
@@ -438,7 +439,7 @@ begin
    
 ;;;read NCEP-NCAR heat flux data
   
-    fils3 = "/home/ys18-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
+    fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -619,7 +620,7 @@ begin
 
 ;;;;两段平均 80-96 97-13
 time = ispan(1980, 2015, 1)*1.0
-m = new(34,"float")
+m = new(36,"float")
 
 Q_net_tr_annual_1 = time(0:17)
 Q_net_tr_annual_1= dim_avg_n_Wrap(Q_net_tr_annual(0:17), 0)
