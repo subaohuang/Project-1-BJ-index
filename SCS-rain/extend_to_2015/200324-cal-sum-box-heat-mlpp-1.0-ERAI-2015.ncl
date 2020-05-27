@@ -71,7 +71,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.198001)
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
@@ -118,7 +118,7 @@ begin
     
 
 
-    indyear = (2015-1980+1)*12-1
+    indyear = (endyear -startyear +1)*12-1
     u_r = f2->u(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     v_r = f3->v(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
@@ -396,8 +396,6 @@ begin
 
        ; u_lateral_west_north = 30*86400*u_lateral_west_north
        ; u_lateral_west_south = 30*86400*u_lateral_west_south
-       
-
     ;;;
 
     
