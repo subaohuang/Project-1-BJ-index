@@ -9,7 +9,7 @@ begin
 ; Mission 1. read data
 ; ==============================================================
 ;;read diabatic data
-  f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/individual_heating_CFSR_ANN_clm_change_profile-EP.nc", "r")
+  f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/individual_heating_CFSR_ANN_clm_change_profile.nc", "r")
 
   lschr_heat_change = f1->lschr_q(1,:)   ;;;large scale condensate heating
   lschr_heat_clm = f1->lschr_q(0,:)   ;;;
@@ -59,7 +59,7 @@ begin
 
 ;;;;
 
-    wks = gsn_open_wks("pdf","非绝热加热的各项的trend以及气候态的profile-ANN-EP")                  ; send graphics to PNG file
+    wks = gsn_open_wks("pdf","非绝热加热的各项的trend以及气候态的profile-ANN-WP")                  ; send graphics to PNG file
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
