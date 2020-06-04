@@ -17,7 +17,6 @@ begin
    b = 0.5
    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
    copy_VarCoords(ssta_rc, prob)
-
 return prob
 end
 function  wgt_annual(total_month)

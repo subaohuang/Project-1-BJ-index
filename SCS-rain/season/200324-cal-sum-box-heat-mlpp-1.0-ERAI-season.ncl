@@ -46,6 +46,9 @@ begin
     total_annual_test = new(34,"float")
     total_annual_test@_FillValue = default_fillvalue("float")
     printVarSummary(total_annual_test)
+    
+
+    h = h-1 ;;;考虑到数组index要减1    y1-y0 = d0 
 
     do i =0,32,1
       total_annual_test(i+1) = sum(total_month(h+i*12:h+2+i*12)*weight1) + sum(total_month(h+(i+1)*12:h+2+(i+1)*12)*weight2) + \
@@ -60,7 +63,7 @@ begin
 
     if season.eq."DJF" then
       do i =0,31,1
-          DT12(i+1) = 0.5*total_month(i*12+11) + 0.5*total_month((i+1)*12+11) + sum(total_month(i*12:i*12+10))
+          DT12(i+1) = 0.5*total_month(i*12+11) + 0.5*total_month((i+1)*12+11) + sum(total_month((i+1)*12:(i+1)*12+10))
           DT1(i+1) = 0.5*total_month((i+1)*12) + 0.5*total_month((i+2)*12) + sum(total_month((i+1)*12+1:(i+1)*12+11))
           DT2(i+1) = 0.5*total_month((i+1)*12+1) + 0.5*total_month((i+2)*12+1) + sum(total_month((i+1)*12+2:(i+1)*12+11)) + total_month((i+2)*12)
           total_annual_test(i+1) = (DT12(i+1)+DT1(i+1)+DT2(i+1))/3.0
@@ -374,7 +377,7 @@ season = "SON"
        ;   end do
        ;    ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
        ;    ;;;;写nc文件,简单的方法  
-       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8_"+season+".nc")   ; remove any pre-existing file
+       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc")   ; remove any pre-existing file
             
        ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density_defined_0.8_"+season+".nc","c")  ; open output netCDF file
 
