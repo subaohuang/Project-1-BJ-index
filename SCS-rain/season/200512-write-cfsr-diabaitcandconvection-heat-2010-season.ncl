@@ -8,6 +8,11 @@
 ; Mission 1. read data
 ; ==============================================================
  begin
+
+ ;;;decide season 
+
+  season = "DJF"
+  
   diri="/mnt/f/share/MERRA/MERRA/"
    ;;;读入MERRA的数据
   m=""+ispan(1979,2010,1)+""
@@ -64,8 +69,9 @@ print("finish read data")
 ;    printVarSummary(wgt_var1)
 ;-----------Follow to caculate the trend--------------
 
-    var1_annual = month_to_annual(var1,1)
-    ; var1_annual = month_to_season(var1, "MAM")
+    ; var1_annual = month_to_annual(var1,1)
+
+    var1_annual = month_to_season(var1, season)
 
     var1_annual!0="time" 
     dimz = dimsizes(var1_annual)
@@ -91,7 +97,7 @@ print("finish read data")
     y(0,:)= (/var1_clim_area/)
     y(1,:)= y(0,:)+(/var1_annual_rc_area/)
 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/diabatic_heating_CFSR_ANN_clm_change_profile_2010.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/diabatic_heating_CFSR_"+season+"_clm_change_profile_2010.nc"
 
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
@@ -104,8 +110,8 @@ print("finish read data")
     deepcon_q = f1[:]->CNVHR_P8_L100_GLL0     ; Deep convective heating rate 
     var2 = deepcon_q
 
-    var2_annual = month_to_annual(var2,1)
-     ; var2_annual = month_to_season(var2, "MAM")
+    ; var2_annual = month_to_annual(var2,1)
+     var2_annual = month_to_season(var2, season)
     var2_annual!0="time" 
     dimz = dimsizes(var2_annual)
     yr_length = dimz(0)
@@ -123,7 +129,7 @@ print("finish read data")
     y2(0,:)= (/var2_clim_area/)
     y2(1,:)= y2(0,:)+(/var2_annual_rc_area/)
 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/deepcon_heating_CFSR_ANN_clm_change_profile_2010.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/deepcon_heating_CFSR_"+season+"_clm_change_profile_2010.nc"
 
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
