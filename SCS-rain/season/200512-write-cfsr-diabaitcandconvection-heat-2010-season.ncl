@@ -11,7 +11,7 @@
 
  ;;;decide season 
 
-  season = "DJF"
+  season = "JJA"
   
   diri="/mnt/f/share/MERRA/MERRA/"
    ;;;读入MERRA的数据

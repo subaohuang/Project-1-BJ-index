@@ -30,7 +30,7 @@ begin
        end if 
     end if
     end if
-   
+   print(h)
     weight1 = ispan(h,h+2,1)*1.0
     weight1 = (weight1-h+0.5)/3.0
 
@@ -52,22 +52,22 @@ begin
 
     h = h-1 ;;;考虑到数组index要减1  
 
-    do i =0,32,1
-      total_annual_test(i+1,:,:) =  dim_sum_n((total_month(h+i*12:h+2+i*12,:,:)*weight1_3d),0) + dim_sum_n(total_month(h+(i+1)*12:h+2+(i+1)*12,:,:)*weight2_3d,0) + \
-                              dim_sum_n(total_month(h+3+i*12:(i+1)*12-1,:,:),0) +  dim_sum_n(total_month((i+1)*12:h-1+(i+1)*12,:,:),0)
-    end do    
-   
-
-    ;;;12月的情况为
-    DT12 = total_annual_test
-    DT1 = DT12
-    DT2 = DT12
+    if season.ne."DJF" then
+        do i =0,32,1
+          total_annual_test(i+1,:,:) =  dim_sum_n((total_month(h+i*12:h+2+i*12,:,:)*weight1_3d),0) + dim_sum_n(total_month(h+(i+1)*12:h+2+(i+1)*12,:,:)*weight2_3d,0) + \
+                                  dim_sum_n(total_month(h+3+i*12:(i+1)*12-1,:,:),0) +  dim_sum_n(total_month((i+1)*12:h-1+(i+1)*12,:,:),0)
+        end do    
+    end if 
 
     if season.eq."DJF" then
+      ;;;12月的情况为
+      DT12 = total_annual_test
+      DT1 = DT12
+      DT2 = DT12
       do i =0,31,1
           DT12(i+1,:,:) = 0.5*total_month(i*12+11,:,:) + 0.5*total_month((i+1)*12+11,:,:) + dim_sum_n(total_month((i+1)*12:(i+1)*12+10,:,:),0)
-          DT1(i+1,:,:) = 0.5*total_month((i+1)*12,:,:) + 0.5*total_month((i+2)*12,:,:) + dim_sum_n(total_month((i+1)*12+1:(i+1)*12+11),0)
-          DT2(i+1,:,:) = 0.5*total_month((i+1)*12+1,:,:) + 0.5*total_month((i+2)*12+1,:,:) + dim_sum_n(total_month((i+1)*12+2:(i+1)*12+11),0) + total_month((i+2)*12,:,:)
+          DT1(i+1,:,:) = 0.5*total_month((i+1)*12,:,:) + 0.5*total_month((i+2)*12,:,:) + dim_sum_n(total_month((i+1)*12+1:(i+1)*12+11,:,:),0)
+          DT2(i+1,:,:) = 0.5*total_month((i+1)*12+1,:,:) + 0.5*total_month((i+2)*12+1,:,:) + dim_sum_n(total_month((i+1)*12+2:(i+1)*12+11,:,:),0) + total_month((i+2)*12,:,:)
           total_annual_test(i+1,:,:) = (DT12(i+1,:,:)+DT1(i+1,:,:)+DT2(i+1,:,:))/3.0
       end do    
      total_annual_test(33,:,:) =  default_fillvalue("float")
@@ -103,7 +103,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "SON"
+ season = "DJF"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"

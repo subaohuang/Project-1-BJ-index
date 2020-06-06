@@ -38,7 +38,7 @@ begin
 
 begin
 ;;;;choose season
-   season ="SON"
+   season ="DJF"
 
   ;;;read era data
         path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
@@ -124,8 +124,8 @@ begin
     g_nlat  =   dimsizes(g_lat)
 
     DivQ = uv2dv_cfd(era_wgt_qu,era_wgt_qv,g_lat,g_lon,2)
-    ; DivQ = (/sqrt(era_wgt_qu^2 + era_wgt_qv^2)/)
-    DivQ = (/sqrt(era_wgt_qv^2)/)
+    DivQ = (/sqrt(era_wgt_qu^2 + era_wgt_qv^2)/)
+    ; DivQ = (/sqrt(era_wgt_qv^2)/)
 
     ; DivQ = uv2dvF_Wrap(era_wgt_qu(:,::-1,:),era_wgt_qv(:,::-1,:)) 
     ; DivQ   =   (/DivQ*86400/) 
@@ -150,7 +150,6 @@ begin
 
       ; era_wgt_qu_delta = (/era_wgt_qu_delta*9.8/)
       ; era_wgt_qv_delta = (/era_wgt_qv_delta*9.8/)
-
     ;;;
 
 
@@ -185,9 +184,9 @@ begin
    u_mon = u
    v_mon = v
    do i = 0,yearnum-1,1
-   q_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), q_bar(i,:,:,:), (/1,2,3/))
-   u_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), u_bar(i,:,:,:), (/1,2,3/))
-   v_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), v_bar(i,:,:,:), (/1,2,3/))
+     q_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), q_bar(i,:,:,:), (/1,2,3/))
+     u_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), u_bar(i,:,:,:), (/1,2,3/))
+     v_mon(12*i:12*i+11,:,:,:) = conform_dims((/12,dim(0),dim(1),dim(2)/), v_bar(i,:,:,:), (/1,2,3/))
    end do 
    
     q_eddy = q 
@@ -245,8 +244,8 @@ begin
  
     ;;;得到magnitude项 
     era_wgt_dyna_q = era_wgt_dyna_qu
-    ; era_wgt_dyna_q = sqrt(era_wgt_dyna_qu^2 + era_wgt_dyna_qv^2)
-    era_wgt_dyna_q = sqrt(era_wgt_dyna_qv^2 )
+    era_wgt_dyna_q = sqrt(era_wgt_dyna_qu^2 + era_wgt_dyna_qv^2)
+    ; era_wgt_dyna_q = sqrt(era_wgt_dyna_qv^2 )
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_dyna_q)
     
@@ -278,8 +277,8 @@ begin
  
     ;;;得到magnitude项 
     era_wgt_thermaldyna_q = era_wgt_thermaldyna_qu
-    ; era_wgt_thermaldyna_q = sqrt(era_wgt_thermaldyna_qu^2 + era_wgt_thermaldyna_qv^2)
-    era_wgt_thermaldyna_q = sqrt(era_wgt_thermaldyna_qv^2 )
+    era_wgt_thermaldyna_q = sqrt(era_wgt_thermaldyna_qu^2 + era_wgt_thermaldyna_qv^2)
+    ; era_wgt_thermaldyna_q = sqrt(era_wgt_thermaldyna_qv^2 )
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_thermaldyna_q)
 
@@ -305,8 +304,8 @@ begin
  
     ;;;得到magnitude项 
     era_wgt_quad_q = era_wgt_quad_qu
-    ; era_wgt_quad_q = sqrt(era_wgt_quad_qu^2 + era_wgt_quad_qv^2)
-    era_wgt_quad_q = sqrt(era_wgt_quad_qv^2)
+    era_wgt_quad_q = sqrt(era_wgt_quad_qu^2 + era_wgt_quad_qv^2)
+    ; era_wgt_quad_q = sqrt(era_wgt_quad_qv^2)
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_quad_q)
  
@@ -347,8 +346,8 @@ begin
 
     ;;;得到magnitude项 
     era_wgt_eddy_q = era_wgt_eddy_qu
-    ; era_wgt_eddy_q = sqrt(era_wgt_eddy_qu^2 + era_wgt_eddy_qv^2)
-    era_wgt_eddy_q = sqrt(era_wgt_eddy_qv^2 )
+    era_wgt_eddy_q = sqrt(era_wgt_eddy_qu^2 + era_wgt_eddy_qv^2)
+    ; era_wgt_eddy_q = sqrt(era_wgt_eddy_qv^2 )
 
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_q)
 
@@ -414,7 +413,7 @@ begin
     prob_qv_eddy = rc_test(qv_eddy_rc)
     ;;;
     
-    ; qu_rc = where(prob_qu.le.0.2, qu_rc,qu_rc@_FillValue)
+    ; qu_rc = where(prob_qu.le.0.2, qu_rc,qu_rc@_Fill Value)
     ; qv_rc = where(prob_qv.le.0.2, qv_rc,qv_rc@_FillValue)
 
 
@@ -422,7 +421,7 @@ begin
 ; Mission 6. draw plot
 ; ==============================================================
 print("画图")
-  wks   = gsn_open_wks("pdf", "水汽通量输送的趋势图-"+season+"qv^2")
+  wks   = gsn_open_wks("pdf", "水汽通量输送的趋势图-"+season)
   plot=new(5,graphic)
   res=True
   res@gsnFrame=False

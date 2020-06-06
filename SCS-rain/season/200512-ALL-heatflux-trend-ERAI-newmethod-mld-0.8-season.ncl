@@ -44,7 +44,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "DJF"
+ season = "JJA"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -269,8 +269,12 @@ begin
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
     total = lhtfl
-    total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
-    total = (/total/coef/)
+    ; total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
+    ; total = (/total/coef/)
+
+    total = lhtfl + shtfl  + nswrs + nlwrs 
+
+
 
     lhtfl_annual = month_to_season(lhtfl, season)
     shtfl_annual = month_to_season(shtfl, season)
@@ -411,7 +415,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"no_mld")
 
   res=True
   res@gsnFrame=False
