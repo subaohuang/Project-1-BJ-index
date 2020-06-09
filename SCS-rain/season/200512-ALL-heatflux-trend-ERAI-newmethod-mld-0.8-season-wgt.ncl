@@ -235,16 +235,20 @@ begin
 
 
      vadv  = mlt_scs
-     vadv = wt_mlt*(T_mean(:,{x1:x2},{y1:y2}) - T_mlt)/mlt_scs
+     vadv = wt_mlt*(T_mean(:,{x1:x2},{y1:y2}) - T_mlt)/mlt_scs   ;;;k/s
 
     vadv = (/-1*vadv/)
     printVarSummary(vadv)
 
-    ;;;convert to units degree ℃/year
-      hadv =365*86400*hadv
-      vadv =365*86400*vadv
-    ;;;
+    ; ;;;convert to units degree ℃/year
+    ;   hadv =365*86400*hadv
+    ;   vadv =365*86400*vadv
+    ; ;;;
     
+    ;;;convert to units degree ℃/month
+      hadv =30*86400*hadv
+      vadv =30*86400*vadv
+    ;;;
 
     hadv_mean = hadv
     vadv_mean  = vadv
@@ -311,17 +315,20 @@ begin
      nswrs_pen =  nswrs*(R*exp(-1*mlt/L1)+ (1-R)*exp(-1*mlt/L2))
     ;;;
 
-    ;;;convert to units degree ℃/year
+    ;;;convert to units degree month/year
       density = 1025  ;;kg/m3
       cp  = 3850         ;;j/kg℃
-      coef  = mlt*density*cp
+      coef  = mlt*density*cp                                  
    
+      
+      lhtfl = 30*86400*lhtfl
+      shtfl = 30*86400*shtfl
+      nswrs = 30*86400*nswrs
+      nlwrs = 30*86400*nlwrs
+      nswrs_pen = 30*86400*nswrs_pen  
+    ;;;;
 
-      lhtfl = 365*86400*lhtfl
-      shtfl = 365*86400*shtfl
-      nswrs = 365*86400*nswrs
-      nlwrs = 365*86400*nlwrs
-      nswrs_pen = 365*86400*nswrs_pen
+
       
     ;;;
     ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
@@ -329,9 +336,19 @@ begin
     ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
+
     total = lhtfl
     total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
+
+
     total = (/total/coef/)
+
+    ;;;;;
+    lhtfl = (/lhtfl/coef/)
+    shtfl = (/shtfl/coef/)
+    nswrs= (/nswrs/coef/)
+    nlwrs = (/nlwrs/coef/)
+
 
     lhtfl_annual = month_to_season(lhtfl, season)
     shtfl_annual = month_to_season(shtfl, season)
@@ -368,12 +385,12 @@ begin
 
 
 print("*******开始计算趋势系数*****************")
-;;;calculate correlation coef
-      lhtfl_annual = lhtfl_annual/(365*86400)
-      shtfl_annual = shtfl_annual/(365*86400)
-      nswrs_annual = nswrs_annual/(365*86400)
-      nlwrs_annual = nlwrs_annual/(365*86400)
-;;;
+; ;;;calculate correlation coef
+;       lhtfl_annual = lhtfl_annual/(365*86400)
+;       shtfl_annual = shtfl_annual/(365*86400)
+;       nswrs_annual = nswrs_annual/(365*86400)
+;       nlwrs_annual = nlwrs_annual/(365*86400)
+; ;;;
 
 ;;;
     ;;;大气
@@ -476,7 +493,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt-mld")
 
   res=True
   res@gsnFrame=False
@@ -488,7 +505,7 @@ print("*********开始画图********")
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
+  res@lbLabelBarOn= True
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
@@ -522,37 +539,60 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -12
-  ; res@cnMaxLevelValF       =   12
-  ; res@cnLevelSpacingF      =  1
-
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -120
-  res@cnMaxLevelValF       =   120
-  res@cnLevelSpacingF      =  10
- 
+  res@cnMinLevelValF       =   -12.0
+  res@cnMaxLevelValF       =   12.0
+  res@cnLevelSpacingF      =  1.0
+
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -120
+  ; res@cnMaxLevelValF       =   120
+    ; res@cnLevelSpacingF      =  10
+   
 
   plot = new(8,graphic)
 
   res@gsnLeftString = "Net Heat Flux"
+   
   plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
+  
   res@gsnLeftString = "Ocean advction"
+     res@cnMinLevelValF       =   -60.0
+    res@cnMaxLevelValF       =   60.0
+    res@cnLevelSpacingF      =  10.0
   plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Ocean horizonal advction"
+     res@cnMinLevelValF       =   -20.0
+    res@cnMaxLevelValF       =   20.0
+    res@cnLevelSpacingF      =  2.0
   plot(2) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res)
+     res@cnMinLevelValF       =   -60.0
+    res@cnMaxLevelValF       =   60.0
+    res@cnLevelSpacingF      =  10.0
   
   res@gsnLeftString = "Ocean Vertical advction"
   plot(3) = gsn_csm_contour_map(wks, r_vadv, res)
 
+ res@cnMinLevelValF       =   -20.0
+    res@cnMaxLevelValF       =   20.0
+    res@cnLevelSpacingF      =  2.0
 
   res@gsnLeftString = "Latent heat flux"
   plot(4) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Sensible heat flux"
+   res@cnMinLevelValF       =   -4.0
+    res@cnMaxLevelValF       =   4.0
+    res@cnLevelSpacingF      =  .5
   plot(5) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Longwave radiation"
+    res@cnMinLevelValF       =   -10.0
+    res@cnMaxLevelValF       =   10.0
+    res@cnLevelSpacingF      =  1.0
   plot(6) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Shortwave radiation"
+    res@cnMinLevelValF       =   -30.0
+    res@cnMaxLevelValF       =   30.0
+    res@cnLevelSpacingF      =  2.0
   plot(7) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
 
 
@@ -647,7 +687,7 @@ print("*********开始画图********")
     end do 
 
   pres = True
-  pres@gsnPanelLabelBar  = True
+  ; pres@gsnPanelLabelBar  = True
   pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f","g","h"/)
 
   gsn_panel(wks, plot, (/4,2/), pres)
