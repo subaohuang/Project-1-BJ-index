@@ -149,7 +149,7 @@ begin
   res2@cnLevels = (/0.55/)
   res2@cnLineColors = "black"
   res2@cnMonoLineColor  = True
-  res2@cnLineThicknessF = 5
+  res2@cnLineThicknessF = 2
   res2@cnMonoLineThickness  = True
   res2@gsnLeftString = ""
   res2@cnInfoLabelOn = False
@@ -241,6 +241,8 @@ begin
     ; overlay(plot, iplot)
 pres = True
 pres@gsnPanelLabelBar  = True
+pres@lbOrientation = "Vertical"
+pres@pmLabelBarHeightF = 0.15
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

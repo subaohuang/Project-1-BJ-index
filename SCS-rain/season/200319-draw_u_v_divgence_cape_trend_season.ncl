@@ -123,11 +123,11 @@ begin
 
 do i = 0,3
    ;;;处理成年数据 
-     u_annual = month_to_season(u, season)
-     v_annual = month_to_season(v, season)
-     d_annual = month_to_season(d, season)
-     sta_s_annual = month_to_season(sta_s, season)
-     cape_annual = month_to_season(cape, season)
+     u_annual = month_to_season(u, season(i))
+     v_annual = month_to_season(v, season(i))
+     d_annual = month_to_season(d, season(i))
+     sta_s_annual = month_to_season(sta_s, season(i))
+     cape_annual = month_to_season(cape, season(i))
    ;;;
 
    ;;;区域平均 
@@ -156,11 +156,11 @@ do i = 0,3
  
 
    ;;回归
-   u_rc = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
-   v_rc = regCoef_n(ispan(1, yearnum, 1), v_annual, 0, 0)
-   d_rc = regCoef_n(ispan(1, yearnum, 1), d_annual, 0, 0)
-   sta_s_rc = regCoef_n(ispan(1, yearnum, 1), sta_s_annual, 0, 0)
-   cape_rc = regCoef_n(ispan(1, yearnum, 1), cape_annual, 0, 0)
+   u_rc := regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
+   v_rc := regCoef_n(ispan(1, yearnum, 1), v_annual, 0, 0)
+   d_rc := regCoef_n(ispan(1, yearnum, 1), d_annual, 0, 0)
+   sta_s_rc := regCoef_n(ispan(1, yearnum, 1), sta_s_annual, 0, 0)
+   cape_rc := regCoef_n(ispan(1, yearnum, 1), cape_annual, 0, 0)
 
    copy_VarCoords(u_annual(1,:,:), u_rc)
    copy_VarCoords(v_annual(1,:,:), v_rc)
@@ -204,7 +204,7 @@ do i = 0,3
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
-  res@cnFillPalette="CBR_coldhot"
+  res@cnFillPalette ="CBR_coldhot"
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -266,25 +266,30 @@ do i = 0,3
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
 
-  res@gsnLeftString  = "925 hPa Divergence trend"
+  res@gsnLeftString  = season(i)+"-Divergence trend"
   plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,d_rc ,res)
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -2.0
   ; res@cnMaxLevelValF       =   8.0
   ; res@cnLevelSpacingF      =  2.0
-    res@cnFillPalette  = "ViBlGrWhYeOrRe"
+    res2 = res 
+    res2@cnFillPalette  = "ViBlGrWhYeOrRe"
 
-    res@gsnSpreadColors      = True               ; use full color map
-    res@gsnSpreadColorStart  = 40              ; start at color 17
-    res@gsnSpreadColorEnd    = 100                ; end at color 200
+    res2@gsnSpreadColors      = True               ; use full color map
+    res2@gsnSpreadColorStart  = 40              ; start at color 17
+    res2@gsnSpreadColorEnd    = 100                ; end at color 200
 
-    res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res@cnMinLevelValF        = -100         ; set min contour level
-    res@cnMaxLevelValF        = 200          ; set max contour level
-    res@cnLevelSpacingF       = 25          ; set contour interval
+    res2@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res2@cnMinLevelValF        = -100.0        ; set min contour level
+    res2@cnMaxLevelValF        = 200.0          ; set max contour level
+    res2@cnLevelSpacingF       = 25.0          ; set contour interval
 
-  res@gsnLeftString  = "Convective available potential energy trend"
-  plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res)
+  res@gsnLeftString  = season(i)+"-Convective available potential energy trend"
+  plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res2)
+  ; delete(res@cnFillPalette)
+  ; delete(res@gsnSpreadColorStart)
+  ; delete(res@gsnSpreadColorEnd)
+  ;  res@gsnSpreadColors      = False               ; use full color map
  
 
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    

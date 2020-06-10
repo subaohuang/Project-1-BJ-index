@@ -53,7 +53,7 @@ begin
     h = h-1 ;;;考虑到数组index要减1  
 
     if season.ne."DJF" then
-        do i =0,32,1
+        do i =0,dim(0)/12-2,1
           total_annual_test(i+1,:,:) =  dim_sum_n((total_month(h+i*12:h+2+i*12,:,:)*weight1_3d),0) + dim_sum_n(total_month(h+(i+1)*12:h+2+(i+1)*12,:,:)*weight2_3d,0) + \
                                   dim_sum_n(total_month(h+3+i*12:(i+1)*12-1,:,:),0) +  dim_sum_n(total_month((i+1)*12:h-1+(i+1)*12,:,:),0)
         end do    
@@ -64,7 +64,7 @@ begin
       DT12 = total_annual_test
       DT1 = DT12
       DT2 = DT12
-      do i =0,31,1
+      do i =0,dim(0)/12-3,1
           DT12(i+1,:,:) = 0.5*total_month(i*12+11,:,:) + 0.5*total_month((i+1)*12+11,:,:) + dim_sum_n(total_month((i+1)*12:(i+1)*12+10,:,:),0)
           DT1(i+1,:,:) = 0.5*total_month((i+1)*12,:,:) + 0.5*total_month((i+2)*12,:,:) + dim_sum_n(total_month((i+1)*12+1:(i+1)*12+11,:,:),0)
           DT2(i+1,:,:) = 0.5*total_month((i+1)*12+1,:,:) + 0.5*total_month((i+2)*12+1,:,:) + dim_sum_n(total_month((i+1)*12+2:(i+1)*12+11,:,:),0) + total_month((i+2)*12,:,:)
@@ -76,6 +76,28 @@ begin
 
 return total_annual_test
 end    
+
+function  wgt_avg(total_month)
+begin
+    weight1 = ispan(1,12,1)*1.0
+    weight1 = (2*weight1-1)/24
+
+    weight2 = ispan(1,12,1)*1.0
+    weight2 = (25-2*weight2)/24
+
+    dim = dimsizes(total_month)
+    total_annual_test = new((/dim(0)/12,dim(1),dim(2)/),"float")
+    total_annual_test@_FillValue = default_fillvalue("float")
+    printVarSummary(total_annual_test)
+    
+    weight1_3d = conform_dims((/12,dim(1),dim(2)/), weight1,0 )
+    weight2_3d = conform_dims((/12,dim(1),dim(2)/), weight2,0 )
+    do i =0,dim(0)/12-2,1
+      total_annual_test(i+1,:,:) = dim_sum_n(total_month(i*12:(i+1)*12-1,:,:)*weight1_3d,0) + dim_sum_n(total_month((i+1)*12:(i+2)*12-1,:,:)*weight2_3d,0)
+    end do    
+return total_annual_test
+end   
+
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
@@ -103,7 +125,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "SON"
+ season = "DJF"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -381,7 +403,7 @@ begin
 
     total_annual = (/wgt_annual(total,season)/)
     printVarSummary(total_annual)
-    total_annual = (/dT/)
+   
 
 
        ; printMinMax(total_ocean_annual, 1)
@@ -398,108 +420,67 @@ begin
 
 
 
-print("*******开始计算趋势系数*****************")
+print("*******开始计算平均值，相较于年平均的气候态来说*****************")
 ; ;;;calculate correlation coef
 ;       lhtfl_annual = lhtfl_annual/(365*86400)
 ;       shtfl_annual = shtfl_annual/(365*86400)
 ;       nswrs_annual = nswrs_annual/(365*86400)
 ;       nlwrs_annual = nlwrs_annual/(365*86400)
-; ;;;
+;;;
 
 ;;;
     ;;;大气
-    r_lh =  regCoef_n(ispan(1, yearnum, 1), lhtfl_annual, 0, 0)
-    r_sh   = regCoef_n(ispan(1, yearnum, 1), shtfl_annual, 0, 0)
+   
 
-    r_ns =  regCoef_n(ispan(1, yearnum, 1), nswrs_annual, 0, 0)
-    r_nl   = regCoef_n(ispan(1, yearnum, 1), nlwrs_annual, 0, 0)
-    r_total = regCoef_n(ispan(1, yearnum, 1), total_annual, 0, 0)
+    r_lh =  dim_avg_n_Wrap(lhtfl_annual, 0) 
+    r_sh   = dim_avg_n_Wrap(shtfl_annual, 0) 
+
+    r_ns =  dim_avg_n_Wrap(nswrs_annual, 0) 
+    r_nl   = dim_avg_n_Wrap(nlwrs_annual, 0)
+    r_total = dim_avg_n_Wrap(total_annual, 0)
 
     copy_VarCoords(ssta_annual(0,:,:), r_lh)
     copy_VarCoords(ssta_annual(0,:,:), r_sh)
     copy_VarCoords(ssta_annual(0,:,:), r_ns)
     copy_VarCoords(ssta_annual(0,:,:), r_nl)
     copy_VarCoords(ssta_annual(0,:,:), r_total)
+    ;;;
+
+    lhtfl_avg = dim_avg_n_Wrap(wgt_avg(lhtfl), 0)
+    shtfl_avg = dim_avg_n_Wrap(wgt_avg(shtfl), 0)
+    nswrs_avg = dim_avg_n_Wrap(wgt_avg(nswrs), 0)
+    nlwrs_avg = dim_avg_n_Wrap(wgt_avg(nlwrs), 0)
+    total_avg = dim_avg_n_Wrap(wgt_avg(total), 0)
+    
+
+    r_lh = (/r_lh - lhtfl_avg/)
+    r_sh = (/r_sh - shtfl_avg/)
+    r_ns = (/r_ns - nswrs_avg/)
+    r_nl = (/r_nl - nlwrs_avg/)
+    r_total = (/r_total - total_avg/)
 
     ;;;
 
     ;;;海洋
-    r_hadv =  regCoef_n(ispan(1, yearnum, 1), hadv_mean_annual, 0, 0)
-    r_vadv   = regCoef_n(ispan(1, yearnum, 1), vadv_mean_annual, 0, 0)
-    r_total_ocean   = regCoef_n(ispan(1, yearnum, 1), total_ocean_annual, 0, 0)    
+    r_hadv =  dim_avg_n_Wrap(hadv_mean_annual, 0)
+    r_vadv   = dim_avg_n_Wrap(vadv_mean_annual, 0)
+   
 
     copy_VarCoords(hadv_mean(0,:,:), r_hadv)
     copy_VarCoords(vadv_mean(0,:,:), r_vadv)
-    copy_VarCoords(vadv_mean(0,:,:), r_total_ocean)
+
+
+
+    hadv_mean_avg = dim_avg_n_Wrap(wgt_avg(hadv_mean),0)
+    vadv_mean_avg = dim_avg_n_Wrap(wgt_avg(vadv_mean), 0)
+    
+    r_hadv = (/r_hadv - hadv_mean_avg/)
+    r_vadv = (/r_vadv - vadv_mean_avg/)
+    
+    r_total_ocean = r_vadv
+  
+
     ;;;;;
-
-    r_lh = (/r_lh*yearnum/)
-    r_sh = (/r_sh*yearnum/)
-    r_ns = (/r_ns*yearnum/)
-    r_nl = (/r_nl*yearnum/)
-    r_total = (/r_total*yearnum/)
-    
-    r_hadv = (/r_hadv*yearnum/)
-    r_vadv = (/r_vadv*yearnum/)
-    r_total_ocean = (/r_total_ocean*yearnum/)
-
-    ; r_total_mean = avg(dim_avg_n_Wrap(r_total({0:15},{110:155}), 1))
-    ; r_total_ocean_mean = avg(dim_avg_n_Wrap(r_total_ocean({0:15},{110:155}), 1))
-    
-    r_lh_scs =  avg(dim_avg_n_Wrap(r_lh({0:15},{110:155}), 1))
-    r_sh_scs =  avg(dim_avg_n_Wrap(r_sh({0:15},{110:155}), 1))
-    r_ns_scs =  avg(dim_avg_n_Wrap(r_ns({0:15},{110:155}), 1))
-    r_nl_scs =  avg(dim_avg_n_Wrap(r_nl({0:15},{110:155}), 1))
-
-    ; print(r_lh_scs)
-    ; print(r_sh_scs)
-    ; print(r_ns_scs)
-    ; print(r_nl_scs)
-    ; exit() 
-
-
-
-
-
-;;;;
-
-print("*******显著性检验*****************")
-
-;;;t test 
-   prob_lh= rc_test(r_lh)
-   prob_sh= rc_test(r_sh)
-   prob_nl= rc_test(r_nl)
-   prob_ns= rc_test(r_ns)
-   prob_total= rc_test(r_total)
-
-   prob_hadv= rc_test(r_hadv)
-   prob_vadv= rc_test(r_vadv)
-   prob_total_ocean = rc_test(r_total_ocean)
-   
-
-
-  copy_VarCoords(r_lh, prob_lh)
-  copy_VarCoords(r_lh, prob_sh)
-  copy_VarCoords(r_lh, prob_nl)
-  copy_VarCoords(r_lh, prob_ns)
-  copy_VarCoords(r_total, prob_total)
-
-  copy_VarCoords(r_hadv, prob_hadv)
-  copy_VarCoords(r_vadv, prob_vadv)
-  copy_VarCoords(r_total_ocean, prob_total_ocean)
-  
-  
- ;  printVarSummary(prob_p1)
- ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
- ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
- ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
- ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
- ; prob_p5 = where(prob_p5.eq.0, 2, prob_p5)
- ; prob_p6 = where(prob_p6.eq.0, 2, prob_p6)
- ; prob_p7 = where(prob_p7.eq.0, 2, prob_p7)
- ; prob_p8 = where(prob_p8.eq.0, 2, prob_p8)
-;;;;
-
 
 print("*********开始画图********")
 
@@ -508,7 +489,7 @@ print("*********开始画图********")
 ;画图
 ;;***************************************************************
   ; wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt-mld")
-  wks   = gsn_open_wks("pdf", "混合层温度变化的季节趋势"+season)
+  wks   = gsn_open_wks("pdf", "混合层通量的长时间季节平均相较于季节的偏差"+season+"test2")
 
   res=True
   res@gsnFrame=False
@@ -554,61 +535,57 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
 
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -12.0
-  ; res@cnMaxLevelValF       =   12.0
-  ; res@cnLevelSpacingF      =  1.0
-
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -.12
-  res@cnMaxLevelValF       =   .12
-  res@cnLevelSpacingF      =  0.01
-
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -120
-  ; res@cnMaxLevelValF       =   120
-    ; res@cnLevelSpacingF      =  10
-   
-
+  res@cnMinLevelValF       =   -0.12
+  res@cnMaxLevelValF       =   0.12
+  res@cnLevelSpacingF      =  0.02
   plot = new(8,graphic)
 
   res@gsnLeftString = "Net Heat Flux"
    
   plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
-  
   res@gsnLeftString = "Ocean advction"
-     res@cnMinLevelValF       =   -12.0
-    res@cnMaxLevelValF       =   12.0
-    res@cnLevelSpacingF      =  1.0
   plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Ocean horizonal advction"
-    ;  res@cnMinLevelValF       =   -12.0
-    ; res@cnMaxLevelValF       =   20.0
-    ; res@cnLevelSpacingF      =  2.0
+    res@cnMinLevelValF       =   -.2
+    res@cnMaxLevelValF       =   0.2
+    res@cnLevelSpacingF      =  0.02
   plot(2) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res) 
   res@gsnLeftString = "Ocean Vertical advction"
+  
+  res@cnMinLevelValF       =   -1.2
+  res@cnMaxLevelValF       =   1.2
+  res@cnLevelSpacingF      =  0.2
   plot(3) = gsn_csm_contour_map(wks, r_vadv, res)
-
- res@cnMinLevelValF       =   -20.0
-    res@cnMaxLevelValF       =   20.0
-    res@cnLevelSpacingF      =  2.0
-
+ 
   res@gsnLeftString = "Latent heat flux"
+   res@cnMinLevelValF       =   -0.2
+  res@cnMaxLevelValF       =   0.2
+  res@cnLevelSpacingF      =  0.02
+  ; res@cnFillPalette="MPL_PuBu"
+  ; res@gsnSpreadColorStart = 110
+  ; res@gsnSpreadColorEnd = 3
   plot(4) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Sensible heat flux"
-   res@cnMinLevelValF       =   -4.0
-    res@cnMaxLevelValF       =   4.0
-    res@cnLevelSpacingF      =  .5
+   res@cnMinLevelValF       =   -0.02
+  res@cnMaxLevelValF       =   0.02
+  res@cnLevelSpacingF      =  0.002
+
   plot(5) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Longwave radiation"
-    res@cnMinLevelValF       =   -10.0
-    res@cnMaxLevelValF       =   10.0
-    res@cnLevelSpacingF      =  1.0
+    res@cnMinLevelValF       =   -0.2
+  res@cnMaxLevelValF       =   0.2
+  res@cnLevelSpacingF      =  0.02
+
   plot(6) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
   res@gsnLeftString = "Net Shortwave radiation"
-    res@cnMinLevelValF       =   -30.0
-    res@cnMaxLevelValF       =   30.0
-    res@cnLevelSpacingF      =  2.0
+    res@cnMinLevelValF       =   -0.4
+  res@cnMaxLevelValF       =   0.8
+  res@cnLevelSpacingF      =  0.1
+
+    ; res@cnFillPalette="NCV_jaisnd"
+    ; res@gsnSpreadColorStart = 130
+    ; res@gsnSpreadColorEnd = 253
   plot(7) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
 
 
@@ -655,52 +632,7 @@ print("*********开始画图********")
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
-    ;;;打点
-    res_pro=True
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.1      ; set contour spacing
-
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-
-    iplot=new(8,graphic)
-
-    iplot(0) = gsn_csm_contour(wks,prob_total({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(1) = gsn_csm_contour(wks,prob_total_ocean({lat1:lat2},{lon1:lon2}) ,res_pro)
-    iplot(2) = gsn_csm_contour(wks,prob_hadv({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(3) = gsn_csm_contour(wks,prob_vadv,res_pro)
-    iplot(4) = gsn_csm_contour(wks,prob_lh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(5) = gsn_csm_contour(wks,prob_sh({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(6) = gsn_csm_contour(wks,prob_nl({lat1:lat2},{lon1:lon2}),res_pro)
-    iplot(7) = gsn_csm_contour(wks,prob_ns({lat1:lat2},{lon1:lon2}),res_pro)
-
- 
-
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-
-    do i = 0,7
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
-    end do
-
-    ;;;  
-    do i = 0,7
-      overlay(plot(i), iplot(i))
-    end do 
+   
 
   pres = True
   ; pres@gsnPanelLabelBar  = True

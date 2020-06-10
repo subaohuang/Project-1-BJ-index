@@ -38,7 +38,7 @@ begin
 
 begin
   ;;;choose season
-   season = "MAM"  
+   season = "DJF"  
  
 
   ;;;read era data
@@ -391,6 +391,12 @@ begin
     ;;;
     
     qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+
+    qu_dyna_rc = where(prob_qu_dyna.le.0.1.or.prob_qv_dyna.le.0.1, qu_dyna_rc,qu_rc@_FillValue)
+    qu_thermaldyna_rc = where(prob_qu_thermaldyna.le.0.1.or.prob_qv_thermaldyna.le.0.1, qu_thermaldyna_rc,qu_rc@_FillValue)
+    qu_quad_rc = where(prob_qu_quad.le.0.1.or.prob_qv_quad.le.0.1, qu_quad_rc,qu_rc@_FillValue)
+    qu_eddy_rc = where(prob_qu_eddy.le.0.1.or.prob_qv_eddy.le.0.1, qu_eddy_rc,qu_rc@_FillValue)
+
     ; qv_rc = where(prob_qv.le.0.1.or.prob_qu.le.0.1, qv_rc,qv_rc@_FillValue)
     
 
@@ -471,7 +477,7 @@ begin
     res@vcRefMagnitudeF          = 1000.0
   plot(1)=gsn_csm_vector_scalar_map(wks,qu_dyna_rc ,qv_dyna_rc, q_dyna_rc, res)
   res@gsnLeftString = "Thermaldynamic component"
-    res@vcRefMagnitudeF          = 200.0
+    res@vcRefMagnitudeF          = 500.0
   plot(2)=gsn_csm_vector_scalar_map(wks,qu_thermaldyna_rc ,qv_thermaldyna_rc, q_thermaldyna_rc, res)
   res@gsnLeftString = "Quadratic component"
     res@vcRefMagnitudeF          = 30.0
