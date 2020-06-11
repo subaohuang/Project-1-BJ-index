@@ -257,8 +257,8 @@ print("*********开始画图********")
   ; res@cnFillPalette = "NCV_jaisnd"
    res@cnFillPalette = "BlueWhiteOrangeRed"
 
-  res@gsnSpreadColorStart = 130
-  res@gsnSpreadColorEnd = 253
+  ; res@gsnSpreadColorStart = 130
+  ; res@gsnSpreadColorEnd = 253
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -299,13 +299,13 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   0.00
-  res@cnMaxLevelValF       =   0.06
-  res@cnLevelSpacingF      =  0.005
+  ; res@cnMinLevelValF       =   0.00
+  ; res@cnMaxLevelValF       =   0.06
+  ; res@cnLevelSpacingF      =  0.005
 
-    res@cnMinLevelValF       =   -0.01
-  res@cnMaxLevelValF       =   0.01
-  res@cnLevelSpacingF      =  0.001
+    res@cnMinLevelValF       =   -0.02
+    res@cnMaxLevelValF       =   0.02
+    res@cnLevelSpacingF      =  0.005
 
 
   res@cnInfoLabelOn = False

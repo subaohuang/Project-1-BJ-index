@@ -77,7 +77,7 @@ begin
     f4=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_wt_mn_1980-2015_chazhi.nc", "r")   
     f5=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_temp_mn_1980-2015_chazhi.nc", "r")
     ; f6=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_mlt_mn_1980-2015_chazhi.nc", "r") 
-     f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_1.0.nc", "r")  
+     f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_0.8.nc", "r")  
 
   
 
@@ -198,7 +198,7 @@ printVarSummary(wt)
   
    ;;δ(WT)
     ; f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
-    f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_1.0.nc", "r")
+    f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc", "r")
 
     wt_mlt = f1->wt_mlt
     T_mlt = f1->T_mlt_diff
@@ -378,13 +378,13 @@ printVarSummary(wt)
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-1.0-define")
+  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-0.8-define")
 
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="MPL_RdYlBu"
+  res@cnFillPalette="cmp_b2r"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -403,8 +403,6 @@ printVarSummary(wt)
   res@mpMaxLatF             = 15
   res@mpMinLonF             = 110
   res@mpMaxLonF             = 155
-
-
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -451,9 +449,9 @@ printVarSummary(wt)
   plot(2) = gsn_csm_contour_map(wks, T_clm, res)
 
   res@gsnLeftString = "dT"
-  res@cnMinLevelValF       =   -0.4
+  res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.0
-  res@cnLevelSpacingF      =  0.05
+  res@cnLevelSpacingF      =  0.1
   plot(3) = gsn_csm_contour_map(wks, T_delta, res)
    
   ;;;;;draw wind stress

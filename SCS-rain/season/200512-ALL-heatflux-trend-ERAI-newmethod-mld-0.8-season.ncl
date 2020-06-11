@@ -44,7 +44,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "JJA"
+ season = "DJF"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -269,10 +269,10 @@ begin
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
     total = lhtfl
-    ; total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
-    ; total = (/total/coef/)
+    total = (/lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen/)
+    total = (/total/coef/)     ;;;;;; ℃/year
 
-    total = lhtfl + shtfl  + nswrs + nlwrs 
+    ; total = lhtfl + shtfl  + nswrs + nlwrs 
 
 
 
@@ -283,8 +283,6 @@ begin
     nswrs_pen_annual = month_to_season(nswrs_pen, season)
 
     
-
-
     total_annual = lhtfl_annual
     total_annual  = month_to_season(total, season)
     printVarSummary(lhtfl_annual)
@@ -308,10 +306,10 @@ begin
 
 print("*******开始计算趋势系数*****************")
 ;;;calculate correlation coef
-      lhtfl_annual = lhtfl_annual/(365*86400)
-      shtfl_annual = shtfl_annual/(365*86400)
-      nswrs_annual = nswrs_annual/(365*86400)
-      nlwrs_annual = nlwrs_annual/(365*86400)
+      lhtfl_annual = lhtfl_annual/(365*86400)   ;;; w/m^2
+      shtfl_annual = shtfl_annual/(365*86400)   ;;; w/m^2
+      nswrs_annual = nswrs_annual/(365*86400)   ;;; w/m^2
+      nlwrs_annual = nlwrs_annual/(365*86400)   ;;; w/m^2
 ;;;
 
 ;;;
@@ -415,7 +413,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"no_mld")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season)
 
   res=True
   res@gsnFrame=False

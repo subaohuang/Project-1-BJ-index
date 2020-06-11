@@ -98,6 +98,22 @@ begin
 return total_annual_test
 end   
 
+function  wgt_get_season_ocean(hadv_mean,vadv_mean,season)
+begin   
+       hadv_mean_annual = month_to_season(hadv_mean, season)
+       vadv_mean_annual = month_to_season(vadv_mean, season)
+       
+       hadv_mean_annual = (/wgt_annual(hadv_mean,season)/)
+       vadv_mean_annual = (/wgt_annual(vadv_mean,season)/)
+
+       total_ocean_annual = vadv_mean_annual
+       total_ocean_annual = hadv_mean_annual(:,{0:15},{110:155}) + vadv_mean_annual
+
+       total_ocean_annual&lat@units = "degrees_north"
+       total_ocean_annual&lon@units = "degrees_east"
+return total_ocean_annual
+end   
+
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
@@ -260,22 +276,17 @@ begin
 
     f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc", "r")
        
-     wt_mlt = f1->wt_mlt
-     T_mlt = f1->T_mlt
+    wt_mlt = f1->wt_mlt
+    T_mlt = f1->T_mlt
 
 
-     vadv  = mlt_scs
-     vadv = wt_mlt*(T_mean(:,{x1:x2},{y1:y2}) - T_mlt)/mlt_scs   ;;;k/s
+    vadv  = mlt_scs
+    vadv = wt_mlt*(T_mean(:,{x1:x2},{y1:y2}) - T_mlt)/mlt_scs   ;;;k/s
 
     vadv = (/-1*vadv/)
-    printVarSummary(vadv)
-
-    ; ;;;convert to units degree ℃/year
-    ;   hadv =365*86400*hadv
-    ;   vadv =365*86400*vadv
-    ; ;;;
+    printVarSummary(vadv);
     
-    ;;;convert to units degree ℃/month
+    ;;;convert the units of k/s to  degree ℃/month
       hadv =30*86400*hadv
       vadv =30*86400*vadv
     ;;;
@@ -293,24 +304,16 @@ begin
     vadv_mean&lon@units = "degrees_east"
  
 
-
     ;;;年平均
-       ; hadv_mean = (/rmMonAnnCycTLL(hadv_mean)/)
-       ; vadv_mean = (/rmMonAnnCycTLL(vadv_mean)/)
-
-       hadv_mean_annual = month_to_season(hadv_mean, season)
-       vadv_mean_annual = month_to_season(vadv_mean, season)
+            
+       total_ocean_mam_annual = wgt_get_season_ocean(hadv_mean,vadv_mean,"MAM")
+       total_ocean_jja_annual = wgt_get_season_ocean(hadv_mean,vadv_mean,"JJA")
+       total_ocean_son_annual = wgt_get_season_ocean(hadv_mean,vadv_mean,"SON")
+       total_ocean_djf_annual = wgt_get_season_ocean(hadv_mean,vadv_mean,"DJF")
        
-       hadv_mean_annual = (/wgt_annual(hadv_mean,season)/)
-       vadv_mean_annual = (/wgt_annual(vadv_mean,season)/)
-
-
-
-       total_ocean_annual = vadv_mean_annual
-       total_ocean_annual = hadv_mean_annual(:,{x1:x2},{y1:y2}) + vadv_mean_annual
-
-       total_ocean_annual&lat@units = "degrees_north"
-       total_ocean_annual&lon@units = "degrees_east"
+       total_ocean = vadv_mean
+       total_ocean = (/hadv_mean(:,{x1:x2},{y1:y2}) + vadv_mean/)
+       total_ocean_avg = dim_avg_n_Wrap(wgt_avg(total_ocean),0)
     ;;;
 
 ;;;read NCEP-NCAR heat flux data
@@ -323,7 +326,6 @@ begin
   
     
     lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
-       ; lhtfl = f3->lhtfl(timeind,:,:)
     shtfl = f3->shtfl(timeind,{lat1:lat2},{lon1:lon2})
     nswrs = f3->nswrs(timeind,{lat1:lat2},{lon1:lon2})
     nlwrs = f3->nlwrs(timeind,{lat1:lat2},{lon1:lon2})
@@ -335,8 +337,6 @@ begin
     
     printVarSummary(lhtfl)
     printVarSummary(shtfl)
-
-
     ;;;nswrs_pen 
      R = 0.58
      L1 = 0.35
@@ -358,18 +358,8 @@ begin
       nswrs_pen = 30*86400*nswrs_pen  
     ;;;;
 
-
-      
-    ;;;
-    ; lhtfl  = (/rmMonAnnCycTLL(lhtfl)/)
-    ; shtfl  = (/rmMonAnnCycTLL(shtfl)/)
-    ; nswrs  = (/rmMonAnnCycTLL(nswrs)/)
-    ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
-    ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
-
     total = lhtfl
-    total = lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen
-
+    total = (/lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen/)
 
     total = (/total/coef/)
 
@@ -379,118 +369,81 @@ begin
     nswrs= (/nswrs/coef/)
     nlwrs = (/nlwrs/coef/)
 
+    ; lhtfl_annual = month_to_season(lhtfl, season)
+    ; shtfl_annual = month_to_season(shtfl, season)
+    ; nswrs_annual = month_to_season(nswrs, season)
+    ; nlwrs_annual = month_to_season(nlwrs, season)
+    ; nswrs_pen_annual = month_to_season(nswrs_pen, season)
+
+    ; lhtfl_annual = wgt_annual(lhtfl,season)
+    ; shtfl_annual = wgt_annual(shtfl,season)
+    ; nswrs_annual = wgt_annual(nswrs,season)
+    ; nlwrs_annual = wgt_annual(nlwrs,season)
+    ; nswrs_pen_annual = wgt_annual(nswrs_pen,season)
+    ; total_annual = lhtfl_annual
 
 
-
-    lhtfl_annual = month_to_season(lhtfl, season)
-    shtfl_annual = month_to_season(shtfl, season)
-    nswrs_annual = month_to_season(nswrs, season)
-    nlwrs_annual = month_to_season(nlwrs, season)
-    nswrs_pen_annual = month_to_season(nswrs_pen, season)
-
-    lhtfl_annual = wgt_annual(lhtfl,season)
-    shtfl_annual = wgt_annual(shtfl,season)
-    nswrs_annual = wgt_annual(nswrs,season)
-    nlwrs_annual = wgt_annual(nlwrs,season)
-    nswrs_pen_annual = wgt_annual(nswrs_pen,season)
+    ;;;total season
+    total_mam_annual  = month_to_season(total, "MAM")
+    total_jja_annual  = month_to_season(total, "JJA")
+    total_son_annual  = month_to_season(total, "SON")
+    total_djf_annual  = month_to_season(total, "DJF")
 
 
-    total_annual = lhtfl_annual
-    total_annual  = month_to_season(total, season)
-    printVarSummary(lhtfl_annual)
-
-    total_annual = (/wgt_annual(total,season)/)
-    printVarSummary(total_annual)
-   
-
-
-       ; printMinMax(total_ocean_annual, 1)
-       ; printMinMax(total_annual, 1)
-       ; printMinMax(hadv_mean_annual, 1)
-       ; printMinMax(vadv_mean_annual, 1)
-
-    total_ocean_mean = dim_avg_n_Wrap(total_ocean_annual, 0)
- ; total_mean = dim_avg_n_Wrap(total_annual, 0)
- ; total = total_ocean_mean + total_mean
-
-;;;
+    total_mam_annual= (/wgt_annual(total,"MAM")/)
+    total_jja_annual = (/wgt_annual(total,"JJA")/)
+    total_son_annual = (/wgt_annual(total,"SON")/)
+    total_djf_annual = (/wgt_annual(total,"DJF")/)
+    ;;;
 
 
 
 
 print("*******开始计算平均值，相较于年平均的气候态来说*****************")
-; ;;;calculate correlation coef
-;       lhtfl_annual = lhtfl_annual/(365*86400)
-;       shtfl_annual = shtfl_annual/(365*86400)
-;       nswrs_annual = nswrs_annual/(365*86400)
-;       nlwrs_annual = nlwrs_annual/(365*86400)
-;;;
 
 ;;;
-    ;;;大气
-   
+    r_mam_total = dim_avg_n_Wrap(total_mam_annual, 0) 
+    r_jja_total = dim_avg_n_Wrap(total_jja_annual, 0) 
+    r_son_total = dim_avg_n_Wrap(total_son_annual, 0) 
+    r_djf_total = dim_avg_n_Wrap(total_djf_annual, 0) 
 
-    r_lh =  dim_avg_n_Wrap(lhtfl_annual, 0) 
-    r_sh   = dim_avg_n_Wrap(shtfl_annual, 0) 
-
-    r_ns =  dim_avg_n_Wrap(nswrs_annual, 0) 
-    r_nl   = dim_avg_n_Wrap(nlwrs_annual, 0)
-    r_total = dim_avg_n_Wrap(total_annual, 0)
-
-    copy_VarCoords(ssta_annual(0,:,:), r_lh)
-    copy_VarCoords(ssta_annual(0,:,:), r_sh)
-    copy_VarCoords(ssta_annual(0,:,:), r_ns)
-    copy_VarCoords(ssta_annual(0,:,:), r_nl)
-    copy_VarCoords(ssta_annual(0,:,:), r_total)
-    ;;;
-
-    lhtfl_avg = dim_avg_n_Wrap(wgt_avg(lhtfl), 0)
-    shtfl_avg = dim_avg_n_Wrap(wgt_avg(shtfl), 0)
-    nswrs_avg = dim_avg_n_Wrap(wgt_avg(nswrs), 0)
-    nlwrs_avg = dim_avg_n_Wrap(wgt_avg(nlwrs), 0)
     total_avg = dim_avg_n_Wrap(wgt_avg(total), 0)
-    
 
-    r_lh = (/r_lh - lhtfl_avg/)
-    r_sh = (/r_sh - shtfl_avg/)
-    r_ns = (/r_ns - nswrs_avg/)
-    r_nl = (/r_nl - nlwrs_avg/)
-    r_total = (/r_total - total_avg/)
+    
+    ; total_avg = (/(r_mam_total + r_jja_total + r_son_total +r_djf_total)/4.0/)
+
+
+    r_mam_total = (/r_mam_total - total_avg/)
+    r_jja_total = (/r_jja_total - total_avg/)
+    r_son_total = (/r_son_total - total_avg/)
+    r_djf_total = (/r_djf_total - total_avg/)
+
+   
 
     ;;;
 
     ;;;海洋
-    r_hadv =  dim_avg_n_Wrap(hadv_mean_annual, 0)
-    r_vadv   = dim_avg_n_Wrap(vadv_mean_annual, 0)
-   
-
-    copy_VarCoords(hadv_mean(0,:,:), r_hadv)
-    copy_VarCoords(vadv_mean(0,:,:), r_vadv)
+    r_mam_total_ocean = dim_avg_n_Wrap(total_ocean_mam_annual, 0) 
+    r_jja_total_ocean = dim_avg_n_Wrap(total_ocean_jja_annual, 0) 
+    r_son_total_ocean = dim_avg_n_Wrap(total_ocean_son_annual, 0) 
+    r_djf_total_ocean = dim_avg_n_Wrap(total_ocean_djf_annual, 0)
 
 
-
-    hadv_mean_avg = dim_avg_n_Wrap(wgt_avg(hadv_mean),0)
-    vadv_mean_avg = dim_avg_n_Wrap(wgt_avg(vadv_mean), 0)
+    ; total_ocean_avg = (/(r_mam_total_ocean + r_jja_total_ocean + r_son_total_ocean +r_djf_total_ocean)/4.0/)
     
-    r_hadv = (/r_hadv - hadv_mean_avg/)
-    r_vadv = (/r_vadv - vadv_mean_avg/)
-    
-    printVarSummary(r_hadv)
-    printVarSummary(r_vadv)
-    r_total_ocean = r_vadv
-    r_total_ocean = (/r_vadv + r_hadv({x1:x2},{y1:y2})/)
-  
-
-    ;;;;;
+    r_mam_total_ocean  = (/r_mam_total_ocean - total_ocean_avg/)
+    r_jja_total_ocean  = (/r_jja_total_ocean - total_ocean_avg/)
+    r_son_total_ocean  = (/r_son_total_ocean - total_ocean_avg/)
+    r_djf_total_ocean  = (/r_djf_total_ocean - total_ocean_avg/)
+    ;;
 
 print("*********开始画图********")
 
-    
 ;;**************************************************************
 ;画图
 ;;***************************************************************
   ; wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt-mld")
-  wks   = gsn_open_wks("pdf", "混合层通量的长时间季节平均相较于季节的偏差"+season+"test2")
+  wks   = gsn_open_wks("pdf", "混合层大气辐射通量和海洋通量的长时间季节平均相较于年平均的偏差-四季")
 
   res=True
   res@gsnFrame=False
@@ -502,15 +455,12 @@ print("*********开始画图********")
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn= True
+  res@lbLabelBarOn= False
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
   res@mpFillDrawOrder = "PostDraw"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =90
-  ; res@mpMaxLonF             = 160
+
    lat1 = 0
    lat2 = 15
    lon1 = 110
@@ -540,58 +490,30 @@ print("*********开始画图********")
   res@cnMinLevelValF       =   -0.12
   res@cnMaxLevelValF       =   0.12
   res@cnLevelSpacingF      =  0.02
+  res@gsnRightString  = ""
   plot = new(8,graphic)
 
-  res@gsnLeftString = "Net Heat Flux"
+  res@gsnLeftString = "MAM Atm forcing"
+  plot(0) = gsn_csm_contour_map(wks, r_mam_total, res)
+  res@gsnLeftString = "MAM Ocean Forcing"
+  plot(1) = gsn_csm_contour_map(wks, r_mam_total_ocean, res)
+
+
+  res@gsnLeftString = "JJA Atm forcing"
+  plot(2) = gsn_csm_contour_map(wks, r_jja_total, res)
+  res@gsnLeftString = "JJA Ocean Forcing"
+  plot(3) = gsn_csm_contour_map(wks, r_jja_total_ocean, res)
+  
+  res@gsnLeftString = "SON Atm forcing"
+  plot(4) = gsn_csm_contour_map(wks, r_son_total, res)
+  res@gsnLeftString = "SON Ocean Forcing"
+  plot(5) = gsn_csm_contour_map(wks, r_son_total_ocean, res)
+  
    
-  plot(0) = gsn_csm_contour_map(wks, r_total({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Ocean advction"
-  plot(1) = gsn_csm_contour_map(wks, r_total_ocean({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Ocean horizonal advction"
-    res@cnMinLevelValF       =   -0.12
-    res@cnMaxLevelValF       =   0.12
-    res@cnLevelSpacingF      =  0.02
-  plot(2) = gsn_csm_contour_map(wks, r_hadv({lat1:lat2},{lon1:lon2}), res) 
-  res@gsnLeftString = "Ocean Vertical advction"
-  
-  res@cnMinLevelValF       =   -0.12
-  res@cnMaxLevelValF       =   0.12
-  res@cnLevelSpacingF      =  0.02
-  plot(3) = gsn_csm_contour_map(wks, r_vadv, res)
- 
-  res@gsnLeftString = "Latent heat flux"
-   res@cnMinLevelValF       =   -0.2
-  res@cnMaxLevelValF       =   0.2
-  res@cnLevelSpacingF      =  0.02
-  ; res@cnFillPalette="MPL_PuBu"
-  ; res@gsnSpreadColorStart = 110
-  ; res@gsnSpreadColorEnd = 3
-  plot(4) = gsn_csm_contour_map(wks, r_lh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Sensible heat flux"
-   res@cnMinLevelValF       =   -0.02
-  res@cnMaxLevelValF       =   0.02
-  res@cnLevelSpacingF      =  0.002
-
-  plot(5) = gsn_csm_contour_map(wks, r_sh({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Longwave radiation"
-    res@cnMinLevelValF       =   -0.2
-  res@cnMaxLevelValF       =   0.2
-  res@cnLevelSpacingF      =  0.02
-
-  plot(6) = gsn_csm_contour_map(wks, r_nl({lat1:lat2},{lon1:lon2}), res)
-  res@gsnLeftString = "Net Shortwave radiation"
-  res@cnMinLevelValF       =   -0.8
-  res@cnMaxLevelValF       =   0.8
-  res@cnLevelSpacingF      =  0.1
-
-    ; res@cnFillPalette="NCV_jaisnd"
-    ; res@gsnSpreadColorStart = 130
-    ; res@gsnSpreadColorEnd = 253
-  plot(7) = gsn_csm_contour_map(wks, r_ns({lat1:lat2},{lon1:lon2}), res)
-
-
-
-  
+  res@gsnLeftString = "DJF Atm forcing"
+  plot(6) = gsn_csm_contour_map(wks, r_djf_total, res)
+  res@gsnLeftString = "DJF Ocean Forcing"
+  plot(7) = gsn_csm_contour_map(wks, r_djf_total_ocean, res)
 
 
   ;;;添加赤道直线
@@ -633,10 +555,9 @@ print("*********开始画图********")
      plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
 
-   
 
   pres = True
-  ; pres@gsnPanelLabelBar  = True
+  pres@gsnPanelLabelBar  = True
   pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f","g","h"/)
 
   gsn_panel(wks, plot, (/4,2/), pres)
