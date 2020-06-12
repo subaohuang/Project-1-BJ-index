@@ -410,7 +410,7 @@ print("*******开始计算平均值，相较于年平均的气候态来说******
     total_avg = dim_avg_n_Wrap(wgt_avg(total), 0)
 
     
-    ; total_avg = (/(r_mam_total + r_jja_total + r_son_total +r_djf_total)/4.0/)
+    total_avg = (/(r_mam_total + r_jja_total + r_son_total +r_djf_total)/4.0/)
 
 
     r_mam_total = (/r_mam_total - total_avg/)
@@ -429,7 +429,7 @@ print("*******开始计算平均值，相较于年平均的气候态来说******
     r_djf_total_ocean = dim_avg_n_Wrap(total_ocean_djf_annual, 0)
 
 
-    ; total_ocean_avg = (/(r_mam_total_ocean + r_jja_total_ocean + r_son_total_ocean +r_djf_total_ocean)/4.0/)
+    total_ocean_avg = (/(r_mam_total_ocean + r_jja_total_ocean + r_son_total_ocean +r_djf_total_ocean)/4.0/)
     
     r_mam_total_ocean  = (/r_mam_total_ocean - total_ocean_avg/)
     r_jja_total_ocean  = (/r_jja_total_ocean - total_ocean_avg/)
@@ -443,7 +443,7 @@ print("*********开始画图********")
 ;画图
 ;;***************************************************************
   ; wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt-mld")
-  wks   = gsn_open_wks("pdf", "混合层大气辐射通量和海洋通量的长时间季节平均相较于年平均的偏差-四季")
+  wks   = gsn_open_wks("pdf", "混合层大气辐射通量和海洋通量的长时间季节平均相较于年平均的偏差-四季"+"test")
 
   res=True
   res@gsnFrame=False
@@ -496,6 +496,9 @@ print("*********开始画图********")
   res@gsnLeftString = "MAM Atm forcing"
   plot(0) = gsn_csm_contour_map(wks, r_mam_total, res)
   res@gsnLeftString = "MAM Ocean Forcing"
+  ; res@cnMinLevelValF       =   -0.5
+  ; res@cnMaxLevelValF       =   0.5
+  ; res@cnLevelSpacingF      =  0.05
   plot(1) = gsn_csm_contour_map(wks, r_mam_total_ocean, res)
 
 

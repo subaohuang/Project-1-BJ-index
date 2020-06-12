@@ -195,7 +195,8 @@ begin
     v = tofloat(v_r)
     wt = tofloat(wt_r)
     T = tofloat(T_r)
- 
+   
+
    copy_VarCoords(u_r, u) 
    copy_VarCoords(v_r, v)
    copy_VarCoords(wt_r, wt)
@@ -459,6 +460,9 @@ print("*******开始计算平均值，相较于年平均的气候态来说******
 
     r_eddy_annual = (/r_annual_dt({x1:x2},{y1:y2})  - total_avg({x1:x2},{y1:y2})  - total_ocean_avg/)
 
+    ;;;;r_eddy_annual
+    r_eddy_annual = (/(r_eddy_mam_total +r_eddy_jja_total + r_eddy_son_total + r_eddy_djf_total)/4.0/)
+
     r_eddy_mam_total = (/r_eddy_mam_total - r_eddy_annual/)
     r_eddy_jja_total = (/r_eddy_jja_total - r_eddy_annual/)
     r_eddy_son_total = (/r_eddy_son_total - r_eddy_annual/)
@@ -515,9 +519,9 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.12
-  res@cnMaxLevelValF       =   0.12
-  res@cnLevelSpacingF      =  0.02
+  res@cnMinLevelValF       =   -0.5
+  res@cnMaxLevelValF       =   0.5
+  res@cnLevelSpacingF      =  0.05
   res@gsnRightString  = ""
   plot = new(4,graphic)
 

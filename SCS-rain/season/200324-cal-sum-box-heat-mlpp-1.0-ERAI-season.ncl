@@ -49,19 +49,19 @@ begin
     
 
     h = h-1 ;;;考虑到数组index要减1    y1-y0 = d0 
-
+  
+  if season.ne."DJF" then
     do i =0,32,1
       total_annual_test(i+1) = sum(total_month(h+i*12:h+2+i*12)*weight1) + sum(total_month(h+(i+1)*12:h+2+(i+1)*12)*weight2) + \
                               sum(total_month(h+3+i*12:(i+1)*12-1)) +  sum(total_month((i+1)*12:h-1+(i+1)*12))
     end do    
-   
+  end if   
 
+  if season.eq."DJF" then
     ;;;12月的情况为
     DT12 = new(34,"float")
     DT1 = DT12
     DT2 = DT12
-
-    if season.eq."DJF" then
       do i =0,31,1
           DT12(i+1) = 0.5*total_month(i*12+11) + 0.5*total_month((i+1)*12+11) + sum(total_month((i+1)*12:(i+1)*12+10))
           DT1(i+1) = 0.5*total_month((i+1)*12) + 0.5*total_month((i+2)*12) + sum(total_month((i+1)*12+1:(i+1)*12+11))
@@ -100,7 +100,7 @@ begin
 ;;;
 
 ;;;选择季节
-season = "SON"
+season = "MAM"
 ;;;
 
 
@@ -733,13 +733,13 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
   print("vadv_clm="+vadv_clm)
 ;;;
 
+
+
      
     
 
        
-
-   
-
+exit()
 
 print("*********开始画图:时间序列********")
 

@@ -269,11 +269,11 @@ begin
     ; nlwrs  = (/rmMonAnnCycTLL(nlwrs)/)
     ; nswrs_pen  = (/rmMonAnnCycTLL(nswrs_pen)/)
     total = lhtfl
-    total = (/lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen/)
-    total = (/total/coef/)     ;;;;;; ℃/year
+    ; total = (/lhtfl + shtfl  + nswrs + nlwrs - nswrs_pen/)
+    ; total = (/total/coef/)     ;;;;;; ℃/year
 
-    ; total = lhtfl + shtfl  + nswrs + nlwrs 
-
+    total = (/(lhtfl + shtfl  + nswrs + nlwrs)/(365*86400)/)
+    
 
 
     lhtfl_annual = month_to_season(lhtfl, season)
@@ -413,7 +413,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season)
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"nomld")
 
   res=True
   res@gsnFrame=False
