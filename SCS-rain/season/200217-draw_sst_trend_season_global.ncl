@@ -40,7 +40,7 @@ begin
 
     timeind:=ind(date.le.201512.and.date.ge.197901)
 
-    sst=lonFlip(f1->sst(timeind,:,:))
+    sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
   

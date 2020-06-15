@@ -192,7 +192,7 @@ do i = 0,3
    ; d_rc = where(prob_d.le.0.1, d_rc, d_rc@_FillValue)
    ; cape_rc = where(prob_cape_rc.le.0.1, cape_rc, cape_rc@_FillValue)
    ; sta_s_rc = where(prob_sta_s.le.0.1, sta_s_rc, sta_s_rc@_FillValue)
-   ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+   u_rc = where(prob_u.le.0.2.or.prob_v.le.0.2, u_rc, u_rc@_FillValue)
 
 ;==============================================================
 ; Mission 4. draw plot
@@ -205,6 +205,7 @@ do i = 0,3
   res@gsnAddCyclic = False
   
   res@cnFillPalette ="CBR_coldhot"
+  res@cnFillPalette = "cmp_b2r"
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -217,7 +218,7 @@ do i = 0,3
   ; res@cnMaxLevelValF       =   1
   ; res@cnLevelSpacingF      =  .1
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=True
+  res@lbLabelBarOn=False
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@lbLabelStride = 2 
@@ -252,11 +253,10 @@ do i = 0,3
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
-  res@vcRefMagnitudeF          = 3.0
-  ; res@vcRefMagnitudeF          = 0.1
+  res@vcRefMagnitudeF          = 4.0
   res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
+  res@vcLineArrowThicknessF=2.0
   res@vcLineArrowHeadMaxSizeF=0.005
   res@vcLineArrowHeadMinSizeF=0.005
   res@vcVectorDrawOrder="PostDraw"
@@ -349,7 +349,7 @@ do i = 0,3
     overlay(plot1(i), iplot1(i))
 end do 
     pres = True
-    pres@gsnPanelLabelBar  = False
+    pres@gsnPanelLabelBar  = True
     gsn_panel(wks, plot, (/2,2/), pres)
     gsn_panel(wks1, plot1, (/2,2/), pres)
 
