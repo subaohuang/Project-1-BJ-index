@@ -38,7 +38,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201312.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -82,7 +82,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
   ; res@cnFillPalette = "NCV_jaisnd"
-   res@cnFillPalette = "BlueWhiteOrangeRed"
+   ; res@cnFillPalette = "BlueWhiteOrangeRed"
+   res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253

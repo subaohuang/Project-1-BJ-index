@@ -51,6 +51,12 @@ begin
    lat2 = 20
    lon1 = 100
    lon2 = 160
+
+   lat1 = -30
+   lat2 = 30
+   lon1 = 0
+   lon2 = 360
+
 ;;;;
 
 
@@ -62,7 +68,9 @@ begin
 
     timeind:=ind(date.le.201312.and.date.ge.198001)
 
-    sst = f1->sst(timeind,{lat1:lat2},{lon1:lon2})
+    sst_r = lonFlip(f1->sst)  
+
+    sst = sst_r(timeind,{lat1:lat2},{lon1:lon2})
     
 ;;;read NCEP-NCAR heat flux data
     fils3 = "/home/ys17-19/lsh/Project/SCS-rain/ERAI-heatflux-1degree.nc"
@@ -89,7 +97,7 @@ begin
 
   season = (/"MAM","JJA","SON","DJF"/)
 
-  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-四季")
+  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-四季-global")
 
   plot = new(12,graphic)
   str = "" + ispan(1,dimsizes(plot),1)
@@ -143,7 +151,7 @@ print("*********开始画图********")
   res@gsnSpreadColorEnd = 253
 
   res@cnFillOn=True
-  res@cnLinesOn=True
+  res@cnLinesOn=False
   res@cnLineLabelInterval = 2
   res@gsnAddCyclic = False
 
@@ -157,10 +165,15 @@ print("*********开始画图********")
   ; res@mpMaxLatF             = 45
   ; res@mpMinLonF             =90
   ; res@mpMaxLonF             = 160
-   lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 110
+   ; lon2 = 155
+
+   lat1 = -30
+   lat2 = 30
+   lon1 = 0
+   lon2 = 360
 
   res@mpMinLatF             = lat1
   res@mpMaxLatF             = lat2
