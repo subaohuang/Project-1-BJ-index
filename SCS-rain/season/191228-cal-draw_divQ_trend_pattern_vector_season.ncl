@@ -5,7 +5,8 @@
 ;;grad_latlon_cfd:lon must be in increasing order
 ;;linshuheng 2019.12.24
 ;**********************************************************
-   
+load  "/home/ys17-19/lsh/Project/other/guanshun/add_TP.ncl"
+  
 function  rc_test(ssta_rc)
 begin
   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
@@ -58,8 +59,7 @@ begin
         ; lon2 = 360
         ; ;;;
 
-    
-
+  
         ;;;time span
         startmon =197901
         endmon = 201312
@@ -142,9 +142,10 @@ begin
    season = (/"MAM","JJA","SON","DJF"/)
    plot  = new(4,graphic)
    iplot = new(4,graphic)
+   plot_tp = plot
 
    str = "" + ispan(1,4,1) + ""
-    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季-notest")
+    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季")
 
 do i = 0,3    
       era_divQ_bar = month_to_season(DivQ, season(i))
@@ -177,23 +178,27 @@ do i = 0,3
     prob_qu = rc_test(qu_rc)
     prob_qv = rc_test(qv_rc)
    
-    ; qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+    qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
 
 ;==============================================================
 ; Mission 6. draw plot
 ; ==============================================================
+  colordata = read_colormap_file("/home/ys17-19/lsh/data/colordata/bluewhiteorangered_11color.rgb")
+
+  ; gsn_define_colormap(wks, colordata)
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
-  res@cnFillPalette="MPL_RdBu"
+  res@cnFillPalette=colordata(::-1,:)
+
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -4.0
   res@cnMaxLevelValF       =   4.0
-  res@cnLevelSpacingF      =  0.5
+  res@cnLevelSpacingF      =  1.0
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
   res@lbLabelStride=2
@@ -239,14 +244,19 @@ do i = 0,3
   ; res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.04
-  ; res@vcRefMagnitudeF          = 1.0
+  
+  
  
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
   res@vcVectorDrawOrder="PostDraw"
+
+  res@vcLineArrowThicknessF=1.5
+  res@vcLineArrowHeadMaxSizeF=0.01
+  res@vcLineArrowHeadMinSizeF=0.01
+
   res@vcRefMagnitudeF          = 1000.0
+  res@vcMinMagnitudeF          =100.0
   res@gsnLeftString = season(i)
   plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
  
@@ -291,9 +301,10 @@ do i = 0,3
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.0045
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -303,12 +314,23 @@ do i = 0,3
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_q,res_pro)    
     overlay(plot(i), iplot(i))
+
+    
+    plot_tp(i) = overlay_tp_horizontal(wks,-10,50,60,160,"gray")
+    overlay(plot(i), plot_tp(i))
+
+
+
+
+
+
 end do
 
  pres = True
  pres@gsnPanelLabelBar = True
  pres@lbOrientation = "vertical"
  pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
+ pres@gsnPanelFigureStringsJust = "TopLeft"
 
  gsn_panel(wks, plot, (/2,2/), pres)
  

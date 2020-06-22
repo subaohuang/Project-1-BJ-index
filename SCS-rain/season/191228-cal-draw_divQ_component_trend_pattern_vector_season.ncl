@@ -468,9 +468,16 @@ begin
  
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
   res@vcVectorDrawOrder="PostDraw"
+  res@vcLineArrowThicknessF=2.0
+  res@vcLineArrowHeadMaxSizeF=0.005
+  res@vcLineArrowHeadMinSizeF=0.005
+
   res@vcRefMagnitudeF          = 1000.0
+
+
+
+
   res@gsnLeftString = "Moisture Convergence Flux"
   plot(0)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
   res@gsnLeftString = "Dynamic component"

@@ -5,7 +5,7 @@
 ;;grad_latlon_cfd:lon must be in increasing order
 ;;linshuheng 2019.12.24
 ;**********************************************************
-   
+load  "/home/ys17-19/lsh/Project/other/guanshun/add_TP.ncl"
 function  rc_test(ssta_rc)
 begin
   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
@@ -326,11 +326,12 @@ begin
     copy_VarCoords(q_bar(:,1,:,:), era_wgt_eddy_qv)
     ;;;;
      print("=====end eddy componte calculate==========")
-
-
-
   ;;;
+;;;
 
+
+
+;;;;;
 
 ; ;==============================================================
 ; ; Mission 3.  trend
@@ -387,6 +388,12 @@ begin
     ;;;
     
     qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+    qu_dyna_rc = where(prob_qu_dyna.le.0.1.or.prob_qv_dyna.le.0.1, qu_dyna_rc,qu_dyna_rc@_FillValue)
+    qu_thermaldyna_rc = where(prob_qu_thermaldyna.le.0.1.or.prob_qv_thermaldyna.le.0.1, qu_thermaldyna_rc,qu_thermaldyna_rc@_FillValue)
+    qu_quad_rc = where(prob_qu_quad.le.0.1.or.prob_qv_quad.le.0.1, qu_quad_rc,qu_quad_rc@_FillValue)
+    qu_eddy_rc = where(prob_qu_eddy.le.0.1.or.prob_qv_eddy.le.0.1, qu_eddy_rc,qu_eddy_rc@_FillValue)
+
+
     ; qv_rc = where(prob_qv.le.0.1.or.prob_qu.le.0.1, qv_rc,qv_rc@_FillValue)
     
 
@@ -396,21 +403,31 @@ begin
 ; ==============================================================
   wks   = gsn_open_wks("pdf", "q_delta以及各个项的趋势以及箭头")
   plot=new(5,graphic)
+
+
+  colordata = read_colormap_file("/home/ys17-19/lsh/data/colordata/bluewhiteorangered_11color.rgb")
+
+  gsn_define_colormap(wks, "precip4_diff_19lev")
+
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnAddCyclic = False
   
-  res@cnFillPalette="MPL_RdBu"
+  ; res@cnFillPalette = colordata(::-1,:)
+  ; res@cnFillPalette = "precip4_diff_19lev"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -4.0
   res@cnMaxLevelValF       =   4.0
   res@cnLevelSpacingF      =  0.5
+
+  res@cnFillColors = (/2,3,4,5,6,7,8,9,11,11,13,14,15,16,18,19,20,20,21,21/)
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
-  res@lbLabelStride=2
+
+
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
   ; res@mpMinLatF             = -5
@@ -452,28 +469,37 @@ begin
   res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
   ; res@vcGlyphStyle="CurlyVector"
 
-  res@vcMinDistanceF           = 0.02           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.04
-  ; res@vcRefMagnitudeF          = 1.0
- 
+  res@vcMinDistanceF           = 0.02           ; thin vector
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
+  res@vcLineArrowThicknessF=1.5
   res@vcVectorDrawOrder="PostDraw"
   res@vcRefMagnitudeF          = 1000.0
+  res@vcMinMagnitudeF          =100.0
+  res@vcLineArrowHeadMaxSizeF=0.01
+  res@vcLineArrowHeadMinSizeF=0.01
+
+
+
+
   res@gsnLeftString = "Moisture Convergence Flux"
   plot(0)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
   res@gsnLeftString = "Dynamic component"
     res@vcRefMagnitudeF          = 1000.0
   plot(1)=gsn_csm_vector_scalar_map(wks,qu_dyna_rc ,qv_dyna_rc, q_dyna_rc, res)
   res@gsnLeftString = "Thermaldynamic component"
-    res@vcRefMagnitudeF          = 200.0
+  res@vcRefMagnitudeF          = 250.0
+    ; res@vcRefMagnitudeF          = 200.0
+    res@vcMinMagnitudeF          =25.0
+
   plot(2)=gsn_csm_vector_scalar_map(wks,qu_thermaldyna_rc ,qv_thermaldyna_rc, q_thermaldyna_rc, res)
   res@gsnLeftString = "Quadratic component"
     res@vcRefMagnitudeF          = 30.0
+     res@vcMinMagnitudeF          =3.0
   plot(3)=gsn_csm_vector_scalar_map(wks,qu_quad_rc ,qv_quad_rc, q_quad_rc, res)
   res@gsnLeftString = "Transient component"
     res@vcRefMagnitudeF          = 250.0
+     res@vcMinMagnitudeF          =25.0
   plot(4)=gsn_csm_vector_scalar_map(wks,qu_eddy_rc ,qv_eddy_rc, q_eddy_rc, res)
  
 
@@ -497,7 +523,7 @@ begin
    do i = 0,4
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    end do
-
+   
    ;;;打点
     res_pro=True
     res_pro@gsnAddCyclic = False
@@ -520,9 +546,10 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.0045
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -537,18 +564,32 @@ begin
     iplot(2)=gsn_csm_contour(wks,prob_q_thermaldyna,res_pro)
     iplot(3)=gsn_csm_contour(wks,prob_q_quad,res_pro)
     iplot(4)=gsn_csm_contour(wks,prob_q_eddy,res_pro)
+
+    plot_tp = new(5,graphic)
   
+   
 
     do i=0,4
+    plot_tp(i) = overlay_tp_horizontal(wks,-10,50,60,160,"gray") ;;;;添加TP的位置
     overlay(plot(i), iplot(i))
+    overlay(plot(i), plot_tp(i))
     end do
+    
 
- pres = True
- pres@gsnPanelLabelBar = True
- pres@lbOrientation = "vertical"
- pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
+  
 
- gsn_panel(wks, plot, (/3,2/), pres)
+
+
+
+    pres = True
+    pres@gsnPanelLabelBar = True
+    pres@lbOrientation = "vertical"
+    pres@lbLabelStride = 2
+    pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
+    pres@gsnPanelFigureStringsJust = "TopLeft"
+
+
+    gsn_panel(wks, plot, (/3,2/), pres)
  
 
 end 

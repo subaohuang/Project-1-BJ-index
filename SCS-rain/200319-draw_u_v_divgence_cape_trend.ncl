@@ -106,28 +106,15 @@ begin
      copy_VarCoords(u(:,:,:), sta_s)
      printVarSummary(sta_s)
     ;;;
-  
-;;;choose season
-   season = (/"MAM","JJA","SON","DJF"/)
-   plot  = new(4,graphic)
-   iplot = new(4,graphic)
-
-    plot1  = new(4,graphic)
-    iplot1 = new(4,graphic)
+  ;;;;;
 
 
-   str = "" + ispan(1,4,1) + ""
-   wks = gsn_open_wks("pdf", "散度trend-925hpa-scs")
-   wks1   = gsn_open_wks("pdf", "cape-trend-925hpa-scs")
-
-
-do i = 0,3
    ;;;处理成年数据 
-     u_annual = month_to_season(u, season)
-     v_annual = month_to_season(v, season)
-     d_annual = month_to_season(d, season)
-     sta_s_annual = month_to_season(sta_s, season)
-     cape_annual = month_to_season(cape, season)
+     u_annual = month_to_annual(u, 1)
+     v_annual = month_to_annual(v, 1)
+     d_annual = month_to_annual(d, 1)
+     sta_s_annual = month_to_annual(sta_s, 1)
+     cape_annual = month_to_annual(cape, 1)
    ;;;
 
    ;;;区域平均 
@@ -198,6 +185,7 @@ do i = 0,3
 ; Mission 4. draw plot
 ; ==============================================================
 
+  wks = gsn_open_wks("pdf", "散度-cape-trend-925hpa-scs")
 
   res=True
   res@gsnFrame=False
@@ -205,13 +193,15 @@ do i = 0,3
   res@gsnAddCyclic = False
   
   res@cnFillPalette="CBR_coldhot"
+  res@cnFillPalette = "cmp_b2r"
+
 
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -80.0
-  res@cnMaxLevelValF       =   80.0
-  res@cnLevelSpacingF      =  10.0
+  res@cnMinLevelValF       =   -180.0
+  res@cnMaxLevelValF       =   180.0
+  res@cnLevelSpacingF      =  30.0
   ;res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1
   ; res@cnMaxLevelValF       =   1
@@ -265,9 +255,9 @@ do i = 0,3
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
-
+  plot = new(2,graphic)
   res@gsnLeftString  = "925 hPa Divergence trend"
-  plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,d_rc ,res)
+  plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,d_rc ,res)
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -2.0
   ; res@cnMaxLevelValF       =   8.0
@@ -284,10 +274,10 @@ do i = 0,3
     res@cnLevelSpacingF       = 25          ; set contour interval
 
   res@gsnLeftString  = "Convective available potential energy trend"
-  plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res)
+  plot(1) = gsn_csm_contour_map(wks,cape_rc,res)
  
 
-  str1 = unique_string("dum1")  ; "unique_string" will return a unique    
+  str = ispan(1,2,1) + "" 
 
  
   ; ;;添加区域
@@ -306,9 +296,9 @@ do i = 0,3
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-
+   do i=0,1
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-   plot1@$str(i)$ = gsn_add_polyline(wks1, plot1(i), pgx_pool, pgy_pool, pgres)
+   end do
 
 
    ;;;打点
@@ -337,18 +327,18 @@ do i = 0,3
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
-    iplot(i)=gsn_csm_contour(wks,prob_d,res_pro)
-    iplot1(i)=gsn_csm_contour(wks1,prob_cape_rc,res_pro)
+    iplot = new(2,graphic)
+    iplot(0) = gsn_csm_contour(wks,prob_d,res_pro)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    iplot(1) = gsn_csm_contour(wks,prob_cape_rc,res_pro)
    
+   do i=0,1
     overlay(plot(i), iplot(i))
-    overlay(plot1(i), iplot1(i))
-end do 
+   end do
+
     pres = True
     pres@gsnPanelLabelBar  = False
-    gsn_panel(wks, plot, (/2,2/), pres)
-    gsn_panel(wks1, plot1, (/2,2/), pres)
-
-
+    gsn_panel(wks, plot, (/2,1/), pres)
 end
     
   

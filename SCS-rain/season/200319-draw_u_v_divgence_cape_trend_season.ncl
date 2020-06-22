@@ -210,9 +210,9 @@ do i = 0,3
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -80.0
-  res@cnMaxLevelValF       =   80.0
-  res@cnLevelSpacingF      =  10.0
+  res@cnMinLevelValF       =   -180.0
+  res@cnMaxLevelValF       =   180.0
+  res@cnLevelSpacingF      =  30.0
   ;res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1
   ; res@cnMaxLevelValF       =   1
@@ -253,12 +253,12 @@ do i = 0,3
 
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
-  res@vcRefMagnitudeF          = 4.0
+  res@vcRefMagnitudeF          = 6.0
   res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=2.0
-  res@vcLineArrowHeadMaxSizeF=0.005
-  res@vcLineArrowHeadMinSizeF=0.005
+  res@vcLineArrowThicknessF=1.5
+  res@vcLineArrowHeadMaxSizeF=0.008
+  res@vcLineArrowHeadMinSizeF=0.008
   res@vcVectorDrawOrder="PostDraw"
   res@mpFillOn =False
 
@@ -284,7 +284,7 @@ do i = 0,3
     res2@cnMaxLevelValF        = 200.0          ; set max contour level
     res2@cnLevelSpacingF       = 25.0          ; set contour interval
 
-  res@gsnLeftString  = season(i)+"-Convective available potential energy trend"
+    res2@gsnLeftString  = season(i)+"-Convective available potential energy trend"
   plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res2)
   ; delete(res@cnFillPalette)
   ; delete(res@gsnSpreadColorStart)
@@ -343,6 +343,7 @@ do i = 0,3
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_d,res_pro)
+     res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     iplot1(i)=gsn_csm_contour(wks1,prob_cape_rc,res_pro)
    
     overlay(plot(i), iplot(i))

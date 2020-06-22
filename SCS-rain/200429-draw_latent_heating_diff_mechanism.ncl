@@ -263,7 +263,7 @@ print("*********开始画图********")
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlRe"
+  res@cnFillPalette="ViBlGrWhYeOrRe"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -304,8 +304,8 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -10.0
-  res@cnMaxLevelValF       =   10.0
+  res@cnMinLevelValF       =   -20.0
+  res@cnMaxLevelValF       =   20.0
   res@cnLevelSpacingF      =  2.5
  
 
@@ -314,17 +314,22 @@ print("*********开始画图********")
   res@gsnRightString = ""
   res@gsnLeftString = "Latent Heat Flux"
   plot(0) = gsn_csm_contour_map(wks, r_lh, res)
- 
-  res@cnMinLevelValF       =   -7.0
+ ; res@cnFillPalette="BlRe"
+  res@cnMinLevelValF       =   -6.0
   res@cnMaxLevelValF       =   0.0
-  res@cnLevelSpacingF      =  1.0
+  res@cnLevelSpacingF      =  1
   res@gsnSpreadColorStart = 4
   res@gsnSpreadColorEnd = 41
 
+  res@gsnSpreadColorStart = 3
+  res@gsnSpreadColorEnd = 53
+
+
   res@gsnLeftString = "Newtonian cooling effect"
   plot(1) = gsn_csm_contour_map(wks,Qo, res)
-  res@cnMinLevelValF       =   -10.0
-  res@cnMaxLevelValF       =   10.0
+    res@cnFillPalette="ViBlGrWhYeOrRe"
+  res@cnMinLevelValF       =   -20.0
+  res@cnMaxLevelValF       =   20.0
   res@cnLevelSpacingF      =  2.5
   delete(res@gsnSpreadColorStart)
   delete(res@gsnSpreadColorEnd)
@@ -404,8 +409,8 @@ print("*********开始画图********")
  
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
+    opt@gsnShadeMid     = 17        ; stipple
+    opt@gsnShadeFillDotSizeF =  0.005
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
