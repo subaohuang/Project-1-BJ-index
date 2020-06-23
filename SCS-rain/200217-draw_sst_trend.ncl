@@ -25,7 +25,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.199801)
+    timeind:=ind(date.le.201312.and.date.ge.197901)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -47,8 +47,16 @@ begin
 
     ; ssta_rc = where(prob_p.le.0.05, ssta_rc, ssta_rc@_FillValue)
     ssta_rc=(/ssta_rc*dim(0)/)
+    printVarSummary(ssta_rc)
     
-    wks   = gsn_open_wks("pdf", "年平均SST的趋势-SCS-1998-2013-global")
+    ssta_rc_avg = avg(dim_avg_n_Wrap(ssta_rc({0:15},{110:155}), 0)) 
+    print(ssta_rc_avg)
+
+    ssta_rc = (/ssta_rc - ssta_rc_avg/)
+    ; print(ssta_rc)
+    
+    
+    wks   = gsn_open_wks("pdf", "年平均SST相对于区域平均的趋势-SCS-1979-2013")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -58,8 +66,8 @@ begin
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
   
-  ; res@cnFillPalette = "NCV_jaisnd"
- res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "NCV_jaisnd"
+ ; res@cnFillPalette = "BlueWhiteOrangeRed"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -71,15 +79,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  ; res@mpMinLatF             = -30
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
-  ; res@mpMinLatF             = 0
-  ; res@mpMaxLatF             = 15
-  ; res@mpMinLonF             =110
-  ; res@mpMaxLonF             = 155
+  res@mpMinLatF             = 0
+  res@mpMaxLatF             = 15
+  res@mpMinLonF             =110
+  res@mpMaxLonF             = 155
 
 
 
@@ -113,12 +121,17 @@ begin
   ; res@cnMaxLevelValF       =   0.6
   ; res@cnLevelSpacingF      =  0.05
   
-  res@cnMinLevelValF       =   -0.6
-  res@cnMaxLevelValF       =   0.6
-  res@cnLevelSpacingF      =  0.05
+  ; res@cnMinLevelValF       =   0.2
+  ; res@cnMaxLevelValF       =   0.6
+  ; res@cnLevelSpacingF      =  0.05
 
+ 
+  res@cnMinLevelValF       =   -0.2
+  res@cnMaxLevelValF       =   0.2
+  res@cnLevelSpacingF      =  0.025
 
-  res@gsnLeftString="HadISST sst trend"
+  ; res@gsnLeftString="HadISST sst trend"
+  res@gsnLeftString="SST trend (remove regional average)"
   plot = gsn_csm_contour_map(wks, ssta_rc, res)
 
   res2 = res

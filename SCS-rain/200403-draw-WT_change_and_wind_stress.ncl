@@ -449,9 +449,9 @@ printVarSummary(wt)
   plot(2) = gsn_csm_contour_map(wks, T_clm, res)
 
   res@gsnLeftString = "dT"
-  res@cnMinLevelValF       =   -0.6
+  res@cnMinLevelValF       =   -2.0
   res@cnMaxLevelValF       =   0.0
-  res@cnLevelSpacingF      =  0.1
+  res@cnLevelSpacingF      =  0.25
   plot(3) = gsn_csm_contour_map(wks, T_delta, res)
    
   ;;;;;draw wind stress
@@ -466,14 +466,16 @@ printVarSummary(wt)
 
 
   res2@vcRefMagnitudeF = 0.05
-  res2@vcMinDistanceF           = 0.017         ; thin vectors
-  res2@vcRefLengthF             = 0.025 ; define length of v
+  res2@vcMinMagnitudeF = 0.005
+  res2@vcMinDistanceF           = 0.018      ; thin vectors
+  res2@vcRefLengthF             = 0.03 ; define length of v
  
   res2@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res2@vcLineArrowThicknessF=1.0
 
-  res2@vcLineArrowHeadMaxSizeF=0.005
-  res2@vcLineArrowHeadMinSizeF=0.005
+
+  res2@vcLineArrowHeadMaxSizeF=0.006
+  res2@vcLineArrowHeadMinSizeF=0.006
   res2@vcVectorDrawOrder="PostDraw"
   res2@mpFillOn =False
 
@@ -483,18 +485,23 @@ printVarSummary(wt)
   res2@cnLevelSpacingF      =  0.1
   delete(res2@gsnSpreadColorEnd)
   delete(res2@gsnSpreadColorStart)
+  
 
-  res2@cnFillPalette = "GMT_polar"
+  color = read_colormap_file("/home/ys17-19/lsh/data/colordata/bluewhiteorangered_11color.rgb")
+
+  ; res2@cnFillPalette = "GMT_polar"
+  delete(res2@cnFillPalette)
+  res2@cnFillPalette = color
   plot(4) = gsn_csm_vector_scalar_map(wks, ue_clm ,ve_clm,wg_clm ,res2)
 
   res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res2@cnMinLevelValF       =   -0.05
   res2@cnMaxLevelValF       =   0.05
   res2@cnLevelSpacingF      =  0.01
-  
+
   res2@vcRefMagnitudeF = 0.005
-  res2@vcMinMagnitudeF          =0.002
-  res2@vcMinDistanceF = 0.01
+  res2@vcMinMagnitudeF          =0.0005
+  
   
  
   res2@gsnLeftString = "Wind stress and curl change "
