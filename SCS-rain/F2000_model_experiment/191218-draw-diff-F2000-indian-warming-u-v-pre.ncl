@@ -22,7 +22,8 @@ end
 
 begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012_chazhi.nc"  
 
 
   f1=addfile(fils1, "r")
@@ -80,11 +81,11 @@ begin
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    ; u_diff = where(prob_u.le.0.7.or.prob_v.le.0.7, u_diff, u_diff@_FillValue)
+    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic")
 
     res=True
     res@gsnDraw=False
@@ -93,7 +94,7 @@ begin
 
 
     res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
+    res@lbLabelBarOn=True
     res@cnFillOn = True 
     res@cnLinesOn =True
     res@cnLineColor = "White"
@@ -105,9 +106,9 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.25
+    res@cnMinLevelValF       =   -1
+    res@cnMaxLevelValF       =   1
+    res@cnLevelSpacingF      =  0.1
     
 
     res@tmXTOn=False
@@ -118,6 +119,7 @@ begin
     res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 30.0
     res@mpMaxLonF             = 160.0
+
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
@@ -129,7 +131,7 @@ begin
     ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = "Indian SST forcing"
+    res@gsnLeftString = "Atlantic SST forcing"
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
@@ -179,7 +181,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0,0.15/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False
@@ -187,7 +189,7 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnFillDotSizeF = 0.004
   
     res_pro@cnMonoFillColor = False
     res_pro@cnFillColors = (/"Transparent","black","Transparent"/)

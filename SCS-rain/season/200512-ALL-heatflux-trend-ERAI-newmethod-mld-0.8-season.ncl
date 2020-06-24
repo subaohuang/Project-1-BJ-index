@@ -44,7 +44,7 @@ begin
    lon2 = 160
 ;;;;
 
- season = "DJF"
+ season = "SON"
 
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -460,9 +460,9 @@ print("*********开始画图********")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -12
-  res@cnMaxLevelValF       =   12
-  res@cnLevelSpacingF      =  1
+  res@cnMinLevelValF       =   -20
+  res@cnMaxLevelValF       =   20
+  res@cnLevelSpacingF      =  4
 
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -120

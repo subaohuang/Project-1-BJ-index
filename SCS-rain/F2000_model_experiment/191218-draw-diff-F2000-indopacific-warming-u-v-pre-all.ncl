@@ -198,18 +198,18 @@ begin
     ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = "Indo-Pacific SST forcing"
+    res@gsnLeftString = "Indian SST forcing"
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.015           ; thin vectors
-    res@vcMinMagnitudeF          =0.02
+    res@vcMinMagnitudeF          =0.1
     res@vcMaxMagnitudeF = 7.0
     res@vcRefMagnitudeF          = 2.0
-    res@vcRefLengthF             = 0.05     ; define length of v
-    res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    res@vcRefLengthF             = 0.04     ; define length of v
+    res@vcRefAnnoOrthogonalPosF    = -1.0              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.5
     res@vcLineArrowHeadMaxSizeF=0.005
     res@vcLineArrowHeadMinSizeF=0.005
@@ -220,7 +220,9 @@ begin
     res@gsnRightString = ""
     plot = new(3,graphic)
     plot(0) = gsn_csm_vector_scalar_map(wks,u_diff_indian,v_diff_indian, PRE_diff_indian,res)
+        res@gsnLeftString = "Pacific SST forcing"
     plot(1) = gsn_csm_vector_scalar_map(wks,u_diff_pacific,v_diff_pacific, PRE_diff_pacific,res)
+        res@gsnLeftString = "Indo-Pacific SST forcing"
     plot(2) = gsn_csm_vector_scalar_map(wks,u_diff_indopacific,v_diff_indopacific, PRE_diff_indopacific,res)
 
 
@@ -268,7 +270,7 @@ begin
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
    
-    res_pro@gsnCenterString = ""
+    res_pro@gsnLeftString = ""
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True

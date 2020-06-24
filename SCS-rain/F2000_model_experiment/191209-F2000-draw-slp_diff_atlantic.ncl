@@ -22,15 +22,14 @@ end
 begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addpacifictrend/F_2000_pacific.cam.h0.0101-4012_chazhi.nc"  
-  fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindopacific/F_2000_indopacific.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarming/F_2000_atlantic.cam.h0.0101-4012_chazhi.nc"  
+  
   
 
     f1=addfile(fils1, "r")
     f2=addfile(fils2, "r")
-    f3=addfile(fils3, "r")
-    f4=addfile(fils4, "r")
+  
+ 
 
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.601.and.date.le.4012)
@@ -44,37 +43,22 @@ begin
     PSL_indian = (/PSL_indian/100/)
 
 
-    PSL_pacific  =  f3->PSL(timeind,:,:)
-    PSL_pacific = (/PSL_pacific/100/)
-
-
-    PSL_indopacific =  f4->PSL(timeind,:,:)
-    PSL_indopacific = (/PSL_indopacific/100/)
-
-
     PSL_CT_clm = dim_avg_n_Wrap(PSL_CT, 0)
     PSL_indian_clm = dim_avg_n_Wrap(PSL_indian, 0)
-    PSL_pacific_clm = dim_avg_n_Wrap(PSL_pacific, 0)
-    PSL_indopacific_clm = dim_avg_n_Wrap(PSL_indopacific, 0)
-
+   
 
     PSL_diff_indian = PSL_CT_clm
     PSL_diff_indian = (/PSL_indian_clm - PSL_CT_clm/)
 
-    PSL_diff_pacific = PSL_CT_clm
-    PSL_diff_pacific = (/PSL_pacific_clm - PSL_CT_clm/)
-
- 
-    PSL_diff_indopacific = PSL_CT_clm
-    PSL_diff_indopacific = (/PSL_indopacific_clm - PSL_CT_clm/)
     
 
     ;;;t_test 
      prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     prob_slp_pacific = t_test(PSL_pacific,PSL_CT)
-     prob_slp_indopacific = t_test(PSL_indopacific,PSL_CT)
+     printVarSummary(prob_slp_indian)
+    
+     
 
-    wks=gsn_open_wks("pdf", "CESM-F2000-slp-pattern-in-pac-indopacific")
+    wks=gsn_open_wks("pdf", "CESM-F2000-slp-pattern-atlantic")
     
     res=True
     res@gsnDraw=False
@@ -101,9 +85,9 @@ begin
     ; res@cnMaxLevelValF       =   1
     ; res@cnLevelSpacingF      =  0.1
     
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   0.4
-    res@cnLevelSpacingF      =  0.05
+    res@cnMinLevelValF       =   -1.5
+    res@cnMaxLevelValF       =   1.5
+    res@cnLevelSpacingF      =  0.1
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
@@ -112,10 +96,10 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    ; res@mpMinLatF             = -30.0
-    ; res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 30.0
-    ; res@mpMaxLonF             = 160.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
 
     res@mpMinLatF             = -10.0
     res@mpMaxLatF             = 50.0
@@ -140,12 +124,9 @@ begin
     res@gsnRightString = ""
     res@gsnLeftString = "Indian SST forcing"
  
-    plot = new(3,graphic)
+    plot = new(1,graphic)
     plot(0) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
-      res@gsnLeftString = "Pacific SST forcing"
-    plot(1) = gsn_csm_contour_map(wks, PSL_diff_pacific, res)
-    res@gsnLeftString = "Indo-Pacific SST forcing"
-    plot(2) = gsn_csm_contour_map(wks, PSL_diff_indopacific, res)
+     
 
     ;;;画box
    pgres=True
@@ -163,9 +144,9 @@ begin
     str3 = ispan(1, 3, 1) +""
     plot1 =new(1,graphic)
     ;;;
-    do i=0,2
-    plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
-    end do
+    
+    plot1@$str3(0)$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres) 
+   
 
      ;;;打点
     res_pro=True
@@ -195,26 +176,22 @@ begin
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
-    iplot = new(3,graphic)
+    iplot = new(1,graphic)
 
     iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    iplot(1)=gsn_csm_contour(wks,prob_slp_pacific,res_pro)
-    iplot(2)=gsn_csm_contour(wks,prob_slp_indopacific,res_pro)
+    
 
-    do i=0,2
-    overlay(plot(i), iplot(i))
-    end do 
+    
+    overlay(plot(0), iplot(0))
+    
     
    getvalues plot@contour
    "cnFillColors" :cnFillColors
    end getvalues
    print(cnFillColors)
 
-
-    pres = True
-    pres@gsnPanelLabelBar = True
-    gsn_panel(wks, plot, (/3,1/), pres)
-
+   draw(plot)
+   frame(wks)
     
     print("done script")
   end

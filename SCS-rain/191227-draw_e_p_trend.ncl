@@ -19,12 +19,16 @@ return prob
 end
 begin
    ;;read  eva data 
-    fils = systemfunc("ls /home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_"+"*"+".nc")
+   year  = ispan(1979,2013,1) + ""
 
+    fils =  "/home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_"+year+".nc"
+    
     f1 = addfiles(fils, "r")
-    date = cd_calendar(f1[:]->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201312)
-    evp_r =short2flt(f1[:]->evapr(timeind,:,:))
+    ; date = cd_calendar(f1[:]->time, 1)
+    ; timeind = ind(date.ge.197901.and.date.le.201312)
+
+    evp_r = short2flt(f1[:]->evapr(:,:,:))
+    
     evp_r@missing_value = -9.96921e+36
     evp_r@_FillValue =   -9.96921e+36
     evp_r&lat@units = "degrees_north"
@@ -86,6 +90,9 @@ begin
 
 
     p_e = p_annual
+
+    printVarSummary(p_annual)
+    printVarSummary(evp_annual)
     p_e = (/p_annual - evp_annual/)
     copy_VarCoords(p_annual, p_e)
   
@@ -235,7 +242,7 @@ begin
     res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
     res_pro@cnMinLevelValF      = 0.00        ; set min contour level
     res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
+    res_pro@cnLevelSpacingF     = 0.1      ; set contour spacing
 
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -251,14 +258,14 @@ begin
 
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
+    opt@gsnShadeMid     = 17        ; stipple
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
 
     do i=0,2 
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
     end do
     
   

@@ -75,12 +75,24 @@ begin
     q = short2flt(f4->q(timeind,::-1,{lat1:lat2},{lon1:lon2}))        
     printVarSummary(q)
 
-    f5 = addfile("/home/ys17-19/lsh/Project/SCS-rain/CAPE_PI_PIL-197901-201412.nc","r")
+    ; f5 = addfile("/home/ys17-19/lsh/Project/SCS-rain/CAPE_PI_PIL-197901-201412.nc","r")
+    f5 = addfile("/home/yangsong3/data-observation/ERA-interim/surface/cape/ERAI-cape-1degree.nc","r")
     date :=cd_calendar(f5->time, 1)
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    cape = short2flt(f5->cape(timeind,{lat1:lat2},{lon1:lon2}))        
+    ; cape = short2flt(f5->cape(timeind,{lat1:lat2},{lon1:lon2}))
+    cape = f5->cape(timeind,{lat1:lat2},{lon1:lon2})
     printVarSummary(cape)
+
+
     print("=====finish read data==========")
+   ;;;
+   
+
+   ;;;;
+   f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+   date:=cd_calendar(f6->time, 1)
+   timeind :=ind(date.ge.startmon.and.date.le.endmon)
+   olr = short2flt(f6->olr(timeind,{lat1:lat2},{lon1:lon2}))
    ;;;
 
 
@@ -108,17 +120,22 @@ begin
     ;;;
   
 ;;;choose season
-   season = (/"MAM","JJA","SON","DJF"/)
-   plot  = new(4,graphic)
-   iplot = new(4,graphic)
+    season = (/"MAM","JJA","SON","DJF"/)
+    plot  = new(4,graphic)
+    iplot = new(4,graphic)
 
     plot1  = new(4,graphic)
     iplot1 = new(4,graphic)
 
 
-   str = "" + ispan(1,4,1) + ""
-   wks = gsn_open_wks("pdf", "散度trend-925hpa-scs")
-   wks1   = gsn_open_wks("pdf", "cape-trend-925hpa-scs")
+    plot2  = new(4,graphic)
+    iplot2 = new(4,graphic)
+
+
+    str = "" + ispan(1,4,1) + ""
+    wks = gsn_open_wks("pdf", "散度trend-925hpa-scs")
+    wks1   = gsn_open_wks("pdf", "cape-trend-925hpa-scs")
+    wks2   = gsn_open_wks("pdf", "olr-trend-scs")
 
 
 do i = 0,3
@@ -128,6 +145,9 @@ do i = 0,3
      d_annual = month_to_season(d, season(i))
      sta_s_annual = month_to_season(sta_s, season(i))
      cape_annual = month_to_season(cape, season(i))
+     olr_annual = month_to_season(olr, season(i))
+
+
    ;;;
 
    ;;;区域平均 
@@ -161,18 +181,21 @@ do i = 0,3
    d_rc := regCoef_n(ispan(1, yearnum, 1), d_annual, 0, 0)
    sta_s_rc := regCoef_n(ispan(1, yearnum, 1), sta_s_annual, 0, 0)
    cape_rc := regCoef_n(ispan(1, yearnum, 1), cape_annual, 0, 0)
+   olr_rc := regCoef_n(ispan(1, yearnum, 1), olr_annual, 0, 0)
 
    copy_VarCoords(u_annual(1,:,:), u_rc)
    copy_VarCoords(v_annual(1,:,:), v_rc)
    copy_VarCoords(d_annual(1,:,:), d_rc)
    copy_VarCoords(sta_s_annual(1,:,:), sta_s_rc)
    copy_VarCoords(cape_annual(1,:,:),cape_rc)
+   copy_VarCoords(olr_annual(1,:,:),olr_rc)
 
    d_rc = (/d_rc*yearnum*10^8/)
    u_rc = (/u_rc*yearnum/)
    v_rc = (/v_rc*yearnum/)
    sta_s_rc = (/sta_s_rc*yearnum/)
    cape_rc = (/cape_rc*yearnum/)
+   olr_rc = (/olr_rc*yearnum/)
 
    ; sta_s_rc = dim_avg_n_Wrap(sta_s_annual, 0)
 
@@ -186,6 +209,7 @@ do i = 0,3
     prob_d = rc_test(d_rc)
     prob_sta_s = rc_test(sta_s_rc)
     prob_cape_rc = rc_test(cape_rc)
+    prob_olr_rc = rc_test(olr_rc)
 
    ;;;
  
@@ -223,14 +247,19 @@ do i = 0,3
   res@lbOrientation="Vertical"
   res@lbLabelStride = 2 
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = lat1
-  ; res@mpMaxLatF             = lat2
-  ; res@mpMinLonF             = lon1
-  ; res@mpMaxLonF             = lon2
   res@mpMinLatF             = 0
   res@mpMaxLatF             = 15
   res@mpMinLonF             = 110
   res@mpMaxLonF             = 155
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             = 90
+  ; res@mpMaxLonF             = 160
+  ;  ;   lat1 = -5
+   ; lat2 = 45
+   ; lon1 = 90
+   ; lon2 = 160
+
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -272,27 +301,45 @@ do i = 0,3
   ; res@cnMinLevelValF       =   -2.0
   ; res@cnMaxLevelValF       =   8.0
   ; res@cnLevelSpacingF      =  2.0
+    gsn_define_colormap(wks1, "ViBlGrWhYeOrRe")
+    
     res2 = res 
-    res2@cnFillPalette  = "ViBlGrWhYeOrRe"
-
+    ; res2@cnFillPalette  = "ViBlGrWhYeOrRe"
+    
+    delete(res2@cnFillPalette)
     res2@gsnSpreadColors      = True               ; use full color map
-    res2@gsnSpreadColorStart  = 40              ; start at color 17
-    res2@gsnSpreadColorEnd    = 100                ; end at color 200
+    ; res2@gsnSpreadColorStart  = 40              ; start at color 17
+    ; res2@gsnSpreadColorEnd    = 100                ; end at color 200
 
     res2@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
     res2@cnMinLevelValF        = -100.0        ; set min contour level
     res2@cnMaxLevelValF        = 200.0          ; set max contour level
     res2@cnLevelSpacingF       = 25.0          ; set contour interval
+    res2@cnFillColors = (/38,40,42,44,50,50,70,80,82,84,86,88,100,102/)
 
     res2@gsnLeftString  = season(i)+"-Convective available potential energy trend"
-  plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res2)
-  ; delete(res@cnFillPalette)
-  ; delete(res@gsnSpreadColorStart)
-  ; delete(res@gsnSpreadColorEnd)
-  ;  res@gsnSpreadColors      = False               ; use full color map
- 
+    plot1(i) = gsn_csm_contour_map(wks1,cape_rc,res2)
+    
+    ;;;; draw olr 
 
-  str1 = unique_string("dum1")  ; "unique_string" will return a unique    
+    res3 = res
+    
+    res3@mpMinLatF             = -5
+    res3@mpMaxLatF             = 45
+    res3@mpMinLonF             = 90
+    res3@mpMaxLonF             = 160
+
+    res3@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res3@cnMinLevelValF        = -30.0        ; set min contour level
+    res3@cnMaxLevelValF        = 30.0          ; set max contour level
+    res3@cnLevelSpacingF       = 5.0          ; set contour interval
+    res3@cnFillPalette = "BlRe"
+    
+    res3@gsnLeftString  = season(i)+"-OLR trend"
+
+    plot2(i) = gsn_csm_contour_map(wks2,olr_rc,res3)
+
+ 
 
  
   ; ;;添加区域
@@ -314,7 +361,7 @@ do i = 0,3
 
    plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
    plot1@$str(i)$ = gsn_add_polyline(wks1, plot1(i), pgx_pool, pgy_pool, pgres)
-
+   plot2@$str(i)$ = gsn_add_polyline(wks2, plot2(i), pgx_pool, pgy_pool, pgres)
 
    ;;;打点
     res_pro=True
@@ -345,14 +392,17 @@ do i = 0,3
     iplot(i)=gsn_csm_contour(wks,prob_d,res_pro)
      res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     iplot1(i)=gsn_csm_contour(wks1,prob_cape_rc,res_pro)
+    iplot2(i)=gsn_csm_contour(wks2,prob_olr_rc,res_pro)
    
     overlay(plot(i), iplot(i))
     overlay(plot1(i), iplot1(i))
+    overlay(plot2(i), iplot2(i))
 end do 
     pres = True
     pres@gsnPanelLabelBar  = True
     gsn_panel(wks, plot, (/2,2/), pres)
     gsn_panel(wks1, plot1, (/2,2/), pres)
+    gsn_panel(wks2, plot2, (/2,2/), pres)
 
 
 end
