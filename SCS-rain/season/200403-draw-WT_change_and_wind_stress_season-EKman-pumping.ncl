@@ -80,7 +80,7 @@ begin
      f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_0.8.nc", "r")  
 
    ;;; 选择季节
-   season = "DJF"
+   season = "JJA"
 
 
     indyear = (2013-1980+1)*12-1
@@ -195,13 +195,126 @@ printVarSummary(wt)
        mlt_scs = where(ismissing(mlt_scs), avg(mlt_scs), mlt_scs)
       
        printMinMax(mlt_scs, 1)
- 
+;;;;;
+
+
+
+;;;read soda data and then calculate EKMAN transport and curl of wind stress
+    
+       
+    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
+    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
+
+
+    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
+    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
+
+    taux = tofloat(taux_r)
+    tauy = tofloat(tauy_r)
+    
+    copy_VarCoords(taux_r, taux) 
+    copy_VarCoords(tauy_r, tauy)
+   
+    delete(taux_r)
+    delete(tauy_r)
+    
+    taux&lat@units = "degrees_north"
+    taux&lon@units = "degrees_east"
+    tauy&lat@units = "degrees_north"
+    tauy&lon@units = "degrees_east"
+
+    lat = taux&lat
+    pi = get_pi("float")
+    omega = 2*pi/86400
+    f = 2*omega*sin(pi*lat/180)
+    density = 1025
+    f_3d = conform_dims(dimsizes(taux), f, 1)
+    
+    ue = tauy
+    ve = taux  
+    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
+    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
+
+    
+    ; vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+      vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)
+      copy_VarCoords(taux, vr)
+      printVarSummary(vr)
+
+     wekman = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+     copy_VarCoords(taux, wekman)
+
   
+    
+      wg = vr 
+      copy_VarCoords(taux, wg)
+
+
+    ;;;年平均
+       ue_annual = month_to_season(taux, season)
+       ve_annual = month_to_season(tauy, season)
+       wg_annual = month_to_season(wg, season)
+    ;;;
+    
+
+    ;;;clm diff 
+    
+    ue_annual_1 = dim_avg_n_Wrap(ue_annual(0:12,:,:), 0)
+    ue_annual_2 = dim_avg_n_Wrap(ue_annual(13:,:,:), 0)
+
+    ue_annual_diff = ue_annual_1 
+    ue_annual_diff = (/ue_annual_2 - ue_annual_1/)
+
+    ve_annual_1 = dim_avg_n_Wrap(ve_annual(0:12,:,:), 0)
+    ve_annual_2 = dim_avg_n_Wrap(ve_annual(13:,:,:), 0)
+
+    ve_annual_diff = ve_annual_1 
+    ve_annual_diff = (/ve_annual_2 - ve_annual_1/)
+
+
+    wg_annual_1 = dim_avg_n_Wrap(wg_annual(0:12,:,:), 0)
+    wg_annual_2 = dim_avg_n_Wrap(wg_annual(13:,:,:), 0)
+
+    wg_annual_diff = wg_annual_1 
+    wg_annual_diff = (/wg_annual_2 - wg_annual_1/)
+    ;;;;
+
+
+    ;;;;clm 
+    ue_clm = dim_avg_n_Wrap(ue_annual, 0)
+    ve_clm = dim_avg_n_Wrap(ve_annual, 0)
+    wg_clm = dim_avg_n_Wrap(wg_annual, 0)
+    wg_clm  = (/wg_clm*10^6/)   ;;;;;  
+    
+    ;;;
+
+
+  
+ 
+;;;calculate correlation coef
+   rc_ue = ue_annual_diff
+   rc_ve = ve_annual_diff
+   rc_wg = wg_annual_diff
+   rc_wg  = (/rc_wg*10^6/)
+   ;;;;
+;;;;
+
+
+
+
+;;;;;
    ;;δ(WT)
     ; f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD.nc", "r")
     f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_wt_T_in_MLD_density_defined_0.8.nc", "r")
+    
+
+     w_clm = (/dim_avg_n_Wrap(wekman(:,{0:15},{110:155}), 0)/)
+     w_clm = (/w_clm*10^5/)
+
 
     wt_mlt = f1->wt_mlt
+    wt_mlt = wekman(:,{0:15},{110:155})
+    
     T_mlt = f1->T_mlt_diff
 
     wtT = wt_mlt
@@ -288,112 +401,14 @@ printVarSummary(wt)
 
   w_clm = (/w_clm*10^5/)
   w_delta = (/w_delta*10^5/)
-
+  
+  printMinMax(w_clm, 1)   
+  
 
 ;;;;wind stress
 
   
-;;;read soda data and then calculate EKMAN transport and curl of wind stress
-    
-       
-    f7=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_taux_mn_1980-2015_chazhi.nc", "r")   
-    f8=addfile("/home/yangsong3/data-observation/SODA/3.4.2/soda3.4.2_tauy_mn_1980-2015_chazhi.nc", "r")   
 
-
-    taux_r = f7->taux(0:indyear,{lat1:lat2},{lon1:lon2})
-    tauy_r = f8->tauy(0:indyear,{lat1:lat2},{lon1:lon2})
-
-    taux = tofloat(taux_r)
-    tauy = tofloat(tauy_r)
-    
-    copy_VarCoords(taux_r, taux) 
-    copy_VarCoords(tauy_r, tauy)
-   
-    delete(taux_r)
-    delete(tauy_r)
-    
-    taux&lat@units = "degrees_north"
-    taux&lon@units = "degrees_east"
-    tauy&lat@units = "degrees_north"
-    tauy&lon@units = "degrees_east"
-
-    lat = taux&lat
-    pi = get_pi("float")
-    omega = 2*pi/86400
-    f = 2*omega*sin(pi*lat/180)
-    density = 1025
-    f_3d = conform_dims(dimsizes(taux), f, 1)
-    
-    ue = tauy
-    ve = taux  
-    ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
-    ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
-
-    
-    vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
-      ; vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)
-      copy_VarCoords(taux, vr)
-      printVarSummary(vr)
-
-     ; wekman = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
-     ; copy_VarCoords(taux, wekman)
-
-     ; w_clm = (/dim_avg_n_Wrap(wekman(:,{0:15},{110:155}), 0)/)
-     ; w_clm = (/w_clm*10^5/)
-    
-      wg = vr 
-      copy_VarCoords(taux, wg)
-
-
-    ;;;年平均
-       ue_annual = month_to_season(taux, season)
-       ve_annual = month_to_season(tauy, season)
-       wg_annual = month_to_season(wg, season)
-    ;;;
-    
-
-    ;;;clm diff 
-    
-    ue_annual_1 = dim_avg_n_Wrap(ue_annual(0:12,:,:), 0)
-    ue_annual_2 = dim_avg_n_Wrap(ue_annual(13:,:,:), 0)
-
-    ue_annual_diff = ue_annual_1 
-    ue_annual_diff = (/ue_annual_2 - ue_annual_1/)
-
-    ve_annual_1 = dim_avg_n_Wrap(ve_annual(0:12,:,:), 0)
-    ve_annual_2 = dim_avg_n_Wrap(ve_annual(13:,:,:), 0)
-
-    ve_annual_diff = ve_annual_1 
-    ve_annual_diff = (/ve_annual_2 - ve_annual_1/)
-
-
-    wg_annual_1 = dim_avg_n_Wrap(wg_annual(0:12,:,:), 0)
-    wg_annual_2 = dim_avg_n_Wrap(wg_annual(13:,:,:), 0)
-
-    wg_annual_diff = wg_annual_1 
-    wg_annual_diff = (/wg_annual_2 - wg_annual_1/)
-    ;;;;
-
-
-    ;;;;clm 
-    ue_clm = dim_avg_n_Wrap(ue_annual, 0)
-    ve_clm = dim_avg_n_Wrap(ve_annual, 0)
-    wg_clm = dim_avg_n_Wrap(wg_annual, 0)
-    wg_clm  = (/wg_clm*10^5/)   ;;;;;  5次方为wind stress/density*f的值设置的 
-    ; wg_clm  = (/wg_clm*10^6/)   ;;;;;
-    ;;;
-
-
-  
- 
-;;;calculate correlation coef
-
-   rc_ue = ue_annual_diff
-   rc_ve = ve_annual_diff
-   rc_wg = wg_annual_diff
-   rc_wg  = (/rc_wg*10^5/)
-   ;;;;
-;;;;
 
 
 
@@ -403,7 +418,7 @@ printVarSummary(wt)
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-0.8-define"+season)
+  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-0.8-define-Ekman-pumping"+season)
 
   res=True
   res@gsnFrame=False
@@ -458,7 +473,7 @@ printVarSummary(wt)
   res@gsnLeftString = "dW"
   res@cnMinLevelValF       =   -0.2
   res@cnMaxLevelValF       =   0.2
-  res@cnLevelSpacingF      =  0.04  
+  res@cnLevelSpacingF      =  0.04
   plot(1) = gsn_csm_contour_map(wks, w_delta, res)
   
   res@gsnLeftString = "Tclm"
@@ -505,9 +520,9 @@ printVarSummary(wt)
   res2@mpFillOn =False
 
 
-  res2@cnMinLevelValF       =   -0.5
-  res2@cnMaxLevelValF       =   0.5
-  res2@cnLevelSpacingF      =  0.1
+  res2@cnMinLevelValF       =   -0.1
+  res2@cnMaxLevelValF       =   0.1
+  res2@cnLevelSpacingF      =  0.02
   delete(res2@gsnSpreadColorEnd)
   delete(res2@gsnSpreadColorStart)
   
@@ -522,9 +537,9 @@ printVarSummary(wt)
   plot(4) = gsn_csm_vector_scalar_map(wks, ue_clm ,ve_clm,wg_clm ,res2)
 
   res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res2@cnMinLevelValF       =   -0.05
-  res2@cnMaxLevelValF       =   0.05
-  res2@cnLevelSpacingF      =  0.01
+  res2@cnMinLevelValF       =   -0.01
+  res2@cnMaxLevelValF       =   0.01
+  res2@cnLevelSpacingF      =  0.002
 
   res2@vcRefMagnitudeF = 0.005
   res2@vcMinMagnitudeF          =0.0005

@@ -25,7 +25,6 @@ end
 
 function remove_enso_signal(data,nino3_4)
   begin  
-    
     data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/)
     data_rc = regCoef_n(nino3_4,data_de, 0, 0)
     copy_VarCoords(data(1,:,:), data_rc)
@@ -67,7 +66,13 @@ begin
     printVarSummary(ssta_index)
 
     nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+    printVarSummary(nino3_4)
+    
+    ; nino3_4_new = nino3_4                ;;;;前期ENSO
+    ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+    ; nino3_4_new(34) =ssta_index(35*12-1) 
+
+    nino3_4 = (/dim_standardize_n(nino3_4_new, 1, 0)/)
 
     ;;;
     
@@ -88,8 +93,6 @@ begin
     ssta_son  = cal_season_trend(ssta_son_r,"SON")
     ssta_djf = cal_season_trend(ssta_djf_r,"DJF")
 
-
-
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
 
@@ -103,7 +106,7 @@ begin
     
   
 
-    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-去掉enso影响-global")
+    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -113,11 +116,11 @@ begin
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
   
-  res@cnFillPalette = "NCV_jaisnd"
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "NCV、_jaisnd"
+   res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@gsnSpreadColorStart = 130
+  ; res@gsnSpreadColorEnd = 253
 
-  res@gsnSpreadColorStart = 130
-  res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -156,9 +159,12 @@ begin
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   0.2
+  ; res@cnMinLevelValF       =   0.2
+  ; res@cnMaxLevelValF       =   0.6
+  ; res@cnLevelSpacingF      =  0.05
+    res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.6
-  res@cnLevelSpacingF      =  0.05
+  res@cnLevelSpacingF      =  0.1
   res@cnInfoLabelOn = False
   
 
