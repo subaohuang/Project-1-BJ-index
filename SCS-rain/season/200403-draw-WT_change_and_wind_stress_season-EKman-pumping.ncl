@@ -80,7 +80,7 @@ begin
      f6=addfile("/home/ys17-19/lsh/Project/SCS-rain/SODA3.4.2_mld_density_criterion_0.8.nc", "r")  
 
    ;;; 选择季节
-   season = "JJA"
+   season = "SON"
 
 
     indyear = (2013-1980+1)*12-1

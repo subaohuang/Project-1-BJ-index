@@ -212,6 +212,7 @@ season = "SON"
     ue  = (/tauy/(density*f_3d)/)   ;;;EKMAN
     ve = (/-1*taux/(density*f_3d)/)   ;;;Ekman
     vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+    ; vr = uv2vr_cfd(taux,tauy ,taux&lat,taux&lon,2)/(density*f_3d)
     copy_VarCoords(tauy, vr)
     printVarSummary(vr)
 
