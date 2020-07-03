@@ -231,10 +231,10 @@ begin
     dt_annual_mean = (/dim_avg_n_Wrap(dT_annual, 0)/)
 
 
-    dt_mam_mean = (/dt_mam_mean - dt_annual_mean/)
-    dt_jja_mean = (/dt_jja_mean - dt_annual_mean/)
-    dt_son_mean = (/dt_son_mean - dt_annual_mean/)
-    dt_djf_mean = (/dt_djf_mean - dt_annual_mean/)
+    ; dt_mam_mean = (/dt_mam_mean - dt_annual_mean/)
+    ; dt_jja_mean = (/dt_jja_mean - dt_annual_mean/)
+    ; dt_son_mean = (/dt_son_mean - dt_annual_mean/)
+    ; dt_djf_mean = (/dt_djf_mean - dt_annual_mean/)
 
 
 
@@ -246,7 +246,7 @@ print("*********开始画图********")
 ;画图
 ;;***************************************************************
   ; wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8-"+season+"wgt-mld")
-  wks   = gsn_open_wks("pdf", "混合层温度DT-long-term-mean-diff-annual")
+  wks   = gsn_open_wks("pdf", "混合层温度DT-long-term-mean-annual")
 
   res=True
   res@gsnFrame=False
@@ -254,11 +254,11 @@ print("*********开始画图********")
   res@gsnLeftStringFontHeightF=20.0
   
 
-  ; res@cnFillPalette = "NCV_jaisnd"
-   res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "NCV_jaisnd"
+   ; res@cnFillPalette = "BlueWhiteOrangeRed"
 
-  ; res@gsnSpreadColorStart = 130
-  ; res@gsnSpreadColorEnd = 253
+  res@gsnSpreadColorStart = 130
+  res@gsnSpreadColorEnd = 253
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -299,13 +299,13 @@ print("*********开始画图********")
   res@tmYLMajorThicknessF=3.0
   res@tmBorderThicknessF=4.0
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   0.00
-  ; res@cnMaxLevelValF       =   0.06
-  ; res@cnLevelSpacingF      =  0.005
+  res@cnMinLevelValF       =   0.00
+  res@cnMaxLevelValF       =   0.06
+  res@cnLevelSpacingF      =  0.005
 
-    res@cnMinLevelValF       =   -0.02
-    res@cnMaxLevelValF       =   0.02
-    res@cnLevelSpacingF      =  0.005
+    ; res@cnMinLevelValF       =   -0.02
+    ; res@cnMaxLevelValF       =   0.02
+    ; res@cnLevelSpacingF      =  0.005
 
 
   res@cnInfoLabelOn = False
