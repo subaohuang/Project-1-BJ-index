@@ -213,9 +213,7 @@ print("*******开始计算趋势系数*****************")
 
     ;;;
 
-   
 
-    
     r_total = (/r_total*yearnum/)
     r_total =(/dt_mean/)
     

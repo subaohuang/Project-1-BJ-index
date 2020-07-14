@@ -100,7 +100,7 @@ begin
 ;;;
 
 ;;;选择季节
-season = "MAM"
+season = "DJF"
 ;;;
 
 
@@ -257,7 +257,6 @@ season = "MAM"
      Tbox =dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
      copy_VarCoords(T(:,1,1,1), Tbox)
 
-     ; volume = sum(45*dy*45.58*dx({0:15})) 
 
      dT = center_finite_diff_n(Tbox, 1, False, 0, 0)
      copy_VarCoords(Tbox, dT)
