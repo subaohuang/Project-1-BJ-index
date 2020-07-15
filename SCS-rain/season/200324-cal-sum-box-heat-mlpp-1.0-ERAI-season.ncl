@@ -227,23 +227,19 @@ season = "DJF"
      dy = (pi/180)*1*6378388.
  
 
-      dz_3d_test = new(dimsizes(u(:,:,{-5:20},{100:160})),float)
-  
+    dz_3d_test = new(dimsizes(u(:,:,{-5:20},{100:160})),float)
 
-      printVarSummary(dz_3d_test)
-      printVarSummary(mlt(:,{-5:20},:))
-   
-      do i = 0,dimsizes(mlt&time)-1
-        dz_3d_test(i,:,:,:) = dpres_plevel(depth, mlt(i,{-5:20},:), 0, 0)
-      end do 
-      copy_VarCoords(u(:,:,{-5:20},{100:160}), dz_3d_test)
-      printVarSummary(dz_3d_test)
-      ; print(mlt(227,{10},{120}))
-    
-  
- 
 
-    
+    printVarSummary(dz_3d_test)
+
+
+    do i = 0,dimsizes(mlt&time)-1
+      dz_3d_test(i,:,:,:) = dpres_plevel(depth, mlt(i,{-5:20},:), 0, 0)
+    end do 
+    copy_VarCoords(u(:,:,{-5:20},{100:160}), dz_3d_test)
+    printVarSummary(dz_3d_test)
+    ; print(mlt(227,{10},{120}))
+
      dx_3d_test = conform_dims(dimsizes(T(:,:,{0:15},{110:155})) ,dx({0:15}) , 2)
 
 
@@ -254,9 +250,11 @@ season = "DJF"
      volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{0:15},{110:155})*dy, (/1,2,3/))
     
 
-     Tbox =dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
+     Tbox = dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
+    ; area = dy*dx({0:15})
+     ; Tbox  = wgt_volave(T(:,:,{0:15},{110:155}),dz_3d_test(1,:,1,1),dx({0:15}),dy,0)
      copy_VarCoords(T(:,1,1,1), Tbox)
-
+    
 
      dT = center_finite_diff_n(Tbox, 1, False, 0, 0)
      copy_VarCoords(Tbox, dT)
@@ -265,23 +263,26 @@ season = "DJF"
      Tbox_annual = month_to_season(Tbox, season)
     
 
-      if season.eq."DJF" then
-      ;;注意点
-        Tbox_annual(0:dimsizes(Tbox_annual&time)-2)=(/Tbox_annual(1:)/)
-        Tbox_annual(dimsizes(Tbox_annual&time)-1)=(/Tbox(dimsizes(Tbox&time)-1)/)
-       ;;;
-      end if
+      ; if season.eq."DJF" then
+      ; ;;注意点
+      ;   Tbox_annual(0:dimsizes(Tbox_annual&time)-2)=(/Tbox_annual(1:)/)
+      ;   Tbox_annual(dimsizes(Tbox_annual&time)-1)=(/Tbox(dimsizes(Tbox&time)-1)/)
+      ;  ;;;
+      ; end if
+      
+    ; ;;;;第二种方法求，先求年再求区域体积平均
+    ;   T_annual = month_to_season(T, season)
+    ;   T_annual_box = wgt_volave(T_annual(:,:,{0:15},{110:155}),dz_3d_test(1,:,1,1),dx({0:15}),dy,0)
+    ;   copy_VarCoords(T(:,1,1,1), T_annual_box)
+    ;   Tbox_annual = (/T_annual_box/)
+    ; ;;;;
 
-
-  
+   
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
      dT_wgt = dT_test
      dT_wgt(1:33) = Tbox_annual(1:33) - Tbox_annual(0:32)
 
 
-
-   
-     
 
     ;; lateral heat transport north and south v*(T -Tbox)dxdz,south: 0N ,110-155,north: 15N ,110-155
        x1 = 0
@@ -734,11 +735,7 @@ print("ocean_hadv_diff="+ocean_hadv_diff)
 
 
 
-     
     
-
-       
-exit()
 
 print("*********开始画图:时间序列********")
 

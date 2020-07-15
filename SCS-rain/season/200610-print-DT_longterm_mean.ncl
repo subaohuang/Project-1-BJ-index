@@ -152,7 +152,7 @@ begin
     wt_r = f4->wt(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     T_r = f5->temp(0:indyear,{0:330},{lat1:lat2},{lon1:lon2})
     mlt = f6->mld(0:indyear,{lat1:lat2},{lon1:lon2})
-    
+    printVarSummary(mlt)
     u = tofloat(u_r)
     v = tofloat(v_r)
     wt = tofloat(wt_r)
@@ -179,12 +179,28 @@ begin
     ; dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
       dz_4d = new(dimsizes(u),float)
       do i = 0,dimsizes(mlt&time)-1
-        dz_4d(i,:,:,:) = dpres_plevel(z, mlt(i,:,:), 0, 0)
-      end do 
+        dz_4d(i,:,:,:) = dpres_plevel(z, mlt(i,:,:), 0, 0)    ;;;each grid have different dz
+      end do
+      copy_VarCoords(u, dz_4d) 
     ;;;;
+    printVarSummary(dz_4d)
+
+    ;;parameter 
+    pi = get_pi("float")
+    dx = u&lat
+    dx = 6378388.*cos(0.0174533*u&lat)
+    dx!0 = "lat"
+    copy_VarCoords(u(1,1,:,1), dx)
+    dy = dx({0:15})
+    dy = (pi/180)*1*6378388.
+
+    ;;;wgt_area 
+    area = dx({0:15})*dy
+    printVarSummary(area)
+    
 
       
-    ;;;1混合层平均的
+    ;;;混合层平均的
      T_mean = T(:,1,:,:)
      u_mean = u(:,1,:,:)
      v_mean = v(:,1,:,:)
@@ -195,17 +211,46 @@ begin
      T_mean = (/dim_sum_n_Wrap(T*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)/)
      u_mean = (/dim_sum_n_Wrap(u*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)/)
      v_mean = (/dim_sum_n_Wrap(v*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)/)
-  
+     
+
+     T_mean_area = wgt_areaave(T_mean(:,{0:15},{110:155}), area, 1.0, 0)
+     copy_VarCoords(T_mean(:,1,1), T_mean_area)
+    ;;;
+
+
+
+ ;;;第二种方法求，先求年再求区域体积平均
+    dx_3d_test = conform_dims(dimsizes(T(:,:,{0:15},{110:155})) ,dx({0:15}) , 2)
+    dx_3d_test  = where(ismissing(T(:,:,{0:15},{110:155})), 0.0, dx_3d_test)
+    dz_3d_test = dz_4d
+    dz_3d_test  = where(ismissing(T), 0.0, dz_4d)
+
+    volume = dim_sum_n(dx_3d_test*dz_3d_test(:,:,{0:15},{110:155})*dy(0), (/1,2,3/))
+
+    T_mean_area = (/dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy(0)*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume/)
+    
+    ; T_mean_area = (/wgt_volave(T(:,:,{0:15},{110:155}),dz_4d(1,:,1,1),dx({0:15}),(pi/180)*1*6378388,0)/)
+
+    ; T_mean_area = (/dim_sum_n_Wrap(T_mean(:,{0:15},{110:155})*dy(0)*dx_3d_test(:,1,:,:), (/1,2/))/\
+    ;                dim_sum_n(dx_3d_test(:,1,:,:)*dy(0), (/1,2/))/)
     
 
-    ;;;
+  ;;;
 
     ;;;温度的梯度
 
-    T_mam_annual = month_to_season(T_mean, "MAM")
-    T_jja_annual = month_to_season(T_mean, "JJA")
-    T_son_annual = month_to_season(T_mean, "SON")
-    T_djf_annual = month_to_season(T_mean, "DJF")
+    T_mam_annual = month_to_season(T_mean_area, "MAM")
+    T_jja_annual = month_to_season(T_mean_area, "JJA")
+    T_son_annual = month_to_season(T_mean_area, "SON")
+    T_djf_annual = month_to_season(T_mean_area, "DJF")
+
+
+      ; ;;注意点
+      ;   T_djf_annual(0:dimsizes(T_djf_annual&time)-2)=(/T_djf_annual(1:)/)
+      ;   T_djf_annual(dimsizes(T_djf_annual&time)-1)=(/T_mean_area(dimsizes(T&time)-1)/)
+      ;  ;;;
+      
+      
 
     ; T_mam_annual = (/wgt_annual(T_mean, "MAM")/)
     ; T_jja_annual = (/wgt_annual(T_mean, "JJA")/)
@@ -213,7 +258,7 @@ begin
     ; T_djf_annual = (/wgt_annual(T_mean, "DJF")/)
 
 
-    T_annual = month_to_annual(T_mean, 1)
+    T_annual = month_to_annual(T_mean_area, 1)
 
     
     dT_mam  = T_mam_annual
@@ -226,13 +271,19 @@ begin
     dT_son = (/center_finite_diff_n(T_son_annual, 1, False, 0, 0) /)
     dT_djf = (/center_finite_diff_n(T_djf_annual, 1, False, 0, 0)/) 
     dT_annual = (/center_finite_diff_n(T_annual, 1, False, 0, 0)/) 
+     
+
+      dT_mam(1:33) = (/T_mam_annual(1:33) - T_mam_annual(0:32)/)
+      dT_jja(1:33) = (/T_jja_annual(1:33) - T_jja_annual(0:32)/)
+      dT_son(1:33) = (/T_son_annual(1:33) - T_son_annual(0:32)/)
+      dT_djf(1:33) = (/T_djf_annual(1:33) - T_djf_annual(0:32)/)
 
 
     dt_mam_mean = dim_avg_n_Wrap(dT_mam, 0)
  
 
-    dt_mam_mean&lat@units = "degree_north"
-    dt_mam_mean&lon@units = "degree_east"
+    ; dt_mam_mean&lat@units = "degree_north"
+    ; dt_mam_mean&lon@units = "degree_east"
 
     dt_jja_mean = dt_mam_mean
     dt_son_mean = dt_mam_mean
@@ -248,39 +299,10 @@ begin
 
 
 
-
-    ;;parameter 
-    pi = get_pi("float")
-    dx = u&lat
-    dx = 6378388.*cos(0.0174533*u&lat)
-    dx!0 = "lat"
-    copy_VarCoords(u(1,1,:,1), dx)
-    dy = dx({0:15})
-    dy = (pi/180)*1*6378388.
-
-   
-  
-    
-    ; dt_mam_area  = avg(dim_avg_n_Wrap(dt_mam_mean({0:15},{110:155}),0))
-    ; dt_jja_area  = avg(dim_avg_n_Wrap(dt_jja_mean({0:15},{110:155}),0))
-    ; dt_son_area  = avg(dim_avg_n_Wrap(dt_son_mean({0:15},{110:155}),0))
-    ; dt_djf_area  = avg(dim_avg_n_Wrap(dt_djf_mean({0:15},{110:155}),0))
-
-    ;;;wgt_area 
-    area = dx({0:15})*dy
-    printVarSummary(area)
-    
-    dt_mam_area = wgt_areaave(dt_mam_mean({0:15},{110:155}), area, 1.0, 0)
-    dt_jja_area = wgt_areaave(dt_jja_mean({0:15},{110:155}), area, 1.0, 0)
-    dt_son_area = wgt_areaave(dt_son_mean({0:15},{110:155}), area, 1.0, 0)
-    dt_djf_area = wgt_areaave(dt_djf_mean({0:15},{110:155}), area, 1.0, 0)
-
-
-
-    print(dt_mam_area)
-    print(dt_jja_area)
-    print(dt_son_area)
-    print(dt_djf_area)
+    print(dt_mam_mean)
+    print(dt_jja_mean)
+    print(dt_son_mean)
+    print(dt_djf_mean)
     exit()
 
 
