@@ -65,7 +65,7 @@ begin
     ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
     
     
-    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-15")
+    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-15-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -75,11 +75,11 @@ begin
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
   
-  res@cnFillPalette = "NCV_jaisnd"
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "NCV_jaisnd"
+   res@cnFillPalette = "BlueWhiteOrangeRed"
 
-  res@gsnSpreadColorStart = 130
-  res@gsnSpreadColorEnd = 253
+  ; res@gsnSpreadColorStart = 130
+  ; res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -88,15 +88,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -30
-  ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             =0
-  ; res@mpMaxLonF             = 360
+  res@mpMinLatF             = -60
+  res@mpMaxLatF             = 60
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
 
-  res@mpMinLatF             = 0
-  res@mpMaxLatF             = 15
-  res@mpMinLonF             =110
-  res@mpMaxLonF             = 155
+  ; res@mpMinLatF             = 0
+  ; res@mpMaxLatF             = 15
+  ; res@mpMinLonF             =110
+  ; res@mpMaxLonF             = 155
 
 
 
@@ -118,9 +118,12 @@ begin
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   0.2
+  ; res@cnMinLevelValF       =   0.2
+  ; res@cnMaxLevelValF       =   0.6
+  ; res@cnLevelSpacingF      =  0.05
+  res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.6
-  res@cnLevelSpacingF      =  0.05
+  res@cnLevelSpacingF      =  0.1
   res@cnInfoLabelOn = False
   
 
