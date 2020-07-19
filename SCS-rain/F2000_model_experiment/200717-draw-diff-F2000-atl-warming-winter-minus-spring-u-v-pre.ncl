@@ -21,9 +21,10 @@ return prob_p
 end 
 
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_spring/F_2000_atl_spring.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_autumn/F_2000_ind_autumn.cam.h0.0101-4012_chazhi.nc"  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_spring/F_2000_atl_spring.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_winter/F_2000_atl_winter.cam.h0.0101-4012_chazhi.nc"
 
 
   f1=addfile(fils1, "r")
@@ -85,7 +86,7 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic-winter-minus-spring")
 
     res=True
     res@gsnDraw=False
@@ -106,8 +107,8 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
+    res@cnMinLevelValF       =   -0.5
+    res@cnMaxLevelValF       =   0.5
     res@cnLevelSpacingF      =  0.1
     
 
@@ -181,7 +182,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.2/)
+    res_pro@cnLevels = (/0,0.5/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False

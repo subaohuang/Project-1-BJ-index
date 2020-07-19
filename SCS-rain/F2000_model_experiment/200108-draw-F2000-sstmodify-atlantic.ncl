@@ -15,9 +15,9 @@ begin
     SST_cpl = f1->SST_cpl(:,:,:)
    
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addatlanticwarming.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addatlanticwarming_1degree_south.nc"
     f2 = addfile(fils2, "r")
-       SST_cpl_indian= f2->SST_cpl(:,:,:)
+    SST_cpl_indian= f2->SST_cpl(:,:,:)
    
     
 
@@ -32,7 +32,7 @@ begin
 
 
 ;;; draw 
-   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-atlantic")
+   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-atlantic_1degree_south")
     
     res=True
     res@gsnDraw=False

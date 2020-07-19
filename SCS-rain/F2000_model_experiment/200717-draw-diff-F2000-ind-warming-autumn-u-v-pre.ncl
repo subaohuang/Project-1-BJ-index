@@ -21,6 +21,9 @@ return prob_p
 end 
 
 begin
+
+  season  = "SON"
+
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_autumn/F_2000_ind_autumn.cam.h0.0101-4012_chazhi.nc"  
@@ -45,9 +48,10 @@ begin
   PRE_id = PRECC_id
   PRE_id = (/PRECC_id+PRECL_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
+   
 
-  PRE_CT_clm = dim_avg_n_Wrap(PRE_CT, 0)
-  PRE_indian_clm = dim_avg_n_Wrap(PRE_id, 0)
+  PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season), 0)
+  PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season), 0)
 
   PRE_diff = PRE_CT_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
@@ -60,22 +64,22 @@ begin
   v_id  =  f2->V(timeind,{850},:,:)
 
 
-  u_CT_clm = dim_avg_n_Wrap(u_CT, 0)
-  u_indian_clm = dim_avg_n_Wrap(u_id, 0)
+  u_CT_clm = dim_avg_n_Wrap(month_to_season(u_CT, season), 0)
+  u_indian_clm = dim_avg_n_Wrap(month_to_season(u_id, season), 0)
 
   u_diff = u_CT_clm
   u_diff = (/u_indian_clm - u_CT_clm/)
 
-  v_CT_clm = dim_avg_n_Wrap(v_CT, 0)
-  v_indian_clm = dim_avg_n_Wrap(v_id, 0)
+  v_CT_clm = dim_avg_n_Wrap(month_to_season(v_CT, season), 0)
+  v_indian_clm = dim_avg_n_Wrap(month_to_season(v_id, season), 0)
 
   v_diff = v_CT_clm
   v_diff = (/v_indian_clm - v_CT_clm/)
 
   ;;;t_test 
-    prob_p = t_test(PRE_CT,PRE_id)
-    prob_u = t_test(u_CT,u_id)
-    prob_v = t_test(v_CT,v_id)
+    prob_p = t_test( month_to_season(PRE_CT, season) ,month_to_season(PRE_id, season))
+    prob_u = t_test( month_to_season(u_CT, season) ,month_to_season(u_id, season))
+    prob_v = t_test( month_to_season(v_CT, season) ,month_to_season(v_id, season))
   ;;;
    PRE_diff@_FillValue = 10^9
    u_diff@_FillValue = 10^9
@@ -85,7 +89,7 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian-"+season)
 
     res=True
     res@gsnDraw=False
@@ -106,9 +110,9 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
-    res@cnLevelSpacingF      =  0.1
+    res@cnMinLevelValF       =   -2
+    res@cnMaxLevelValF       =   2
+    res@cnLevelSpacingF      =  0.2
     
 
     res@tmXTOn=False
@@ -181,7 +185,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.2/)
+    res_pro@cnLevels = (/0,0.01/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False
