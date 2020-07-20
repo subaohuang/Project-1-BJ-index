@@ -1,9 +1,46 @@
-;;;************************************************************
+ ;;;************************************************************
 ;; read CFSR latent heating and convection heating
 ;; convert to nc data
 ;;avg region over scs and philipian sea
 ;; linshuheng 2019.12.31
 ;;;*********************************************************
+undef("remove_enso_signal")
+function remove_enso_signal(data)
+  begin  
+    ;;;读入HadiSST海温数据
+    diri="/home/ys17-19/lsh/data/sst/"
+    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+    f1=addfile(fils1, "r")
+    date:=cd_calendar(f1->time, 1)
+
+    timeind:=ind(date.le.201012.and.date.ge.197901)
+    sst =  lonFlip(f1->sst(timeind,:,:))
+    ssta=(/rmMonAnnCycTLL(sst)/)
+    copy_VarCoords(sst, ssta)
+    ssta_de = ssta
+    ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+    printVarSummary(ssta_index)
+    nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+    printVarSummary(nino3_4)
+    ; nino3_4_new = nino3_4                ;;;;前期ENSO
+    ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+    ; nino3_4_new(34) =ssta_index(35*12-1) 
+    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+;;;;;
+    dim = dimsizes(data)
+    data_de=(/dtrend_msg_n(ispan(1,dim(0),1),data,False,True,0)/) 
+    data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+    copy_VarCoords(data(1,:,:,:), data_rc)
+    data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2,3/))
+    m = data_rc_3d 
+    m = (/data_rc@yintercept(0)/)
+
+    data_relate_enso  = data_de*data_rc_3d + m 
+    data_new = data 
+    data_new = (/data - data_relate_enso/)
+  return data_new
+end 
 ; ==============================================================
 ; Mission 1. read data
 ; ==============================================================
@@ -79,6 +116,8 @@ print("finish read data")
     dimz = dimsizes(var1_annual)
     yr_length = dimz(0)
 
+    var1_annual = (/remove_enso_signal(var1_annual)/)
+
     var1_annual_rc = regCoef_n(ispan(1,yr_length,1), var1_annual,0,0)
     copy_VarCoords(var1_annual(1,:,:,:), var1_annual_rc)
     var1_annual_rc = var1_annual_rc*yr_length
@@ -99,7 +138,7 @@ print("finish read data")
     y(0,:)= (/var1_clim_area/)
     y(1,:)= y(0,:)+(/var1_annual_rc_area/)
 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/diabatic_heating_CFSR_"+season+"_clm_change_profile_2010.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/diabatic_heating_CFSR_"+season+"_clm_change_profile_2010_remove_enso.nc"
 
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file
@@ -113,16 +152,21 @@ print("finish read data")
     var2 = deepcon_q
 
     ; var2_annual = month_to_annual(var2,1)
-     var2_annual = month_to_season(var2, season)
+    var2_annual = month_to_season(var2, season)
     var2_annual!0="time" 
+    var2_clim = dim_avg_n_Wrap(var2_annual,0)
+
+
     dimz = dimsizes(var2_annual)
     yr_length = dimz(0)
+
+    var2_annual = (/remove_enso_signal(var2_annual)/)
 
     var2_annual_rc = regCoef_n(ispan(1,yr_length,1), var2_annual,0,0)
     copy_VarCoords(var2_annual(1,:,:,:), var2_annual_rc)
     var2_annual_rc = var2_annual_rc*yr_length
 
-    var2_clim = dim_avg_n_Wrap(var2_annual,0)
+    
     var2_clim_area = wgt_areaave_Wrap(var2_clim(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
 
     var2_annual_rc_area = wgt_areaave_Wrap(var2_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
@@ -131,7 +175,7 @@ print("finish read data")
     y2(0,:)= (/var2_clim_area/)
     y2(1,:)= y2(0,:)+(/var2_annual_rc_area/)
 
-    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/deepcon_heating_CFSR_"+season+"_clm_change_profile_2010.nc"
+    g_data_out_path = "/home/ys17-19/lsh/Project/SCS-rain/season/deepcon_heating_CFSR_"+season+"_clm_change_profile_2010_remove_enso.nc"
 
     system("rm "+g_data_out_path)
     ncdf = addfile(g_data_out_path ,"c")  ; open output netCDF file

@@ -220,7 +220,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2013-去�
 
    
      do i=0,3
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.2,opt)
      overlay(plot(i), iplot(i))
   end do
 

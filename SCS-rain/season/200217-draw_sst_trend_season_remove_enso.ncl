@@ -25,8 +25,9 @@ end
 
 function remove_enso_signal(data,nino3_4)
   begin  
-    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/)
-    data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+    ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/)
+    data_de = data
+    data_rc = regCoef_n(nino3_4,data, 0, 0)
     copy_VarCoords(data(1,:,:), data_rc)
     data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
     m = data_rc_3d 
@@ -38,9 +39,6 @@ function remove_enso_signal(data,nino3_4)
     data_new = (/data - data_relate_enso/)
   return data_new
 end 
-
-
-
 
 ;;**************************************************************
 ;;;main program
@@ -61,7 +59,7 @@ begin
     copy_VarCoords(sst, ssta)
 
     ssta_de = ssta
-    ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
     printVarSummary(ssta_index)
 
@@ -72,7 +70,7 @@ begin
     ; nino3_4_new(0:33) = (/nino3_4(1:)/)
     ; nino3_4_new(34) =ssta_index(35*12-1) 
 
-    nino3_4 = (/dim_standardize_n(nino3_4_new, 1, 0)/)
+    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
 
     ;;;
     
@@ -106,7 +104,7 @@ begin
     
   
 
-    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-global")
+    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-global-没去趋势做回归")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -129,8 +127,8 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
+  res@mpMinLatF             = -60
+  res@mpMaxLatF             = 60
   res@mpMinLonF             =0
   res@mpMaxLonF             = 360
 
