@@ -23,7 +23,7 @@ end
 begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_north/F_2000_atl_1degree_north.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_south/F_2000_atl_1degree_south.cam.h0.0101-4012_chazhi.nc"  
 
 
   f1=addfile(fils1, "r")
@@ -85,7 +85,7 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-altantic_1degree")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-altantic_1degree-south")
 
     res=True
     res@gsnDraw=False
@@ -119,7 +119,11 @@ begin
     res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 30.0
     res@mpMaxLonF             = 160.0
-
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+   
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
@@ -181,7 +185,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.2/)
+    res_pro@cnLevels = (/0,0.1/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False

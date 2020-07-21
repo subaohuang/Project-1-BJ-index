@@ -17,11 +17,11 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_north/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_south/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=F_2000_atl_1degree_north
+modelname=F_2000_atl_1degree_south
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 

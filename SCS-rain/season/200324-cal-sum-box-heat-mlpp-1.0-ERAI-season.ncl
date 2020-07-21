@@ -251,8 +251,6 @@ season = "DJF"
     
 
      Tbox = dim_sum_n_Wrap(T(:,:,{0:15},{110:155})*dy*dx_3d_test*dz_3d_test(:,:,{0:15},{110:155}), (/1,2,3/))/volume
-    ; area = dy*dx({0:15})
-     ; Tbox  = wgt_volave(T(:,:,{0:15},{110:155}),dz_3d_test(1,:,1,1),dx({0:15}),dy,0)
      copy_VarCoords(T(:,1,1,1), Tbox)
     
 
@@ -270,12 +268,7 @@ season = "DJF"
       ;  ;;;
       ; end if
       
-    ; ;;;;第二种方法求，先求年再求区域体积平均
-    ;   T_annual = month_to_season(T, season)
-    ;   T_annual_box = wgt_volave(T_annual(:,:,{0:15},{110:155}),dz_3d_test(1,:,1,1),dx({0:15}),dy,0)
-    ;   copy_VarCoords(T(:,1,1,1), T_annual_box)
-    ;   Tbox_annual = (/T_annual_box/)
-    ; ;;;;
+    
 
    
      dT_test = center_finite_diff_n(Tbox_annual, 1, False, 0, 0)
@@ -515,8 +508,16 @@ season = "DJF"
     shtfl = (/shtfl/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
     nswrs = (/nswrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
     nlwrs = (/nlwrs/(24*3600)/)  ;;units j/m^2 (12hour) to w/m^2
+    
+    lhtfl_clm = dim_avg_n_Wrap(lhtfl, 0)
+    lhtfl_ocean = lhtfl
 
-
+    sst = (/sst +273.1/)
+    lhtfl_ocean = (/0.06*conform_dims(dimsizes(lhtfl), lhtfl_clm, (/1,2/))*sst(:,{lat1:lat2},{lon1:lon2})/)
+    printVarSummary(lhtfl_ocean)
+    
+    lhtfl = (/lhtfl + lhtfl_ocean/) 
+ 
 
     ;;;nswrs_pen 
      R = 0.58
@@ -550,6 +551,7 @@ season = "DJF"
       nswrs = 30*86400*nswrs/coef
       nlwrs = 30*86400*nlwrs/coef
       nswrs_pen = 30*86400*nswrs_pen/coef
+
     ;;;
 
     Q_net = lhtfl
@@ -743,7 +745,7 @@ print("*********开始画图:时间序列********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-0.8-ERAI-"+season)
+  wks   = gsn_open_wks("pdf", "all-heat-flux-contribute2BOXSST-wgt-all-component-mlpp-0.8-ERAI-"+season+"remove_ocean_latent")
   plot=new(1,graphic)
   
   resxy = True
