@@ -38,7 +38,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201312.and.date.ge.197901)
 
     sst=f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -65,7 +65,7 @@ begin
     ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
     
     
-    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-15-global")
+    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

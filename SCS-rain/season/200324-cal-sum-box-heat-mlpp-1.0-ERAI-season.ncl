@@ -512,11 +512,11 @@ season = "DJF"
     lhtfl_clm = dim_avg_n_Wrap(lhtfl, 0)
     lhtfl_ocean = lhtfl
 
-    sst = (/sst +273.1/)
-    lhtfl_ocean = (/0.06*conform_dims(dimsizes(lhtfl), lhtfl_clm, (/1,2/))*sst(:,{lat1:lat2},{lon1:lon2})/)
-    printVarSummary(lhtfl_ocean)
+    ; sst = (/sst +273.1/)
+    ; lhtfl_ocean = (/0.06*conform_dims(dimsizes(lhtfl), lhtfl_clm, (/1,2/))*sst(:,{lat1:lat2},{lon1:lon2})/)
+    ; printVarSummary(lhtfl_ocean)
     
-    lhtfl = (/lhtfl + lhtfl_ocean/) 
+    ; lhtfl = (/lhtfl + lhtfl_ocean/) 
  
 
     ;;;nswrs_pen 
