@@ -22,11 +22,11 @@ end
 
 begin
 
-  season = "MAM"
+  season = "DJF"
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_spring/F_2000_atl_spring.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_spring_notest/F_2000_atl_spring_notest.cam.h0.0101-4012_chazhi.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_winter/F_2000_atl_winter.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_winter_notest/F_2000_atl_winter_notest.cam.h0.0101-4012_chazhi.nc"
 
 
 
@@ -90,7 +90,7 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic-"+season+"-notest")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic-"+season+"-notest-scs")
 
     res=True
     res@gsnDraw=False
@@ -108,12 +108,16 @@ begin
     res@cnRasterSmoothingOn=True
 
     res@cnFillPalette = "precip_diff_12lev"
-
+    ; res@cnFillPalette ="BlRe"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.2
+    ; res@cnMinLevelValF       =   -2
+    ; res@cnMaxLevelValF       =   2
+    ; res@cnLevelSpacingF      =  0.2
+    
+    res@cnMinLevelValF       =   -1
+    res@cnMaxLevelValF       =   1
+    res@cnLevelSpacingF      =  0.1
     
 
     res@tmXTOn=False
@@ -125,10 +129,16 @@ begin
     ; res@mpMinLonF             = 0.0
     ; res@mpMaxLonF             = 360.0
 
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 30.0
-    res@mpMaxLonF             = 160.0
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 30.0
+    ; res@mpMaxLonF             = 160.0
+
+    res@mpMinLatF             = 0.0
+    res@mpMaxLatF             = 15.0
+    res@mpMinLonF             = 110.0
+    res@mpMaxLonF             = 155.0
+
 
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False

@@ -4,12 +4,22 @@
 ;;lnshuheng 2019.12.24
 ;**********************************************************
 load "/home/ys17-19/lsh/Project/other/function_lin/function_lin.ncl"
-function cal_trend(data,season)
+; function cal_trend(data,season)
+;   begin
+;   dim = dimsizes(data)
+;     p_rc=regCoef_n(ispan(1, dim(0), 1), data, 0, 0)
+;     copy_VarCoords(data(1,:,:), p_rc)
+;     p_rc=(/p_rc*dim(0)/)
+;   return p_rc
+; end 
+function cal_trend(data)
   begin
-  dim = dimsizes(data)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), data, 0, 0)
+    dim = dimsizes(data)
+    p_mk=trend_manken(data, False, 0)
+    p_rc = p_mk(1,:,:)
     copy_VarCoords(data(1,:,:), p_rc)
     p_rc=(/p_rc*dim(0)/)
+    p_rc@prob = p_mk(0,:,:)
   return p_rc
 end 
 
@@ -68,15 +78,36 @@ begin
     p_djf = (/remove_enso_signal(p_djf,nino3_4)/)
     
   
-    rc_mam = cal_trend(p_mam,"MAM")
-    rc_jja = cal_trend(p_jja,"JJA")
-    rc_son = cal_trend(p_son,"SON")
-    rc_djf = cal_trend(p_djf,"DJF")
+    ; rc_mam = cal_trend(p_mam,"MAM")
+    ; rc_jja = cal_trend(p_jja,"JJA")
+    ; rc_son = cal_trend(p_son,"SON")
+    ; rc_djf = cal_trend(p_djf,"DJF")
 
-    prob_mam=rc_test(rc_mam)
-    prob_jja=rc_test(rc_jja)
-    prob_son=rc_test(rc_son)
-    prob_djf=rc_test(rc_djf)
+    ; prob_mam=rc_test(rc_mam)
+    ; prob_jja=rc_test(rc_jja)
+    ; prob_son=rc_test(rc_son)
+    ; prob_djf=rc_test(rc_djf)
+
+    rc_mam = cal_trend(p_mam)
+    rc_jja = cal_trend(p_jja)
+    rc_son = cal_trend(p_son)
+    rc_djf = cal_trend(p_djf)
+
+    ; prob_mam=rc_test(rc_mam)
+    ; prob_jja=rc_test(rc_jja)
+    ; prob_son=rc_test(rc_son)
+    ; prob_djf=rc_test(rc_djf)
+    
+    prob_mam = 1- rc_mam@prob
+    prob_jja = 1- rc_jja@prob
+    prob_son = 1- rc_son@prob
+    prob_djf = 1- rc_djf@prob
+
+
+    copy_VarCoords(p_mam(1,:,:), prob_mam)
+    copy_VarCoords(p_mam(1,:,:), prob_jja)
+    copy_VarCoords(p_mam(1,:,:), prob_son)
+    copy_VarCoords(p_mam(1,:,:), prob_djf)
     
     
 wks   = gsn_open_wks("pdf", "不同季节ERA降水的趋势-scs-1979-2013-去掉ENSO影响")

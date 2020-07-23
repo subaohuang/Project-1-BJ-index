@@ -15,16 +15,27 @@ begin
 return prob
 end
 
+; function cal_season_trend(data,season)
+;   begin
+;     p_djf_r=month_to_season(data, season)
+;     dim = dimsizes(p_djf_r)
+;     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)  
+;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
+;     p_rc=(/p_rc*dim(0)/)
+;   return p_rc
+; end 
+
 function cal_season_trend(data,season)
   begin
     p_djf_r=month_to_season(data, season)
     dim = dimsizes(p_djf_r)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
+    p_mk=trend_manken(p_djf_r, False, 0)
+    p_rc = p_mk(1,:,:)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
     p_rc=(/p_rc*dim(0)/)
+    p_rc@prob = p_mk(0,:,:)
   return p_rc
 end 
-
 begin
     f2=addfile("/home/yangsong3/data-observation/ERA-interim/monthly/precipitation/ERAI-pre-1degree.nc", "r")
     date=cd_calendar(f2->time, 1)
@@ -42,11 +53,22 @@ begin
     rc_son = cal_season_trend(p_pi,"SON")
     rc_djf = cal_season_trend(p_pi,"DJF")
 
-    prob_mam=rc_test(rc_mam)
-    prob_jja=rc_test(rc_jja)
-    prob_son=rc_test(rc_son)
-    prob_djf=rc_test(rc_djf)
+    ; prob_mam=rc_test(rc_mam)
+    ; prob_jja=rc_test(rc_jja)
+    ; prob_son=rc_test(rc_son)
+    ; prob_djf=rc_test(rc_djf)
     
+    prob_mam = 1- rc_mam@prob
+    prob_jja = 1- rc_jja@prob
+    prob_son = 1- rc_son@prob
+    prob_djf = 1- rc_djf@prob
+
+
+    copy_VarCoords(p_pi(1,:,:), prob_mam)
+    copy_VarCoords(p_pi(1,:,:), prob_jja)
+    copy_VarCoords(p_pi(1,:,:), prob_son)
+    copy_VarCoords(p_pi(1,:,:), prob_djf)
+
     
 wks   = gsn_open_wks("pdf", "不同季节ERA降水的趋势-scs-1979-2015")
 ;;**************************************************************

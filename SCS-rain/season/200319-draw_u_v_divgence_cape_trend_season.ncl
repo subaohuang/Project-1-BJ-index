@@ -20,7 +20,7 @@ begin
 ;;==========================================================
     ;;;read data
     path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-    var_name = (/"uwnd","vwnd","air","shum"/)
+    var_name = (/"uwnd","vwnd","air","shum.total"/)
     filein = path_wind + var_name +".mon.mean.nc"
         
     ; ;;;region 
@@ -39,7 +39,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -147,6 +147,10 @@ do i = 0,3
      cape_annual = month_to_season(cape, season(i))
      olr_annual = month_to_season(olr, season(i))
 
+     if season(i).eq."DJF"
+        cape_annual(0:dimsizes(cape_annual&time)-2,:,:) = cape_annual(1:,:,:) 
+        cape_annual(dimsizes(cape_annual&time)-1,:,:) = cape(dimsizes(cape&time)-1,:,:)
+     end if 
 
    ;;;
 
@@ -175,7 +179,7 @@ do i = 0,3
 
  
 
-   ;;回归
+   ;;趋势
    u_rc := regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
    v_rc := regCoef_n(ispan(1, yearnum, 1), v_annual, 0, 0)
    d_rc := regCoef_n(ispan(1, yearnum, 1), d_annual, 0, 0)
@@ -197,10 +201,15 @@ do i = 0,3
    cape_rc = (/cape_rc*yearnum/)
    olr_rc = (/olr_rc*yearnum/)
 
-   ; sta_s_rc = dim_avg_n_Wrap(sta_s_annual, 0)
-
-
-   ;;;
+   ; ; sta_s_rc = dim_avg_n_Wrap(sta_s_annual, 0)
+   ;  cape_mk = trend_manken(cape_annual, False, 0)
+   ;  cape_rc = cape_mk(1,:,:)
+   ;  cape_rc = (/cape_rc*yearnum/)
+   ;  copy_VarCoords(cape_annual(1,:,:), cape_rc)
+   ;  prob_cape_rc = 1 - cape_mk(0,:,:)
+   ;  copy_VarCoords(cape_rc, prob_cape_rc)
+   ;  printVarSummary(prob_cape_rc)
+   ; ;;;
 
    ;;;显著性检验
     
@@ -208,7 +217,7 @@ do i = 0,3
     prob_v = rc_test(v_rc)
     prob_d = rc_test(d_rc)
     prob_sta_s = rc_test(sta_s_rc)
-    prob_cape_rc = rc_test(cape_rc)
+    ; prob_cape_rc = rc_test(cape_rc)
     prob_olr_rc = rc_test(olr_rc)
 
    ;;;

@@ -19,23 +19,47 @@ begin
 return prob
 end
 
+; function cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
+; begin
+;   ;;;;Q component
+;     Q_rc  = regCoef_n(ispan(1, yearnum, 1), era_divQ_delta, 0, 0)
+;     copy_VarCoords(era_divQ_delta(1,:,:), Q_rc)
+;     Q_rc = (/Q_rc*yearnum/)
+    
+;     era_wgt_qu_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qu_delta, 0, 0)
+;     copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qu_delta_rc)
+;     era_wgt_qu_delta_rc = (/era_wgt_qu_delta_rc*yearnum/)
+
+;     era_wgt_qv_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qv_delta, 0, 0)
+;     copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qv_delta_rc)
+;     era_wgt_qv_delta_rc = (/era_wgt_qv_delta_rc*yearnum/)
+;  return [/Q_rc,era_wgt_qu_delta_rc,era_wgt_qv_delta_rc/]
+;  end
 function cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
-begin
+  begin
   ;;;;Q component
-    Q_rc  = regCoef_n(ispan(1, yearnum, 1), era_divQ_delta, 0, 0)
+ 
+    Q_mk  = trend_manken(era_divQ_delta, False, 0)
+    Q_rc = Q_mk(1,:,:)
     copy_VarCoords(era_divQ_delta(1,:,:), Q_rc)
     Q_rc = (/Q_rc*yearnum/)
+    Q_rc@prob = Q_mk(0,:,:)
     
-    era_wgt_qu_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qu_delta, 0, 0)
-    copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qu_delta_rc)
-    era_wgt_qu_delta_rc = (/era_wgt_qu_delta_rc*yearnum/)
+    era_wgt_qu_delta_mk  = trend_manken(era_wgt_qu_delta, False, 0)
+    era_wgt_qu_delta_rc = era_wgt_qu_delta_mk(1,:,:)
+     copy_VarCoords(era_wgt_qu_delta(1,:,:), era_wgt_qu_delta_rc)
 
-    era_wgt_qv_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qv_delta, 0, 0)
-    copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qv_delta_rc)
+    era_wgt_qu_delta_rc = (/era_wgt_qu_delta_rc*yearnum/)
+    era_wgt_qu_delta_rc@prob = era_wgt_qu_delta_mk(0,:,:)
+
+    era_wgt_qv_delta_mk  = trend_manken(era_wgt_qv_delta, False, 0)
+    era_wgt_qv_delta_rc = era_wgt_qv_delta_mk(1,:,:)
+    copy_VarCoords(era_wgt_qv_delta(1,:,:), era_wgt_qv_delta_rc)
     era_wgt_qv_delta_rc = (/era_wgt_qv_delta_rc*yearnum/)
+    era_wgt_qv_delta_rc@prob = era_wgt_qv_delta_mk(0,:,:)
+
  return [/Q_rc,era_wgt_qu_delta_rc,era_wgt_qv_delta_rc/]
  end
-
 
 begin
 
@@ -145,19 +169,32 @@ begin
    plot_tp = plot
 
    str = "" + ispan(1,4,1) + ""
-    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季")
+    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季-mk")
 
 do i = 0,3    
       era_divQ_bar = month_to_season(DivQ, season(i))
+       if season(i).eq."DJF"
+          era_divQ_bar(0:dimsizes(era_divQ_bar&time)-2,:,:) = era_divQ_bar(1:,:,:) 
+          era_divQ_bar(dimsizes(era_divQ_bar&time)-1,:,:) = DivQ(dimsizes(DivQ&time)-1,:,:)
+        end if 
       era_divQ_delta = dim_rmvmean_n_Wrap(era_divQ_bar, 0)
 
       printVarSummary(era_divQ_delta)
 
       ;;;得到divQ_bar的两个箭头
       era_wgt_qu_annual = month_to_season(era_wgt_qu, season(i))
+        if season(i).eq."DJF"
+          era_wgt_qu_annual(0:dimsizes(era_wgt_qu_annual&time)-2,:,:) = era_wgt_qu_annual(1:,:,:) 
+          era_wgt_qu_annual(dimsizes(era_wgt_qu_annual&time)-1,:,:) = era_wgt_qu(dimsizes(era_wgt_qu&time)-1,:,:)
+        end if 
       era_wgt_qu_delta =  dim_rmvmean_n_Wrap(era_wgt_qu_annual, 0)
 
+
       era_wgt_qv_annual = month_to_season(era_wgt_qv, season(i))
+       if season(i).eq."DJF"
+          era_wgt_qv_annual(0:dimsizes(era_wgt_qv_annual&time)-2,:,:) = era_wgt_qv_annual(1:,:,:) 
+          era_wgt_qv_annual(dimsizes(era_wgt_qv_annual&time)-1,:,:) = era_wgt_qv(dimsizes(era_wgt_qv&time)-1,:,:)
+        end if 
       era_wgt_qv_delta =  dim_rmvmean_n_Wrap(era_wgt_qv_annual, 0)
 
       era_wgt_qu_delta = (/era_wgt_qu_delta*9.8/)
@@ -174,9 +211,19 @@ do i = 0,3
     qu_rc  =  Q_rc[1]
     qv_rc  =  Q_rc[2]
 
-    prob_q = rc_test(q_rc)
-    prob_qu = rc_test(qu_rc)
-    prob_qv = rc_test(qv_rc)
+    ; prob_q = rc_test(q_rc)
+    ; prob_qu = rc_test(qu_rc)
+    ; prob_qv = rc_test(qv_rc)
+
+    prob_q = 1- q_rc@prob
+    prob_qu = 1- qu_rc@prob
+    prob_qv = 1- qv_rc@prob
+
+    copy_VarCoords(q_rc, prob_q)
+    copy_VarCoords(q_rc, prob_qv)
+    copy_VarCoords(q_rc, prob_qu)
+    
+
    
     qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
 
