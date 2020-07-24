@@ -59,6 +59,8 @@ begin
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
+    lat = f1->latitude
+    lon = f1->longitude
 
     timeind:=ind(date.le.201312.and.date.ge.197901)
 
@@ -99,6 +101,28 @@ begin
     iplot1 = iplot
     season =  (/"MAM","JJA","SON","DJF"/)
 
+;;;area mean 
+  rad    = 4.0*atan(1.0)/180.0
+  re     = 6371220.0
+  rr     = re*rad
+
+  dlon   = abs(lon(2)-lon(1))*rr
+  dx     = dlon*cos(lat*rad)
+  ;          
+  jlat  = dimsizes( lat )
+  dy     = new ( jlat, typeof(dx))      ; close enough
+  
+  dy(0)  = abs(lat(2)-lat(1))*rr
+  dy(1:jlat-2)  = abs(lat(2:jlat-1)-lat(0:jlat-3))*rr*0.5   
+  dy(jlat-1)    = abs(lat(jlat-1)-lat(jlat-2))*rr
+
+  area   = dx*dy                                ; cell area function of latitude only
+  copy_VarCoords(lat, area)
+  printVarSummary(area)
+;;;;
+
+
+
 do i =0,3
   ; ;;;region
   ;  lat1 = -5
@@ -117,6 +141,11 @@ do i =0,3
     ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season(i))
     printVarSummary(ssta_annual)
 
+    ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
+    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) , 0, 0)
+    ssta_index_rc  =ssta_index_rc*yearnum
+
+
     ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
 
     ;;;sst 倾向值
@@ -131,7 +160,7 @@ do i =0,3
     copy_VarCoords(ssta_annual, dsst_annual)
     
     p_annual = month_to_season(p_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-
+    p_annual_rc = regCoef_n(ispan(1,dimsizes(p_annual&time),1), p_annual, 0, 0)
     p_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),p_annual,False,True,0)/)
 
    
@@ -146,7 +175,8 @@ do i =0,3
    ; lon1 = 110
    ; lon2 = 155
 
-   ssta_index = dim_avg_n_Wrap(ssta_annual(:,{-30:0},{300:360}), (/1,2/))
+   
+   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) 
    dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:0},{300:360}), (/1,2/))
 
    ;;;normalized 
@@ -168,6 +198,13 @@ print("*******开始计算相关系数*****************")
     copy_VarCoords(dsst_annual(0,:,:), r_dsst_p)
 ;;;
 
+
+;;;;回归一致性 
+    r_sst_p = (/r_sst_p*ssta_index_rc/)
+    print(""+season(i)+"="+ssta_index_rc)
+    ; print(ssta_index_rc)
+
+;;;;
 ;;;;
  
     ;;;;;
@@ -178,6 +215,8 @@ print("*******开始计算相关系数*****************")
     ;;;t test 
     prob_p1= rc_test(r_sst_p)
     prob_p2= rc_test(r_dsst_p)
+
+    ; prob_p1 = (/rc_test(p_annual_rc)/)
     printVarSummary(prob_p1)
     prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
     prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
@@ -228,10 +267,12 @@ print("*******开始计算相关系数*****************")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.1
-
+  ; res@cnMinLevelValF       =   -1.0
+  ; res@cnMaxLevelValF       =   1.0
+  ; res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -0.3
+  res@cnMaxLevelValF       =   0.3
+  res@cnLevelSpacingF      =  0.05
  
   res@gsnLeftString = season(i)+"_SST&GPCP"
   plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)

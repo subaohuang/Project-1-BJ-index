@@ -114,8 +114,8 @@ begin
 ;;;; 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数-season")
-    wks1   = gsn_open_wks("pdf", "GPCP回归到印度洋dSST的回归系数-season")
+    wks   = gsn_open_wks("pdf", "GPCP回归到scs的SST的一致性系数-season")
+    wks1   = gsn_open_wks("pdf", "GPCP回归到scs的dSST的一致性系数-season")
     plot=new(4,graphic)
     plot1 = plot  
     str = (/"1","2","3","4"/)
@@ -147,7 +147,7 @@ do i =0,3
     ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
 
 
-    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-10:10},{30:110}), area({-10:10}), 1.0, 0) , 0, 0)
+    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{0:15},{110:155}), area({0:15}), 1.0, 0) , 0, 0)
     ssta_index_rc  =ssta_index_rc*yearnum
 
     ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
@@ -179,8 +179,8 @@ do i =0,3
    ; lon1 = 110
    ; lon2 = 155
 
-   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-10:10},{40:100}), area({-10:10}), 1.0, 0) 
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:30},{30:110}), (/1,2/))
+   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:15},{110:155}), area({0:15}), 1.0, 0) 
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:15},{110:155}), (/1,2/))
 
    ;;;normalized 
    

@@ -95,6 +95,7 @@ begin
      ; sst_rc = sst_rc*10
 
      sst_rc = sst_rc*yearnum
+     sst_rc = where(sst_rc.eq.0, sst_rc@_FillValue, sst_rc)
 
      copy_VarCoords(sst_annual(1,:,:), sst_rc)
 
@@ -121,11 +122,19 @@ begin
   
     prob_sst_p = rc_test(sst_p_rc)
 
+    prob_sst_p = prob_sst
    ;;;;
+
+  ;;;对线性一致性进行f检验
+    
+
 
   ;;;趋势一致性
 
     sst_p_rc = (/sst_p_rc*p_rc/)
+    ; sst_p_rc = (/sst_p_rc*p_rc/sst_rc/)
+    ; sst_p_rc = where(prob_sst.le.0.05, sst_p_rc, sst_p_rc@_FillValue)
+
   ;;;;
     
 
@@ -195,6 +204,9 @@ print("==========finish preprocessing data =============")
   res@cnMinLevelValF       =   -0.5
   res@cnMaxLevelValF       =   0.5
   res@cnLevelSpacingF      =  0.1
+  ;   res@cnMinLevelValF       =   -1.0
+  ; res@cnMaxLevelValF       =   1.0
+  ; res@cnLevelSpacingF      =  0.2
 
   res@gsnLeftString = "(b)"+season(i)+"-SST linearly congruent with GPCP Pr"
     
