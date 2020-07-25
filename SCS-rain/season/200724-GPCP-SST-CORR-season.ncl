@@ -101,10 +101,10 @@ begin
 
 do i =0,3
   ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 160
+   lat1 = -60
+   lat2 = 60
+   lon1 = 0
+   lon2 = 360
   ;;;
 
  
@@ -174,7 +174,7 @@ do i =0,3
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlueRed"
+  res@cnFillPalette="BlueDarkRed18"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
