@@ -17,11 +17,11 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_winter_notest/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_winter/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=F_2000_ind_winter_notest
+modelname=F_2000_tro_winter
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 

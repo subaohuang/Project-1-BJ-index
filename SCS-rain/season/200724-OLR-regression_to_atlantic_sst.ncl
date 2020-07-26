@@ -75,24 +75,23 @@ begin
 ;;;
 
 
-;;;read GPCP precipitation data
-    
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
-    date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
-    p=f2->precip(timeind,:,:)
-    printVarSummary(p)
-    
-
-    p_chazhi = chazhi(p)
+;;;read noaa-olr  data
+   ;;;;
+   f2 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+   date:=cd_calendar(f2->time, 1)
+   timeind :=ind(date.ge.startmon.and.date.le.endmon)
+   olr = short2flt(f2->olr(timeind,::-1,:))
+   printVarSummary(olr)
+   ;;;
+    p_chazhi = chazhi(olr)
     printVarSummary(p_chazhi)
  
     p_chazhi=(/rmMonAnnCycTLL(p_chazhi)/)
 ;;;; 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到南大西洋SST的回归系数-season")
-    wks1   = gsn_open_wks("pdf", "GPCP回归到南大西洋dSST的回归系数-season")
+    wks   = gsn_open_wks("pdf", "olr回归到北大西洋SST的回归系数-season")
+    wks1   = gsn_open_wks("pdf", "olr回归到北大西洋dSST的回归系数-season")
     plot=new(4,graphic)
     plot1 = plot  
     str = (/"1","2","3","4"/)
@@ -142,7 +141,7 @@ do i =0,3
     printVarSummary(ssta_annual)
 
     ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
-    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) , 0, 0)
+    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) , 0, 0)
     ssta_index_rc  =ssta_index_rc*yearnum
 
 
@@ -176,8 +175,8 @@ do i =0,3
    ; lon2 = 155
 
    
-   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) 
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:0},{300:360}), (/1,2/))
+   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) 
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:30},{300:360}), (/1,2/))
 
    ;;;normalized 
    
@@ -217,13 +216,11 @@ print("*******开始计算相关系数*****************")
     prob_p2= rc_test(r_dsst_p)
 
     ; prob_p1 = (/rc_test(p_annual_rc)/)
-    ; prob_p1 = (/r_sst_p/p_annual_rc/)
-
-
     printVarSummary(prob_p1)
     prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
     prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-;;;;
+
+  ;;;;
 
 
   print("*********开始画图********")
@@ -237,7 +234,7 @@ print("*******开始计算相关系数*****************")
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="MPL_BrBG"
+  res@cnFillPalette="BlueRed"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -269,16 +266,14 @@ print("*******开始计算相关系数*****************")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -1.0
-  ; res@cnMaxLevelValF       =   1.0
-  ; res@cnLevelSpacingF      =  0.1
-  res@cnMinLevelValF       =   -0.3
-  res@cnMaxLevelValF       =   0.3
-  res@cnLevelSpacingF      =  0.05
+  res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.1
+  
  
-  res@gsnLeftString = season(i)+"_SST&GPCP"
+  res@gsnLeftString = season(i)+"_SST&0LR"
   plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)
-  res@gsnLeftString = season(i)+"_DSST&GPCP"
+  res@gsnLeftString = season(i)+"_DSST&OLR"
   plot1(i) = gsn_csm_contour_map(wks1, r_dsst_p, res)
  
   ;;;添加赤道直线
@@ -348,8 +343,8 @@ print("*******开始计算相关系数*****************")
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
-     iplot(i) = gsn_contour_shade(iplot(i) , 0.0,0.1,opt)
-     iplot1(i) = gsn_contour_shade(iplot1(i) , 0.0,0.1,opt)
+     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
+     iplot1(i) = gsn_contour_shade(iplot1(i) , 0,0.1,opt)
 
 
     ;;;  
