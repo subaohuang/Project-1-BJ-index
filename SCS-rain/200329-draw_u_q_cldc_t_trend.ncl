@@ -190,15 +190,15 @@ begin
 
 
    ;;;云量的数据以及趋势
-    ; f4=addfile("/home/ys17-19/lsh/data/ICOADS/cldc.mean.nc", "r")
-    ; f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/cldc.mean.nc", "r")
+    ; f4=addfile("/home/ys17-19/lsh/data/ICOADS/ssta.mean.nc", "r")
+    ; f4=addfile("/home/yangsong3/data-observation/ICOADS2/Enhanced/ssta.mean.nc", "r")
 
     ; date:=cd_calendar(f4->time, 1)
     ; timeind:=ind(date.ge.198001.and.date.le.201312)
-    ; cldc = short2flt(f4->cldc(timeind,:,:))
-    ; delete(cldc&time)
-    ; cldc&time=date(timeind)
-    ; printVarSummary(cldc)
+    ; ssta = short2flt(f4->ssta(timeind,:,:))
+    ; delete(ssta&time)
+    ; ssta&time=date(timeind)
+    ; printVarSummary(ssta)
 
     
     yearin  = ispan(1980, 2013, 1)
@@ -212,36 +212,36 @@ begin
     lon = f4[1]->longitude
   
 
-      cldc = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+      ssta = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
    
     do i = 0,dimsizes(timeind)/12-1
-      cldc(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
+      ssta(i*12:(i+1)*12-1,:,:) = short2flt(f4[i]->tcc(:,:,:))
     end do
     ; ;;;插值，missing value值给去掉，只能限制longitude的5点和纬向的1点
     ; opt=(/0,5/)
     ; ;;先插值lon方向的
-    ; cldc=(/linmsg_n(cldc, opt, 2)/)
+    ; ssta=(/linmsg_n(ssta, opt, 2)/)
     ; ;;插值lat方向的
     ; opt=(/0,1/)
-    ; cldc=(/linmsg_n(cldc, opt, 1)/)
+    ; ssta=(/linmsg_n(ssta, opt, 1)/)
     ; delete(opt)
-    cldc_annual  = month_to_annual(cldc(:,{lat1:lat2},{lon1:lon2}), 1)
+    ssta_annual  = month_to_annual(ssta(:,{lat1:lat2},{lon1:lon2}), 1)
     ;;;
 
 
 
-    cldc_annual&year = ispan(1, 34, 1)
-    printVarSummary(cldc_annual)
+    ssta_annual&year = ispan(1, 34, 1)
+    printVarSummary(ssta_annual)
 
-    cldc_annual_tropical=dim_avg_n_Wrap(month_to_annual(cldc(:,{-30:30},:),1), (/1,2/))
-    do i=0,dimsizes(cldc_annual&year)-1
-        cldc_annual(i,:,:)=(/cldc_annual(i,:,:)-cldc_annual_tropical(i)/)
+    ssta_annual_tropical=dim_avg_n_Wrap(month_to_annual(ssta(:,{-30:30},:),1), (/1,2/))
+    do i=0,dimsizes(ssta_annual&year)-1
+        ssta_annual(i,:,:)=(/ssta_annual(i,:,:)-ssta_annual_tropical(i)/)
     end do
     ;;
 
-    cldc_rc = regCoef_n(ispan(1, yearnum, 1), cldc_annual, 0, 0)
-    copy_VarCoords(cldc_annual(1,:,:), cldc_rc)
-    cldc_rc = (/cldc_rc*yearnum/)
+    ssta_rc = regCoef_n(ispan(1, yearnum, 1), ssta_annual, 0, 0)
+    copy_VarCoords(ssta_annual(1,:,:), ssta_rc)
+    ssta_rc = (/ssta_rc*yearnum/)
     
 
 
@@ -282,7 +282,7 @@ begin
     prob_q = rc_test(q_rc)
     prob_u = rc_test(u_rc)
     prob_t = rc_test(t_rc)
-    prob_cldc = rc_test(cldc_rc)
+    prob_ssta = rc_test(ssta_rc)
    ;;;
 
  
@@ -348,7 +348,7 @@ begin
   ; res@vpWidthF=0.8
   plot = new(4, graphic)
   
-  plot(0) = gsn_csm_contour_map(wks,cldc_rc,res)
+  plot(0) = gsn_csm_contour_map(wks,ssta_rc,res)
   res@gsnLeftString  = "Ts - Ta"
   res@cnMinLevelValF       =   -1.0
   res@cnMaxLevelValF       =   1.0
@@ -413,7 +413,7 @@ begin
     iplot = new(4,graphic)
   
   
-    iplot(0) = gsn_csm_contour(wks,prob_cldc,res_pro)
+    iplot(0) = gsn_csm_contour(wks,prob_ssta,res_pro)
     iplot(1) = gsn_csm_contour(wks,prob_t,res_pro)
     iplot(2) = gsn_csm_contour(wks,prob_u,res_pro)
     iplot(3) = gsn_csm_contour(wks,prob_q,res_pro)
