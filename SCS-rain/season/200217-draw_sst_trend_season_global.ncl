@@ -17,7 +17,12 @@ end
 
 function cal_season_trend(data,season)
   begin
+
     p_djf_r=month_to_season(data, season)
+      if season.eq."DJF"
+      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+    end if
     dim = dimsizes(p_djf_r)
     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
@@ -38,7 +43,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)

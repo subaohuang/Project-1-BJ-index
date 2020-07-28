@@ -45,7 +45,7 @@ begin
     
     ;;convert units to mm/day
     p_pi = cp
-    p_pi = (/lsp + cp/)
+    p_pi = (/lsp/)
     p_pi = p_pi*10^3
 
     rc_mam = cal_season_trend(p_pi,"MAM")
@@ -70,7 +70,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节ERA降水的趋势-scs-1979-2015")
+wks   = gsn_open_wks("pdf", "不同季节ERA-大尺度降水的趋势-scs-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

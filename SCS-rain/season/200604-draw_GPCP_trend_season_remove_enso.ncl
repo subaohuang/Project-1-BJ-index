@@ -20,7 +20,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst =  lonFlip(f1->sst(timeind,:,:))
  
@@ -46,7 +46,7 @@ begin
 ;;;;;
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
+    timeind:=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -76,7 +76,7 @@ begin
     prob_djf=rc_test(rc_djf)
     
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2013-去掉ENSO影响")
+wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2015-去掉ENSO影响")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
