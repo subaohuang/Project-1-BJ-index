@@ -18,7 +18,8 @@ end
 
 function change(lhtfl,season)
 begin 
-    lhtfl_annual = month_to_season(lhtfl, season)
+    ; lhtfl_annual = month_to_season(lhtfl, season)
+    lhtfl_annual = month_to_annual(lhtfl, 1)
     lhtfl_change = lhtfl_annual(1,:,:)
     dim  = dimsizes(lhtfl_annual)
     rc = regCoef_n(ispan(1, dim(0), 1), lhtfl_annual,0,0)
@@ -97,7 +98,7 @@ begin
 
   season = (/"MAM","JJA","SON","DJF"/)
 
-  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-四季-global")
+  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-annual-global")
 
   plot = new(12,graphic)
   str = "" + ispan(1,dimsizes(plot),1)
