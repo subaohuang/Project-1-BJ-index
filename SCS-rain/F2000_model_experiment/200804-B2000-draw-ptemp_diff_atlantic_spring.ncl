@@ -21,9 +21,10 @@ return prob_p
 end 
 begin
 
-season = "DJF"
-  fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_test/B2000_alt_north_spring_test.TEMP.251-260.nc"
+season = "MAM"
+  ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -37,8 +38,8 @@ season = "DJF"
     date2=cd_calendar(time2, 1)
 
 
-    timeind1=ind(date1.ge.25101.and.date1.le.26012)
-    timeind2=ind(date2.ge.25101.and.date2.le.26012)
+    timeind1=ind(date1.ge.25101.and.date1.le.28012)
+    timeind2=ind(date2.ge.25101.and.date2.le.28012)
 
 
     PSL_CT  =  f1->TEMP(timeind1,:,:)
@@ -76,7 +77,7 @@ season = "DJF"
     
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-"+season)
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-"+season+"-0280+")
     
     res=True
     res@gsnDraw=False
@@ -101,9 +102,9 @@ season = "DJF"
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.2
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
+    res@cnLevelSpacingF      =  0.1
     
     ; res@cnMinLevelValF       =   -1.5
     ; res@cnMaxLevelValF       =   1.5
