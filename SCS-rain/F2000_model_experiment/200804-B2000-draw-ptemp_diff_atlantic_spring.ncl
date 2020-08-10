@@ -24,7 +24,7 @@ begin
 season = "MAM"
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
   fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_WNPCLM_spring/B2000_alt_north_spring_WNPCLM.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -77,7 +77,7 @@ season = "MAM"
     
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-"+season+"-0280+")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-WNPCLM"+season+"-0280")
     
     res=True
     res@gsnDraw=False
@@ -97,7 +97,10 @@ season = "MAM"
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+
+    gsn_define_colormap(wks, "BlueRed")
+ 
  
 
 

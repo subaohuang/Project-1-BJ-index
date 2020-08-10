@@ -22,14 +22,13 @@ end
 begin
 
     season = "MAM"
-    fils1 = "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECC.mon.0250-0299.nc"  
-    fils1a= "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECL.mon.0250-0299.nc"  
-
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_WNPCLM_spring/B2000_alt_north_spring_WNPCLM.cam.h0.0251-0280.nc"  
     fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.cam.h0.0251-0280.nc"
+    
 
   
     f1=addfile(fils1, "r")
-    f1a=addfile(fils1a, "r")
+  
     f2=addfile(fils2, "r")
     
     time1 = f1->time
@@ -45,7 +44,7 @@ begin
     
 
 
-    PRECL_CT  =  f1a->PRECL(timeind1,:,:)
+    PRECL_CT  =  f1->PRECL(timeind1,:,:)
     PRECC_CT  =  f1->PRECC(timeind1,:,:)
 
     PRE_CT = PRECC_CT
@@ -72,7 +71,7 @@ begin
     PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-"+season+"-0280")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-minus-WNPCLM-"+season+"-0280")
     
     res=True
     res@gsnDraw=False
@@ -97,13 +96,13 @@ begin
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; res@cnMinLevelValF       =   -0.5
-    ; res@cnMaxLevelValF       =   0.5
-    ; res@cnLevelSpacingF      =  0.1
-    
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
+    res@cnMinLevelValF       =   -0.5
+    res@cnMaxLevelValF       =   0.5
     res@cnLevelSpacingF      =  0.1
+    
+    ; res@cnMinLevelValF       =   -1.0
+    ; res@cnMaxLevelValF       =   1.0
+    ; res@cnLevelSpacingF      =  0.1
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
