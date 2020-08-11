@@ -22,7 +22,7 @@ end
 
 begin
 
-  season = "DJF"
+  season = "MAM"
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_winter/F_2000_atl_winter.cam.h0.0101-4012_chazhi.nc"  
@@ -40,6 +40,7 @@ begin
   PRECC_CT  =  f1->PRECC(timeind,:,:)
 
   PRE_CT = PRECC_CT
+
   PRE_CT = (/PRECC_CT+PRECL_CT/)
   PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
@@ -90,12 +91,12 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic-"+season+"-notest-scs")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-atlantic-winter-notest-global-MAM")
 
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
-    res@gsnAddCyclic=True
+    res@gsnAddCyclic=False
 
 
     res@cnLineColors="Transparent"  ;
@@ -111,9 +112,9 @@ begin
     ; res@cnFillPalette ="BlRe"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    ; res@cnMinLevelValF       =   -2
-    ; res@cnMaxLevelValF       =   2
-    ; res@cnLevelSpacingF      =  0.2
+    ; res@cnMinLevelValF       =   -0.3
+    ; res@cnMaxLevelValF       =   0.3
+    ; res@cnLevelSpacingF      =  0.05
     
     res@cnMinLevelValF       =   -1
     res@cnMaxLevelValF       =   1
@@ -124,23 +125,24 @@ begin
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -30.0
-    ; res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 0.0
-    ; res@mpMaxLonF             = 360.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
+    res@mpMinLonF             = 0.0
+    res@mpMaxLonF             = 360.0
+
 
     ; res@mpMinLatF             = -30.0
     ; res@mpMaxLatF             = 30.0
     ; res@mpMinLonF             = 30.0
     ; res@mpMaxLonF             = 160.0
 
-    res@mpMinLatF             = 0.0
-    res@mpMaxLatF             = 15.0
-    res@mpMinLonF             = 110.0
-    res@mpMaxLonF             = 155.0
+    ; res@mpMinLatF             = 0.0
+    ; res@mpMaxLatF             = 15.0
+    ; res@mpMinLonF             = 110.0
+    ; res@mpMaxLonF             = 155.0
 
 
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
+    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5

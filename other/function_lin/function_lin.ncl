@@ -42,16 +42,42 @@ end
 undef("remove_enso_signal")
 function remove_enso_signal(data,nino3_4)
   begin  
-    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-    data_rc = regCoef_n(nino3_4,data_de, 0, 0)
-    copy_VarCoords(data(1,:,:), data_rc)
-    data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
-    m = data_rc_3d 
-    m = (/data_rc@yintercept(0)/)
+  ; ;;;读入HadiSST海温数据
+  ;     diri="/home/ys17-19/lsh/data/sst/"
+  ;     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+  ;     f1=addfile(fils1, "r")
+  ;     date:=cd_calendar(f1->time, 1)
 
-    data_relate_enso  = data_de*data_rc_3d + m 
-    data_new = data 
-    data_new = (/data - data_relate_enso/)
+  ;     timeind:=ind(date.le.201512.and.date.ge.197901)
+
+  ;     sst =  lonFlip(f1->sst(timeind,:,:))
+   
+  ;     ssta=(/rmMonAnnCycTLL(sst)/)
+  ;     copy_VarCoords(sst, ssta)
+
+  ;     ssta_de = ssta
+  ;     ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+  ;     ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+  ;     printVarSummary(ssta_index)
+
+  ;     nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+  ;     printVarSummary(nino3_4)
+      
+  ;     ; nino3_4_new = nino3_4                ;;;;前期ENSO
+  ;     ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+  ;     ; nino3_4_new(34) =ssta_index(35*12-1) 
+  ;     nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+  ;;;;;
+      data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+      copy_VarCoords(data(1,:,:), data_rc)
+      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
+      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
+  
+      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
+      data_new = data 
+      data_new = (/data - data_relate_enso/)
   return data_new
 end 
 

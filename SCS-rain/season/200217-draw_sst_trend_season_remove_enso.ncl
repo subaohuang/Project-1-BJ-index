@@ -25,16 +25,14 @@ end
 
 function remove_enso_signal(data,nino3_4)
   begin  
-    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/)
-    ; data_de = data
+    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
     data_rc = regCoef_n(nino3_4,data_de, 0, 0)
     copy_VarCoords(data(1,:,:), data_rc)
     data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
-    m = data_rc_3d 
-    m = (/data_rc@yintercept(0)/)
-    printVarSummary(data_rc_3d)
-    printVarSummary(m)
-    data_relate_enso  = data_de*data_rc_3d + m 
+    m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+    nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
+
+    data_relate_enso  = nino3_4_3d*data_rc_3d + m 
     data_new = data 
     data_new = (/data - data_relate_enso/)
   return data_new

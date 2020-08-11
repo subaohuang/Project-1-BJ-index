@@ -15,64 +15,53 @@ begin
 return prob
 end
 
-function cal_season_trend(data,season)
-  begin
-  p_djf_r=month_to_season(data, season)
-   if season.eq."DJF"
-      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
-      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
-    end if
-    p_djf_r=month_to_season(data, season)
-    dim = dimsizes(p_djf_r)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
-    copy_VarCoords(p_djf_r(1,:,:), p_rc)
-    p_rc=(/p_rc*dim(0)/)
-  return p_rc
-end 
 ; function cal_season_trend(data,season)
 ;   begin
 ;     p_djf_r=month_to_season(data, season)
-
-;     if season.eq."DJF"
-;       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
-;       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
-;     end if
 ;     dim = dimsizes(p_djf_r)
-;     p_mk=trend_manken(p_djf_r, False, 0)
-;     p_rc = p_mk(1,:,:)
+;     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)  
 ;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
 ;     p_rc=(/p_rc*dim(0)/)
-;     p_rc@prob = p_mk(0,:,:)
 ;   return p_rc
 ; end 
 
+function cal_season_trend(data,season)
+  begin
+    p_djf_r=month_to_season(data, season)
+    dim = dimsizes(p_djf_r)
+    p_mk=trend_manken(p_djf_r, False, 0)
+    p_rc = p_mk(1,:,:)
+    copy_VarCoords(p_djf_r(1,:,:), p_rc)
+    p_rc=(/p_rc*dim(0)/)
+    p_rc@prob = p_mk(0,:,:)
+  return p_rc
+end 
 begin
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    f2=addfile("/home/yangsong3/data-observation/20thCRV2/prate.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
     timeind=ind(date.ge.197901.and.date.le.201512)
-    p=f2->precip(timeind,:,:)
-   
-    delete(p&time)
-    p&time=date(timeind)
-    printVarSummary(p)
-    p_pi = p
+    lsp=f2->prate(timeind,:,:)  ;;;units are m
     
+    
+    ;;convert units to mm/day
+    p_pi = lsp
+    p_pi = (/lsp/)
+    p_pi = 86400*10^3*p_pi/10^3
 
-   
     rc_mam = cal_season_trend(p_pi,"MAM")
     rc_jja = cal_season_trend(p_pi,"JJA")
     rc_son = cal_season_trend(p_pi,"SON")
     rc_djf = cal_season_trend(p_pi,"DJF")
 
-    prob_mam=rc_test(rc_mam)
-    prob_jja=rc_test(rc_jja)
-    prob_son=rc_test(rc_son)
-    prob_djf=rc_test(rc_djf)
+    ; prob_mam=rc_test(rc_mam)
+    ; prob_jja=rc_test(rc_jja)
+    ; prob_son=rc_test(rc_son)
+    ; prob_djf=rc_test(rc_djf)
     
-    ; prob_mam = 1- rc_mam@prob
-    ; prob_jja = 1- rc_jja@prob
-    ; prob_son = 1- rc_son@prob
-    ; prob_djf = 1- rc_djf@prob
+    prob_mam = 1- rc_mam@prob
+    prob_jja = 1- rc_jja@prob
+    prob_son = 1- rc_son@prob
+    prob_djf = 1- rc_djf@prob
 
 
     copy_VarCoords(p_pi(1,:,:), prob_mam)
@@ -81,7 +70,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2015")
+wks   = gsn_open_wks("pdf", "不同季节-20CR-大尺度降水的趋势-scs-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

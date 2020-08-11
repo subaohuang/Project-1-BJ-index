@@ -3,7 +3,7 @@
 ;;
 ;;lnshuheng 2019.12.24
 ;**********************************************************
-load "/home/ys17-19/lsh/Project/other/function_lin/function_lin.ncl"
+; load "/home/ys17-19/lsh/Project/other/function_lin/function_lin.ncl"
 ; function cal_trend(data,season)
 ;   begin
 ;   dim = dimsizes(data)
@@ -22,7 +22,20 @@ function cal_trend(data)
     p_rc@prob = p_mk(0,:,:)
   return p_rc
 end 
+function remove_enso_signal(data,nino3_4)
+  begin  
+    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+    data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+    copy_VarCoords(data(1,:,:), data_rc)
+    data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
+    m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+    nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
 
+    data_relate_enso  = nino3_4_3d*data_rc_3d + m 
+    data_new = data 
+    data_new = (/data - data_relate_enso/)
+  return data_new
+end 
 begin
 ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
@@ -30,7 +43,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst =  lonFlip(f1->sst(timeind,:,:))
  
@@ -56,7 +69,7 @@ begin
     ;;;;;
     f2=addfile("/home/yangsong3/data-observation/ERA-interim/monthly/precipitation/ERAI-pre-1degree.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201312)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     lsp=f2->lsp(timeind,:,:)  ;;;units are m
     cp=f2->cp(timeind,:,:)   
 

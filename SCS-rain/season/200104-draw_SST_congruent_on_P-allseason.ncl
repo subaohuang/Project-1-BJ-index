@@ -14,11 +14,29 @@ begin
 return prob
 end
 
+undef("remove_enso_signal")
+function remove_enso_signal(data,nino3_4)
+  begin  
+  ;;;;;
+      data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+      copy_VarCoords(data(1,:,:), data_rc)
+      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
+      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
+  
+      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
+      data_new = data 
+      data_new = (/data - data_relate_enso/)
+  return data_new
+end 
+
+
 begin
 ;;;读入GPCP降水场
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
+    timeind:=ind(date.ge.197901.and.date.le.201512)
     p_t=f2->precip(timeind,:,:)
 ;;;;
 
@@ -42,7 +60,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -67,7 +85,20 @@ begin
     sst = (/rmMonAnnCycTLL(sst)/)
     p_t = (/rmMonAnnCycTLL(p_t)/)
 
+    ;;;nino3_4
+    ssta_de = sst
+    ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(sst&time),1),sst,False,True,0)/)
+    ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+    printVarSummary(ssta_index)
 
+    nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+    printVarSummary(nino3_4)
+
+    ; nino3_4_new = nino3_4                ;;;;前期ENSO
+    ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+    ; nino3_4_new(34) =ssta_index(35*12-1) 
+    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+    ;;;;
 
      ;;;choose season
 
@@ -78,6 +109,7 @@ begin
      iplot =new(8,graphic)
      str = ispan(1, 8, 1) +""
      wks   = gsn_open_wks("pdf", "sst_congruent_on_P-"+"allseason")
+     wks   = gsn_open_wks("pdf", "sst_congruent_on_P-"+"allseason-remove-enso")
 
  do i=0,3
    ;;;处理成年异常数据
@@ -106,6 +138,15 @@ begin
 
      sst_annual = (/dtrend_msg_n(ispan(1,dim(0),1),sst_annual,False,True,0)/)
      p_annual = (/dtrend_msg_n(ispan(1,dim(0),1),p_annual,False,True,0)/)
+  ;;;;
+
+  
+  ;;;回归去掉ENSO的影响
+
+     sst_annual = (/remove_enso_signal(sst_annual,nino3_4)/) 
+     p_nino_rc = regCoef_n(nino3_4,p_annual, 0, 0)
+     p_annual_relate_enso  = nino3_4*p_nino_rc + p_nino_rc@yintercept
+     p_annual = (/p_annual - p_annual_relate_enso/)
 
 
   ;;回归
