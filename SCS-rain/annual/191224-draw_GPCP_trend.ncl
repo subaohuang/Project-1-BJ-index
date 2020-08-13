@@ -62,14 +62,14 @@ end
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =90
-  ; res@mpMaxLonF             = 160
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             = 60
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 45
+  res@mpMinLonF             =90
+  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
 
 

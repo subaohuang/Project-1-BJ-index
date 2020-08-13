@@ -183,15 +183,15 @@ plot(0) = gsn_csm_contour_map(wks,ssta(1,:,:),res)
 draw(plot)
 frame(wks)
 print("done draw")
-exit()
+; exit()
 
 ;;;;;
 
 
   ;;;;
 ;;-----------------------写入nc文件---------------------------
-    system("/bin/rm -f /home/ys17-19/lsh/CESM-data/B/modify_sst/Had_sst_addatlanticwarming_"+"year.nc")   ; remove any pre-existing file
-    ncdf = addfile("/home/ys17-19/lsh/CESM-data/B/modify_sst/Had_sst_addatlanticwarming_"+"year.nc","c")  ; open output netCDF file
+    system("/bin/rm -f /home/ys17-19/lsh/CESM-data/B/modify_sst/Had_sst_addpacificwarming_"+"year.nc")   ; remove any pre-existing file
+    ncdf = addfile("/home/ys17-19/lsh/CESM-data/B/modify_sst/Had_sst_addpacificwarming_"+"year.nc","c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
 

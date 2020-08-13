@@ -280,80 +280,88 @@ begin
 
        print("start triple loops")
        printMinMax(mlt_scs, 1)
-
+      
+      ;;;modifyed by shuhenglin in 20200823
+      x1 = 0
+      x2 = 20
+      y1  = 110.5
+      y2 = 155
+      ;;;;;
        wt_mlt = wt(:,4,{x1:x2},{y1:y2})
        T_mlt = T(:,4,{x1:x2},{y1:y2})
        T_mlt_diff = T(:,4,{x1:x2},{y1:y2})
        wt_mlt_dh  = wt(:,4,{x1:x2},{y1:y2})
        
        ; exit()
-    
-       ; ;;;将wt进行垂直方向差值，为了得到更加精确的结果
-       ;     print("开始差值")
-       ;      xi  = wt&depth 
-       ;      xo = ispan(5,330,5)
-
-       ;      wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-       ;      T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
-
-       ;      dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
-       ;      dhdt!0 = "time"
-       ;      dhdt!1 = "lat"
-       ;      dhdt!2 = "lon"
-       ;      copy_VarCoords(mlt, dhdt)
-       ;      printVarSummary(dhdt)
       
-       ;      delete(wt)
-       ;      delete(T)
-       ;    printVarSummary(wt_chazhi)
+ 
+
+       ;;;将wt进行垂直方向差值，为了得到更加精确的结果
+           print("开始差值")
+            xi  = wt&depth 
+            xo = ispan(5,330,5)
+
+            wt_chazhi = linint1_n_Wrap(xi,wt(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+            T_chazhi = linint1_n_Wrap(xi,T(:,:,{x1:x2},{y1:y2}),False,xo,0,1)
+
+            dhdt = center_finite_diff_n(mlt, 30*86400, False, 0, 0)
+            dhdt!0 = "time"
+            dhdt!1 = "lat"
+            dhdt!2 = "lon"
+            copy_VarCoords(mlt, dhdt)
+            printVarSummary(dhdt)
+      
+            delete(wt)
+            delete(T)
+          printVarSummary(wt_chazhi)
         
-       ;   ; ;    ;;mlt变化引起温度的变化，可以不考虑 
+         ; ;    ;;mlt变化引起温度的变化，可以不考虑 
 
-       ;   do i = 0,dim(0)-1
-       ;      do j = 0,dim(1)-1
-       ;         do k = 0,dim(2)-1
-       ;            ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-       ;             ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
-       ;             ; print(mlt_scs(i,j,k))
-       ;             wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
+         do i = 0,dim(0)-1
+            do j = 0,dim(1)-1
+               do k = 0,dim(2)-1
+                  ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})+dhdt(i,{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+                   ; wtT(i,:,:) = (wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}))*(T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i))
+                   ; print(mlt_scs(i,j,k))
+                   wt_mlt(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2})
 
-       ;             T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) 
-       ;             T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
-       ;             wt_mlt_dh(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) + dhdt(i,{x1:x2},{y1:y2})
-       ;         end do 
-       ;        end do
-       ;   end do
-       ;    ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
-       ;    ;;;;写nc文件,简单的方法  
-       ;     system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc")   ; remove any pre-existing file
+                   T_mlt(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) 
+                   T_mlt_diff(i,:,:) = T_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) - Tbox(i)
+                   wt_mlt_dh(i,:,:) = wt_chazhi(i,{mlt_scs(i,j,k)},{x1:x2},{y1:y2}) + dhdt(i,{x1:x2},{y1:y2})
+               end do 
+              end do
+         end do
+          ; wt_mlt_dh = where(wt_mlt_dh.gt.0, wt_mlt_dh, wt_mlt_dh@_FillValue)
+          ;;;;写nc文件,简单的方法  
+           system("/bin/rm -f SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc")   ; remove any pre-existing file
             
-       ;    ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc" ,"c")  ; open output netCDF file
+          ncdf = addfile("SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc" ,"c")  ; open output netCDF file
 
-       ;    ;===================================================================
-       ;    ; create global attributes of the file (optional)
-       ;    ;===================================================================
-       ;       fAtt               = True            ; assign file attributes
-       ;       fAtt@title         = "SODA3.4.2 wt and T in mld,mld is defined by 1.0 density criterion"
-       ;       fAtt@Conventions   = "None"
-       ;       fAtt@creation_date = systemfunc ("date")
-       ;       fileattdef( ncdf, fAtt )            ; copy file attributes
+          ;===================================================================
+          ; create global attributes of the file (optional)
+          ;===================================================================
+             fAtt               = True            ; assign file attributes
+             fAtt@title         = "SODA3.4.2 wt and T in mld,mld is defined by 1.0 density criterion"
+             fAtt@Conventions   = "None"
+             fAtt@creation_date = systemfunc ("date")
+             fileattdef( ncdf, fAtt )            ; copy file attributes
 
-       ;    ;===================================================================
-       ;    ; make time an UNLIMITED dimension; recommended  for most applications
-       ;    ;===================================================================
-       ;       filedimdef(ncdf,"time",-1,True) 
+          ;===================================================================
+          ; make time an UNLIMITED dimension; recommended  for most applications
+          ;===================================================================
+             filedimdef(ncdf,"time",-1,True) 
 
-       ;    ;===================================================================
-       ;    ; output variables directly; NCL will call appropriate functions
-       ;    ; to write the meta data associated with each variable
-       ;    ;===================================================================
-       ;       ncdf->wt_mlt  = wt_mlt                          ; 4D      
-       ;       ncdf->wt_mlt_dh  = wt_mlt_dh                          ; 4D            
-       ;       ncdf->T_mlt = T_mlt  
-       ;       ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
+          ;===================================================================
+          ; output variables directly; NCL will call appropriate functions
+          ; to write the meta data associated with each variable
+          ;===================================================================
+             ncdf->wt_mlt  = wt_mlt                          ; 4D      
+             ncdf->wt_mlt_dh  = wt_mlt_dh                          ; 4D            
+             ncdf->T_mlt = T_mlt  
+             ncdf->T_mlt_diff = T_mlt_diff                    ; 3D 
 
-       ;    ;;;;
-       ;    exit()
+          ;;;;
+          exit()
 
 ;;;;;;
        f1 = addfile("/home/ys17-19/lsh/Project/SCS-rain//extend_to_2015/SODA3.4.2_wt_T_in_MLD_density_defined_0.8_2015.nc", "r")

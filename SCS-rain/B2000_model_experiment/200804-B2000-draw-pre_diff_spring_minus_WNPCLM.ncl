@@ -22,8 +22,8 @@ end
 begin
 
     season = "MAM"
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_WNPCLM_spring/B2000_alt_north_spring_WNPCLM.cam.h0.0251-0280.nc"  
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.cam.h0.0251-0280.nc"
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_WNPCLM_spring/B2000_alt_north_year_WNPCLM.cam.h0.0251-0280.nc"  
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_year.cam.h0.0251-0280.nc"
     
 
   
@@ -39,8 +39,8 @@ begin
     date2=cd_calendar(time2, 1)
 
 
-    timeind1=ind(date1.ge.25101.and.date1.le.28012)
-    timeind2=ind(date2.ge.25101.and.date2.le.28012)
+    timeind1=ind(date1.ge.25601.and.date1.le.28012)
+    timeind2=ind(date2.ge.25601.and.date2.le.28012)
     
 
 

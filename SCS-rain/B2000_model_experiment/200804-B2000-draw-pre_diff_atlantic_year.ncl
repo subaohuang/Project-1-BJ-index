@@ -25,7 +25,7 @@ begin
     fils1 = "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECC.mon.0250-0299.nc"  
     fils1a= "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECL.mon.0250-0299.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM/B2000_alt_north_year_WNPCLM.cam.h0.0251-0280.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280.nc"
 
   
     f1=addfile(fils1, "r")
@@ -40,8 +40,8 @@ begin
     date2=cd_calendar(time2, 1)
 
 
-    timeind1=ind(date1.ge.25101.and.date1.le.28012)
-    timeind2=ind(date2.ge.25101.and.date2.le.28012)
+    timeind1=ind(date1.ge.25601.and.date1.le.28012)
+    timeind2=ind(date2.ge.25601.and.date2.le.28012)
     
 
 
