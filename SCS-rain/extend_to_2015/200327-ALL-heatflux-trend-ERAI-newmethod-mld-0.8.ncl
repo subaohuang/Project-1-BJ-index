@@ -112,19 +112,31 @@ begin
 
      
     ;;;;垂直积分平均，在混合层内进行
- 
-
- 
      z = u&depth 
      printVarSummary(mlt)
      printVarSummary(u)
-  
-    ; dz_4d = conform_dims(dimsizes(u), dz, (/1,2,3/))
-      dz_4d = new(dimsizes(u),float)
+     
+     print(z)
+    
+       dz_4d = new(dimsizes(u),float)
+     printVarSummary(dz_4d)
+       ; mlt = 30.0
       do i = 0,dimsizes(mlt&time)-1
         dz_4d(i,:,:,:) = dpres_plevel(z, mlt(i,:,:), 0, 0)
-      end do 
-    ;;;1混合层平均的
+      end do  
+    
+    
+
+
+    ;;; mlt(time,lat,lon),z_3d(lev,lat,lon)
+
+    print(dz_4d(1,:,20,20))
+    print(mlt(1,20,20))
+    ; exit()
+
+
+
+    ;;;混合层平均的
      T_mean = T(:,1,:,:)
      u_mean = u(:,1,:,:)
      v_mean = v(:,1,:,:)
@@ -132,7 +144,6 @@ begin
      T_mean = dim_sum_n_Wrap(T*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
      u_mean = dim_sum_n_Wrap(u*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
      v_mean = dim_sum_n_Wrap(v*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
-
     ;;;
 
     gradLatLon  = grad_latlon_cfd (T_mean, T_mean&lat, T_mean&lon, True, False)
@@ -144,8 +155,46 @@ begin
     hadv = u_mean
     hadv = u_mean*T_grad_lon + v_mean*T_grad_lat
     hadv = (/-1*hadv/)
+    ;;;
 
-    ;;;垂直项
+
+    ;;;;
+
+
+
+    ; ;;;calculate Horizontal and Vertical advction
+
+    ; gradLatLon2  = grad_latlon_cfd (T, T&lat, T&lon, True, False)
+                             
+    ; T_grad_lat2  = gradLatLon2[0]    ; for clarity; explicitly extract variables from returned 'list' 
+    ; T_grad_lon2  = gradLatLon2[1]
+    ; delete(gradLatLon2)
+    
+    ; have_new = u
+    ; hadv_new = u*T_grad_lon2 + v*T_grad_lat2
+    ; hadv_new = (/-1*hadv_new/)
+
+    
+    ; T_grad_z = center_finite_diff_n(T, T&depth,False,0,1)
+
+    ; vadv_new = wt
+    ; vadv_new = wt*tofloat(T_grad_z)
+
+    ; ;;;convert to units degree ℃/year
+    ;   hadv_new =365*86400*hadv_new
+    ;   vadv_new =365*86400*vadv_new
+    ; ;;;
+    
+    ; hadv_mean_new = dim_sum_n_Wrap(hadv_new*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+    ; vadv_mean_new  = dim_sum_n_Wrap(vadv_new*dz_4d,1)/dim_sum_n_Wrap(dz_4d, 1)
+   
+    ; copy_VarCoords(u(:,1,:,:), hadv_mean_new)
+    ; copy_VarCoords(u(:,1,:,:), vadv_mean_new)
+
+
+
+
+    ; ;;;垂直项
 
 
      ;;;将wt进行垂直方向差值，为了得到更加精确的结果
@@ -185,15 +234,18 @@ begin
       vadv =365*86400*vadv
     ;;;
     
+    ; hadv_mean = hadv
+    ; vadv_mean  = vadv
+     
+    hadv_mean = hadv_mean_new
+    vadv_mean  = vadv_mean_new
+     
 
-   
+   printVarSummary(u)
+   printVarSummary(hadv_mean)
+   printVarSummary(vadv_mean)
 
 
-
-
-    hadv_mean = hadv
-    vadv_mean  = vadv
-   
     copy_VarCoords(u(:,1,:,:), hadv_mean)
     copy_VarCoords(u(:,1,{x1:x2},{y1:y2}), vadv_mean)
 
@@ -211,8 +263,13 @@ begin
 
        hadv_mean_annual = month_to_annual(hadv_mean, 1)
        vadv_mean_annual = month_to_annual(vadv_mean, 1)
+       printVarSummary(hadv_mean_annual(:,{x1:x2},{y1:y2}))
+       printVarSummary(vadv_mean_annual)
+
        total_ocean_annual = vadv_mean_annual
        total_ocean_annual = hadv_mean_annual(:,{x1:x2},{y1:y2}) + vadv_mean_annual
+       ; total_ocean_annual = hadv_mean_annual + vadv_mean_annual
+
 
        total_ocean_annual&lat@units = "degrees_north"
        total_ocean_annual&lon@units = "degrees_east"
@@ -406,7 +463,7 @@ print("*********开始画图********")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8_2015")
+  wks   = gsn_open_wks("pdf", "所有通量的线性趋势-ERAI-newthod-mld_0.8_2015-old")
 
   res=True
   res@gsnFrame=False
