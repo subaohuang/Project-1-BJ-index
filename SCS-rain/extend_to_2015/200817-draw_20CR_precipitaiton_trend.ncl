@@ -1,7 +1,6 @@
 ;;********************************************************
-;;画GPCP的降水趋势
+;;画20cr的降水趋势
 ;;
-;;lnshuheng 2019.12.24
 ;**********************************************************
 function  rc_test(ssta_rc)
 begin
@@ -14,17 +13,18 @@ begin
 
 return prob
 end
-   begin
+begin
 
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    f2=addfile("/home/yangsong3/data-observation/20thCRV2/prate.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
-    p=f2->precip(timeind,:,:)
-   
-    delete(p&time)
-    p&time=date(timeind)
-    printVarSummary(p)
-    p_pi = p
+    timeind=ind(date.ge.190001.and.date.le.201612)
+    lsp=f2->prate(timeind,:,:)  ;;;units are m
+    
+    
+    ;;convert units to mm/day
+    p_pi = lsp
+    p_pi = (/lsp/)
+    p_pi = 86400*10^3*p_pi/10^3
 
    ;;;先得到秋季和冬季eninio年的沃克环流情况SONDJF
     ; p_djf_r=month_to_season(p_pi(time|:,lat|:,lon|:), "MAM")
@@ -34,7 +34,6 @@ end
 
     delete(date)
     delete(timeind)
-    delete(p)
     delete(p_pi)
     ;;;
     
@@ -44,7 +43,7 @@ end
     prob_p=rc_test(p_rc)
     p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-2016")
+    wks   = gsn_open_wks("pdf", "年平均20cr降水的趋势-scs-1900-2016")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

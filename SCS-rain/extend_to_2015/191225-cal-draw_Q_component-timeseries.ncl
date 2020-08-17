@@ -34,7 +34,7 @@ begin
 
         ;;;time span
         startmon =197901
-        endmon = 201512
+        endmon = 201612
 
         startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
         endyear_r = str_split_by_length(endmon, 4 )
@@ -262,7 +262,7 @@ begin
 ; ; ==============================================================
 ;;
  ;;read  eva data 
-    year = ispan(1979,2015,1) 
+    year = ispan(1979,2016,1) 
     fils_evp = new(dimsizes(year),string)
     
     do i=0,dimsizes(year)-1
@@ -312,7 +312,7 @@ begin
 
         f2 = addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
         date:=cd_calendar(f2->time, 1)
-        timeind:=ind(date.ge.197901.and.date.le.201512)
+        timeind:=ind(date.ge.197901.and.date.le.201612)
         p=f2->precip(timeind,:,:)
 
         delete(p&time)
@@ -336,23 +336,23 @@ begin
 ; ; Mission 3.  area avg(x)
 ; ; ==============================================================
    ;;era_wgt_dyna_q ; era_wgt_thermaldyna_q ;;era_wgt_quad_q;;era_wgt_eddy_q 
-  ;  lat1 = 0
-   ;lat2 = 15
-   ;lon1 = 110
-   ;lon2 = 155
-    p_e_annual_series = dim_avg_n_Wrap(p_e_annual(:,{0:15},{110:155}), (/1,2/))
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 125
+   ; lon2 = 155
+    p_e_annual_series = dim_avg_n_Wrap(p_e_annual(:,{0:15},{125:155}), (/1,2/))
 
-    series_era_divQ_delta  = dim_avg_n_Wrap(era_divQ_delta(:,{0:15},{110:155}), (/1,2/))
-    ; series_era_divQ_delta = (/series_era_divQ_delta - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
-    series_thermaldyna_q = dim_avg_n_Wrap(era_wgt_thermaldyna_q(:,{0:15},{110:155}), (/1,2/))
-    series_dyna_q = dim_avg_n_Wrap(era_wgt_dyna_q(:,{0:15},{110:155}), (/1,2/))
-    series_quad_q = dim_avg_n_Wrap(era_wgt_quad_q(:,{0:15},{110:155}), (/1,2/))
-    series_eddy_q = dim_avg_n_Wrap(era_wgt_eddy_q(:,{0:15},{110:155}), (/1,2/))
+    series_era_divQ_delta  = dim_avg_n_Wrap(era_divQ_delta(:,{0:15},{125:155}), (/1,2/))
+    ; series_era_divQ_delta = (/series_era_divQ_delta - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{125:155}),1))/)
+    series_thermaldyna_q = dim_avg_n_Wrap(era_wgt_thermaldyna_q(:,{0:15},{125:155}), (/1,2/))
+    series_dyna_q = dim_avg_n_Wrap(era_wgt_dyna_q(:,{0:15},{125:155}), (/1,2/))
+    series_quad_q = dim_avg_n_Wrap(era_wgt_quad_q(:,{0:15},{125:155}), (/1,2/))
+    series_eddy_q = dim_avg_n_Wrap(era_wgt_eddy_q(:,{0:15},{125:155}), (/1,2/))
 
 
     ;;;写成nc 文件输出
 
-    outpath = "/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-5-2015.nc"
+    outpath = "/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-5-2016-philipian.nc"
        ;;-----------------------写入nc文件---------------------------
     system("rm -f" + outpath)   ; remove any pre-existing file
     ncdf = addfile(outpath ,"c")  ; open output netCDF file
@@ -376,12 +376,12 @@ begin
     ncdf->series_dyna_q = series_dyna_q
     ncdf->series_quad_q = series_quad_q
     ncdf->series_eddy_q = series_eddy_q
-    ncdf->time = ispan(1979,2015,1)
+    ncdf->time = ispan(1979,2016,1)
     ;;;
 
 exit()
     
-    ; series_eddy_q = (/series_thermaldyna_q + series_dyna_q + series_quad_q + series_eddy_q - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{110:155}),1))/)
+    ; series_eddy_q = (/series_thermaldyna_q + series_dyna_q + series_quad_q + series_eddy_q - avg(dim_avg_n_Wrap(era_wgt_quad_q_clm({0:15},{125:155}),1))/)
 
     ;;trend
     

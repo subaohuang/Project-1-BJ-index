@@ -49,14 +49,14 @@ begin
     ssta_rc=(/ssta_rc*dim(0)/)
     printVarSummary(ssta_rc)
     
-    ssta_rc_avg = avg(dim_avg_n_Wrap(ssta_rc({0:15},{110:155}), 0)) 
+    ssta_rc_avg = avg(dim_avg_n_Wrap(ssta_rc({0:15},{125:160}), 0)) 
     print(ssta_rc_avg)
 
-    ; ssta_rc = (/ssta_rc - ssta_rc_avg/)
+    ssta_rc = (/ssta_rc - ssta_rc_avg/)
     ; print(ssta_rc)
     
     
-    wks   = gsn_open_wks("pdf", "年平均SST趋势-SCS-1979-2013")
+    wks   = gsn_open_wks("pdf", "年平均SST趋势-SCS-1979-2016-remove-regionmean")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -66,8 +66,8 @@ begin
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
   
-  res@cnFillPalette = "NCV_jaisnd"
- ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "NCV_jaisnd"
+ res@cnFillPalette = "BlueWhiteOrangeRed"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -86,8 +86,8 @@ begin
 
   res@mpMinLatF             = 0
   res@mpMaxLatF             = 15
-  res@mpMinLonF             =110
-  res@mpMaxLonF             = 155
+  res@mpMinLonF             =125
+  res@mpMaxLonF             = 160
 
 
 
@@ -128,7 +128,7 @@ begin
  
   res@cnMinLevelValF       =   -0.2
   res@cnMaxLevelValF       =   0.2
-  res@cnLevelSpacingF      =  0.025
+  res@cnLevelSpacingF      =  0.05
 
   ; res@gsnLeftString="HadISST sst trend"
   res@gsnLeftString="SST trend (remove regional average)"
@@ -152,42 +152,36 @@ begin
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
 
-  ;;;添加赤道直线
-   pgx=ispan(30,390,10)
-   pgy=new(dimsizes(pgx),typeof(pgx))
-   pgy=0
-   str1=unique_string("dum1")
-   str2=unique_string("dum2")
-    str3=unique_string("dum3")
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
-   plot@$str1$ = gsn_add_polyline(wks, plot(0), pgx, pgy, pgres)
-  ;;;添加indo-pacific warm pool
-    ; ;;添加区域
-   ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
+  ; ;;;添加赤道直线
+  ;  pgx=ispan(30,390,10)
+  ;  pgy=new(dimsizes(pgx),typeof(pgx))
+  ;  pgy=0
+  ;  str1=unique_string("dum1")
+  ;  str2=unique_string("dum2")
+  ;   str3=unique_string("dum3")
+  ;  pgres=True
+  ;  pgres@gsLineColor="black"
+  ;  pgres@gsLineThicknessF=1.0
+  ;  pgres@gsLineDashPattern=1
+  ;  plot@$str1$ = gsn_add_polyline(wks, plot(0), pgx, pgy, pgres)
+  ; ;;;添加indo-pacific warm pool
+  ;   ; ;;添加区域
+  ;  ;;warm pool
+  ;  pgres@gsLineThicknessF=2.0
+  ;  pgres@gsLineDashPattern=0
+  ;  str3=unique_string("dum3")
+  ;  str4=unique_string("dum4")
    
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
+  ;  ;;;画box
+  ;  lat1 = 0
+  ;  lat2 = 15
+  ;  lon1 = 110
+  ;  lon2 = 155
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-    plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
-
-
-
-
-
-    
+  ;  pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+  ;  pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+  ;  ;;;
+  ;   plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
     
    ;;;打点
     res_pro=True

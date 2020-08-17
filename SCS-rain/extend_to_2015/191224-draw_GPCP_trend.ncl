@@ -53,7 +53,9 @@ end
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="NCV_blu_red"
+  ; res@cnFillPalette="NCV_blu_red"
+  res@cnFillPalette="MPL_BrBG"
+  res@cnFillPalette =  "precip_diff_12lev"
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -65,7 +67,7 @@ end
   res@mpMinLatF             = -5
   res@mpMaxLatF             = 45
   res@mpMinLonF             =90
-  res@mpMaxLonF             = 160
+  res@mpMaxLonF             = 165
   ; res@mpMinLatF             = -60
   ; res@mpMaxLatF             = 60
   ; res@mpMinLonF             =0
@@ -103,11 +105,11 @@ end
   ; res@vpWidthF=0.7
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.5
-  res@cnMaxLevelValF       =   2.5
+  res@cnMinLevelValF       =   -1.5
+  res@cnMaxLevelValF       =   1.5
   res@cnLevelSpacingF      =  0.25
 
-  res@cnFillPalette="MPL_BrBG"
+
   res@gsnLeftString="GPCP Precipitation trend"
   plot = gsn_csm_contour_map(wks, p_rc, res)
   
@@ -166,17 +168,13 @@ end
    ;;;画box
    lat1 = 0
    lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
      plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
-
-
-
-
 
     ;;;打点
     res_pro=True
@@ -195,24 +193,48 @@ end
 
     iplot=new(1,graphic)
 
-    
- 
+
+
     iplot = gsn_csm_contour(wks,prob_p,res_pro)
-    
 
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+  opt                      = True
+  opt@gsnShadeFillType     = "pattern"
+  opt@gsnShadeMid     = 17         ; stipple
+  ; opt@gsnShadeMid     = 6         ; stipple
+  ; opt@gsnShadeHigh   = "green"
+  opt@gsnShadeFillScaleF   = 0.1         ; add extra density
+  opt@gsnShadeFillDotSizeF = 0.2      ; make dots larger
+  iplot = gsn_contour_shade(iplot, 0,0.1, opt)
+  overlay(plot, iplot)
 
+  ; res_pro=True
+  ; res_pro@gsnDraw=False
+  ; res_pro@gsnFrame=False
+  ; res_pro@cnFillOn = True
 
-  
-    iplot = gsn_contour_shade(iplot , 0,0.05,opt)
+  ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+  ; res_pro@cnLevels = (/0,0.05/)
+  ; res_pro@lbLabelBarOn = False
+  ; res_pro@cnLinesOn=False
+  ; res_pro@cnMonoLineColor =False
+  ; res_pro@cnLineColors = ((/"Transparent","black","Transparent"/))
 
-    ;;;  
-    overlay(plot, iplot)
+  ; res_pro@cnMonoFillPattern = True
+  ; res_pro@cnFillPattern = 17
+  ; res_pro@cnFillDotSizeF = 0.0045
+  ; res_pro@cnMonoFillColor = False
+  ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+  ; ; res_pro@cnLevels = ispan(-6,6,1)
+  ; res_pro@cnLineLabelsOn=False
+  ; res_pro@tmYRMode = "Automatic"
+  ; res_pro@cnInfoLabelOn=False
+  ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
+  ; ; res_pro@cnLineThicknessF = 3.
+  ; ; res_pro@cnFillOn        = True
+  ; iplot(0)=gsn_csm_contour(wks,prob_p,res_pro)
+  ; overlay(plot, iplot)
+  ;;;  
+
 draw(plot)
 frame(wks)
 

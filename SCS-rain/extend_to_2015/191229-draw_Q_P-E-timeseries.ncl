@@ -19,7 +19,7 @@ return prob
 end
 begin
    ;;read  eva data 
-    year = ispan(1979,2015,1) 
+    year = ispan(1979,2016,1) 
     fils_evp = new(dimsizes(year),string)
     
     do i=0,dimsizes(year)-1
@@ -72,7 +72,7 @@ begin
 
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201512)
+    timeind:=ind(date.ge.197901.and.date.le.201612)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -90,14 +90,23 @@ begin
     p_e = p_annual
     p_e = (/p_annual - evp_annual/)
     copy_VarCoords(p_annual, p_e)
+    
+    ;;;
+    lat1 = 0
+    lat2 = 15
+    lon1 = 125
+    lon2 = 155
 
-    p_e_t = dim_avg_n_Wrap(p_e(:,{0:15},{110:155}), (/1,2/))
-    p_annual_t = dim_avg_n_Wrap(p_annual(:,{0:15},{110:155}), (/1,2/))
-    evp_annual_t = dim_avg_n_Wrap(evp_annual(:,{0:15},{110:155}), (/1,2/))
+
+
+
+    p_e_t = dim_avg_n_Wrap(p_e(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
+    p_annual_t = dim_avg_n_Wrap(p_annual(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
+    evp_annual_t = dim_avg_n_Wrap(evp_annual(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
 ;;;
 
 ;;;读入Q-term
-    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-5-2015.nc", "r")
+    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-5-2016-philipian.nc", "r")
     series_Q = f3->series_Q(:)
     series_thermaldyna_q = f3->series_thermaldyna_q
     series_dyna_q = f3->series_dyna_q
@@ -110,7 +119,7 @@ begin
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "P-E以及Q的各项的时间序列-2015")
+  wks   = gsn_open_wks("pdf", "P-E以及Q的各项的时间序列-2016-philipian")
   plot=new(1,graphic)
   
   resxy = True
@@ -118,12 +127,12 @@ begin
   resxy@gsnFrame = False
     
   resxy@tmXBMode  =  "Explicit"
-  resxy@trXMaxF = 2015
+  resxy@trXMaxF = 2016
   resxy@trXMinF = 1979
-  resxy@tmXBValues = ispan(1979,2015,5)
-  resxy@tmXBLabels = ispan(1979,2015,5)
+  resxy@tmXBValues = ispan(1979,2016,5)
+  resxy@tmXBLabels = ispan(1979,2016,5)
   resxy@tmXBMinorOn = True
-  resxy@tmXBMinorValues = ispan(1979,2015,1)
+  resxy@tmXBMinorValues = ispan(1979,2016,1)
 
   resxy@tmYLMinorOn = False
 
@@ -140,7 +149,7 @@ begin
   resxy@xyMarkLineModes    =  (/"lines","lines","lines","lines","lines","lines"/)
   resxy@xyExplicitLegendLabels  =  (/"P-E","divQ","dyn","thermaldynamic","quandratic", "eddy"/)     ;加线的标注
   
-  time = ispan(1979, 2015, 1)
+  time = ispan(1979, 2016, 1)
   ; printVarSummary(p_e_t)
   ; printVarSummary(series_Q)
   ; printVarSummary(series_dyna_q)
