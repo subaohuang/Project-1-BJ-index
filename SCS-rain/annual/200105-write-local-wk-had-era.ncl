@@ -9,9 +9,13 @@ begin
     ; fils1=systemfunc("ls "+diri+"era_pre_global.nc")
     f1=addfile(fils1, "r")
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.le.201312.and.date.ge.197901)
+
+    timeind=ind(date.le.201612.and.date.ge.197901)
     w_r = f1->w(timeind,{1000:100},::-1,:)
+
+    time = f1->time(timeind)
     delete(f1)
+    
 
 
     if isatt(w_r, "add_offset") then 
@@ -83,7 +87,7 @@ begin
 ;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
 
     diro="/home/ys17-19/lsh/data/era/"
-    filo1="era_m_zonal_meri_ERAI.nc"
+    filo1="era_m_zonal_meri_ERAI_500hpa.nc"
     system("/bin/rm -f "+diro + filo1+"")
     setfileoption("nc","Format","LargeFile")
     fout=addfile(diro + filo1,"c")
@@ -94,25 +98,25 @@ begin
     fAtt@creation_date = "2020.1.05"
     fileattdef( fout, fAtt)            ; copy file attributes    
     ;----------------------------坐标变量的定义
-    dimnames=(/"time","level","lat","lon"/)
-    dimsize=(/ntime,nlev,nlat,nlon/)
-    dimunlim=(/False,False,False,False/)
+    dimnames=(/"time","lat","lon"/)
+    dimsize=(/ntime,nlat,nlon/)
+    dimunlim=(/False,False,False/)
     filedimdef(fout, dimnames, dimsize, dimunlim)
  ;-----------------------------定义变量名，类型和维数
 
     filevardef(fout, "time", typeof(m_zonal&time),(/"time"/))
-    filevardef(fout, "level",typeof(m_zonal&level), (/"level"/))
+    ; filevardef(fout, "level",typeof(m_zonal&level), (/"level"/))
     filevardef(fout, "lat", typeof(m_zonal&lat),(/"lat"/))
     filevardef(fout, "lon", typeof(m_zonal&lon),(/"lon"/))
 
-    filevardef(fout, "m_zonal", typeof(m_zonal),(/"time","level","lat","lon"/))
-    filevardef(fout, "m_meri", typeof(m_meri),(/"time","level","lat","lon"/))
+    filevardef(fout, "m_zonal", typeof(m_zonal),(/"time","lat","lon"/))
+    filevardef(fout, "m_meri", typeof(m_meri),(/"time","lat","lon"/))
     ; filevardef(fout, "fi_zonal", typeof(ud),(/"time","level","lat","lon"/))
     ; filevardef(fout, "fi_meri", typeof(vd),(/"time","level","lat","lon"/))  
  
   
     filevarattdef(fout, "time", m_zonal&time)   ;;;记得给时间附上时间单位
-    filevarattdef(fout, "level", m_zonal&level)
+    ; filevarattdef(fout, "level", m_zonal&level)
     filevarattdef(fout, "lat", m_zonal&lat)
     filevarattdef(fout, "lon", m_zonal&lon)
 
@@ -125,12 +129,11 @@ begin
     setfileoption(fout,"DefineMode",False)
     
     fout->time=(/m_zonal&time/)
-    fout->level=(/m_zonal&level/)
     fout->lat=(/m_zonal&lat/)
     fout->lon=(/m_zonal&lon/)
 
-    fout->m_zonal=(/m_zonal/)
-    fout->m_meri=(/m_meri/)
+    fout->m_zonal=(/m_zonal_mean/)
+    fout->m_meri=(/m_meri_mean/)
     ; fout->fi_zonal=(/ud/)
     ; fout->fi_meri=(/vd/)
 

@@ -213,9 +213,9 @@ printVarSummary(wt)
 
 
     dwt  = wtT(1,:,:)
-    dwt = (/dim_avg_n_Wrap(wtT(12*17:,:,:), 0) - dim_avg_n_Wrap(wtT(0:12*17-1,:,:), 0)/)
-   dwt&lat@units = "degrees_north"
-   dwt&lon@units = "degrees_east"
+    dwt = (/dim_avg_n_Wrap(wtT(12*18:,:,:), 0) - dim_avg_n_Wrap(wtT(0:12*18-1,:,:), 0)/)
+    dwt&lat@units = "degrees_north"
+    dwt&lon@units = "degrees_east"
 
     printVarSummary(dwt)
 
@@ -223,8 +223,8 @@ printVarSummary(wt)
 
    ;;δ(W)T
     tdw = wtT(1,:,:)
-    T_clm  = dim_avg_n_Wrap(T_mlt(0:12*17-1,:,:), 0)
-    w_delta = dim_avg_n_Wrap(wt_mlt(12*17:,:,:), 0) - dim_avg_n_Wrap(wt_mlt(0:12*17-1,:,:), 0)
+    T_clm  = dim_avg_n_Wrap(T_mlt(0:12*18-1,:,:), 0)
+    w_delta = dim_avg_n_Wrap(wt_mlt(12*18:,:,:), 0) - dim_avg_n_Wrap(wt_mlt(0:12*18-1,:,:), 0)
     
     tdw = (/T_clm*w_delta/)
    
@@ -232,8 +232,8 @@ printVarSummary(wt)
 
     ;;δ(T)w
     wdt = wtT(1,:,:)
-    w_clm  = dim_avg_n_Wrap(wt_mlt(0:12*17-1,:,:), 0)
-    T_delta = dim_avg_n_Wrap(T_mlt(12*17:,:,:), 0) - dim_avg_n_Wrap(T_mlt(0:12*17-1,:,:), 0)
+    w_clm  = dim_avg_n_Wrap(wt_mlt(0:12*18-1,:,:), 0)
+    T_delta = dim_avg_n_Wrap(T_mlt(12*18:,:,:), 0) - dim_avg_n_Wrap(T_mlt(0:12*18-1,:,:), 0)
     
     wdt = (/T_delta*w_clm/)
 
@@ -315,7 +315,9 @@ printVarSummary(wt)
 
 
     ; vr = uv2vr_cfd((/taux/(density*f_3d)/) ,(/tauy/(density*f_3d)/) ,taux&lat,taux&lon,2)
+     ; vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)/(density*f_3d)
      vr = uv2vr_cfd(taux ,tauy ,taux&lat,taux&lon,2)
+
 
     copy_VarCoords(taux, vr)
     printVarSummary(vr)
@@ -355,9 +357,13 @@ printVarSummary(wt)
 
 
     ;;;;clm 
-    ue_clm = dim_avg_n_Wrap(ue_annual, 0)
-    ve_clm = dim_avg_n_Wrap(ve_annual, 0)
-    wg_clm = dim_avg_n_Wrap(wg_annual, 0)
+    ; ue_clm = dim_avg_n_Wrap(ue_annual, 0)
+    ; ve_clm = dim_avg_n_Wrap(ve_annual, 0)
+    ; wg_clm = dim_avg_n_Wrap(wg_annual, 0)
+
+    ue_clm = ue_annual_1
+    ve_clm = ve_annual_1
+    wg_clm = wg_annual_1
     wg_clm  = (/wg_clm*10^7/)
 
     ;;;
@@ -379,7 +385,7 @@ printVarSummary(wt)
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-0.8-define-philipian")
+  wks   = gsn_open_wks("pdf", "WT的变化以及气候态以及wind-stress-mld-0.8-define-philipian-realcurl")
 
   res=True
   res@gsnFrame=False
@@ -444,6 +450,7 @@ printVarSummary(wt)
   res@cnLevelSpacingF      =  0.5
   
   res@cnFillPalette = "MPL_PuBu"
+
   res@gsnSpreadColorStart = 110
   res@gsnSpreadColorEnd = 3
 
@@ -493,12 +500,14 @@ printVarSummary(wt)
   ; res2@cnFillPalette = "GMT_polar"
   delete(res2@cnFillPalette)
   res2@cnFillPalette = color
+  ; res@cnFillPalette="cmp_b2r"
+  ; res2@cnFillPalette = "BlueRed"
   plot(4) = gsn_csm_vector_scalar_map(wks, ue_clm ,ve_clm,wg_clm ,res2)
 
   res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res2@cnMinLevelValF       =   -0.05
-  res2@cnMaxLevelValF       =   0.05
-  res2@cnLevelSpacingF      =  0.01
+  res2@cnMinLevelValF       =   -0.1
+  res2@cnMaxLevelValF       =   0.1
+  res2@cnLevelSpacingF      =  0.02
 
   res2@vcRefMagnitudeF = 0.005
   res2@vcMinMagnitudeF          =0.0005
