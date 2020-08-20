@@ -69,8 +69,8 @@ begin
    delete(w_zonal)
    delete(w_meri)
 
-    m_zonal_mean=dim_avg_n_Wrap(m_zonal(:,{500},:,:), 0)
-    m_meri_mean=dim_avg_n_Wrap(m_meri(:,{500},:,:), 0)
+    m_zonal_mean = m_zonal(:,{500},:,:)
+    m_meri_mean = m_meri(:,{500},:,:)
     
     printVarSummary(m_zonal)
  ;;;

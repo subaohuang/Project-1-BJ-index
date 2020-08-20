@@ -21,15 +21,11 @@ return prob_p
 end 
 begin
 
-; season = "MAM"
-  ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"  
-                                                                                      
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.TEMP.h0.0251-0280.nc"
+    ; season = "MAM"
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280.nc"  
 
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc" 
- 
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.cam.h0.0251-0280.nc"
+
   
     f1=addfile(fils1, "r")
     f2=addfile(fils2, "r")
@@ -44,47 +40,40 @@ begin
 
     timeind1=ind(date1.ge.25601.and.date1.le.28012)
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
-
-
-    PSL_CT  =  f1->TEMP(timeind1,:,:)
-
-  
-
-    PSL_indian  =  f2->TEMP(timeind2,0,:,:)
-    TLAT = f2->TLAT
-    TLONG = f2->TLONG
-   
-    PSL_indian!1 = "nlat"
-    PSL_indian!2 = "nlon"
-    PSL_indian@lat2d   = TLAT
-    PSL_indian@lon2d   = TLONG
-
-
-    printVarSummary(PSL_indian)
-
-
-
-
-    ; PSL_CT_clm = dim_avg_n_Wrap(month_to_season(PSL_CT, season), 0)
-    ; PSL_indian_clm = dim_avg_n_Wrap(month_to_season(PSL_indian, season), 0)
     
-    PSL_CT_clm = dim_avg_n_Wrap(PSL_CT, 0)
-    PSL_indian_clm = dim_avg_n_Wrap(PSL_indian, 0)
-      
 
-    PSL_diff_indian = PSL_indian_clm
-    PSL_diff_indian = (/PSL_indian_clm - PSL_CT_clm/)
 
-    
+    PRECL_CT  =  f1->PRECL(timeind1,:,:)
+    PRECC_CT  =  f1->PRECC(timeind1,:,:)
+
+    PRE_CT = PRECC_CT
+    PRE_CT = (/PRECC_CT+PRECL_CT/)
+    ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
+    PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
+
+    PRECL_id  =  f2->PRECL(timeind2,:,:)
+    PRECC_id  =  f2->PRECC(timeind2,:,:)
+
+    PRE_id = PRECC_id
+    PRE_id = (/PRECC_id+PRECL_id/)
+    ; PRE_id = (/PRECL_id/)
+    PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
+
+    ; PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season), 0)
+    ; PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season), 0)
+    PRE_CT_clm = dim_avg_n_Wrap(PRE_CT, 0)
+    PRE_indian_clm =dim_avg_n_Wrap(PRE_id,0)
+
+    PRE_diff = PRE_CT_clm
+    PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
     ;;;t_test 
-     prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     copy_VarCoords(PSL_indian_clm, prob_slp_indian)
-     printVarSummary(prob_slp_indian)
-    
+    ; prob_p = t_test( month_to_season(PRE_CT, season) ,month_to_season(PRE_id, season))
+    prob_p = t_test(PRE_CT ,PRE_id)
+    PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-PACCLM-MINUS-CTRL")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year_PACCLM_minus_altyear")
     
     res=True
     res@gsnDraw=False
@@ -94,7 +83,7 @@ begin
 
     res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=True
-    res@cnFillOn = True 
+    res@cnFillOn = True
     res@cnLinesOn =False
     res@cnLineLabelsOn=False
     ; res@cnFillMode  = 
@@ -104,16 +93,13 @@ begin
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
-
-    ; gsn_define_colormap(wks, "BlueRed")
- 
+    gsn_define_colormap(wks, "MPL_BrBG")
  
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; res@cnMinLevelValF       =   -0.6
-    ; res@cnMaxLevelValF       =   0.6
+    ; res@cnMinLevelValF       =   -0.5
+    ; res@cnMaxLevelValF       =   0.5
     ; res@cnLevelSpacingF      =  0.1
     
     res@cnMinLevelValF       =   -1.0
@@ -157,7 +143,7 @@ begin
     res@gsnLeftString = "Indian SST forcing"
  
     plot = new(1,graphic)
-    plot(0) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
+    plot(0) = gsn_csm_contour_map(wks, PRE_diff, res)
      
 
     ;;;画box

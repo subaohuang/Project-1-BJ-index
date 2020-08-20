@@ -25,7 +25,7 @@ begin
     fils1 = "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECC.mon.0250-0299.nc"  
     fils1a= "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECL.mon.0250-0299.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.cam.h0.0251-0280.nc"
 
   
     f1=addfile(fils1, "r")
@@ -75,7 +75,7 @@ begin
     PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year-PACCLM")
     
     res=True
     res@gsnDraw=False

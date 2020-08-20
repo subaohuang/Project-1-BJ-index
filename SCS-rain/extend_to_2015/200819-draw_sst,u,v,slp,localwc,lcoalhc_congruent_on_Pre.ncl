@@ -48,7 +48,7 @@ begin
     else if variable.eq."u".or.variable.eq."v" then 
       sst=short2flt(f1->$variable$(timeind,{850},{lat1:lat2},{lon1:lon2}))
     else 
-      sst=f1->$variable$(timeind,{500},{lat1:lat2},{lon1:lon2})
+      sst=f1->$variable$(timeind,{lat1:lat2},{lon1:lon2})
     end if 
     end if
     end if
@@ -109,7 +109,7 @@ end
 begin
   ;;;time span
     startmon =197901
-    endmon = 201212
+    endmon = 201612
   ;;;
 
   ;;;region 
@@ -131,7 +131,7 @@ begin
    diri2 =  "/home/yangsong3/data-observation/ERA-interim/monthly/uwnd.mon.mean.nc"
    diri3 =  "/home/yangsong3/data-observation/ERA-interim/monthly/vwnd.mon.mean.nc"
    diri4 =  "/home/yangsong3/data-observation/ERA-interim/monthly/slp.mon.mean.nc"
-   diri5 = "/home/ys17-19/lsh/data/era/era_m_zonal_meri_new.nc"
+   diri5 = "/home/ys17-19/lsh/data/era/era_m_zonal_meri_ERAI_500hpa.nc"
 ;;;
    sst_info = linear_congruent(diri1,"sst",startmon,endmon,p_t) 
    uwnd_info = linear_congruent(diri2,"u",startmon,endmon,p_t)   
@@ -356,11 +356,11 @@ begin
     iplot(2)=gsn_csm_contour(wks,slp_info[2],res_pro)
     iplot(3)=gsn_csm_contour(wks,slp_info[3],res_pro)
 
-    iplot(4)=gsn_csm_contour(wks,uwnd_info[2],res_pro)
-    iplot(5)=gsn_csm_contour(wks,uwnd_info[3],res_pro)
+    iplot(4)=gsn_csm_contour(wks,m_zonal_info[2],res_pro)
+    iplot(5)=gsn_csm_contour(wks,m_zonal_info[3],res_pro)
     
-    iplot(6)=gsn_csm_contour(wks,vwnd_info[2],res_pro)
-    iplot(7)=gsn_csm_contour(wks,vwnd_info[3],res_pro)
+    iplot(6)=gsn_csm_contour(wks,m_meri_info[2],res_pro)
+    iplot(7)=gsn_csm_contour(wks,m_meri_info[3],res_pro)
     
 
     do i = 0,7
