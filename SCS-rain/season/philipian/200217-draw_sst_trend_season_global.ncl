@@ -76,7 +76,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "全球季节平均SST的趋势-SCS-79-16")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -107,8 +107,8 @@ begin
 
   ; res@mpMinLatF             = 0
   ; res@mpMaxLatF             = 15
-  ; res@mpMinLonF             =110
-  ; res@mpMaxLonF             = 155
+  ; res@mpMinLonF             =125
+  ; res@mpMaxLonF             = 160
 
 
 
@@ -133,10 +133,17 @@ begin
   res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.6
   res@cnLevelSpacingF      =  0.1
+  ; res@cnMinLevelValF       =   0.0
+  ; res@cnMaxLevelValF       =   0.6
+  ; res@cnLevelSpacingF      =  0.1
   res@cnInfoLabelOn = False
   
 
   res@gsnLeftString="Spring"
+
+  res@mpShapeMode = "FreeAspect"
+  res@vpHeightF = 0.2
+  res@vpWidthF = 0.7
 
   plot=new(4,graphic)
 
@@ -200,8 +207,8 @@ begin
    ;;;画box
    lat1 = 0
    lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
@@ -213,38 +220,43 @@ begin
       plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
     end do 
 
-   ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
+   ; ;;;打点
+   ;  res_pro=True
+   ;  res_pro@gsnAddCyclic = False
+   ;  res_pro@gsnDraw=False
+   ;  res_pro@gsnFrame=False
+   ;  res_pro@cnFillOn = True
 
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.01/)
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+   ;  res_pro@cnLevelSelectionMode = "ExplicitLevels"
+   ;  res_pro@cnLevels = (/0,0.01/)
+   ;  res_pro@lbLabelBarOn = False
+   ;  res_pro@cnLinesOn=False
+   ;  ; res_pro@cnMonoLineColor =False
+   ;  ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
+   ;  res_pro@cnMonoFillPattern = True
+   ;  res_pro@cnFillPattern = 17
+   ;  res_pro@cnFillDotSizeF = 0.001
+   ;  res_pro@cnMonoFillColor = False
+   ;  res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+   ;  ; res_pro@cnLevels = ispan(-6,6,1)
+   ;  res_pro@cnLineLabelsOn=False
+   ;  res_pro@tmYRMode = "Automatic"
+   ;  res_pro@cnInfoLabelOn=False
+   ;  ; res_pro@cnLineLabelBackgroundColor="Transparent"
+   ;  ; res_pro@cnLineThicknessF = 3.
+   ;  ; res_pro@cnFillOn        = True
   
-  
-     ; iplot = gsn_csm_contour(wks,prob_p  ,res_pro)
+   ;   iplot = new(4,graphic)
+   ;   iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
+   ;   iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
+   ;   iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
+   ;   iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
+   ;  ;;  
+   ;  do i=0,3
+   ;   overlay(plot(i), iplot(i))
+   ;  end do
 
-    ;;;  
-    ; overlay(plot, iplot)
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@lbOrientation = "Vertical"

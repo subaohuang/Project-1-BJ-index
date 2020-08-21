@@ -15,6 +15,7 @@ return prob
 end
 
 
+begin
 
 ;==========================================================
 ;;;回归u，v,slp，500hpa Geophyoptensial heigh
@@ -41,13 +42,13 @@ end
       lat1 = -5
       lat2 = 45
       lon1 = 100
-      lon2 = 160
+      lon2 = 170
     ;;;
 
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -132,6 +133,7 @@ end
     res@gsnAddCyclic = False
     res@gsnLeftStringFontHeightF=20.0
     res@cnFillPalette="BlueWhiteOrangeRed"
+    res@cnFillPalette="BlueRed"
     res@cnFillOn=True
     res@cnLinesOn=False
 
@@ -143,7 +145,7 @@ end
     res@mpMinLatF             = -5
     res@mpMaxLatF             = 45
     res@mpMinLonF             =100
-    res@mpMaxLonF             = 160
+    res@mpMaxLonF             = 170
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
     res@tmXTOn=False
@@ -179,8 +181,8 @@ end
    ;;;画box
    lat1 = 0
    lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)

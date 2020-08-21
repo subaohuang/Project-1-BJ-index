@@ -79,7 +79,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2016")
+wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -98,7 +98,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2016")
 
   res@mpLimitMode           = "LatLon"
   
-  res@mpMinLatF             = 0
+  res@mpMinLatF             = -5
   res@mpMaxLatF             = 45
   res@mpMinLonF             =100
   res@mpMaxLonF             = 170
@@ -175,8 +175,8 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2016")
    ;;;画box
    lat1 = 0
    lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)

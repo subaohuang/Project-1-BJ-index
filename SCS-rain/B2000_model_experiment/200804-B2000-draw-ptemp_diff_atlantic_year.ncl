@@ -23,12 +23,10 @@ begin
 
 ; season = "MAM"
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"  
+  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"  
                                                                                       
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.TEMP.h0.0251-0280.nc"
-
-  ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -46,7 +44,7 @@ begin
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,:,:)
+    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
 
   
 
@@ -84,7 +82,7 @@ begin
     
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-PACCLM-MINUS-CTRL")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year-0280-MINUS-CONCTRL")
     
     res=True
     res@gsnDraw=False
@@ -112,13 +110,13 @@ begin
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; res@cnMinLevelValF       =   -0.6
-    ; res@cnMaxLevelValF       =   0.6
-    ; res@cnLevelSpacingF      =  0.1
-    
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
     res@cnLevelSpacingF      =  0.1
+    
+    ; res@cnMinLevelValF       =   -1.0
+    ; res@cnMaxLevelValF       =   1.0
+    ; res@cnLevelSpacingF      =  0.1
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
@@ -127,8 +125,11 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
+
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF = 180.0
@@ -154,7 +155,7 @@ begin
     
     
     res@gsnRightString = ""
-    res@gsnLeftString = "Indian SST forcing"
+    res@gsnLeftString = "Nudging Atlantic SST to Clim+Change"
  
     plot = new(1,graphic)
     plot(0) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
@@ -166,10 +167,15 @@ begin
    pgres@gsLineThicknessF=2.0
    pgres@gsLineDashPattern=0
    
+    ; lat1 = 0
+    ; lat2 = 15
+    ; lon1 = 110
+    ; lon2 = 155
+
     lat1 = 0
     lat2 = 15
-    lon1 = 110
-    lon2 = 155
+    lon1 = 125
+    lon2 = 160
 
     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
