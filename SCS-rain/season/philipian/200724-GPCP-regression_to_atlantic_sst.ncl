@@ -44,7 +44,7 @@ function remove_enso_signal(data)
       f1=addfile(fils1, "r")
       date:=cd_calendar(f1->time, 1)
 
-      timeind:=ind(date.le.201612.and.date.ge.197901)
+      timeind:=ind(date.le.201512.and.date.ge.197901)
 
       sst =  lonFlip(f1->sst(timeind,:,:))
    
@@ -66,8 +66,8 @@ function remove_enso_signal(data)
    
       nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
   ;;;;;
+      data_de = data
       ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-      data_de  = data
       data_rc = regCoef_n(nino3_4,data_de, 0, 0)
       copy_VarCoords(data(1,:,:), data_rc)
       data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
@@ -79,15 +79,13 @@ function remove_enso_signal(data)
       data_new = (/data - data_relate_enso/)
   return data_new
 end 
-
-
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
 begin
  ;;;time span
     startmon =197901
-    endmon = 201612
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -120,29 +118,6 @@ begin
     delete(timeind)
 ;;;
 
-;;;area mean 
-      rad    = 4.0*atan(1.0)/180.0
-      re     = 6371220.0
-      rr     = re*rad
-
-      dlon   = abs(lon(2)-lon(1))*rr
-      dx     = dlon*cos(lat*rad)
-      ;          
-      jlat  = dimsizes( lat )
-      dy     = new ( jlat, typeof(dx))      ; close enough
-      
-      dy(0)  = abs(lat(2)-lat(1))*rr
-      dy(1:jlat-2)  = abs(lat(2:jlat-1)-lat(0:jlat-3))*rr*0.5   
-      dy(jlat-1)    = abs(lat(jlat-1)-lat(jlat-2))*rr
-
-      area   = dx*dy                                ; cell area function of latitude only
-      copy_VarCoords(lat, area)
-      printVarSummary(area)
-;;;;
-
-
-
-
 
 ;;;read GPCP precipitation data
     
@@ -160,8 +135,8 @@ begin
 ;;;; 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数")
-    wks1   = gsn_open_wks("pdf", "GPCP回归到印度洋dSST的回归系数-season")
+    wks   = gsn_open_wks("pdf", "GPCP回归到北大西洋SST的回归系数-season-remove-ensosignal")
+    wks1   = gsn_open_wks("pdf", "GPCP回归到北大西洋dSST的回归系数-season-remove-ensosignal")
     plot=new(4,graphic)
     plot1 = plot  
     str = (/"1","2","3","4"/)
@@ -169,7 +144,26 @@ begin
     iplot = new(4,graphic)
     iplot1 = iplot
     season =  (/"MAM","JJA","SON","DJF"/)
-;;;;;
+
+;;;area mean 
+  rad    = 4.0*atan(1.0)/180.0
+  re     = 6371220.0
+  rr     = re*rad
+
+  dlon   = abs(lon(2)-lon(1))*rr
+  dx     = dlon*cos(lat*rad)
+  ;          
+  jlat  = dimsizes( lat )
+  dy     = new ( jlat, typeof(dx))      ; close enough
+  
+  dy(0)  = abs(lat(2)-lat(1))*rr
+  dy(1:jlat-2)  = abs(lat(2:jlat-1)-lat(0:jlat-3))*rr*0.5   
+  dy(jlat-1)    = abs(lat(jlat-1)-lat(jlat-2))*rr
+
+  area   = dx*dy                                ; cell area function of latitude only
+  copy_VarCoords(lat, area)
+  printVarSummary(area)
+;;;;
 
 
 
@@ -190,17 +184,16 @@ do i =0,3
  
     ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season(i))
     printVarSummary(ssta_annual)
+    
+    ;;;;remove_enso_signal 
+      ssta_annual = (/remove_enso_signal(ssta_annual)/)
+    ;;;;
 
-    ; ;;;;remove_enso_signal 
-    ;   ssta_annual = (/remove_enso_signal(ssta_annual)/)
-    ; ;;;;
- 
 
     ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
-
-
-    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) , 0, 0)
+    ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) , 0, 0)
     ssta_index_rc  =ssta_index_rc*yearnum
+
 
     ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
 
@@ -216,10 +209,10 @@ do i =0,3
     copy_VarCoords(ssta_annual, dsst_annual)
     
     p_annual = month_to_season(p_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-    
-    ; ;;;;remove_enso_signal 
-    ;   p_annual = (/remove_enso_signal(p_annual)/)
-    ; ;;;;
+
+      ;;;;remove_enso_signal 
+      p_annual = (/remove_enso_signal(p_annual)/)
+    ;;;;
  
 
     p_annual_rc = regCoef_n(ispan(1,dimsizes(p_annual&time),1), p_annual, 0, 0)
@@ -237,8 +230,12 @@ do i =0,3
    ; lon1 = 110
    ; lon2 = 155
 
-   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) 
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:30},{30:110}), (/1,2/))
+   
+   ; ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) 
+   ; dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:0},{300:360}), (/1,2/))
+
+   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) 
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:30},{300:360}), (/1,2/))
 
    ;;;normalized 
    
@@ -266,6 +263,7 @@ print("*******开始计算相关系数*****************")
     ; print(ssta_index_rc)
 
 ;;;;
+;;;;
  
     ;;;;;
 ;;;;
@@ -275,12 +273,15 @@ print("*******开始计算相关系数*****************")
     ;;;t test 
     prob_p1= rc_test(r_sst_p)
     prob_p2= rc_test(r_dsst_p)
-    printVarSummary(prob_p1)
 
+    ; prob_p1 = (/rc_test(p_annual_rc)/)
+    ; prob_p1 = (/r_sst_p/p_annual_rc/)
+
+
+    printVarSummary(prob_p1)
     prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
     prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-
-  ;;;;
+;;;;
 
 
   print("*********开始画图********")
@@ -326,14 +327,12 @@ print("*******开始计算相关系数*****************")
   res@tmBorderThicknessF=4.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -1.0
-  ; res@cnMaxLevelValF       =   1.0
-  ; res@cnLevelSpacingF      =  0.1
-    res@cnMinLevelValF       =   -0.5
+  res@cnMinLevelValF       =   -0.5
   res@cnMaxLevelValF       =   0.5
   res@cnLevelSpacingF      =  0.05
-
-
+  ; res@cnMinLevelValF       =   -0.3
+  ; res@cnMaxLevelValF       =   0.3
+  ; res@cnLevelSpacingF      =  0.05
  
   res@gsnLeftString = season(i)+"_SST&GPCP"
   plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)
@@ -366,7 +365,7 @@ print("*******开始计算相关系数*****************")
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 15  
    lon1 = 125
    lon2 = 160
 
@@ -376,7 +375,7 @@ print("*******开始计算相关系数*****************")
 
    
    plot@$str1(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-   plot1@$str1(i)$ = gsn_add_polyline(wks1, plot1(i), pgx_pool, pgy_pool, pgres)
+   ; plot1@$str1(i)$ = gsn_add_polyline(wks1, plot1(i), pgx_pool, pgy_pool, pgres)
 
 
     ;;;打点
@@ -407,14 +406,14 @@ print("*******开始计算相关系数*****************")
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
-     iplot1(i) = gsn_contour_shade(iplot1(i) , 0,0.1,opt)
-
+     iplot(i) = gsn_contour_shade(iplot(i) , 0.0,0.1,opt)
+     ; iplot1(i) = gsn_contour_shade(iplot1(i) , 0.0,0.1,opt)
+; 
 
     ;;;  
     
       overlay(plot(i), iplot(i))
-      overlay(plot1(i), iplot1(i))
+      ; overlay(plot1(i), iplot1(i))
       delete(lat1)
       delete(lat2)
       delete(lon1)
@@ -425,8 +424,7 @@ end do
   pres@gsnPanelLabelBar  = True
 
   gsn_panel(wks, plot, (/2,2/), pres)
-  gsn_panel(wks1, plot1, (/2,2/), pres)
+  ; gsn_panel(wks1, plot1, (/2,2/), pres)
  
- print("done")
 
 end

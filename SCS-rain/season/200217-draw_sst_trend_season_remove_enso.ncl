@@ -25,7 +25,8 @@ end
 
 function remove_enso_signal(data,nino3_4)
   begin  
-    data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+    data_de = data
+    ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
     data_rc = regCoef_n(nino3_4,data_de, 0, 0)
     copy_VarCoords(data(1,:,:), data_rc)
     data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
@@ -57,7 +58,7 @@ begin
     copy_VarCoords(sst, ssta)
 
     ssta_de = ssta
-    ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
     printVarSummary(ssta_index)
 

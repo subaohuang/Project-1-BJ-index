@@ -14,11 +14,59 @@ begin
 
 return prob
 end
+undef("remove_enso_signal")
+function remove_enso_signal(data)
+  begin  
+  ; ;;;读入HadiSST海温数据
+      diri="/home/ys17-19/lsh/data/sst/"
+      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+      f1=addfile(fils1, "r")
+      date:=cd_calendar(f1->time, 1)
+
+      timeind:=ind(date.le.201612.and.date.ge.197901)
+
+      sst =  lonFlip(f1->sst(timeind,:,:))
+   
+      ssta=(/rmMonAnnCycTLL(sst)/)
+      copy_VarCoords(sst, ssta)
+
+      ssta_de = ssta
+      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+      printVarSummary(ssta_index)
+
+      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+      printVarSummary(nino3_4)
+
+      
+      ; nino3_4_new = nino3_4                ;;;;前期ENSO
+      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+      ; nino3_4_new(34) =ssta_index(35*12-1) 
+   
+      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+  ;;;;;
+      data_de = data
+      ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+      copy_VarCoords(data(1,:,:), data_rc)
+      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
+      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
+  
+      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
+      data_new = data 
+      data_new = (/data - data_relate_enso/)
+  return data_new
+end 
 
 function cal_season_trend(data,season)
   begin
-
+   
     p_djf_r=month_to_season(data, season)
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
+
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
@@ -29,6 +77,7 @@ function cal_season_trend(data,season)
     p_rc=(/p_rc*dim(0)/)
   return p_rc
 end 
+
 
 
 
@@ -48,7 +97,7 @@ begin
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
-  
+    
 
    ;;;;cal season trend 
     ssta_mam = cal_season_trend(ssta,"MAM")
@@ -87,8 +136,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
   ; res@cnFillPalette = "NCV_jaisnd"
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlRe"
+   res@cnFillPalette = "BlueWhiteOrangeRed"
+   ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
