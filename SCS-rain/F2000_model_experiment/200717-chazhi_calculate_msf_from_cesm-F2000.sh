@@ -17,11 +17,10 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_test/
-# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_spring_notest/
 
 STEP=3
-modelname=B2000_alt_north_spring_test
+modelname=F_2000_ind_spring_notest
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 
@@ -42,7 +41,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
     pwd
     ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012.nc\" \
          outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_chazhi.nc\" \
-       /home/ys17-19/lsh/Project/SCS-rain/191209-CESM-data-chazhi.ncl
+       /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
     echo "finish CESM chazhi"
   fi 
 # # step3 calculate mass stream function

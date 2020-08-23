@@ -92,7 +92,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201612.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -125,7 +125,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -136,8 +136,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
   ; res@cnFillPalette = "NCV_jaisnd"
-   res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlRe"
+   ; res@cnFillPalette = "BlueWhiteOrangeRed"
+   res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
