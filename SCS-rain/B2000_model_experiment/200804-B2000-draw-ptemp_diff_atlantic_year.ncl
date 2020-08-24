@@ -23,10 +23,11 @@ begin
 
 ; season = "MAM"
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"  
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.TEMP.h0.0251-0280.nc"  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"  
                                                                                       
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
+  fils2  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM/B2000_alt_north_year_WNPCLM.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -44,7 +45,7 @@ begin
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
+    PSL_CT  =  f1->TEMP(timeind1,:,:)
 
   
 
@@ -82,7 +83,7 @@ begin
     
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year-0280-MINUS-CONCTRL")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-PACCLM-MINUS-WNPCLM.pdf")
     
     res=True
     res@gsnDraw=False
@@ -125,10 +126,10 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
 
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0

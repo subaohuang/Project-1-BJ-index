@@ -17,10 +17,10 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_spring_notest/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_summer_notest/
 
 STEP=3
-modelname=F_2000_ind_spring_notest
+modelname=F_2000_alt_summer_notest
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 

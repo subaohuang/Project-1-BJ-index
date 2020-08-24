@@ -7,13 +7,12 @@
 begin
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addindianwarming_"+season+"_notest.nc" 
-  
-  wks=gsn_open_wks("pdf", "CESM-F2000-SST-warming-foul-season")
-  
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addscs_"+season+"_notest.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addscs_"+season+".nc" 
+ 
   plot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
-   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-indian-fourseason")
+   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-scs-fourseason")
 
 do i = 0,3
 

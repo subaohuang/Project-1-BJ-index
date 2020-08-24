@@ -21,71 +21,72 @@ return prob_p
 end 
 
 begin
-; season = "MAM"
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"
-
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM_nudge2NTACLM/B2000_alt_north_year_PACCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"  
-
+season_r = (/"spring","summer","autumn","winter"/)
+season = (/"MAM","JJA","SON","DJF"/)
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
-    f1=addfile(fils1, "r")
-    f2=addfile(fils2, "r")
-    
-    time1 = f1->time
-    time2 = f2->time
-    time1 = (/time1 -1/)
-    time2 = (/time2 -1/)
-    date1=cd_calendar(time1, 1)
-    date2=cd_calendar(time2, 1)
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-foul-season")
+  
+  plot = new(4,graphic)
+  iplot = new(4,graphic)
+  str3 = ispan(1,4,1) + ""
 
 
-    timeind1=ind(date1.ge.25601.and.date1.le.28012)
-    timeind2=ind(date2.ge.25601.and.date2.le.28012)
+do i = 0,3
+  f1=addfile(fils1, "r")
+  f2=addfile(fils2(i), "r")
+  print("读入file"+fils2(i))
 
+  date=cd_calendar(f1->time, 1)
+  timeind=ind(date.ge.601.and.date.le.4012)
 
-  PRECL_CT  =  f1->PRECL(timeind1,:,:)
-  PRECC_CT  =  f1->PRECC(timeind1,:,:)
+  PRECL_CT  =  f1->PRECL(timeind,:,:)
+  PRECC_CT  =  f1->PRECC(timeind,:,:)
 
   PRE_CT = PRECC_CT
   PRE_CT = (/PRECC_CT+PRECL_CT/)
+  ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
   PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
-  PRECL_id  =  f2->PRECL(timeind2,:,:)
-  PRECC_id  =  f2->PRECC(timeind2,:,:)
+  PRECL_id  =  f2->PRECL(timeind,:,:)
+  PRECC_id  =  f2->PRECC(timeind,:,:)
 
   PRE_id = PRECC_id
   PRE_id = (/PRECC_id+PRECL_id/)
+  ; PRE_id = (/PRECL_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
-
-  PRE_CT_clm = dim_avg_n_Wrap(PRE_CT, 0)
-  PRE_indian_clm = dim_avg_n_Wrap(PRE_id, 0)
+   
+  PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
+  PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
 
   PRE_diff = PRE_CT_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
   ;;;;U,V
-  u_CT  =  f1->U(timeind1,{850},:,:)
-  v_CT  =  f1->V(timeind1,{850},:,:)
+  u_CT  =  f1->U(timeind,{850},:,:)
+  v_CT  =  f1->V(timeind,{850},:,:)
 
-  u_id  =  f2->U(timeind2,{850},:,:)
-  v_id  =  f2->V(timeind2,{850},:,:)
+  u_id  =  f2->U(timeind,{850},:,:)
+  v_id  =  f2->V(timeind,{850},:,:)
 
 
-  u_CT_clm = dim_avg_n_Wrap(u_CT, 0)
-  u_indian_clm = dim_avg_n_Wrap(u_id, 0)
+  u_CT_clm = dim_avg_n_Wrap(month_to_season(u_CT, season(i)), 0)
+  u_indian_clm = dim_avg_n_Wrap(month_to_season(u_id, season(i)), 0)
 
   u_diff = u_CT_clm
   u_diff = (/u_indian_clm - u_CT_clm/)
 
-  v_CT_clm = dim_avg_n_Wrap(v_CT, 0)
-  v_indian_clm = dim_avg_n_Wrap(v_id, 0)
+  v_CT_clm = dim_avg_n_Wrap(month_to_season(v_CT, season(i)), 0)
+  v_indian_clm = dim_avg_n_Wrap(month_to_season(v_id, season(i)), 0)
 
   v_diff = v_CT_clm
   v_diff = (/v_indian_clm - v_CT_clm/)
 
   ;;;t_test 
-    prob_p = t_test(PRE_CT,PRE_id)
-    prob_u = t_test(u_CT,u_id)
-    prob_v = t_test(v_CT,v_id)
+    prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
+    prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
+    prob_v = t_test( month_to_season(v_CT, season(i)) ,month_to_season(v_id, season(i)))
   ;;;
    PRE_diff@_FillValue = 10^9
    u_diff@_FillValue = 10^9
@@ -93,10 +94,10 @@ begin
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
     ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+;;;
 
 
-   wks=gsn_open_wks("pdf", "diff-p,u,v-restore-altantic-0280-PACCLM-MINUS-YEAR.pdf")
-
+;;;;;;
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -104,11 +105,11 @@ begin
 
 
     res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=True
+    res@lbLabelBarOn=False
     res@cnFillOn = True 
-    res@cnLinesOn =False
-    ; res@cnLineColor = "White"
-    ; res@cnLineLabelInterval = 2
+    res@cnLinesOn =True
+    res@cnLineColor = "White"
+    res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
@@ -118,37 +119,42 @@ begin
 
     res@cnMinLevelValF       =   -2
     res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.25
+    res@cnLevelSpacingF      =  0.2
     
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -30.0
+    res@mpMinLatF             = -10.0
     res@mpMaxLatF             = 30.0
-    res@mpMinLonF             =0.0
-    res@mpMaxLonF             = 360.0
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2
+    res@mpMinLonF             = 40.0
+    res@mpMaxLonF             = 170.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+   
+    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
     
-    ; res@mpShapeMode = "FreeAspect"
-    ; res@vpWidthF = 0.7
-    ; res@vpHeightF = 0.3
+    res@mpShapeMode = "FreeAspect"
+    res@vpWidthF = 0.7
+    res@vpHeightF = 0.3
     ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = "Indo-Pacific SST forcing"
+    res@gsnLeftString = season(i)
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.015           ; thin vectors
-    res@vcMinMagnitudeF          =0.02
-    res@vcMaxMagnitudeF = 7.0
+    ; res@vcMinMagnitudeF          =0.02
+    ; res@vcMaxMagnitudeF = 7.0
     res@vcRefMagnitudeF          = 2.0
     res@vcRefLengthF             = 0.05     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
@@ -160,28 +166,27 @@ begin
     
     
     res@gsnRightString = ""
-    plot = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
 
+  
 
    pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=2.0
    pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
+ 
    
-     ;;;画box
-     lat1 = 0
-     lat2 = 15
-     lon1 = 110
-     lon2 = 155
+   ;;;画box
+   lat1 = 0
+   lat2 = 15
+   lon1 = 125
+   lon2 = 160
 
-     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-     ;;;
-      plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
+   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ;;;
+    plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
-   
     ;;;打点
     res_pro=True
     res_pro@gsnAddCyclic = False
@@ -190,7 +195,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0,0.01/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False
@@ -198,7 +203,7 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnFillDotSizeF = 0.003
   
     res_pro@cnMonoFillColor = False
     res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
@@ -210,16 +215,16 @@ begin
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
-    iplot = new(1,graphic)
-
-    iplot(0)=gsn_csm_contour(wks,prob_p,res_pro)
-
-    i = 0
+    iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
     overlay(plot(i), iplot(i))
+    print("finish subset figure")
+end do
+  print("panel")
+  pres = True
+  pres@gsnPanelLabelBar = True
 
-    draw(plot)
-    frame(wks)
-    print("done script")
-  end
+  gsn_panel(wks, plot, (/2,2/), pres)
+  print("done script")
+end
   
 
