@@ -8,12 +8,12 @@
 begin
 
   season = (/"MAM","JJA","SON","DJF"/)
-  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010.nc"
-  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010.nc"
+  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-philipian.nc"
+  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-philipian.nc"
  
   plot1 = new(4,graphic)
   plot2 = new(4,graphic)
-  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2015-season-wktrend")                  ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2015-philipian-season")                  ; send graphics to PNG file
 
 
 
@@ -45,7 +45,7 @@ do i=0,3
 ;;;
 
 ;;;read Q1 monthly data from linshuheng
-  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/Q_time_era.nc")
+  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/annual/Q_time_era.nc")
   f3 = addfile(fils, "r")
   date = cd_calendar(f3->time, 1)
 
@@ -66,11 +66,13 @@ do i=0,3
 
   dim = dimsizes(q1_annual)
 
-  ; q1_annual_rc = (/regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)/)
+  q1_annual_rc = (/regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)/)
   
-    q1_annual_mk=trend_manken(q1_annual, False, 0)
-    q1_annual_rc = q1_annual_mk(1,:,:,:)
+    ; q1_annual_mk=trend_manken(q1_annual, False, 0)
+    ; q1_annual_rc = q1_annual_mk(1,:,:,:)
     copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
+
+
     q1_annual_rc = (/q1_annual_rc*dim(0)/)
     q1_clm = dim_avg_n_Wrap(q1_annual, 0)
 

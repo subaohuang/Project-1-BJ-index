@@ -20,14 +20,14 @@ begin
 return prob_p
 end 
 begin
-    fils1 = "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECC.mon.0250-0299.nc"  
-    fils1a= "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECL.mon.0250-0299.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.cam.h0.0251-0280.nc"
 
+  ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h0.0251-0280_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"
+ 
   
     f1=addfile(fils1, "r")
-    f1a=addfile(fils1a, "r")
     f2=addfile(fils2, "r")
     
     time1 = f1->time
@@ -40,10 +40,8 @@ begin
 
     timeind1=ind(date1.ge.25601.and.date1.le.28012)
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
-    
 
-
-    PRECL_CT  =  f1a->PRECL(timeind1,:,:)
+    PRECL_CT  =  f1->PRECL(timeind1,:,:)
     PRECC_CT  =  f1->PRECC(timeind1,:,:)
 
     PRE_CT = PRECC_CT
@@ -58,29 +56,33 @@ begin
     PRE_id = (/PRECC_id+PRECL_id/)
     ; PRE_id = (/PRECL_id/)
     PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
-
-
-
-
+   
+    
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-fourseason-0280")
+    wks=gsn_open_wks("pdf", "diff-pre-restore-altantic-year-fourseason-0280.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
     plot1 =new(4,graphic)
+    iplot = new(4,graphic)
 
-    do i = 0,3
 
-        PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
-        PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
+  do i=0,3
 
-        PRE_diff = PRE_CT_clm
-        PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
-        ;;;t_test 
-        prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
-        PRE_diff@_FillValue = 10^9
-             
+    PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
+    PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
+
+    PRE_diff = PRE_CT_clm
+    PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
+
+    
+
+    ;;;t_test 
+     prob_pre_indian = t_test(month_to_season(PRE_CT, season(i)),month_to_season(PRE_id, season(i)))
+     copy_VarCoords(PRE_indian_clm, prob_pre_indian)
+    
+    
         res=True
         res@gsnDraw=False
         res@gsnFrame=False
@@ -108,9 +110,9 @@ begin
         ; res@cnMaxLevelValF       =   0.5
         ; res@cnLevelSpacingF      =  0.1
 
-        res@cnMinLevelValF       =   -1.0
-        res@cnMaxLevelValF       =   1.0
-        res@cnLevelSpacingF      =  0.1
+        res@cnMinLevelValF       =   -2.0
+        res@cnMaxLevelValF       =   2.0
+        res@cnLevelSpacingF      =  0.25
 
         ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
@@ -119,16 +121,16 @@ begin
 
         res@mpLimitMode           = "LatLon"
          
-        res@mpMinLatF             = -60.0
-        res@mpMaxLatF             = 60.0
-        res@mpMinLonF             = 0.0
-        res@mpMaxLonF             = 360.0
-        res@mpCenterLonF = 180.0
+        ; res@mpMinLatF             = -60.0
+        ; res@mpMaxLatF             = 60.0
+        ; res@mpMinLonF             = 0.0
+        ; res@mpMaxLonF             = 360.0
+        ; res@mpCenterLonF = 180.0
 
-        ; res@mpMinLatF             = -10.0
-        ; res@mpMaxLatF             = 50.0
-        ; res@mpMinLonF             = 60.0
-        ; res@mpMaxLonF             = 160.0
+        res@mpMinLatF             = -10.0
+        res@mpMaxLatF             = 50.0
+        res@mpMinLonF             = 70.0
+        res@mpMaxLonF             = 170.0
 
 
 
@@ -159,8 +161,8 @@ begin
 
         lat1 = 0
         lat2 = 15
-        lon1 = 110
-        lon2 = 155
+        lon1 = 125
+        lon2 = 160
 
         pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
         pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
@@ -170,42 +172,40 @@ begin
         plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
    
 
-    ;  ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
+     ;;;打点
+        res_pro=True
+        res_pro@gsnAddCyclic = False
+        res_pro@gsnDraw=False
+        res_pro@gsnFrame=False
+        res_pro@cnFillOn = True
 
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.1/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+        res_pro@cnLevelSelectionMode = "ExplicitLevels"
+        res_pro@cnLevels = (/0,0.05/)
+        res_pro@lbLabelBarOn = False
+        res_pro@cnLinesOn=False
+        ; res_pro@cnMonoLineColor =False
+        ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.002
-  
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
-   
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot = new(1,graphic)
+        res_pro@cnMonoFillPattern = True
+        res_pro@cnFillPattern = 17
+        res_pro@cnFillDotSizeF = 0.002
 
-    ; iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    
+        res_pro@cnMonoFillColor = False
+        res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+        res_pro@cnLineLabelsOn=False
+        res_pro@tmYRMode = "Automatic"
+        res_pro@cnInfoLabelOn=False
 
-    
-    ; overlay(plot(0), iplot(0))
-    end do 
+        res_pro@gsnCenterString = ""
+        ; res_pro@cnLineLabelBackgroundColor="Transparent"
+        ; res_pro@cnLineThicknessF = 3.
+        ; res_pro@cnFillOn        = True
+
+
+        iplot(i)=gsn_csm_contour(wks,prob_pre_indian,res_pro)
+
+      overlay(plot(i), iplot(i))
+end do 
     pres = True
     pres@gsnPanelLabelBar = True
     
@@ -213,4 +213,3 @@ begin
     print("done script")
   end
   
-

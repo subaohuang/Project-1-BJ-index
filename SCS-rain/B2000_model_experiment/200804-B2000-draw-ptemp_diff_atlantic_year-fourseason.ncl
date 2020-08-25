@@ -23,8 +23,8 @@ begin
 
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -42,7 +42,7 @@ begin
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,:,:)
+    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
 
   
 
@@ -60,7 +60,7 @@ begin
 
     
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-spring-fourseason-0280.pdf")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year-fourseason-0280.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
@@ -106,7 +106,7 @@ begin
 
     ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    gsn_define_colormap(wks, "BlueRed")
+    gsn_define_colormap(wks, "BlRe")
  
  
 
