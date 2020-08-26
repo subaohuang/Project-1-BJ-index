@@ -128,7 +128,8 @@ begin
         ; res@mpCenterLonF = 180.0
 
         res@mpMinLatF             = -10.0
-        res@mpMaxLatF             = 50.0
+        res@mpMaxLatF             = 30.0
+        ; res@mpMaxLatF             = 50.0
         res@mpMinLonF             = 70.0
         res@mpMaxLonF             = 170.0
 

@@ -258,7 +258,8 @@ do i = 0,3
 
     ;;;global region
    res@mpMinLatF             = -5
-   res@mpMaxLatF             = 50
+   ; res@mpMaxLatF             = 50
+   res@mpMaxLatF             = 30
    res@mpMinLonF             = 90
    res@mpMaxLonF             = 170
   ; ;;;

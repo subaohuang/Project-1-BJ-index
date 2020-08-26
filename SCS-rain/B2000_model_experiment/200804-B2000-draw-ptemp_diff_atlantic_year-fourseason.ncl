@@ -106,7 +106,8 @@ begin
 
     ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    gsn_define_colormap(wks, "BlRe")
+    ; gsn_define_colormap(wks, "BlRe")
+    gsn_define_colormap(wks, "BlueDarkRed18")
  
  
 
@@ -127,8 +128,8 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF = 180.0

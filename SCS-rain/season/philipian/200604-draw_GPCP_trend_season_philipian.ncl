@@ -99,7 +99,8 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   res@mpLimitMode           = "LatLon"
   
   res@mpMinLatF             = -5
-  res@mpMaxLatF             = 45
+  ; res@mpMaxLatF             = 45
+  res@mpMaxLatF             = 30
   res@mpMinLonF             =100
   res@mpMaxLonF             = 170
 
