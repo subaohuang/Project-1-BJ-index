@@ -22,7 +22,7 @@ end
 begin
 
     
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM/B2000_alt_north_year_WNPCLM.cam.h0.0251-0280.nc"  
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.cam.h0.0251-0280.nc"  
     fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280.nc"
     
 
@@ -71,7 +71,7 @@ begin
     PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-minus-WNPCLM-year-0280")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-minus-WNPCLM_Nudge-year-0280")
     
     res=True
     res@gsnDraw=False

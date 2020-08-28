@@ -22,9 +22,9 @@ end
 begin
 
     ; season = "MAM"
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280.nc"  
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.cam.h0.0251-0280.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"
 
   
     f1=addfile(fils1, "r")
@@ -73,7 +73,7 @@ begin
     PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year_PACCLM_minus_altyear")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year_WNPCLM_minus_altyear")
     
     res=True
     res@gsnDraw=False
@@ -102,9 +102,9 @@ begin
     ; res@cnMaxLevelValF       =   0.5
     ; res@cnLevelSpacingF      =  0.1
     
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
-    res@cnLevelSpacingF      =  0.1
+    res@cnMinLevelValF       =   -2.0
+    res@cnMaxLevelValF       =   2.0
+    res@cnLevelSpacingF      =  0.2
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
@@ -154,8 +154,8 @@ begin
    
     lat1 = 0
     lat2 = 15
-    lon1 = 110
-    lon2 = 155
+    lon1 = 125
+    lon2 = 160
 
     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
