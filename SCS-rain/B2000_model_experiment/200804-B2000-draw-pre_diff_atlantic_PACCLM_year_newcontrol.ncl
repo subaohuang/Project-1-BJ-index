@@ -24,7 +24,9 @@ begin
     ; season = "MAM"
     fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"
+    ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"
+
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_new/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"
 
   
     f1=addfile(fils1, "r")
@@ -73,7 +75,7 @@ begin
     PRE_diff@_FillValue = 10^9
      
 
-    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year_WNPCLM_minus_altyear")
+    wks=gsn_open_wks("pdf", "diff-precipitation-restore-altantic-0280-year_new_minus_year")
     
     res=True
     res@gsnDraw=False

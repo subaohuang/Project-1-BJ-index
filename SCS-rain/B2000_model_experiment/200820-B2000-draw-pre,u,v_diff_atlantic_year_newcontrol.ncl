@@ -22,9 +22,9 @@ end
 
 begin
 ; season = "MAM"
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"
+    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc"
 
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM_nudge2NTACLM/B2000_alt_north_year_PACCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"  
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM_nudge2NTACLM/B2000_alt_north_year_PACCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"  
 
   
     f1=addfile(fils1, "r")
