@@ -27,8 +27,10 @@ begin
   ; fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM/B2000_alt_north_year_PACCLM.TEMP.h0.0251-0280.nc"  
   ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"  
                                                                                       
-  fils1  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
-  fils2  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_PACCLM_nudge2NTACLM/B2000_alt_north_year_PACCLM_nudge2NTACLM.TEMP.h0.0251-0280.nc"
+  ; fils1  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
+    fils2  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
+  ; fils2  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
+  fils1  = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -40,6 +42,7 @@ begin
     time2 = (/time2 -1/)
     date1=cd_calendar(time1, 1)
     date2=cd_calendar(time2, 1)
+
 
 
     timeind1=ind(date1.ge.25601.and.date1.le.28012)
@@ -80,11 +83,18 @@ begin
     ;;;t_test 
      prob_slp_indian = t_test(PSL_indian,PSL_CT)
      copy_VarCoords(PSL_indian_clm, prob_slp_indian)
+
+
+    prob_slp_indian!0 = "nlat"
+    prob_slp_indian!1 = "nlon"
+    prob_slp_indian@lat2d   = TLAT
+    prob_slp_indian@lon2d   = TLONG
+
      printVarSummary(prob_slp_indian)
     
      
 
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-PACCLM-MINUS-year.pdf")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-WNPCLM_nudge2NTACLM-MINUS-year.pdf")
     
     res=True
     res@gsnDraw=False
@@ -127,10 +137,10 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
-    ; res@mpMinLatF             = -30.0
-    ; res@mpMaxLatF             = 30.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
 
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
@@ -155,9 +165,10 @@ begin
     ; res@vpHeightF = 0.3
 
     
-    
+     
     res@gsnRightString = ""
-    res@gsnLeftString = "Nudging Atlantic SST to Clim+Change"
+    res@gsnLeftString = "AW - WNPCLM "
+    res@gsnLeftStringFontHeightF = 5.0    ; res@gsnLeftString = ""
  
     plot = new(1,graphic)
     plot(0) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
@@ -188,41 +199,42 @@ begin
     plot1@$str3(0)$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres) 
    
 
-    ;  ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
+     ;;;打点
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
+    res_pro@trGridType = "TriangularMesh"
 
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.1/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.002
   
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
    
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot = new(1,graphic)
+    res_pro@gsnCenterString = ""
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
+    iplot = new(1,graphic)
 
-    ; iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    
+    iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+        
 
     
-    ; overlay(plot(0), iplot(0))
+    overlay(plot(0), iplot(0))
     
     
    getvalues plot@contour
