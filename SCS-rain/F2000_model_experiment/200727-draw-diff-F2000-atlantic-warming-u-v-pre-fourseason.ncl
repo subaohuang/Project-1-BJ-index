@@ -92,8 +92,8 @@ do i = 0,3
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -107,19 +107,21 @@ do i = 0,3
     res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=False
     res@cnFillOn = True 
-    res@cnLinesOn =True
+    res@cnLinesOn =False
     res@cnLineColor = "White"
     res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "precip_diff_12lev"
+    res@cnFillPalette = "MPL_BrBG"
+
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
     res@cnMinLevelValF       =   -2
     res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.2
+    res@cnLevelSpacingF      =  0.25
     
 
     res@tmXTOn=False
@@ -128,7 +130,8 @@ do i = 0,3
     res@mpLimitMode           = "LatLon"
     res@mpMinLatF             = -10.0
     res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 40.0
+    ; res@mpMinLonF             = 40.0
+    res@mpMinLonF             = 70.0
     res@mpMaxLonF             = 170.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
@@ -145,14 +148,14 @@ do i = 0,3
     res@vpHeightF = 0.3
     ;;
      ;;;LineArrow
-    res@gsnScalarContour        = True
+    ; res@gsnScalarContour        = True
     res@gsnLeftString = season(i)
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.015           ; thin vectors
+    res@vcMinDistanceF           = 0.02           ; thin vectors
     ; res@vcMinMagnitudeF          =0.02
     ; res@vcMaxMagnitudeF = 7.0
     res@vcRefMagnitudeF          = 2.0
@@ -166,26 +169,27 @@ do i = 0,3
     
     
     res@gsnRightString = ""
-    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
 
-  
+    plot(i) = gsn_csm_contour_map(wks,PRE_diff,res)
 
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
- 
-   
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-    plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+     pgres=True
+     pgres@gsLineColor="black"
+     pgres@gsLineThicknessF=2.0
+     pgres@gsLineDashPattern=0
+
+     
+     ;;;画box
+     lat1 = 0
+     lat2 = 15
+     lon1 = 125
+     lon2 = 160
+
+     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+     ;;;
+      plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
     ;;;打点
     res_pro=True

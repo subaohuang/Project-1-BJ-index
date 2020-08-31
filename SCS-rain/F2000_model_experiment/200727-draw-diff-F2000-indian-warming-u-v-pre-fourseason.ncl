@@ -107,19 +107,20 @@ do i = 0,3
     res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=False
     res@cnFillOn = True 
-    res@cnLinesOn =True
+    res@cnLinesOn =False
     res@cnLineColor = "White"
     res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "precip_diff_12lev"
+      res@cnFillPalette = "MPL_BrBG"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
     res@cnMinLevelValF       =   -2
     res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.2
+    res@cnLevelSpacingF      =  0.25
     
 
     res@tmXTOn=False
@@ -128,7 +129,8 @@ do i = 0,3
     res@mpLimitMode           = "LatLon"
     res@mpMinLatF             = -10.0
     res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 40.0
+    ; res@mpMinLonF             = 40.0
+    res@mpMinLonF             = 70.0
     res@mpMaxLonF             = 170.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
@@ -145,7 +147,8 @@ do i = 0,3
     res@vpHeightF = 0.3
     ;;
      ;;;LineArrow
-    res@gsnScalarContour        = True
+    ; res@gsnScalarContour        = True
+    res@gsnScalarContour        = False
     res@gsnLeftString = season(i)
 
     
@@ -166,7 +169,8 @@ do i = 0,3
     
     
     res@gsnRightString = ""
-    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    plot(i) = gsn_csm_contour_map(wks, PRE_diff,res)
 
   
 

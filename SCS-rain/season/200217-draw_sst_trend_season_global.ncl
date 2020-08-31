@@ -69,10 +69,10 @@ begin
     ; ssta_son = where(prob_son.le.0.05, ssta_son, ssta_son@_FillValue)
     ; ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
 
-    ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
     
     
     
@@ -241,10 +241,14 @@ begin
     ; res_pro@cnFillOn        = True
   
   
-     ; iplot = gsn_csm_contour(wks,prob_p  ,res_pro)
+     iplot = gsn_csm_contour(wks,prob_p ,res_pro)
 
     ;;;  
-    ; overlay(plot, iplot)
+      overlay(plot, iplot)
+
+
+
+
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@lbOrientation = "Vertical"

@@ -118,10 +118,10 @@ begin
     ; ssta_son = where(prob_son.le.0.05, ssta_son, ssta_son@_FillValue)
     ; ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
 
-    ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
     
     
     
@@ -137,7 +137,8 @@ begin
   
   ; res@cnFillPalette = "NCV_jaisnd"
    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlRe"
+   res@cnFillPalette = "BlueDarkRed18"
+   ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -190,9 +191,9 @@ begin
 
   res@gsnLeftString="Spring"
 
-  res@mpShapeMode = "FreeAspect"
-  res@vpHeightF = 0.2
-  res@vpWidthF = 0.7
+  ; res@mpShapeMode = "FreeAspect"
+  ; res@vpHeightF = 0.2
+  ; res@vpWidthF = 0.7
 
   plot=new(4,graphic)
 
@@ -269,42 +270,42 @@ begin
       plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
     end do 
 
-   ; ;;;打点
-   ;  res_pro=True
-   ;  res_pro@gsnAddCyclic = False
-   ;  res_pro@gsnDraw=False
-   ;  res_pro@gsnFrame=False
-   ;  res_pro@cnFillOn = True
+   ;;;打点
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
 
-   ;  res_pro@cnLevelSelectionMode = "ExplicitLevels"
-   ;  res_pro@cnLevels = (/0,0.01/)
-   ;  res_pro@lbLabelBarOn = False
-   ;  res_pro@cnLinesOn=False
-   ;  ; res_pro@cnMonoLineColor =False
-   ;  ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-   ;  res_pro@cnMonoFillPattern = True
-   ;  res_pro@cnFillPattern = 17
-   ;  res_pro@cnFillDotSizeF = 0.001
-   ;  res_pro@cnMonoFillColor = False
-   ;  res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-   ;  ; res_pro@cnLevels = ispan(-6,6,1)
-   ;  res_pro@cnLineLabelsOn=False
-   ;  res_pro@tmYRMode = "Automatic"
-   ;  res_pro@cnInfoLabelOn=False
-   ;  ; res_pro@cnLineLabelBackgroundColor="Transparent"
-   ;  ; res_pro@cnLineThicknessF = 3.
-   ;  ; res_pro@cnFillOn        = True
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.001
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    ; res_pro@cnLevels = ispan(-6,6,1)
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
   
-   ;   iplot = new(4,graphic)
-   ;   iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
-   ;   iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
-   ;   iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
-   ;   iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
-   ;  ;;  
-   ;  do i=0,3
-   ;   overlay(plot(i), iplot(i))
-   ;  end do
+     iplot = new(4,graphic)
+     iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
+     iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
+     iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
+     iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
+    ;;  
+    do i=0,3
+     overlay(plot(i), iplot(i))
+    end do
 
 pres = True
 pres@gsnPanelLabelBar  = True

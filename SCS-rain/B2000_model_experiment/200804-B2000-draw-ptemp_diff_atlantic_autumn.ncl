@@ -23,8 +23,8 @@ begin
 
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
+  fils2 = "/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_autumn/B2000_alt_north_autumn.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -42,7 +42,7 @@ begin
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,:,:)
+    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
 
   
 
@@ -60,12 +60,12 @@ begin
 
     
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-spring-fourseason-0280.pdf")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-autumn-fourseason-0280.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
     plot1 =new(4,graphic)
-
+    iplot = new(4,graphic)
 
   do i=0,3
 
@@ -106,7 +106,7 @@ begin
 
     ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    ; gsn_define_colormap(wks, "BlueRed")
+    ; gsn_define_colormap(wks, "BlRe")
     gsn_define_colormap(wks, "BlueDarkRed18")
  
  
@@ -128,8 +128,8 @@ begin
 
     res@mpLimitMode           = "LatLon"
      
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF = 180.0
@@ -178,41 +178,38 @@ begin
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
    
 
-    ;  ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
+     ;;;打点
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
 
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.1/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.002
   
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
    
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot = new(1,graphic)
-
-    ; iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+    res_pro@gsnCenterString = ""
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
     
 
-    
-    ; overlay(plot(0), iplot(0))
+    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+    overlay(plot(i), iplot(i))
 end do
     pres = True
     pres@gsnPanelLabelBar = True
