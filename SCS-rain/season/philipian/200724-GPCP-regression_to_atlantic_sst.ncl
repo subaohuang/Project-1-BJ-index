@@ -135,8 +135,8 @@ begin
 ;;;; 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到北大西洋SST的回归系数-season-remove-ensosignal")
-    wks1   = gsn_open_wks("pdf", "GPCP回归到北大西洋dSST的回归系数-season-remove-ensosignal")
+    wks   = gsn_open_wks("pdf", "GPCP回归到南大西洋SST的回归系数-season-remove-ensosignal-wnp")
+    wks1   = gsn_open_wks("pdf", "GPCP回归到南大西洋dSST的回归系数-season-remove-ensosignal-wnp")
     plot=new(4,graphic)
     plot1 = plot  
     str = (/"1","2","3","4"/)
@@ -231,11 +231,11 @@ do i =0,3
    ; lon2 = 155
 
    
-   ; ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) 
-   ; dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:0},{300:360}), (/1,2/))
+   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:0},{300:360}), area({-30:0}), 1.0, 0) 
+   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{-30:0},{300:360}), (/1,2/))
 
-   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) 
-   dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:30},{300:360}), (/1,2/))
+   ; ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:30},{300:360}), area({0:30}), 1.0, 0) 
+   ; dsst_index = dim_avg_n_Wrap(dsst_annual(:,{0:30},{300:360}), (/1,2/))
 
    ;;;normalized 
    
@@ -305,10 +305,15 @@ print("*******开始计算相关系数*****************")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = lat1
-  res@mpMaxLatF             = lat2
-  res@mpMinLonF             = lon1
-  res@mpMaxLonF             = lon2
+  ; res@mpMinLatF             = lat1
+  ; res@mpMaxLatF             = lat2
+  ; res@mpMinLonF             = lon1
+  ; res@mpMaxLonF             = lon2
+  
+    res@mpMinLatF             = -10
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 70
+  res@mpMaxLonF             = 170
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0

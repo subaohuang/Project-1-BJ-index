@@ -160,7 +160,7 @@ begin
 ;;;; 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数")
+    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数-wnp")
     wks1   = gsn_open_wks("pdf", "GPCP回归到印度洋dSST的回归系数-season")
     plot=new(4,graphic)
     plot1 = plot  
@@ -191,9 +191,9 @@ do i =0,3
     ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season(i))
     printVarSummary(ssta_annual)
 
-    ; ;;;;remove_enso_signal 
-    ;   ssta_annual = (/remove_enso_signal(ssta_annual)/)
-    ; ;;;;
+    ;;;;remove_enso_signal 
+      ssta_annual = (/remove_enso_signal(ssta_annual)/)
+    ;;;;
  
 
     ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
@@ -304,10 +304,14 @@ print("*******开始计算相关系数*****************")
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = lat1
-  res@mpMaxLatF             = lat2
-  res@mpMinLonF             = lon1
-  res@mpMaxLonF             = lon2
+  ; res@mpMinLatF             = lat1
+  ; res@mpMaxLatF             = lat2
+  ; res@mpMinLonF             = lon1
+  ; res@mpMaxLonF             = lon2
+  res@mpMinLatF             = -10
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 70
+  res@mpMaxLonF             = 170
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -329,7 +333,7 @@ print("*******开始计算相关系数*****************")
   ; res@cnMinLevelValF       =   -1.0
   ; res@cnMaxLevelValF       =   1.0
   ; res@cnLevelSpacingF      =  0.1
-    res@cnMinLevelValF       =   -0.5
+  res@cnMinLevelValF       =   -0.5
   res@cnMaxLevelValF       =   0.5
   res@cnLevelSpacingF      =  0.05
 
