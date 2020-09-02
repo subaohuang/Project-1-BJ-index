@@ -41,7 +41,7 @@ begin
     ;;;region 
       lat1 = -5
       lat2 = 45
-      lon1 = 100
+      lon1 = 90
       lon2 = 170
     ;;;
 
@@ -142,10 +142,17 @@ begin
     res@lbLabelStride=2
     res@lbOrientation="Vertical"
     res@mpLimitMode           = "LatLon"
+    ; res@mpMinLatF             = -5
+    ; res@mpMaxLatF             = 45
+    ; res@mpMinLonF             =100
+    ; res@mpMaxLonF             = 170 
+
     res@mpMinLatF             = -5
-    res@mpMaxLatF             = 45
-    res@mpMinLonF             =100
-    res@mpMaxLonF             = 170
+    res@mpMaxLatF             = 20
+    res@mpMinLonF             =90
+    res@mpMaxLonF             = 170 
+
+
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
     res@tmXTOn=False
