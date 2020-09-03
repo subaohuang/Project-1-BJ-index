@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-foul-season-global")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-foul-season")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -128,15 +128,15 @@ do i = 0,3
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 30.0
-    ; ; res@mpMinLonF             = 40.0
-    ; res@mpMinLonF             = 70.0
-    ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
+    res@mpMinLatF             = -10.0
+    res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 40.0
+    res@mpMinLonF             = 70.0
+    res@mpMaxLonF             = 170.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
@@ -192,34 +192,64 @@ do i = 0,3
       plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
     ;;;打点
+    ; res_pro=True
+    ; res_pro@gsnAddCyclic = False
+    ; res_pro@gsnDraw=False
+    ; res_pro@gsnFrame=False
+    ; res_pro@cnFillOn = True
+
+    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    ; res_pro@cnLevels = (/0,0.01/)
+    ; res_pro@lbLabelBarOn = False
+    ; res_pro@cnLinesOn=False
+    ; ; res_pro@cnMonoLineColor =False
+    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    ; res_pro@cnMonoFillPattern = True
+    ; res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.003
+  
+    ; res_pro@cnMonoFillColor = False
+    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    ; res_pro@cnLineLabelsOn=False
+    ; res_pro@tmYRMode = "Automatic"
+    ; res_pro@cnInfoLabelOn=False
+   
+    ; res_pro@gsnCenterString = ""
+    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; ; res_pro@cnLineThicknessF = 3.
+    ; ; res_pro@cnFillOn        = True
+    ; iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
+
+
+     ;;;打点
     res_pro=True
-    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.01/)
-    res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    res_pro@cnLevelSpacingF     = 0.01     ; set contour spacing
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
-  
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-   
-    res_pro@gsnCenterString = ""
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-    iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
+
+
+    iplot(i) = gsn_csm_contour(wks,prob_p,res_pro)
+
+     
+    
+
+    opt                      = True
+    opt@gsnShadeFillType     = "pattern"
+    opt@gsnShadeMid     = 6         ; stipple
+    ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; opt@gsnShadeHigh   = "green"
+    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.01,opt)
     overlay(plot(i), iplot(i))
     print("finish subset figure")
 end do

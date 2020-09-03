@@ -49,7 +49,7 @@ end
 begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -79,7 +79,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016")
+wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

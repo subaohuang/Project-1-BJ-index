@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,psl-alt-warming-foul-season")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,psl-alt-warming-foul-season-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -131,15 +131,15 @@ do i = 0,3
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -10.0
-    res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 70.0
-    res@mpMaxLonF             = 170.0
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
-    ; res@mpMinLonF             = 0.0
-    ; res@mpMaxLonF             = 360.0
+    ; res@mpMinLatF             = -10.0
+    ; res@mpMaxLatF             = 30.0
+    ; ; res@mpMinLonF             = 40.0
+    ; res@mpMinLonF             = 70.0
+    ; res@mpMaxLonF             = 170.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
+    res@mpMinLonF             = 0.0
+    res@mpMaxLonF             = 360.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False

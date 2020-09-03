@@ -27,13 +27,13 @@ begin
     fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h0.0251-0280_chazhi.nc"/)
 
     fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc", \
-      "B2000_alt_north_year_WNPCLM_nudge2NTACLM/B2000_alt_north_year_WNPCLM_nudge2NTACLM.cam.h0.0251-0280_chazhi.nc"/)
+      "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.cam.h0.0251-0280_chazhi.nc"/)
 
     leftstring = (/"AW - CTRL", "WNPCLM - CTRL","AW - WNPCLM"/)
 
 
 
-    wks = gsn_open_wks("pdf", "diff-pre-restore-altantic-year_WNPCLM_panel")
+    wks = gsn_open_wks("pdf", "diff-pre-restore-altantic-year_WNPCLM__2buffer_panel")
     plot = new(3,graphic)
 
     str3 = ispan(1, 3, 1) +""

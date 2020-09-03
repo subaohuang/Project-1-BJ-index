@@ -21,22 +21,23 @@ return prob_p
 end 
 
 begin
-season_r = (/"spring","summer","autumn","winter"/)
-season = (/"MAM","JJA","SON","DJF"/)
+  season_r = (/"summer"/)
+  season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
-  
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-indian-warming-foul-season")
-  
+
+
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-"+season_r+"-foul-season")
+
   plot = new(4,graphic)
   iplot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
 
 
-do i = 0,3
   f1=addfile(fils1, "r")
-  f2=addfile(fils2(i), "r")
-  print("读入file"+fils2(i))
+  f2=addfile(fils2, "r")
+
 
   date=cd_calendar(f1->time, 1)
   timeind=ind(date.ge.601.and.date.le.4012)
@@ -56,7 +57,9 @@ do i = 0,3
   PRE_id = (/PRECC_id+PRECL_id/)
   ; PRE_id = (/PRECL_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
-   
+
+do i = 0,3
+
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
 
@@ -92,8 +95,8 @@ do i = 0,3
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -114,7 +117,8 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     ; res@cnFillPalette = "precip_diff_12lev"
-      res@cnFillPalette = "MPL_BrBG"
+    res@cnFillPalette = "MPL_BrBG"
+
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
@@ -137,7 +141,7 @@ do i = 0,3
     ; res@mpMinLonF             = 0.0
     ; res@mpMaxLonF             = 360.0
    
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
+    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
@@ -148,14 +152,13 @@ do i = 0,3
     ;;
      ;;;LineArrow
     ; res@gsnScalarContour        = True
-    res@gsnScalarContour        = False
     res@gsnLeftString = season(i)
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.015           ; thin vectors
+    res@vcMinDistanceF           = 0.02           ; thin vectors
     ; res@vcMinMagnitudeF          =0.02
     ; res@vcMaxMagnitudeF = 7.0
     res@vcRefMagnitudeF          = 2.0
@@ -170,28 +173,28 @@ do i = 0,3
     
     res@gsnRightString = ""
     ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
-    plot(i) = gsn_csm_contour_map(wks, PRE_diff,res)
 
-  
+    plot(i) = gsn_csm_contour_map(wks,PRE_diff,res)
 
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
- 
-   
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-    plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+     pgres=True
+     pgres@gsLineColor="black"
+     pgres@gsLineThicknessF=2.0
+     pgres@gsLineDashPattern=0
 
-    ; ;;;打点
+     
+     ;;;画box
+     lat1 = 0
+     lat2 = 15
+     lon1 = 125
+     lon2 = 160
+
+     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+     ;;;
+      plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+
+    ;;;打点
     ; res_pro=True
     ; res_pro@gsnAddCyclic = False
     ; res_pro@gsnDraw=False
@@ -220,7 +223,9 @@ do i = 0,3
     ; ; res_pro@cnLineThicknessF = 3.
     ; ; res_pro@cnFillOn        = True
     ; iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-      ;;;打点
+
+
+     ;;;打点
     res_pro=True
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False

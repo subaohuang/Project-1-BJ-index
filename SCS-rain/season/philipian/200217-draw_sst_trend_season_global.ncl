@@ -23,7 +23,7 @@ function remove_enso_signal(data)
       f1=addfile(fils1, "r")
       date:=cd_calendar(f1->time, 1)
 
-      timeind:=ind(date.le.201612.and.date.ge.197901)
+      timeind:=ind(date.le.201512.and.date.ge.197901)
 
       sst =  lonFlip(f1->sst(timeind,:,:))
    
@@ -63,9 +63,9 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ; ;;;;remove_enso_signal
-     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ; ;;;;
+     ;;;;remove_enso_signal
+         p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ;;;;
 
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
@@ -104,8 +104,11 @@ begin
     ssta_jja = cal_season_trend(ssta,"JJA")
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
-
-
+    
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -125,7 +128,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15-removeenso")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -303,9 +306,9 @@ begin
      iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
      iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
     ;;  
-    do i=0,3
-     overlay(plot(i), iplot(i))
-    end do
+    ; do i=0,3
+    ;  overlay(plot(i), iplot(i))
+    ; end do
 
 pres = True
 pres@gsnPanelLabelBar  = True

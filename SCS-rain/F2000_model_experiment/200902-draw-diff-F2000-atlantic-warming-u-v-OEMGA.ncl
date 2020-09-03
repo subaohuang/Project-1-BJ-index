@@ -24,9 +24,9 @@ begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-indian-warming-foul-season")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,OMEGA-alt-warming-foul-season-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -41,21 +41,18 @@ do i = 0,3
   date=cd_calendar(f1->time, 1)
   timeind=ind(date.ge.601.and.date.le.4012)
 
-  PRECL_CT  =  f1->PRECL(timeind,:,:)
-  PRECC_CT  =  f1->PRECC(timeind,:,:)
+
+  PRECC_CT  =  f1->OMEGA(timeind,{500},:,:)
 
   PRE_CT = PRECC_CT
-  PRE_CT = (/PRECC_CT+PRECL_CT/)
-  ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
-  PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
-  PRECL_id  =  f2->PRECL(timeind,:,:)
-  PRECC_id  =  f2->PRECC(timeind,:,:)
+  printMinMax(PRECC_CT, 1)
 
+ 
+
+  PRECC_id  =  f2->OMEGA(timeind,{500},:,:)
   PRE_id = PRECC_id
-  PRE_id = (/PRECC_id+PRECL_id/)
-  ; PRE_id = (/PRECL_id/)
-  PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
+
    
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
@@ -91,9 +88,15 @@ do i = 0,3
    PRE_diff@_FillValue = 10^9
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
-   ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+   
+   ; if season(i).eq."JJA" then
+     ; PRE_diff = where(prob_p.le.0.4, PRE_diff, PRE_diff@_FillValue)
+   ; else 
+    PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
+   ; end if
+
+    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -114,13 +117,14 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     ; res@cnFillPalette = "precip_diff_12lev"
-      res@cnFillPalette = "MPL_BrBG"
+      ; res@cnFillPalette = "BlueWhiteOrangeRed"
+      res@cnFillPalette = "BlueDarkRed18"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.25
+    res@cnMinLevelValF       =   -0.01
+    res@cnMaxLevelValF       =   0.01
+    res@cnLevelSpacingF      =  0.005
     
 
     res@tmXTOn=False
@@ -137,7 +141,7 @@ do i = 0,3
     ; res@mpMinLonF             = 0.0
     ; res@mpMaxLonF             = 360.0
    
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
+    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
@@ -147,18 +151,18 @@ do i = 0,3
     res@vpHeightF = 0.3
     ;;
      ;;;LineArrow
-    ; res@gsnScalarContour        = True
-    res@gsnScalarContour        = False
+    res@gsnScalarContour        = True
+  
     res@gsnLeftString = season(i)
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.015           ; thin vectors
+    res@vcMinDistanceF           = 0.02           ; thin vectors
     ; res@vcMinMagnitudeF          =0.02
     ; res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 2.0
+    res@vcRefMagnitudeF          = 1.0
     res@vcRefLengthF             = 0.05     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.5
@@ -169,8 +173,8 @@ do i = 0,3
     
     
     res@gsnRightString = ""
-    ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
-    plot(i) = gsn_csm_contour_map(wks, PRE_diff,res)
+    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    ; plot(i) = gsn_csm_contour_map(wks, PRE_diff,res)
 
   
 
@@ -191,64 +195,35 @@ do i = 0,3
    ;;;
     plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
-    ; ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
-
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.01/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
-
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.003
-  
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
-   
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-      ;;;打点
+    ;;;打点
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.01     ; set contour spacing
+    res_pro@cnFillOn = True
 
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.01/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+
+
+    res_pro@cnMonoFillPattern = False
+    res_pro@cnFillPatterns = (/-1,17,-1/) 
+    ; res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.003
+
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-
-
-    iplot(i) = gsn_csm_contour(wks,prob_p,res_pro)
-
-     
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.01,opt)
-    overlay(plot(i), iplot(i))
+   
+    res_pro@gsnCenterString = ""
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
+    iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
+    ; overlay(plot(i), iplot(i))
     print("finish subset figure")
 end do
   print("panel")
