@@ -300,6 +300,7 @@ begin
   res@gsnAddCyclic = False
   
   res@cnFillPalette="BlRe"
+  res@cnFillPalette = "BlueWhiteOrangeRed"
 
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -348,9 +349,9 @@ begin
   
   plot(0) = gsn_csm_contour_map(wks,ssta_rc,res)
   res@gsnLeftString  = "Ts - Ta"
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.2
+  res@cnMinLevelValF       =   -0.2
+  res@cnMaxLevelValF       =   0.2
+  res@cnLevelSpacingF      =  0.04
   plot(1) = gsn_csm_contour_map(wks,t_rc,res)
    res@cnMinLevelValF       =   -1.0
   res@cnMaxLevelValF       =   1.0

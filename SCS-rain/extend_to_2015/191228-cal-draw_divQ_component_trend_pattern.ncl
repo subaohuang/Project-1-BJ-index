@@ -419,12 +419,14 @@ begin
   ; res@cnFillPalette = "precip4_diff_19lev"
   res@cnFillOn=True
   res@cnLinesOn=False
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -3.0
-  res@cnMaxLevelValF       =   3.0
-  res@cnLevelSpacingF      =  0.5
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -3.0
+  ; res@cnMaxLevelValF       =   2.0
+  ; res@cnLevelSpacingF      =  0.5
+  res@cnLevelSelectionMode = "ExplicitLevels"
+  res@cnLevels = (/-2,-1.5,-1.0,0.0,0.5,1.0,1.5,2.0/)
+  res@cnFillColors = (/4,5,7,0,17,18,19,20,21/)
 
-  ; res@cnFillColors = (/2,3,4,5,6,7,8,9,11,11,13,14,15,16,18,19,20,20,21,21/)
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
 
@@ -437,19 +439,16 @@ begin
   ; res@mpMaxLonF             = 160
 
     ;;;global region
-   res@mpMinLatF             = -10
-   res@mpMaxLatF             = 50
-   res@mpMinLonF             = 70
-   res@mpMaxLonF             = 170
-  ; ;;;
+   ; res@mpMinLatF             = -10
+   ; res@mpMaxLatF             = 50
+   ; res@mpMinLonF             = 70
+   ; res@mpMaxLonF             = 170
 
-  
-  ; ;;;global region
-  ;  res@mpMinLatF             = -30
-  ;  res@mpMaxLatF             = 30
-  ;  res@mpMinLonF             = 0
-  ;  res@mpMaxLonF             = 360
-  ; ;;;
+   res@mpMinLatF             = -5
+   res@mpMaxLatF             = 30
+   res@mpMinLonF             = 100
+   res@mpMaxLonF             = 170
+
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -471,7 +470,7 @@ begin
   ; res@vcGlyphStyle="CurlyVector"
 
   res@vcMinDistanceF           = 0.02           ; thin vector
-  res@vcRefLengthF             = 0.08     ; define length of v
+  res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.5
   res@vcVectorDrawOrder="PostDraw"

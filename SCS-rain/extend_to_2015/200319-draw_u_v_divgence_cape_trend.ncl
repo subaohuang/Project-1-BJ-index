@@ -194,14 +194,15 @@ begin
   
   res@cnFillPalette="CBR_coldhot"
   res@cnFillPalette = "cmp_b2r"
+  res@cnFillPalette = "CBR_coldhot"
 
 
   res@cnFillOn=True
   res@cnLinesOn=False
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -180.0
-  res@cnMaxLevelValF       =   180.0
-  res@cnLevelSpacingF      =  30.0
+  res@cnMinLevelValF       =   -90.0
+  res@cnMaxLevelValF       =   90.0
+  res@cnLevelSpacingF      =  15.0
   ;res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1
   ; res@cnMaxLevelValF       =   1
@@ -246,7 +247,8 @@ begin
   ; res@vcRefMagnitudeF          = 0.1
   res@vcRefLengthF             = 0.1     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
+  res@vcLineArrowThicknessF=1.5
+
   res@vcLineArrowHeadMaxSizeF=0.005
   res@vcLineArrowHeadMinSizeF=0.005
   res@vcVectorDrawOrder="PostDraw"

@@ -180,7 +180,7 @@ do i=0,2
 
     res@gsnRightString = ""
     res@gsnLeftString = leftstring(i)
-    res@gsnLeftStringFontHeightF = 5.0    ; res@gsnLeftString = ""
+    res@gsnLeftStringFontHeightF = 10.0    ; res@gsnLeftString = ""
 
 
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
@@ -249,7 +249,10 @@ do i=0,2
 
    pres = True
    pres@gsnPanelLabelBar = True
-
+   pres@lbOrientation = "Vertical"
+   pres@pmLabelBarWidthF = 0.1
+   pres@pmLabelBarHeightF = 0.3
+   ; pres@lbLabelFontHeightF = 0.2
    gsn_panel(wks, plot, (/3,1/), pres)
   end
   
