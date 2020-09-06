@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-indian-warming-foul-season")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,convective—pre-indian-warming-foul-season")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -45,16 +45,16 @@ do i = 0,3
   PRECC_CT  =  f1->PRECC(timeind,:,:)
 
   PRE_CT = PRECC_CT
-  PRE_CT = (/PRECC_CT+PRECL_CT/)
-  ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
+  ; PRE_CT = (/PRECC_CT+PRECL_CT/)
+  ; PRE_CT = (/PRECL_CC/)  ;;;大尺度降水
   PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
   PRECL_id  =  f2->PRECL(timeind,:,:)
   PRECC_id  =  f2->PRECC(timeind,:,:)
 
   PRE_id = PRECC_id
-  PRE_id = (/PRECC_id+PRECL_id/)
-  ; PRE_id = (/PRECL_id/)
+  ; PRE_id = (/PRECC_id+PRECL_id/)
+  ; PRE_id = (/PRECC_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
    
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)

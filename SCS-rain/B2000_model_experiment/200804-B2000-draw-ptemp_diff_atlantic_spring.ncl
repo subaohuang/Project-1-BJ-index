@@ -23,9 +23,11 @@ begin
 
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
-  ; fils2 = "/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_spring_new/B2000_alt_north_spring.TEMP.h0.0251-0280.nc"
+  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.TEMP.mon.0251-0280.nc"  
+ fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
+ ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
+ fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth/B2000_alt_north_spring_fixmonth.TEMP.h0.0251-0280.nc"
+  
  
   
     f1=addfile(fils1, "r")
@@ -43,7 +45,7 @@ begin
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,:,:)
+    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
 
   
 
@@ -61,7 +63,7 @@ begin
 
     
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-spring-fourseason-0280")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-spring-fourseason-0280-fixothermonth")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
@@ -79,12 +81,17 @@ begin
 
     
 
-    ;;;t_test 
-     prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     copy_VarCoords(PSL_indian_clm, prob_slp_indian)
-     printVarSummary(prob_slp_indian)
+   ;;;t_test 
+    ; prob_slp_indian = t_test(PSL_indian,PSL_CT)
+    ; copy_VarCoords(PSL_indian_clm, prob_slp_indian)
+    ; printVarSummary(prob_slp_indian)
     
-     
+    prob_slp_indian = t_test(month_to_season(PSL_indian, season(i)),month_to_season(PSL_CT, season(i)))
+    prob_slp_indian!0 = "nlat"
+    prob_slp_indian!1= "nlon"
+    prob_slp_indian@lat2d   = TLAT
+    prob_slp_indian@lon2d   = TLONG
+
 
     
     res=True
@@ -179,41 +186,38 @@ begin
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
    
 
-    ;  ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
+     ;;;打点
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
 
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.1/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.003
   
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","red","Transparent"/)
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
    
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot = new(1,graphic)
+    res_pro@gsnCenterString = ""
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
+    iplot = new(4,graphic)
 
-    ; iplot(0)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    
-
-    
-    ; overlay(plot(0), iplot(0))
+    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+    overlay(plot(i), iplot(i))
 end do
     pres = True
     pres@gsnPanelLabelBar = True
