@@ -43,7 +43,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201612.and.date.ge.197901)
+    timeind:=ind(date.le.201912.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -76,7 +76,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "全球季节平均SST的趋势-SCS-79-16")
+    wks   = gsn_open_wks("pdf", "全球季节平均SST的趋势-SCS-79-19")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -241,10 +241,10 @@ begin
     ; res_pro@cnFillOn        = True
   
   
-     iplot = gsn_csm_contour(wks,prob_p ,res_pro)
+     ; iplot = gsn_csm_contour(wks,prob_p ,res_pro)
 
     ;;;  
-      overlay(plot, iplot)
+      ; overlay(plot, iplot)
 
 
 
