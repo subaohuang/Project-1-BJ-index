@@ -85,10 +85,10 @@ begin
     prob_slp_indian!1= "nlon"
     prob_slp_indian@lat2d   = TLAT
     prob_slp_indian@lon2d   = TLONG
+    ;;;
 
      
 
-    
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -107,10 +107,10 @@ begin
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    ; gsn_define_colormap(wks, "BlRe")
-    gsn_define_colormap(wks, "BlueDarkRed18")
+    ; gsn_define_colormap(wks, "BlueRed")
+    ; gsn_define_colormap(wks, "BlueDarkRed18")
  
  
 
@@ -126,8 +126,8 @@ begin
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
-    ; res@tmXTOn=False
-    ; res@tmYROn=False
+    res@tmXTOn=False
+    res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
      
@@ -159,6 +159,7 @@ begin
     
     res@gsnRightString = ""
     res@gsnLeftString = season(i)
+    res@gsnLeftStringFontHeightF = 10.0
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
      
@@ -197,10 +198,10 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnFillDotSizeF = 0.003
   
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","white","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
@@ -209,16 +210,21 @@ begin
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
-    
+    iplot = new(4,graphic)
 
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    overlay(plot(i), iplot(i))
+    ; overlay(plot(i), iplot(i))
 end do
     pres = True
     pres@gsnPanelLabelBar = True
+    pres@lbOrientation  = "Vertical"
+    pres@pmLabelBarWidthF  = 0.06
+    pres@pmLabelBarHeightF = 0.15
+    pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
   end
   
+
 

@@ -18,11 +18,11 @@
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_new/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth
+PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/B2000_alt_north_summer_fixmonth/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=B2000_alt_north_spring_fixmonth
+modelname=B2000_alt_north_summer_fixmonth
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 

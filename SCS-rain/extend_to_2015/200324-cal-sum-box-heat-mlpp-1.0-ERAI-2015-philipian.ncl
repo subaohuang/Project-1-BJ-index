@@ -673,7 +673,7 @@ print("ocean_vadv_diff="+ocean_vadv_diff)
 print("ocean_hadv_diff="+ocean_hadv_diff)
 
 
-
+exit()
 
 
 ;;;long-term mean

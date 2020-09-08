@@ -104,10 +104,10 @@ begin
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
     ; gsn_define_colormap(wks, "BlRe")
-    gsn_define_colormap(wks, "BlueDarkRed18")
+    ; gsn_define_colormap(wks, "BlueDarkRed18")
  
  
 
@@ -156,6 +156,7 @@ begin
     
     res@gsnRightString = ""
     res@gsnLeftString = season(i)
+    res@gsnLeftStringFontHeightF = 10.0
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
      
@@ -209,10 +210,14 @@ begin
     
 
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    overlay(plot(i), iplot(i))
+    ; overlay(plot(i), iplot(i))
 end do
-    pres = True
+     pres = True
     pres@gsnPanelLabelBar = True
+    pres@lbOrientation  = "Vertical"
+    pres@pmLabelBarWidthF  = 0.06
+    pres@pmLabelBarHeightF = 0.15
+    pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")

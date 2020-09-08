@@ -24,7 +24,8 @@ begin
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
   fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
-  fils2 = "/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_autumn/B2000_alt_north_autumn.TEMP.h0.0251-0280.nc"
+  ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth/B2000_alt_north_spring_fixmonth.TEMP.h0.0251-0280.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_autumn_fixmonth/B2000_alt_north_autumn_fixmonth.TEMP.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -60,7 +61,8 @@ begin
 
     
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-autumn-fourseason-0280.pdf")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-autumn-fourseason-0280-fixmonth.pdf")
+    ; wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-autumn-minus-spring-fourseason.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
@@ -85,7 +87,7 @@ begin
     
      
 
-    
+     
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -104,10 +106,10 @@ begin
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    ; gsn_define_colormap(wks, "BlRe")
-    gsn_define_colormap(wks, "BlueDarkRed18")
+    ; gsn_define_colormap(wks, "BlueRed")
+    ; gsn_define_colormap(wks, "BlueDarkRed18")
  
  
 
@@ -156,6 +158,7 @@ begin
     
     res@gsnRightString = ""
     res@gsnLeftString = season(i)
+    res@gsnLeftStringFontHeightF  = 10.0
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
      
@@ -194,10 +197,10 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnFillDotSizeF = 0.003
   
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","white","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
@@ -206,13 +209,17 @@ begin
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
-    
+    iplot = new(4,graphic)
 
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    overlay(plot(i), iplot(i))
+    ; overlay(plot(i), iplot(i))
 end do
     pres = True
     pres@gsnPanelLabelBar = True
+    pres@lbOrientation  = "Vertical"
+    pres@pmLabelBarWidthF  = 0.06
+    pres@pmLabelBarHeightF = 0.15
+    pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")

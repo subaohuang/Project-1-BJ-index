@@ -14,41 +14,61 @@ begin
 
 return prob
 end
-   begin
 
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+function cal_season_trend(data,season)
+  begin
+    p_djf_r=month_to_annual(data, 1)
+    dim = dimsizes(p_djf_r)
+    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)  
+    copy_VarCoords(p_djf_r(1,:,:), p_rc)
+    p_rc=(/p_rc*dim(0)/)
+  return p_rc
+end 
+
+; function cal_season_trend(data,season)
+;   begin
+;     p_djf_r=month_to_season(data, season)
+;     dim = dimsizes(p_djf_r)
+;     p_mk=trend_manken(p_djf_r, False, 0)
+;     p_rc = p_mk(1,:,:)
+;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
+;     p_rc=(/p_rc*dim(0)/)
+;     p_rc@prob = p_mk(0,:,:)
+;   return p_rc
+; end 
+begin
+    f2=addfile("/home/yangsong3/data-observation/ERA-interim/monthly/precipitation/ERAI-pre-1degree.nc", "r")
     date=cd_calendar(f2->time, 1)
     timeind=ind(date.ge.197901.and.date.le.201312)
-    p=f2->precip(timeind,:,:)
+    lsp=f2->lsp(timeind,:,:)  ;;;units are m
+    cp=f2->cp(timeind,:,:)   
+    
+    ;;convert units to mm/day
+    p_pi = cp
+    p_pi = (/lsp+cp/)
+    p_pi = p_pi*10^3
+
+    rc_mam = cal_season_trend(p_pi,"MAM")
+  
+
+    prob_mam=rc_test(rc_mam)
+
+    
+    ; prob_mam = 1- rc_mam@prob
+    ; prob_jja = 1- rc_jja@prob
+    ; prob_son = 1- rc_son@prob
+    ; prob_djf = 1- rc_djf@prob
+
+
+    copy_VarCoords(p_pi(1,:,:), prob_mam)
    
-    delete(p&time)
-    p&time=date(timeind)
-    printVarSummary(p)
-    p_pi = p
 
-   ;;;先得到秋季和冬季eninio年的沃克环流情况SONDJF
-    ; p_djf_r=month_to_season(p_pi(time|:,lat|:,lon|:), "MAM")
-    p_djf_r=month_to_annual(p_pi(time|:,lat|:,lon|:), 1)
-    ;;注意点
-    p_djf=p_djf_r(:,:,:)
-
-    delete(date)
-    delete(timeind)
-    delete(p)
-    delete(p_pi)
-    ;;;
     
-    dim = dimsizes(p_djf_r)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf, 0, 0)
-    copy_VarCoords(p_djf_r(1,:,:), p_rc)
-    prob_p=rc_test(p_rc)
-    p_rc=(/p_rc*dim(0)/)
-    
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1979-2013")
+wks   = gsn_open_wks("pdf", "ERA-降水的趋势-scs-1979-2013")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
-  plot=new(1,graphic)
+    plot=new(1,graphic)
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
@@ -108,62 +128,41 @@ end
   res@cnMinLevelValF       =   -1.5
   res@cnMaxLevelValF       =   1.5
   res@cnLevelSpacingF      =  0.25
-  res@cnFillColors = (/0,1,2,3,4,5,6,6,7,8,9,10,11,11/)
+  res@cnFillColors = (/0,1,2,3,4,5,6,6,7,8,9,10,11,12/)
 
-  res@gsnLeftString="GPCP Precipitation trend"
-  plot = gsn_csm_contour_map(wks, p_rc, res)
+  res@gsnLeftString="ERA Precipitation trend"
+  
+  plot = new(1,graphic)
+  plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
+  
   
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
-  ; ;;添加区域
-  ;  ;;indian
-  ;  pgx_indian=(/70,100,100,70,70/)
-  ;  pgy_indian=(/-5,-5,5,5,-5/)
-  ;  ;;;
-  ;  ;;;pacific
-  ;  pgx_pa=(/150,210,210,150,150/)
-  ;  pgy_pa=(/-5,-5,5,5,-5/)
-  ;  ;;;
-  ;  ;;;altantic
-  ;  pgx_alt=(/320,340,340,320,320/)
-  ;  pgy_alt=(/-5,-5,5,5,-5/)
-  ;  ;;;
-   
-  ;  str1=unique_string("dum1")
-  ;  str2=unique_string("dum2")
-  ;  str3=unique_string("dum3")
-
-  ;  pgres=True
-  ;  pgres@gsLineColor="black"
-  ;  pgres@gsLineThicknessF=2.0
-   
-   
-  ; plot@$str1$ = gsn_add_polyline(wks, plot(0), pgx_indian, pgy_indian, pgres)
-  ; plot@$str2$ = gsn_add_polyline(wks, plot(0), pgx_pa, pgy_pa, pgres)
-  ; plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_alt, pgy_alt, pgres)
-  ; ;;
-
+ 
   ;;;添加赤道直线
 
-    
    pgx=ispan(30,390,10)
    pgy=new(dimsizes(pgx),typeof(pgx))
    pgy=0
-   str1=unique_string("dum1")
-   str2=unique_string("dum2")
-    str3=unique_string("dum3")
+
    pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=1.0
    pgres@gsLineDashPattern=1
-   plot@$str1$ = gsn_add_polyline(wks, plot(0), pgx, pgy, pgres)
+   
+   str = ispan(1, 4, 1) + ""
+   
+   plot@$str(0)$ = gsn_add_polyline(wks, plot(0), pgx, pgy, pgres)
+   
+
+
+
   ;;;添加indo-pacific warm pool
     ; ;;添加区域
    ;;warm pool
    pgres@gsLineThicknessF=2.0
    pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
+
    
    ;;;画box
    lat1 = 0
@@ -174,7 +173,12 @@ end
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-     plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
+
+     str2 = ispan(21, 24, 1) +""
+     i = 0 
+     plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+  
+
 
     ;;;打点
     res_pro=True
@@ -193,50 +197,26 @@ end
 
     iplot=new(1,graphic)
 
+    
+ 
+    iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
+    
+    
 
+    opt                      = True
+    opt@gsnShadeFillType     = "pattern"
+    opt@gsnShadeMid     = 17         ; stipple
+    ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; opt@gsnShadeHigh   = "green"
+    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
-    iplot = gsn_csm_contour(wks,prob_p,res_pro)
+   
+     i = 0
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+     overlay(plot(i), iplot(i))
+  
 
-  opt                      = True
-  opt@gsnShadeFillType     = "pattern"
-  opt@gsnShadeMid     = 17         ; stipple
-  ; opt@gsnShadeMid     = 6         ; stipple
-  ; opt@gsnShadeHigh   = "green"
-  opt@gsnShadeFillScaleF   = 0.1         ; add extra density
-  opt@gsnShadeFillDotSizeF = 0.2      ; make dots larger
-  iplot = gsn_contour_shade(iplot, 0,0.1, opt)
-  overlay(plot, iplot)
-
-  ; res_pro=True
-  ; res_pro@gsnDraw=False
-  ; res_pro@gsnFrame=False
-  ; res_pro@cnFillOn = True
-
-  ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-  ; res_pro@cnLevels = (/0,0.05/)
-  ; res_pro@lbLabelBarOn = False
-  ; res_pro@cnLinesOn=False
-  ; res_pro@cnMonoLineColor =False
-  ; res_pro@cnLineColors = ((/"Transparent","black","Transparent"/))
-
-  ; res_pro@cnMonoFillPattern = True
-  ; res_pro@cnFillPattern = 17
-  ; res_pro@cnFillDotSizeF = 0.0045
-  ; res_pro@cnMonoFillColor = False
-  ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-  ; ; res_pro@cnLevels = ispan(-6,6,1)
-  ; res_pro@cnLineLabelsOn=False
-  ; res_pro@tmYRMode = "Automatic"
-  ; res_pro@cnInfoLabelOn=False
-  ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-  ; ; res_pro@cnLineThicknessF = 3.
-  ; ; res_pro@cnFillOn        = True
-  ; iplot(0)=gsn_csm_contour(wks,prob_p,res_pro)
-  ; overlay(plot, iplot)
-  ;;;  
-
-draw(plot)
-frame(wks)
-
-
+    ;;;  
+ draw(plot)
+ frame(wks)
 end

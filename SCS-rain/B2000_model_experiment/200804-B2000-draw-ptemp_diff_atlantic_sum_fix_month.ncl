@@ -21,14 +21,23 @@ return prob_p
 end 
 begin
 
-
+  season = (/"spring","summer","autumn","winter"/)
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
   fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
-  ; fils2 = "/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_summer/B2000_alt_north_summer.TEMP.h0.0251-0280.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_summer_fixmonth/B2000_alt_north_summer_fixmonth.TEMP.h0.0251-0280.nc"
-  
+  ; fils2 = "/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_winter/B2000_alt_north_winter.TEMP.h0.0251-0280.nc"
+
+   
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_"+season+"_fixmonth/B2000_alt_north_"+season+"_fixmonth.TEMP.h0.0251-0280.nc"
+
+  diff_total = new((/4,4,384,320/),float)
+
+   season = (/"MAM","JJA","SON","DJF"/)
+
+
+do j = 0,3
+
     f1=addfile(fils1, "r")
-    f2=addfile(fils2, "r")
+    f2=addfile(fils2(j), "r")
     
     time1 = f1->time
     time2 = f2->time
@@ -59,13 +68,6 @@ begin
     printVarSummary(PSL_indian)
 
     
-    season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-summer-fourseason-0280-fixmonth.pdf")
-
-    plot = new(4,graphic)
-    str3 = ispan(1, 4, 1) +""
-    plot1 =new(4,graphic)
-    iplot = new(4,graphic)
 
   do i=0,3
 
@@ -76,19 +78,45 @@ begin
     PSL_diff_indian = PSL_indian_clm
     PSL_diff_indian = (/PSL_indian_clm - PSL_CT_clm/)
 
-    
+    diff_total(j,i,:,:) = (/PSL_diff_indian/)
 
-    ;;;t_test 
-    prob_slp_indian = t_test(month_to_season(PSL_indian, season(i)),month_to_season(PSL_CT, season(i)))
-    prob_slp_indian!0 = "nlat"
-    prob_slp_indian!1= "nlon"
-    prob_slp_indian@lat2d   = TLAT
-    prob_slp_indian@lon2d   = TLONG
+   end do 
 
-     
+end do 
+;;;;;;;;;;;;;;;
 
-    
-       res=True
+
+
+;;;;计算累加
+
+  diff_total_sum = dim_sum_n_Wrap(diff_total,0)
+  diff_total_sum!0 ="time" 
+  diff_total_sum!1 = "nlat"
+  diff_total_sum!2 = "nlon"
+
+  diff_total_sum@lat2d   = TLAT
+  diff_total_sum@lon2d   = TLONG
+
+   printVarSummary(diff_total_sum)
+;;;;;;;;;;
+
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-fourseason-sum-0280-fixmonth.pdf")
+
+    plot = new(4,graphic)
+    str3 = ispan(1, 4, 1) +""
+    plot1 =new(4,graphic)
+    iplot = new(4,graphic)
+  
+
+  ; do i = 1,3
+  ; diff_total_sum(i,:,:) = (/diff_total_sum(i,:,:) - diff_total_sum(0,:,:)/)
+  ; end do
+  ; diff_total_sum(0,:,:) = 0.0
+
+do i = 0,3
+
+;;;;;画图
+    res=True
     res@gsnDraw=False
     res@gsnFrame=False
     res@gsnAddCyclic=True
@@ -115,8 +143,8 @@ begin
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -0.6
-    res@cnMaxLevelValF       =   0.6
+    res@cnMinLevelValF       =   -1.0
+    res@cnMaxLevelValF       =   1.0
     res@cnLevelSpacingF      =  0.1
     
     ; res@cnMinLevelValF       =   -1.5
@@ -152,15 +180,11 @@ begin
 
     ; res@mpShapeMode = "FreeAspect"
     ; res@vpWidthF = 0.7
-    ; res@vpHeightF = 0.3
-
-    
-    
+    ; res@vpHeightF = 0.3    
     res@gsnRightString = ""
     res@gsnLeftString = season(i)
-    res@gsnLeftStringFontHeightF = 10.0
  
-    plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
+    plot(i) = gsn_csm_contour_map(wks, diff_total_sum(i,:,:), res)
      
 
     ;;;画box
@@ -179,50 +203,15 @@ begin
     ;;;
     
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
-   
-
-     ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
-
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
-  
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","white","Transparent"/)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-   
-    res_pro@gsnCenterString = ""
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-    iplot = new(4,graphic)
-
-    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    ; overlay(plot(i), iplot(i))
 end do
     pres = True
     pres@gsnPanelLabelBar = True
-    pres@lbOrientation  = "Vertical"
-    pres@pmLabelBarWidthF  = 0.06
-    pres@pmLabelBarHeightF = 0.15
-    pres@lbLabelStride = 2  
+    pres@lbOrientation = "Vertical"
+    ; pres@gsnMaximize = True
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
   end
   
+
 
