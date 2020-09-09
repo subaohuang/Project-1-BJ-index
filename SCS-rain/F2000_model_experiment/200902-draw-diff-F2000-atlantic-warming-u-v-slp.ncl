@@ -95,8 +95,8 @@ do i = 0,3
     PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
    ; end if
 
-    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+    ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -136,8 +136,8 @@ do i = 0,3
     ; ; res@mpMinLonF             = 40.0
     ; res@mpMinLonF             = 70.0
     ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -40.0
+    res@mpMaxLatF             = 40.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
    
@@ -146,10 +146,10 @@ do i = 0,3
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
     
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.3
-    ;;
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.7
+    ; res@vpHeightF = 0.3
+    ; ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
   

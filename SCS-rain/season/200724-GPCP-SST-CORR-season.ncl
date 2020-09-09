@@ -41,7 +41,7 @@ end
 begin
  ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -60,7 +60,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
@@ -77,7 +77,7 @@ begin
     
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
+    timeind:=ind(date.ge.197901.and.date.le.201612)
     p=f2->precip(timeind,:,:)
     printVarSummary(p)
     
@@ -101,10 +101,10 @@ begin
 
 do i =0,3
   ;;;region
-   lat1 = -60
-   lat2 = 60
-   lon1 = 0
-   lon2 = 360
+   lat1 = -5
+   lat2 = 30
+   lon1 = 90
+   lon2 = 170
   ;;;
 
  
@@ -243,8 +243,8 @@ do i =0,3
    ;;;画box
    lat1 = 0
    lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)

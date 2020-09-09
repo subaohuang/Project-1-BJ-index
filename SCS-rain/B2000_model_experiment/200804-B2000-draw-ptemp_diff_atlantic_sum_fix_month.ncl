@@ -183,6 +183,7 @@ do i = 0,3
     ; res@vpHeightF = 0.3    
     res@gsnRightString = ""
     res@gsnLeftString = season(i)
+    res@gsnLeftStringFontHeightF = 10.0
  
     plot(i) = gsn_csm_contour_map(wks, diff_total_sum(i,:,:), res)
      
@@ -204,10 +205,12 @@ do i = 0,3
     
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
 end do
-    pres = True
+     pres = True
     pres@gsnPanelLabelBar = True
-    pres@lbOrientation = "Vertical"
-    ; pres@gsnMaximize = True
+    pres@lbOrientation  = "Vertical"
+    pres@pmLabelBarWidthF  = 0.06
+    pres@pmLabelBarHeightF = 0.15
+    pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
