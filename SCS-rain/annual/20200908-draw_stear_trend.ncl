@@ -24,8 +24,8 @@ end
 begin
     
 ;;;time and region
- timestart = 197901
- timeend = 201612
+ timestart = 198001
+ timeend = 201512
 ;;;
 
 lat1 = -30 
@@ -65,11 +65,11 @@ lon2 = 170
     ; v_850_annual = month_to_annual(v_850, 1)
     ; v_200_annual = month_to_annual(v_200, 1)
 
-     u_850_annual = month_to_season(u_850, "JJA")
-    u_200_annual = month_to_season(u_200, "JJA")
+    u_850_annual = month_to_season(u_850, "MAM")
+    u_200_annual = month_to_season(u_200, "MAM")
     
-    v_850_annual = month_to_season(v_850, "JJA")
-    v_200_annual = month_to_season(v_200, "JJA")
+    v_850_annual = month_to_season(v_850, "MAM")
+    v_200_annual = month_to_season(v_200, "MAM")
 
     ;;;风切变情况
     stear = sqrt((u_200_annual- u_850_annual)^2 + (v_200_annual- v_850_annual)^2)
@@ -89,7 +89,7 @@ lon2 = 170
 ;;;;
 
 ;;;; 
-   wks   = gsn_open_wks("pdf", "stear趋势-SCS-1979-2016")
+   wks   = gsn_open_wks("pdf", "stear趋势-SCS-1980-2015-MAM")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
