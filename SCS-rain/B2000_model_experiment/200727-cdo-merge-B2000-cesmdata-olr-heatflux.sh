@@ -18,58 +18,46 @@
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
 PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/
-# PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/B2000_alt_north_year_CTRL/
-# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
+# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_winter/
 
 STEP=3
 modelname=B2000_alt_north_year_CTRL
-
-# variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
-variable=U,V
+# modelname=F_2000_tro_winter
+variable=FLUT,FSNS,FLNS,LHFLX,SHFLX
+# variable=FLUT
 
 
 # step1 : merge the cesm data into a whole data by using cdo
   ### the prefix of data is usually CESM compet name ,alarm for time select
 
-  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc ] ; then
+  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_OLR_heatflux.nc ] ; then
   #   echo "don't exit merge file, procecing..."
   #   cd $PRE_DIR_ORG
-  #   rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc
-  #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280.nc
+  #   rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_OLR_heatflux.nc
+  #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280_OLR_heatflux.nc
   # fi
 
-
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc ] ; then
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_OLR_heatflux.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc
-    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280_UV.nc
+    rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_OLR_heatflux.nc
+     ncl  -nQ modelname=\"${modelname}\" \
+         inpath=\"${PRE_DIR_ORG}\" \
+         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_OLR_heatflux.nc\" \
+       /home/ys17-19/lsh/Project/SCS-rain/B2000_model_experiment/200913-CESM-B2000-heatflux-combine.ncl
+    echo "finish CESM heatflux data combine "
   fi
 
-# step2 : interpolate the data from hybird level to pressure level
-  if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
-    echo "don't exit chazhi file, procecing..."
-    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
-    pwd
-    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc\" \
-         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc\" \
-       /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
-    echo "finish CESM chazhi"
-  fi 
-
- cd $PRE_DIR_ORG
- pwd
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc ] ; then
-    echo "don't exit merge file, procecing..."
-    cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc
-    cdo select,name=TEMP,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP.h0.0251-0280.nc
-  fi
-
-
-
-
-
+# # step2 : interpolate the data from hybird level to pressure level
+#   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+#     echo "don't exit chazhi file, procecing..."
+#     cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+#     pwd
+#     ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012.nc\" \
+#          outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_chazhi.nc\" \
+#        /home/ys17-19/lsh/Project/SCS-rain/191209-CESM-data-chazhi.ncl
+#     echo "finish CESM chazhi"
+#   fi 
 # # step3 calculate mass stream function
 
 #   if  [ ! -e /home/ys17-19/lsh/data/wc-result/msf_${modelname}_0101-4012.nc ] ; then
