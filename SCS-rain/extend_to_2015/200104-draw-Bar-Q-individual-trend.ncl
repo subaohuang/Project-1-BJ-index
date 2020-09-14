@@ -19,12 +19,12 @@ return prob
 end
 begin
    ;;read  eva data 
-    years = ispan(1979, 2016, 1)
+    years = ispan(1979, 2013, 1)
     fils =  "/home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_"+years+".nc"
 
     f1 = addfiles(fils, "r")
     date = cd_calendar(f1[:]->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201312)
     evp_r =short2flt(f1[:]->evapr(timeind,:,:))
     evp_r@missing_value = -9.96921e+36
     evp_r@_FillValue =   -9.96921e+36
@@ -68,7 +68,7 @@ begin
 
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201612)
+    timeind:=ind(date.ge.197901.and.date.le.201312)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -89,23 +89,25 @@ begin
     dim = dimsizes(p_e)
     yearnum = dim(0)
     p_e_t = dim_avg_n_Wrap(p_e(:,{0:15},{125:160}), (/1,2/))
-    p_annual_t = dim_avg_n_Wrap(p_annual(:,{0:15},{125:150}), (/1,2/))
+    p_annual_t = dim_avg_n_Wrap(p_annual(:,{0:15},{125:160}), (/1,2/))
     evp_annual_t = dim_avg_n_Wrap(evp_annual(:,{0:15},{125:160}), (/1,2/))
 ;;;
 
 ;;;读入Q-term
-    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-8-philipian.nc", "r")
-    series_Q = f3->series_Q
-    
-    series_dyna_adv_q  = f3->series_dyna_adv_q 
-    series_dyna_con_q  = f3->series_dyna_con_q 
-    series_thermaldyna_adv_q = f3->series_thermaldyna_adv_q
-    series_thermaldyna_con_q = f3->series_thermaldyna_con_q
- 
-    series_quad_adv_q  = f3->series_quad_adv_q 
-    series_quad_con_q  = f3->series_quad_con_q 
+    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/extend_to_2015/Q-term-8-philipian-2014.nc", "r")
 
-    series_eddy_q = f3->series_eddy_q
+
+    series_Q = f3->series_Q(0:yearnum-1)
+    
+    series_dyna_adv_q  = f3->series_dyna_adv_q(0:yearnum-1)
+    series_dyna_con_q  = f3->series_dyna_con_q(0:yearnum-1) 
+    series_thermaldyna_adv_q = f3->series_thermaldyna_adv_q(0:yearnum-1)
+    series_thermaldyna_con_q = f3->series_thermaldyna_con_q(0:yearnum-1)
+ 
+    series_quad_adv_q  = f3->series_quad_adv_q(0:yearnum-1) 
+    series_quad_con_q  = f3->series_quad_con_q(0:yearnum-1) 
+
+    series_eddy_q = f3->series_eddy_q(0:yearnum-1)
 ;;;
  
 ;;;; 计算趋势trend 
@@ -161,7 +163,7 @@ begin
 ;********************************************************
 ; create the plot
 ;********************************************************   
-  wks1 = gsn_open_wks("pdf","bar-q-component-trend-2016")                  ; send graphics to PNG file
+  wks1 = gsn_open_wks("pdf","bar-q-component-trend-2013")                  ; send graphics to PNG file
   res                       = True                 ; plot mods desired         
   res@gsnFrame              = False                ; don't advance frame yet
   res@gsnXYBarChart         = True                 ; turn on bar chart
