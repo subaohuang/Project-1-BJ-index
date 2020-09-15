@@ -22,7 +22,11 @@ begin
     lhtfl_annual = month_to_annual(lhtfl, 1)
     lhtfl_change = lhtfl_annual(1,:,:)
     dim  = dimsizes(lhtfl_annual)
-    rc = regCoef_n(ispan(1, dim(0), 1), lhtfl_annual,0,0)
+
+    ;;;m-k趋势
+    mk = trend_manken(lhtfl_annual, False, 0)
+    ; rc = regCoef_n(ispan(1, dim(0), 1), lhtfl_annual,0,0)
+    rc = mk(1,:,:)
     lhtfl_change = (/rc*dim(0)/)
 return lhtfl_change
 end     
@@ -32,7 +36,7 @@ end
 ;;***************************************************************
 begin
  ;;;time span
-    startmon =198001
+    startmon =199701
     endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
@@ -66,7 +70,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.198001)
+    timeind:=ind(date.le.201512.and.date.ge.199701)
 
     sst_r = lonFlip(f1->sst)  
 
@@ -78,7 +82,7 @@ begin
 
     date:=cd_calendar(f3->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.198001)
+    timeind:=ind(date.le.201512.and.date.ge.199701)
   
     
     lhtfl = f3->lhtfl(timeind,{lat1:lat2},{lon1:lon2})
@@ -97,7 +101,7 @@ begin
 
   season = (/"MAM","JJA","SON","DJF"/)
 
-  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-annual-global")
+  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-annual-global-98-16")
 
   plot = new(12,graphic)
   str = "" + ispan(1,dimsizes(plot),1)
@@ -165,7 +169,7 @@ print("*********开始画图********")
   ; res@mpMaxLatF             = 45
   ; res@mpMinLonF             =90
   ; res@mpMaxLonF             = 160
-   lat1 = 0
+   lat1 = -15
    lat2 = 15
    lon1 = 125
    lon2 = 160

@@ -49,7 +49,7 @@ end
 begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201512)
+    timeind=ind(date.ge.197901.and.date.le.201612)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -79,7 +79,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015")
+wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -96,6 +96,9 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
   res@lbLabelBarOn=False
   res@lbLabelStride=2
 
+  res@lbBoxLinesOn              = True
+  res@lbBoxLineThicknessF       = 0.
+
   res@mpLimitMode           = "LatLon"
   
   res@mpMinLatF             = -5
@@ -104,7 +107,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
   res@mpMinLonF             =100
   res@mpMaxLonF             = 170
 
-
+  
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -114,33 +117,39 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
   res@tmYROn=False
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
+  res@tmXBLabelFontHeightF      = 0.02    ;font height of tick labels
+  res@tmYLLabelFontHeightF      = 0.02
 
-
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=2.0
+  res@tmYLMajorThicknessF=2.0
+  res@tmBorderThicknessF=2.0
 
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.7
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.5
-  res@cnMaxLevelValF       =   2.5
-  res@cnLevelSpacingF      =  0.25
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -2.5
+  ; res@cnMaxLevelValF       =   2.5
+  ; res@cnLevelSpacingF      =  0.25
+  ; res@cnFillPalette="MPL_BrBG"
+  ; res@cnFillPalette = "CBR_drywet"
+  res@cnFillPalette = "precip_diff_12lev"
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+  res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+  
+ 
 
-  res@cnFillPalette="MPL_BrBG"
-  res@gsnLeftString="Spring"
+  res@gsnLeftString="(a)GPCP Pre Spring trend " 
 
   plot = new(4,graphic)
   plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
-  res@gsnLeftString="Summer"
+  res@gsnLeftString="(b)GPCP Pre Summer trend " 
   plot(1) = gsn_csm_contour_map(wks, rc_jja, res)
-  res@gsnLeftString="Autumn"
+  res@gsnLeftString="(c)GPCP Pre Autumn trend " 
   plot(2) = gsn_csm_contour_map(wks, rc_son, res)
-  res@gsnLeftString="Winter"
+  res@gsnLeftString="(d)GPCP Pre Winter trend " 
   plot(3) = gsn_csm_contour_map(wks, rc_djf, res)
 
 
@@ -198,7 +207,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
     res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
     res_pro@cnMinLevelValF      = 0.00        ; set min contour level
     res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
+    res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
 
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -224,7 +233,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
 
    
      do i=0,3
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
      overlay(plot(i), iplot(i))
   end do
 
@@ -232,6 +241,8 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015
    
 pres = True
 pres@gsnPanelLabelBar  = True
+pres@lbLabelStrings = res@cnLevels +""
+pres@lbLabelFontHeightF = 0.012
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

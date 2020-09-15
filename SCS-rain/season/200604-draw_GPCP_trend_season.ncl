@@ -49,7 +49,7 @@ end
 begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201912)
+    timeind=ind(date.ge.197901.and.date.le.201612)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -88,7 +88,6 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="NCV_blu_red"
   res@cnFillOn=True
   res@cnLinesOn=False
 
@@ -113,6 +112,8 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
   res@tmYROn=False
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
+  res@lbBoxLinesOn              = True
+  res@lbBoxLineThicknessF       = 0.
 
 
   res@tmXBLabelFontHeightF=0.015
@@ -125,25 +126,27 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.7
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.5
-  res@cnMaxLevelValF       =   2.5
-  res@cnLevelSpacingF      =  0.25
-
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -2.5
+  ; res@cnMaxLevelValF       =   2.5
+  ; res@cnLevelSpacingF      =  0.25
   res@cnFillPalette="MPL_BrBG"
-  res@gsnLeftString="Spring"
+  res@cnFillPalette = "CBR_drywet"
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  res@cnLevels = (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+  res@cnFillColors=(/0,1,2,3,4,-1,6,7,8,9,10/) 
 
+
+  res@gsnLeftString="(a)GPCP Pre Spring trend " 
   plot = new(4,graphic)
   plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
-  res@gsnLeftString="Summer"
+  res@gsnLeftString= "(b)GPCP Pre Summer trend "
   plot(1) = gsn_csm_contour_map(wks, rc_jja, res)
-  res@gsnLeftString="Autumn"
+  res@gsnLeftString="(c)GPCP Pre Autumn trend "
   plot(2) = gsn_csm_contour_map(wks, rc_son, res)
-  res@gsnLeftString="Winter"
+  res@gsnLeftString="(d)GPCP Pre Winter trend "
   plot(3) = gsn_csm_contour_map(wks, rc_djf, res)
 
-
-  
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
  

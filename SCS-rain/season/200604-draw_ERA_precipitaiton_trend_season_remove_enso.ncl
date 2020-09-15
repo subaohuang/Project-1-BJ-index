@@ -43,8 +43,8 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
-
+    timeind:=ind(date.le.201612.and.date.ge.197901)
+printVarSummary(timeind)
     sst =  lonFlip(f1->sst(timeind,:,:))
  
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -69,13 +69,15 @@ begin
     ;;;;;
     f2=addfile("/home/yangsong3/data-observation/ERA-interim/monthly/precipitation/ERAI-pre-1degree.nc", "r")
     date:=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201512)
+
+    timeind:=ind(date.ge.197901.and.date.le.201612)
+  
     lsp=f2->lsp(timeind,:,:)  ;;;units are m
     cp=f2->cp(timeind,:,:)   
 
     ;;convert units to mm/day
     p = cp
-    p = (/lsp + cp/)
+    ; p = (/lsp + cp/)
     p = p*10^3
 
 
@@ -123,7 +125,7 @@ begin
     copy_VarCoords(p_mam(1,:,:), prob_djf)
     
     
-wks   = gsn_open_wks("pdf", "不同季节ERA降水的趋势-scs-1979-2013-去掉ENSO影响")
+wks   = gsn_open_wks("pdf", "不同季节ERA降水的趋势-scs-1979-2016-去掉ENSO影响")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

@@ -17,34 +17,34 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/
-# PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/B2000_alt_north_year_CTRL/
+# PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/lsh_B2000_alt_north_year_WNP_nowind_cam/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B//B2000_alt_north_year_CTRL/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
 modelname=B2000_alt_north_year_CTRL
 
-# variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
-variable=U,V
+variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
+# variable=U,V
 
 
 # step1 : merge the cesm data into a whole data by using cdo
   ### the prefix of data is usually CESM compet name ,alarm for time select
 
-  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc ] ; then
-  #   echo "don't exit merge file, procecing..."
-  #   cd $PRE_DIR_ORG
-  #   rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc
-  #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280.nc
-  # fi
-
-
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc ] ; then
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc
-    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280_UV.nc
+    rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc
+    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280.nc
   fi
+
+
+  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc ] ; then
+  #   echo "don't exit merge file, procecing..."
+  #   cd $PRE_DIR_ORG
+  #   rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc
+  #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280_UV.nc
+  # fi
 
 # step2 : interpolate the data from hybird level to pressure level
   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
@@ -59,12 +59,12 @@ variable=U,V
 
  cd $PRE_DIR_ORG
  pwd
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc ] ; then
-    echo "don't exit merge file, procecing..."
-    cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc
-    cdo select,name=TEMP,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP.h0.0251-0280.nc
-  fi
+  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc ] ; then
+  #   echo "don't exit merge file, procecing..."
+  #   cd $PRE_DIR_ORG
+  #   rm ${PRE_DIR_ORG}${modelname}.TEMP.h0.0251-0280.nc
+  #   cdo select,name=TEMP,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP.h0.0251-0280.nc
+  # fi
 
 
 

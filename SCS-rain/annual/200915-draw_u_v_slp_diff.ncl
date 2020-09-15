@@ -61,7 +61,7 @@ begin
       lon2 = 360
     ;;;
     ;;;time span
-    startmon =199801
+    startmon =197901
     endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
@@ -127,21 +127,26 @@ begin
    copy_VarCoords(z_annual(1,:,:), z_rc)
 
    ;;;
+   
+   u_rc = (/dim_avg_n_Wrap(u_annual(18:,:,:), 0) - dim_avg_n_Wrap(u_annual(0:18,:,:), 0)/)
+   v_rc = (/dim_avg_n_Wrap(v_annual(18:,:,:), 0) - dim_avg_n_Wrap(v_annual(0:18,:,:), 0)/)
 
-   ;;;显著性检验
-    prob_slp = rc_test(slp_rc)
-    prob_u = rc_test(u_rc)
-    prob_v = rc_test(v_rc)
-    prob_z = rc_test(z_rc)
-   ;;;
+   slp_rc = (/dim_avg_n_Wrap(slp_annual(18:,:,:), 0) - dim_avg_n_Wrap(slp_annual(0:18,:,:), 0)/)
+
+   ; ;;;显著性检验
+   ;  prob_slp = rc_test(slp_rc)
+   ;  prob_u = rc_test(u_rc)
+   ;  prob_v = rc_test(v_rc)
+   ;  prob_z = rc_test(z_rc)
+   ; ;;;
  
-   slp_rc = where(prob_slp.le.0.1, slp_rc, slp_rc@_FillValue)
+   ; slp_rc = where(prob_slp.le.0.1, slp_rc, slp_rc@_FillValue)
    ; u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
 
 ;==============================================================
 ; Mission 4. draw plot
 ; ==============================================================
-  wks   = gsn_open_wks("pdf", "uv_slp_z_trend-1998-2016")
+  wks   = gsn_open_wks("pdf", "uv_slp_z_trend-diff")
   plot=new(1,graphic)
   res=True
   res@gsnFrame=False
@@ -170,11 +175,16 @@ begin
   ; res@mpMinLonF             = lon1
   ; res@mpMaxLonF             = lon2
 
-  res@mpMinLatF             = 0
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
+  ; res@mpMinLonF             = 0
+  ; res@mpMaxLonF             = 360
+  
+ res@mpMinLatF             = -15
   res@mpMaxLatF             = 15
   res@mpMinLonF             = 125
   res@mpMaxLonF             = 160
-
+  
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -198,7 +208,7 @@ begin
   res@vcMinDistanceF           = 0.02           ; thin vectors
   ; res@vcMinMagnitudeF          =0.04
   ; res@vcRefMagnitudeF          = 1.0
-  res@vcRefMagnitudeF          = 0.1
+  res@vcRefMagnitudeF          = 1.0
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF=1.0

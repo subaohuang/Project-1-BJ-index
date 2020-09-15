@@ -63,9 +63,9 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ;;;;remove_enso_signal
-         p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ;;;;
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
 
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
@@ -92,7 +92,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -116,10 +116,10 @@ begin
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
 
-    ; ssta_mam = where(prob_mam.le.0.05, ssta_mam, ssta_mam@_FillValue)
-    ; ssta_jja = where(prob_jja.le.0.05, ssta_jja, ssta_jja@_FillValue)
-    ; ssta_son = where(prob_son.le.0.05, ssta_son, ssta_son@_FillValue)
-    ; ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
+    ssta_mam = where(prob_mam.le.0.05, ssta_mam, ssta_mam@_FillValue)
+    ssta_jja = where(prob_jja.le.0.05, ssta_jja, ssta_jja@_FillValue)
+    ssta_son = where(prob_son.le.0.05, ssta_son, ssta_son@_FillValue)
+    ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
@@ -138,9 +138,9 @@ begin
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
   
-  ; res@cnFillPalette = "NCV_jaisnd"
+ 
    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlueDarkRed18"
+   ; res@cnFillPalette = "BlueDarkRed18"
    ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
@@ -153,15 +153,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  ; res@mpMinLatF             = -30
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
-  ; res@mpMinLatF             = 0
-  ; res@mpMaxLatF             = 15
-  ; res@mpMinLonF             =125
-  ; res@mpMaxLonF             = 160
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 100
+  res@mpMaxLonF             = 170
 
 
 
@@ -176,19 +176,22 @@ begin
 
 
 
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=2.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.6
-  res@cnMaxLevelValF       =   0.6
+  res@cnMinLevelValF       =   0.0
+  res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.1
-  ; res@cnMinLevelValF       =   0.0
-  ; res@cnMaxLevelValF       =   0.6
-  ; res@cnLevelSpacingF      =  0.1
+   ; res@cnFillPalette = "NCV_jaisnd"
+   res@cnFillPalette = "sunshine_9lev"
+  ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+  ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+
   res@cnInfoLabelOn = False
   
 
@@ -208,28 +211,28 @@ begin
     res@gsnLeftString="Winter"
   plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
 
-  res2 = res
-  res2@cnLevelSelectionMode = "ExplicitLevels"
-  res2@cnFillOn = False
-  res2@cnLinesOn = True
-  res2@cnLevels = (/0.55/)
-  res2@cnLineColors = "black"
-  res2@cnMonoLineColor  = True
-  res2@cnLineThicknessF = 2
-  res2@cnMonoLineThickness  = True
-  res2@gsnLeftString = ""
-  res2@cnInfoLabelOn = False
+  ; res2 = res
+  ; res2@cnLevelSelectionMode = "ExplicitLevels"
+  ; res2@cnFillOn = False
+  ; res2@cnLinesOn = True
+  ; res2@cnLevels = (/0.55/)
+  ; res2@cnLineColors = "black"
+  ; res2@cnMonoLineColor  = True
+  ; res2@cnLineThicknessF = 2
+  ; res2@cnMonoLineThickness  = True
+  ; res2@gsnLeftString = ""
+  ; res2@cnInfoLabelOn = False
   
-  plot1=new(4,graphic)
+  ; plot1=new(4,graphic)
 
-  plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
-  plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
-  plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
-  plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
+  ; plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
+  ; plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
+  ; plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
+  ; plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
 
-  do i=0,3
-  overlay(plot(i), plot1(i))
-  end do   
+  ; do i=0,3
+  ; overlay(plot(i), plot1(i))
+  ; end do   
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 

@@ -40,11 +40,11 @@ begin
     delete(timeind)
     ;;;
     
-    dim1 = dimsizes(ssta_annual(0:18,:,:))
-    dim2 = dimsizes(ssta_annual(18:,:,:))
+    dim1 = dimsizes(ssta_annual(0:17,:,:))
+    dim2 = dimsizes(ssta_annual(17:,:,:))
 
 
-    ssta_rc1=regCoef_n(ispan(1, dim1(0), 1), ssta_annual(0:18,:,:), 0, 0)
+    ssta_rc1=regCoef_n(ispan(1, dim1(0), 1), ssta_annual(0:17,:,:), 0, 0)
     copy_VarCoords(ssta_annual(1,:,:), ssta_rc1)
     prob_p1=rc_test(ssta_rc1)
 
@@ -54,7 +54,7 @@ begin
     
 
 
-    ssta_rc2=regCoef_n(ispan(1, dim2(0), 1), ssta_annual(18:,:,:), 0, 0)
+    ssta_rc2=regCoef_n(ispan(1, dim2(0), 1), ssta_annual(17:,:,:), 0, 0)
     copy_VarCoords(ssta_annual(1,:,:), ssta_rc2)
     prob_p2=rc_test(ssta_rc2)
 
@@ -72,7 +72,7 @@ begin
     ; print(ssta_rc)
     
     
-    wks   = gsn_open_wks("pdf", "年平均SST趋势-SCS-1979-1997,1998-2012,diff")
+    wks   = gsn_open_wks("pdf", "年平均SST趋势-SCS-1979-1997,1998-2016,diff-tropical")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -95,12 +95,12 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -30
-  ; res@mpMaxLatF             = 30
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
   ; res@mpMinLonF             =0
   ; res@mpMaxLonF             = 360
 
-  res@mpMinLatF             = 0
+  res@mpMinLatF             = -15
   res@mpMaxLatF             = 15
   res@mpMinLonF             =125
   res@mpMaxLonF             = 160

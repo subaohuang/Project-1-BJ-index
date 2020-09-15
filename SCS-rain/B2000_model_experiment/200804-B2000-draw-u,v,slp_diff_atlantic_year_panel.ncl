@@ -26,24 +26,25 @@ begin
 fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h0.0251-0280_chazhi.nc"/)
 
 fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.cam.h0.0251-0280_chazhi.nc", \
-  "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.cam.h0.0251-0280_chazhi.nc"/)
+  "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.cam.h0.0251-0280_chazhi.nc",\
+  "lsh_B2000_alt_north_year_WNP_nowind_cam/lsh_B2000_alt_north_year_WNP_nowind.cam.h0.0251-0280_chazhi.nc"/)
 
-leftstring = (/"AW - CTRL", "WNPCLM - CTRL","AW - WNPCLM"/)
+leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
 
 
 
 wks = gsn_open_wks("pdf", "diff-u,v,slp-restore-altantic-year_WNPCLM_2buffer_panel")
-plot = new(3,graphic)
+plot = new(4,graphic)
 
-str3 = ispan(1, 3, 1) +""
+str3 = ispan(1, 4, 1) +""
 plot1 =new(1,graphic)
-iplot = new(3,graphic)
+iplot = new(4,graphic)
 
 
 
-do i=0,2
+do i=0,3
 
-      if i.ne.2 then
+      if i.ne.3 then
       f1=addfile(fils1, "r")
       f2=addfile(fils2(i), "r")
       else 
@@ -236,6 +237,6 @@ do i=0,2
    pres = True
    pres@gsnPanelLabelBar = True
 
-   gsn_panel(wks, plot, (/3,1/), pres)
+   gsn_panel(wks, plot, (/2,2/), pres)
   end
 

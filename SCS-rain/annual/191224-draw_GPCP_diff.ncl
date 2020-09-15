@@ -18,7 +18,7 @@ end
 
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.199801.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201612)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -37,14 +37,23 @@ end
     delete(p)
     delete(p_pi)
     ;;;
+
+
+
     
     dim = dimsizes(p_djf_r)
     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf, 0, 0)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
-    prob_p=rc_test(p_rc)
-    p_rc=(/p_rc*dim(0)/)
     
-    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-1998-2016")
+
+    p_rc = (/dim_avg_n_Wrap(p_djf_r(18:,:,:),0) - dim_avg_n_Wrap(p_djf_r(0:18,:,:),0)/)
+
+   
+
+
+
+    
+    wks   = gsn_open_wks("pdf", "年平均GPCP降水的趋势-scs-diff")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -62,14 +71,14 @@ end
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =90
-  ; res@mpMaxLonF             = 160
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             = 60
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLatF             = -15
+  res@mpMaxLatF             = 15 
+  res@mpMinLonF             = 125
+  res@mpMaxLonF             = 160
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
 
 
@@ -103,9 +112,9 @@ end
   ; res@vpWidthF=0.7
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.5
-  res@cnMaxLevelValF       =   1.5
-  res@cnLevelSpacingF      =  0.25
+  res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.05
 
   res@cnFillPalette="MPL_BrBG"
   res@gsnLeftString="GPCP Precipitation trend"
@@ -176,8 +185,6 @@ end
 
 
 
-
-
     ;;;打点
     res_pro=True
     res_pro@gsnDraw=False
@@ -197,22 +204,19 @@ end
 
     
  
-    iplot = gsn_csm_contour(wks,prob_p,res_pro)
+    ; iplot = gsn_csm_contour(wks,prob_p,res_pro)
     
 
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+    ; opt                      = True
+    ; opt@gsnShadeFillType     = "pattern"
+    ; opt@gsnShadeMid     = 6         ; stipple
+    ; ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; ; opt@gsnShadeHigh   = "green"
+    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+    ; iplot = gsn_contour_shade(iplot , 0,0.05,opt)
 
-
-  
-    iplot = gsn_contour_shade(iplot , 0,0.05,opt)
-
-    ;;;  
-    overlay(plot, iplot)
+    ; ;;;  
+    ; overlay(plot, iplot)
 draw(plot)
 frame(wks)
 
