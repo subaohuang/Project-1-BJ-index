@@ -28,26 +28,26 @@ begin
     ; fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"  
     
 
-    
-    fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"/)
+  
+fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc.nc"/)
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc", \
-      "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP.h0.0251-0280.nc"/)
+fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc.nc", \
+  "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP.h0.0251-0280.nc.nc",\
+  "lsh_B2000_alt_north_year_WNP_nowind/lsh_B2000_alt_north_year_WNP_nowind.TEMP.h0.0251-0280.nc.nc"/)
 
-    leftstring = (/"AW - CTRL", "WNPCLM - CTRL","AW - WNPCLM"/)
-
+leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
 
 
     wks = gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year_WNPCLM_year - WNPCLM-2buffer")
-    plot = new(3,graphic)
+    plot = new(4,graphic)
 
-    str3 = ispan(1, 3, 1) +""
+    str3 = ispan(1, 4, 1) +""
     plot1 =new(1,graphic)
-    iplot = new(3,graphic)
+    iplot = new(4,graphic)
 
-do i=0,2
+do i=0,3
     
-    if i.ne.2 then
+    if i.ne.3 then
       f1=addfile(fils1, "r")
       f2=addfile(fils2(i), "r")
     else 
@@ -253,7 +253,7 @@ do i=0,2
    pres@pmLabelBarWidthF = 0.1
    pres@pmLabelBarHeightF = 0.3
    ; pres@lbLabelFontHeightF = 0.2
-   gsn_panel(wks, plot, (/3,1/), pres)
+   gsn_panel(wks, plot, (/2,2/), pres)
   end
   
 
