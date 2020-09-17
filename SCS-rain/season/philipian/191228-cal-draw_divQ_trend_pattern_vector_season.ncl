@@ -224,8 +224,9 @@ do i = 0,3
     copy_VarCoords(q_rc, prob_qu)
     
 
-   
-    qu_rc = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+    qu_rc_test = qu_rc
+    qv_rc_test = qv_rc
+    qu_rc_test = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
 
 ;==============================================================
 ; Mission 6. draw plot
@@ -260,18 +261,11 @@ do i = 0,3
    res@mpMinLatF             = -5
    ; res@mpMaxLatF             = 50
    res@mpMaxLatF             = 30
-   res@mpMinLonF             = 90
+   res@mpMinLonF             = 100
    res@mpMaxLonF             = 170
   ; ;;;
 
-  
-  ; ;;;global region
-  ;  res@mpMinLatF             = -30
-  ;  res@mpMaxLatF             = 30
-  ;  res@mpMinLonF             = 0
-  ;  res@mpMaxLonF             = 360
-  ; ;;;
-
+ 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False
@@ -281,32 +275,64 @@ do i = 0,3
 
   res@tmXBLabelFontHeightF=0.015
   res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
 
   res@mpFillOn = False
   res@gsnScalarContour        = True
     ;;;;;;;LineArrow
   res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
   ; res@vcGlyphStyle="CurlyVector"
-
-  res@vcMinDistanceF           = 0.02           ; thin vectors
+   res@vcMonoLineArrowColor = True
+  res@vcLineArrowColor = "black"
+  res@vcMinDistanceF           = 0.025           ; thin vectors
   
-  
- 
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcVectorDrawOrder="PostDraw"
 
   res@vcLineArrowThicknessF=1.5
-  res@vcLineArrowHeadMaxSizeF=0.01
-  res@vcLineArrowHeadMinSizeF=0.01
+  ; res@vcLineArrowHeadMaxSizeF=0.01
+  ; res@vcLineArrowHeadMinSizeF=0.01
+  res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  res@vcLineArrowHeadMinSizeF = 0.006
 
   res@vcRefMagnitudeF          = 1000.0
   res@vcMinMagnitudeF          =100.0
   res@gsnLeftString = season(i)
-  plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
+  plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res)
+
+
+    resv                             = True 
+    resv@gsnDraw                     = False
+    resv@gsnFrame                    = False      ;don't advance frame
+    resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    ; res@vcGlyphStyle="CurlyVector"
+
+    resv@vcMinDistanceF           = 0.025           ; thin vectors
+
+    resv@vcRefLengthF             = 0.08     ; define length of v
+    resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    ; resv@vcVectorDrawOrder="PostDraw"
+    resv@vcMonoLineArrowColor = True
+    resv@vcLineArrowColor = "blue"
+    resv@vcLineArrowThicknessF=1.5
+    ; resv@vcLineArrowHeadMaxSizeF=0.01
+    ; resv@vcLineArrowHeadMinSizeF=0.01
+    resv@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    resv@vcLineArrowHeadMinSizeF = 0.006
+
+    resv@vcRefMagnitudeF          = 1000.0
+    ; resv@vcMinMagnitudeF          =100.0
+
+    resv@vcRefAnnoOn    = False
+    resv@gsnLeftString         = " "
+    resv@gsnRightString        = " "
+
+
+    plot_vect := gsn_csm_vector(wks,qu_rc_test({-5:30},{100:170}),qv_rc_test({-5:30},{100:170}),resv)
+    overlay (plot(i),plot_vect)
  
   ; ;;添加区域
    ;;warm pool
@@ -352,7 +378,7 @@ do i = 0,3
     ; res_pro@cnFillDotSizeF = 0.0045
     res_pro@cnFillDotSizeF = 0.002
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -366,11 +392,6 @@ do i = 0,3
     
     plot_tp(i) = overlay_tp_horizontal(wks,-10,50,60,160,"gray")
     overlay(plot(i), plot_tp(i))
-
-
-
-
-
 
 end do
 

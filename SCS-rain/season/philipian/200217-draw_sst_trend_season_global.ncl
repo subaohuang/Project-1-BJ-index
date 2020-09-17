@@ -116,10 +116,10 @@ begin
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
 
-    ssta_mam = where(prob_mam.le.0.05, ssta_mam, ssta_mam@_FillValue)
-    ssta_jja = where(prob_jja.le.0.05, ssta_jja, ssta_jja@_FillValue)
-    ssta_son = where(prob_son.le.0.05, ssta_son, ssta_son@_FillValue)
-    ssta_djf = where(prob_djf.le.0.05, ssta_djf, ssta_djf@_FillValue)
+    ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
@@ -128,7 +128,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15-removeenso")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -316,7 +316,7 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@lbOrientation = "Vertical"
-pres@pmLabelBarHeightF = 0.15
+pres@pmLabelBarHeightF = 0.3
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

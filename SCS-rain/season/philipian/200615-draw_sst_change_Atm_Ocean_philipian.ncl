@@ -49,19 +49,15 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
-   ; lat1 = -5
-   ; lat2 = 45
-   ; lon1 = 90
-   ; lon2 = 160
-   lat1 = -10
-   lat2 = 20
-   lon1 = 100
-   lon2 = 160
-
-   lat1 = -30
+   lat1 = -5
    lat2 = 30
-   lon1 = 0
-   lon2 = 360
+   lon1 = 100
+   lon2 = 170
+   ; lat1 = -10
+   ; lat2 = 20
+   ; lon1 = 100
+   ; lon2 = 160
+
 
 ;;;;
 
@@ -110,6 +106,7 @@ begin
   str2 = "0" + ispan(1,dimsizes(plot),1)
 
  do i=0,3   
+
     sst_change = change(sst,season(i))
     printVarSummary(sst_change)
     lhtfl_change = change(lhtfl,season(i))
@@ -157,29 +154,32 @@ print("*********开始画图********")
   res@gsnSpreadColorEnd = 253
 
   res@cnFillOn=True
-  res@cnLinesOn=True
+  res@cnLinesOn=False
   res@cnLineLabelInterval = 2
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
+
+
+  if i.eq.3
   res@lbLabelBarOn=True
+  res@lbOrientation = "Horizontal"
+  else 
+  res@lbLabelBarOn =False
+  end if
+
   res@lbLabelStride=2
-  res@lbOrientation="Vertical"
+  ; res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
   res@mpFillDrawOrder = "PostDraw"
   ; res@mpMinLatF             = -5
   ; res@mpMaxLatF             = 45
   ; res@mpMinLonF             =90
   ; res@mpMaxLonF             = 160
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
-
-   ; lat1 = -30
-   ; lat2 = 30
-   ; lon1 = 0
-   ; lon2 = 360
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 125
+   ; lon2 = 160
 
   res@mpMinLatF             = lat1
   res@mpMaxLatF             = lat2
@@ -197,9 +197,9 @@ print("*********开始画图********")
 
   res@tmXBLabelFontHeightF=0.015
   res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
   res@gsnRightString = ""
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
@@ -207,7 +207,7 @@ print("*********开始画图********")
   res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.1
 
-
+  res@gsnLeftStringFontHeightF = 0.02
 
 
 
@@ -220,10 +220,11 @@ print("*********开始画图********")
   
   delete(res@gsnSpreadColorStart)
   delete(res@gsnSpreadColorEnd)
-  res@cnFillPalette = "BlRe"
-  res@cnMinLevelValF       =   -5.0
-  res@cnMaxLevelValF       =   5.0
-  res@cnLevelSpacingF      =  1.0
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "GMT_polar"
+  res@cnMinLevelValF       =   -3.0
+  res@cnMaxLevelValF       =   3.0
+  res@cnLevelSpacingF      =  0.5
 
 
   res@gsnLeftString = "Atm Forcing SST trend"
@@ -238,16 +239,17 @@ print("*********开始画图********")
     pgy=0
 
     pgres=True
+
     pgres@gsLineColor="black"
-    pgres@gsLineThicknessF=1.0
+    pgres@gsLineThicknessF=2.0
     pgres@gsLineDashPattern=1
   
    
 
 
-     plot@$str(i*3)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-     plot@$str(i*3+1)$ = gsn_add_polyline(wks, plot(i+1), pgx, pgy, pgres)
-     plot@$str(i*3+2)$ = gsn_add_polyline(wks, plot(i+2), pgx, pgy, pgres)
+     ; plot@$str(i*3)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+     ; plot@$str(i*3+1)$ = gsn_add_polyline(wks, plot(i+1), pgx, pgy, pgres)
+     ; plot@$str(i*3+2)$ = gsn_add_polyline(wks, plot(i+2), pgx, pgy, pgres)
 
   ; ;;;添加indo-pacific warm pool
   ;   ; ;;添加区域
@@ -257,22 +259,26 @@ print("*********开始画图********")
   ;  str3=unique_string("dum3")
   ;  str4=unique_string("dum4")
    
-  ;  ;;;画box
-  ;  lat1 = 0
-  ;  lat2 = 15
-  ;  lon1 = 110
-  ;  lon2 = 155
+   ;;;画box
+   lat11 = 0
+   lat21 = 15
+   lon11 = 125
+   lon21 = 160
 
-  ;  pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-  ;  pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-  ;  ;;;
-  ; plot@$str2(i*3)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-  ; plot@$str2(i*3+1)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-  ; plot@$str2(i*3+2)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   pgx_pool=(/lon11,lon21,lon21,lon11,lon11/)
+   pgy_pool=(/lat11,lat11,lat21,lat21,lat11/)
+   ;;;
+  plot@$str2(i*3)$ = gsn_add_polyline(wks, plot(i*3), pgx_pool, pgy_pool, pgres)
+  plot@$str2(i*3+1)$ = gsn_add_polyline(wks, plot(i*3+1), pgx_pool, pgy_pool, pgres)
+  plot@$str2(i*3+2)$ = gsn_add_polyline(wks, plot(i*3+2), pgx_pool, pgy_pool, pgres)
+
+
+
 end do 
 
   
   pres = True
+  pres@gsnMaximize = True
   pres@gsnPanelLabelBar  = False
   ; pres@gsnPanelFigureStrings = (/"a","b","c"/)
   gsn_panel(wks, plot, (/4,3/), pres)

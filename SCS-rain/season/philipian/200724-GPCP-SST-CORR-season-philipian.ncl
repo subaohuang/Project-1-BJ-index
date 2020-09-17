@@ -101,10 +101,10 @@ begin
 
 do i =0,3
   ;;;region
-   lat1 = -60
-   lat2 = 60
-   lon1 = 0
-   lon2 = 360
+   lat1 = -5
+   lat2 = 30
+   lon1 = 100
+   lon2 = 170
   ;;;
 
  
@@ -174,7 +174,8 @@ do i =0,3
   res@gsnFrame=False
   res@gsnDraw=False
   res@gsnLeftStringFontHeightF=20.0
-  res@cnFillPalette="BlueDarkRed18"
+  ; res@cnFillPalette="BlueDarkRed18"
+  res@cnFillPalette = "BlueWhiteOrangeRed"
   res@cnFillOn=True
   res@cnLinesOn=False
   res@gsnAddCyclic = False
@@ -188,6 +189,7 @@ do i =0,3
   res@mpMaxLatF             = lat2
   res@mpMinLonF             = lon1
   res@mpMaxLonF             = lon2
+  
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -201,19 +203,19 @@ do i =0,3
 
   res@tmXBLabelFontHeightF=0.015
   res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -0.8
+  res@cnMaxLevelValF       =   0.8
+  res@cnLevelSpacingF      =  0.2
 
  
-  res@gsnLeftString = season(i)+"_SST&GPCP"
+  res@gsnLeftString = season(i)+" Corr.SST&Pre"
   plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)
-  res@gsnLeftString = season(i)+"_DSST&GPCP"
+  res@gsnLeftString = season(i)+"_DSST&Pre"
   plot1(i) = gsn_csm_contour_map(wks1, r_dsst_p, res)
  
   ;;;添加赤道直线
@@ -271,6 +273,7 @@ do i =0,3
     res_pro@cnInfoLabelOn=False
 
 
+
     iplot(i) = gsn_csm_contour(wks,prob_p1,res_pro)
     iplot1(i) = gsn_csm_contour(wks1,prob_p2,res_pro)
      
@@ -278,7 +281,7 @@ do i =0,3
 
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
+    opt@gsnShadeMid     = 17         ; stipple
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
