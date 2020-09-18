@@ -33,12 +33,12 @@ fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_al
 
 fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc.nc", \
   "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP.h0.0251-0280.nc.nc",\
-  "lsh_B2000_alt_north_year_WNP_nowind/lsh_B2000_alt_north_year_WNP_nowind.TEMP.h0.0251-0280.nc.nc"/)
+  "lsh_B2000_alt_north_year_WNP_nowindstress/lsh_B2000_alt_north_year_WNP_nowindstress.TEMP.h0.0251-0280.nc.nc"/)
 
 leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
 
 
-    wks = gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year_WNPCLM_year - WNPCLM-2buffer")
+    wks = gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year_WNPCLM_year-stress")
     plot = new(4,graphic)
 
     str3 = ispan(1, 4, 1) +""

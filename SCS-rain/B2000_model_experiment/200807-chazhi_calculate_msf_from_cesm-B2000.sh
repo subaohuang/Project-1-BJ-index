@@ -17,12 +17,12 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_year_CTRL/
-# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B//B2000_alt_north_year_CTRL/
+PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/lsh_B2000_alt_north_year_WNP_nowindstress/
+# PRE_DIR_ORG=/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=B2000_alt_north_year_CTRL
+modelname=lsh_B2000_alt_north_year_WNP_nowindstress
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 # variable=U,V
@@ -46,16 +46,16 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
   #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280_UV.nc
   # fi
 
-# step2 : interpolate the data from hybird level to pressure level
- #  if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
- #    echo "don't exit chazhi file, procecing..."
- #    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
- #    pwd
- #    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc\" \
- #         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc\" \
- #       /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
- #    echo "finish CESM chazhi"
- #  fi 
+#step2 : interpolate the data from hybird level to pressure level
+  # if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+  #   echo "don't exit chazhi file, procecing..."
+  #   cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+  #   pwd
+  #   ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc\" \
+  #        outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc\" \
+  #      /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
+  #   echo "finish CESM chazhi"
+  # fi 
 
  # cd $PRE_DIR_ORG
  # pwd
@@ -71,7 +71,7 @@ if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
     rm ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
-    cdo select,name=TEMP,TAUX,TAUY,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
+    cdo select,name=TAUY  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
   fi
 
 

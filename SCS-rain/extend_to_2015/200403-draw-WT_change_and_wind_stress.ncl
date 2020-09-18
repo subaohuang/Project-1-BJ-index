@@ -213,7 +213,10 @@ printVarSummary(wt)
 
 
     dwt  = wtT(1,:,:)
+ 
+
     dwt = (/dim_avg_n_Wrap(wtT(12*18:,:,:), 0) - dim_avg_n_Wrap(wtT(0:12*18-1,:,:), 0)/)
+ 
     dwt&lat@units = "degrees_north"
     dwt&lon@units = "degrees_east"
 
@@ -225,6 +228,7 @@ printVarSummary(wt)
     tdw = wtT(1,:,:)
     T_clm  = dim_avg_n_Wrap(T_mlt(0:12*18-1,:,:), 0)
     w_delta = dim_avg_n_Wrap(wt_mlt(12*18:,:,:), 0) - dim_avg_n_Wrap(wt_mlt(0:12*18-1,:,:), 0)
+     ; w_delta  =   (/dim_avg_n_Wrap(wt(12*18:,4,{x1:x2},{y1:y2}), 0) - dim_avg_n_Wrap(wt(0:12*18-1,4,{x1:x2},{y1:y2}), 0)/)
     
     tdw = (/T_clm*w_delta/)
    
