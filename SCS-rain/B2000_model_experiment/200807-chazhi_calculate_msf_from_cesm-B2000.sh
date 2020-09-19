@@ -17,12 +17,12 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/lsh_B2000_alt_north_year_WNP_nowindstress/
+PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/lsh_B2000_alt_north_year_WNP_nowindstress_new/
 # PRE_DIR_ORG=/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=lsh_B2000_alt_north_year_WNP_nowindstress
+modelname=lsh_B2000_alt_north_year_WNP_nowindstress_new
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 # variable=U,V
@@ -67,11 +67,11 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
  #  fi
 
 
-if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc ] ; then
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
     rm ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
-    cdo select,name=TAUY  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
+    cdo select,name=TAUX  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
   fi
 
 
