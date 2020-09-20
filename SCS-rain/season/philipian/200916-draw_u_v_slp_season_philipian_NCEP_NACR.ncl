@@ -19,7 +19,7 @@ begin
 ;;;回归u，v,slp，500hpa Geophyoptensial heigh
 ;;==========================================================
     ;;;read data
-    path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
+    path_wind = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/"
     var_name = (/"uwnd","vwnd","slp"/)
     filein = path_wind + var_name +".mon.mean.nc"
         
@@ -39,7 +39,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -56,21 +56,19 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
 
-    u = short2flt(f1->u(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    u =  f1->uwnd(timeind,{925},{lat1:lat2},{lon1:lon2})
 
     f2 = addfile(filein(1),"r")
-    v = short2flt(f2->v(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    v = f2->vwnd(timeind,{925},{lat1:lat2},{lon1:lon2})
 
     
     f3 = addfile(filein(2),"r")
-    ; f3 = addfile("/home/ys17-19/lsh/data/Hadley-slp/slp.mnmean.real.nc","r")
     date :=cd_calendar(f3->time, 1)
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    slp = short2flt(f3->msl(timeind,{lat1:lat2},{lon1:lon2}))      
-    ; slp = short2flt(f3->slp(timeind,{lat1:lat2},{lon1:lon2}))        
+    slp = f3->slp(timeind,{lat1:lat2},{lon1:lon2})      
     printVarSummary(slp)
    
-    ; slp = (/slp*100/)
+    slp  = (/slp*100.0/)
   
 ;;;choose season
     season = (/"MAM","JJA","SON","DJF"/)
@@ -86,7 +84,7 @@ begin
 
 
     str = "" + ispan(1,4,1) + ""
-    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-13")
+    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-NCEP-NCAR")
 
 
 

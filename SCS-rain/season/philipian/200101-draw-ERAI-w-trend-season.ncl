@@ -83,7 +83,7 @@ begin
 
 
   ;;;;
-    wks2   = gsn_open_wks("pdf", "ERA-In中的W趋势平面图-季节")
+    wks2   = gsn_open_wks("pdf", "ERA-In中的W趋势平面图-季节-mk")
     plot=new(4,graphic)  
     str = (/"1","2","3","4"/)
     iplot = new(4,graphic)
@@ -93,6 +93,10 @@ begin
   do i = 0,3
     w_annual = month_to_season(w, MONTH(i))
 
+    if MONTH(i).eq."DJF" then 
+       w_annual(0:dim-2,:,:,:) = (/w_annual(1:dim-1,:,:,:)/)
+       w_annual(dim-1,:,:,:) = (/w(dim*12-1,:,:,:)/)
+    end if
     
     ; ;;;垂直积分
     ; dp=dpres_plevel(level,1013,min(level),0)              ; caculate dp
@@ -112,11 +116,23 @@ begin
    ;;;计算趋势
 
       
-    wgt_w_rc = regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
+    ; wgt_w_rc = regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
+    ; copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
+
+    ; prob_w = rc_test(wgt_w_rc)
+    
+
+    mk = trend_manken(wgt_w, False, 0)
+    wgt_w_rc := mk(1,:,:)
     copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
 
-    prob_w = rc_test(wgt_w_rc)
-    
+    prob_w := mk(0,:,:)
+    prob_w = (/1 - prob_w/)
+    copy_VarCoords(wgt_w(1,:,:), prob_w)
+
+ 
+
+
     ; prob_t  = prob_t*10^6
    ;;;
    wgt_w_rc = (/wgt_w_rc*yearnum/)   
@@ -148,8 +164,8 @@ begin
     ; res@mpMaxLonF             = 170 
 
     res@mpMinLatF             = -5
-    res@mpMaxLatF             = 20
-    res@mpMinLonF             =90
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = 100
     res@mpMaxLonF             = 170 
 
 
