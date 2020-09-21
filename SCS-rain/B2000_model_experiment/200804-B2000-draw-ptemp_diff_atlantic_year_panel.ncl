@@ -29,13 +29,14 @@ begin
     
 
   
-fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc.nc"/)
+fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"/)
 
-fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc.nc", \
-  "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP.h0.0251-0280.nc.nc",\
-  "lsh_B2000_alt_north_year_WNP_nowindstress/lsh_B2000_alt_north_year_WNP_nowindstress.TEMP.h0.0251-0280.nc.nc"/)
+fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc", \
+  "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP_taux_tauy.h0.0251-0280.nc.nc",\
+  "lsh_B2000_alt_north_year_WNP_nowindstress_new/lsh_B2000_alt_north_year_WNP_nowindstress_new.TEMP_taux_tauy.h0.0251-0280.nc"/)
 
-leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
+; leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
+leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNP_nowind"/)
 
 
     wks = gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year_WNPCLM_year-stress")
@@ -51,7 +52,7 @@ do i=0,3
       f1=addfile(fils1, "r")
       f2=addfile(fils2(i), "r")
     else 
-      f1=addfile(fils2(1), "r")
+      f1=addfile(fils2(2), "r")
       f2=addfile(fils2(0), "r")
     end if
 
@@ -67,11 +68,11 @@ do i=0,3
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
+    PSL_CT  :=  f1->TEMP(timeind1,0,:,:)
 
-    PSL_indian  =  f2->TEMP(timeind2,0,:,:)
-    TLAT = f2->TLAT
-    TLONG = f2->TLONG
+    PSL_indian  :=  f2->TEMP(timeind2,0,:,:)
+    TLAT := f2->TLAT
+    TLONG := f2->TLONG
    
     PSL_indian!1 = "nlat"
     PSL_indian!2 = "nlon"
@@ -149,19 +150,19 @@ do i=0,3
 
     res@mpLimitMode           = "LatLon"
 
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
     res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
 
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
-    res@mpCenterLonF = 180.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+    ; res@mpCenterLonF = 180.0
 
     ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 50.0
-    ; res@mpMinLonF             = 60.0
-    ; res@mpMaxLonF             = 160.0
+    ; res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 100.0
+    ; res@mpMaxLonF             = 170.0
 
 
 

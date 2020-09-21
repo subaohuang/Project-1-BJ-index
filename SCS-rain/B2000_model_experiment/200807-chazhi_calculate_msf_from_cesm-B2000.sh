@@ -71,7 +71,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
     rm ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
-    cdo select,name=TAUX  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
+    cdo select,name=TEMP,TAUX,TAUY,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
   fi
 
 

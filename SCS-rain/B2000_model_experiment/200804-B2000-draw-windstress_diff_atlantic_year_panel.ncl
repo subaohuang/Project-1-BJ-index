@@ -33,7 +33,7 @@ fils1 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year_CTRL/B2000_al
 
 fils2 = "/home/ys17-19/lsh/CESM-data/B/" + (/"B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc", \
   "B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer.TEMP_taux_tauy.h0.0251-0280.nc.nc",\
-  "lsh_B2000_alt_north_year_WNP_nowindstress/lsh_B2000_alt_north_year_WNP_nowindstress.cam.h0.0251-0280_windstress.nc"/)
+  "lsh_B2000_alt_north_year_WNP_nowindstress_new/lsh_B2000_alt_north_year_WNP_nowindstress_new.TEMP_taux_tauy.h0.0251-0280.nc"/)
 
 leftstring = (/"AW - CTRL", "WNPCLM - CTRL","WNP_nowind - CTRL","AW - WNPCLM"/)
 
@@ -126,7 +126,7 @@ do i=0,3
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    gsn_define_colormap(wks, "BlRe")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
     ; gsn_define_colormap(wks, "BlueRed")
 
@@ -151,19 +151,22 @@ do i=0,3
 
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
 
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
-    res@mpCenterLonF = 180.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+    ; res@mpCenterLonF = 180.0
 
     ; res@mpMinLatF             = -10.0
     ; res@mpMaxLatF             = 50.0
     ; res@mpMinLonF             = 60.0
     ; res@mpMaxLonF             = 160.0
 
-
+    res@mpMinLatF             = -10.0
+    res@mpMaxLatF             = 30.0
+    res@mpMinLonF             = 100.0
+    res@mpMaxLonF             = 170.0
 
 
     res@mpFillOn = False
