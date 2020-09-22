@@ -150,19 +150,19 @@ do i=0,3
 
     res@mpLimitMode           = "LatLon"
 
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    ; res@mpMinLatF             = -60.0
+    ; res@mpMaxLatF             = 60.0
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
 
     ; res@mpMinLonF             = 0.0
     ; res@mpMaxLonF             = 360.0
     ; res@mpCenterLonF = 180.0
 
-    ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 100.0
-    ; res@mpMaxLonF             = 170.0
+    res@mpMinLatF             = -10.0
+    res@mpMaxLatF             = 30.0
+    res@mpMinLonF             = 100.0
+    res@mpMaxLonF             = 170.0
 
 
 

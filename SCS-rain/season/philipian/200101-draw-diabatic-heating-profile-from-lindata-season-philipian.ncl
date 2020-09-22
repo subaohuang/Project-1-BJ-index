@@ -13,7 +13,7 @@ begin
  
   plot1 = new(4,graphic)
   plot2 = new(4,graphic)
-  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2016-philipian-season")                  ; send graphics to PNG file
+  wks = gsn_open_wks("eps","Q1,非绝热加热,深对流加热的profile-lindata-era-2016-philipian-season")                  ; send graphics to PNG file
 
 
 
@@ -98,16 +98,24 @@ do i=0,3
     resxy = True
     resxy@gsnDraw = False
     resxy@gsnFrame  =False
-    resxy@xyLineThicknessF  =  (/ 3.0/)          ; make second line thicker
+    resxy@xyLineThicknessF  =  (/2.0/)          ; make second line thicker
     resxy@xyMonoLineThickness = True
     resxy@xyLineColors       :=  (/"blue","blue","red","red"/)          ; change line color
     resxy@xyMarkLineModes    :=  (/"MarkLines","MarkLines","MarkLines","MarkLines"/)
     resxy@xyDashPatterns := (/0,1,0,1/)
     resxy@xyMonoMarker        = False
-    resxy@xyMarkers           := (/16,16,9,9/)
+    resxy@xyMarkers           := (/16,16,7,7/)
     resxy@xyMarkerColors :=  (/"blue","blue","red","red"/)
     resxy@gsnLeftString = season(i)
     
+    resxy@tmXBMode  =  "Explicit"
+    resxy@trXMaxF =  6.
+    resxy@trXMinF = -2.
+    resxy@tmXBValues = fspan(-2,6,5)
+    resxy@tmXBLabels = fspan(-2,6,5)
+    resxy@tmXBMinorOn = True
+    resxy@tmXBMinorValues = fspan(-2,6,17)
+    resxy@tiYAxisString = ""
    
     ; resxy@pmLegendDisplayMode = "Always"
     ; resxy@lgBoxLinesOn = False
@@ -126,74 +134,74 @@ do i=0,3
 
     overlay(plot1(i), plot2(i))
 
-
-
-   ;;添加legend 
-   if i.eq.0
-      ;--------------------------------------------------------------------------
-    res_lines                   = True                  ; polyline mods desired
-    res_lines@gsLineDashPattern = 0.                    ; solid line
-    res_lines@gsLineThicknessF  = 2.                    ; line thicker
-
-    
-    res_text                    = True                  ; text mods desired
-    res_text@txFontHeightF      = 0.01                 ; change text size
-    res_text@txJust             = "CenterLeft"          ; text justification
-
-    res_lines@gsLineColor       = "black"
-
-    yy = (/25.,25./)
-    xx = (/2.5,3.0/)
-    text_pos = 3.1
-   
-    dum3 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum4 = gsn_add_text(wks,plot1(i),"Q1 Clim",text_pos,yy(0),res_text); add text
- 
-    res_lines@gsLineDashPattern = 1.                    ; solid line
-    yy = yy+50
-    dum31 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum41 = gsn_add_text(wks,plot1(i),"Q1 Clim+Change",text_pos,yy(0),res_text); add text
-    
-    res_lines@gsLineDashPattern = 0.                    ; solid line
-    res_lines@gsMarkerIndex     = 16
-    res_lines@gsMarkerSizeF     = 0.01
-    res_lines@gsLineColor       = "blue"
-    res_lines@gsMarkerColor = "blue"
-
-    yy = yy+50
-    dum5 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum6 = gsn_add_text(wks,plot1(i),"DPLH Clim",text_pos,yy(0),res_text); add text
-    dum55 = gsn_add_polymarker(wks,plot1(i),xx,yy,res_lines)   
-
-    res_lines@gsLineDashPattern = 1.
-   
-    yy = yy+50
-    dum51 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum61 = gsn_add_text(wks,plot1(i),"DPLH Clim+Change",text_pos,yy(0),res_text); add text
-    dum551 = gsn_add_polymarker(wks,plot1(i),xx,yy,res_lines)   
-
-   
-    res_lines@gsMarkerIndex     = 9
-    res_lines@gsLineColor       = "red"
-    res_lines@gsLineDashPattern = 0.
-    res_lines@gsMarkerColor     = "red"
-    res_lines@gsMarkerThicknessF   = 3.0
-    yy = yy+50
-    dum7 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum8 = gsn_add_text(wks,plot1(i),"DIABH Clim",text_pos,yy(0),res_text); add text
-    dum77 = gsn_add_polymarker(wks,plot1(i),xx,yy,res_lines)   
-    
-    res_lines@gsLineDashPattern = 1.
-    yy = yy+50
-    dum71 = gsn_add_polyline(wks,plot1(i),xx,yy,res_lines)              ; add polyline
-    dum81 = gsn_add_text(wks,plot1(i),"DIABH Clim+Change",text_pos,yy(0),res_text); add text
-    dum771 = gsn_add_polymarker(wks,plot1(i),xx,yy,res_lines)       
-  end if
 end do 
 
 
 pres =True
+; drawNDCGrid(wks)
 gsn_panel(wks, plot1, (/2,2/), pres)
+
+print("done stript")
+
+  ;  ;;添加legend 
+  ;     ;--------------------------------------------------------------------------
+    ; res_lines                   = True                  ; polyline mods desired
+    ; res_lines@gsLineDashPattern = 0.                    ; solid line
+    ; res_lines@gsLineThicknessF  = 2.                    ; line thicker
+
+    
+    ; res_text                    = True                  ; text mods desired
+    ; res_text@txFontHeightF      = 0.01                 ; change text size
+    ; res_text@txJust             = "CenterLeft"          ; text justification
+
+    ; res_lines@gsLineColor       = "black"
+
+    ; yy = (/25.,25./)
+    ; xx = (/2.5,3.0/)
+    ; text_pos = 3.1
+   
+    ; dum3 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum4 = gsn_text_ndc(wks,"Q1 Clim",text_pos,yy(0),res_text); add text
+ 
+    ; res_lines@gsLineDashPattern = 1.                    ; solid line
+    ; yy = yy+50
+    ; dum31 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum41 = gsn_text_ndc(wks,"Q1 Clim+Change",text_pos,yy(0),res_text); add text
+    
+    ; res_lines@gsLineDashPattern = 0.                    ; solid line
+    ; res_lines@gsMarkerIndex     = 16
+    ; res_lines@gsMarkerSizeF     = 0.01
+    ; res_lines@gsLineColor       = "blue"
+    ; res_lines@gsMarkerColor = "blue"
+
+    ; yy = yy+50
+    ; dum5 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum6 = gsn_text_ndc(wks,"DPLH Clim",text_pos,yy(0),res_text); add text
+    ; dum55 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
+
+    ; res_lines@gsLineDashPattern = 1.
+   
+    ; yy = yy+50
+    ; dum51 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum61 = gsn_text_ndc(wks,"DPLH Clim+Change",text_pos,yy(0),res_text); add text
+    ; dum551 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
+
+   
+    ; res_lines@gsMarkerIndex     = 9
+    ; res_lines@gsLineColor       = "red"
+    ; res_lines@gsLineDashPattern = 0.
+    ; res_lines@gsMarkerColor     = "red"
+    ; res_lines@gsMarkerThicknessF   = 3.0
+    ; yy = yy+50
+    ; dum7 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum8 = gsn_text_ndc(wks,"DIABH Clim",text_pos,yy(0),res_text); add text
+    ; dum77 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
+    
+    ; res_lines@gsLineDashPattern = 1.
+    ; yy = yy+50
+    ; dum71 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum81 = gsn_text_ndc(wks,"DIABH Clim+Change",text_pos,yy(0),res_text); add text
+    ; dum771 = gsn_polymarker_ndc(wks,xx,yy,res_lines)       
 
 
 end 

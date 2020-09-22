@@ -2,6 +2,11 @@
 ;;
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/popRemap.ncl"
+
 function t_test(series1,series2)
 begin
   ;;;ttest 
@@ -67,47 +72,101 @@ do i=0,3
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-    PSL_CT  =  f1->TAUX(timeind1,:,:)
+    U_CT  =  f1->TAUX(timeind1,:,:)
 
-    PSL_indian  :=  f2->TAUX(timeind2,:,:)
-    ULAT := f2->ULAT
-    ULONG := f2->ULONG
+    U_indian  :=  f2->TAUX(timeind2,:,:)
+
+
+    V_CT  =  f1->TAUY(timeind1,:,:)
+
+    V_indian  :=  f2->TAUY(timeind2,:,:)
+
+    ; ULAT := f2->ULAT
+    ; ULONG := f2->ULONG
    
-    PSL_indian!1 = "nlat"
-    PSL_indian!2 = "nlon"
-    PSL_indian@lat2d   = ULAT
-    PSL_indian@lon2d   = ULONG
+    ; U_indian!1 = "nlat"
+    ; U_indian!2 = "nlon"
+    ; U_indian@lat2d   = ULAT
+    ; U_indian@lon2d   = ULONG
 
 
-    printVarSummary(PSL_indian)
+    ;;;插值
+      U_CT_new = PopLatLon(U_CT,"gx1v6","1x1d","bilin","da","100716")
 
-    ; PSL_CT_clm = dim_avg_n_Wrap(month_to_season(PSL_CT, season), 0)
-    ; PSL_indian_clm = dim_avg_n_Wrap(month_to_season(PSL_indian, season), 0)
+      U_CT_new!1 = "lat"
+      U_CT_new!2 = "lon"
+
+      V_CT_new = PopLatLon(V_CT,"gx1v6","1x1d","bilin","da","100716")
+
+      V_CT_new!1 = "lat"
+      V_CT_new!2 = "lon"
+
+
+      U_indian_new = PopLatLon(U_indian,"gx1v6","1x1d","bilin","da","100716")
+
+      U_indian_new!1 = "lat"
+      U_indian_new!2 = "lon"
+
+      V_indian_new = PopLatLon(V_indian,"gx1v6","1x1d","bilin","da","100716")
+
+      V_indian_new!1 = "lat"
+      V_indian_new!2 = "lon"
+    ;;;;
+
+
+
+
+    ;;;;风应力旋度
+    vr_CT = uv2vr_cfd(U_CT_new,V_CT_new,U_CT_new&lat,V_CT_new&lon,2)
+    copy_VarCoords(U_CT, vr_CT)
+    printVarSummary(vr_CT)
+  
+    vr_indian = uv2vr_cfd(U_indian_new,V_indian_new,U_indian_new&lat,V_indian_new&lon,2)
+    copy_VarCoords(U_indian, vr_indian)
+    printVarSummary(vr_indian)
+   
+   
     
-    PSL_CT_clm = dim_avg_n_Wrap(PSL_CT, 0)
-    PSL_indian_clm = dim_avg_n_Wrap(PSL_indian, 0)
+
+
+
+    ; U_CT_clm = dim_avg_n_Wrap(month_to_season(U_CT, season), 0)
+    ; U_indian_clm = dim_avg_n_Wrap(month_to_season(U_indian, season), 0)
+    
+    U_CT_clm := dim_avg_n_Wrap(vr_CT, 0)
+    U_indian_clm := dim_avg_n_Wrap(vr_indian, 0)
       
-
-    PSL_diff_indian = PSL_indian_clm
-    PSL_diff_indian = (/PSL_indian_clm - PSL_CT_clm/)
-
     
+    U_CT_clm!0 = "lat"
+    U_CT_clm!1 = "lon"
+    
+
+    U_indian_clm!0 = "lat"
+    U_indian_clm!1 = "lon"
+
+    U_CT_clm&lat = fspan(-89.5,89.5,180)
+    U_CT_clm&lon = fspan(0.5,359.5,360)
+
+    U_CT_clm&lat@units = "degree_north"
+    U_CT_clm&lon@units = "degree_east"
+
+
+    copy_VarCoords(U_CT_clm, U_indian_clm)
+
+    PSL_diff_indian = U_indian_clm
+    PSL_diff_indian = (/U_indian_clm - U_CT_clm/)
+
+    PSL_diff_indian = (/PSL_diff_indian*10^7/)
 
     ;;;t_test 
-     prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     copy_VarCoords(PSL_indian_clm, prob_slp_indian)
+     prob_slp_indian = t_test(U_indian,U_CT)
+     copy_VarCoords(U_indian_clm, prob_slp_indian)
+    ;;;
 
-
-    prob_slp_indian!0 = "nlat"
-    prob_slp_indian!1 = "nlon"
-    prob_slp_indian@lat2d   = ULAT
-    prob_slp_indian@lon2d   = ULONG
-
-     printVarSummary(prob_slp_indian)
     
-     
 
-
+  
+    
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
@@ -126,17 +185,17 @@ do i=0,3
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
-    ; gsn_define_colormap(wks, "BlueRed")
+    gsn_define_colormap(wks, "BlueRed")
 
 
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -0.1
-    res@cnMaxLevelValF       =   0.1
-    res@cnLevelSpacingF      =  0.01
+    res@cnMinLevelValF       =   -1
+    res@cnMaxLevelValF       =   1
+    res@cnLevelSpacingF      =  0.1
 
     ; res@cnMinLevelValF       =   -1.0
     ; res@cnMaxLevelValF       =   1.0
@@ -158,15 +217,12 @@ do i=0,3
     ; res@mpMaxLonF             = 360.0
     ; res@mpCenterLonF = 180.0
 
-    ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 50.0
-    ; res@mpMinLonF             = 60.0
-    ; res@mpMaxLonF             = 160.0
-
     res@mpMinLatF             = -10.0
     res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 100.0
     res@mpMaxLonF             = 170.0
+
+
 
 
     res@mpFillOn = False
