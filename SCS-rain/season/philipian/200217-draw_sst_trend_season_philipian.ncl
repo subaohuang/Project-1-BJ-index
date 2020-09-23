@@ -92,7 +92,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -105,10 +105,10 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ; ssta_jja = (/ssta_jja - ssta_mam/)
-    ; ssta_son = (/ssta_son- ssta_mam/)
-    ; ssta_djf = (/ssta_djf -ssta_mam/)
-    ; ssta_mam = 0.0
+    ssta_jja = (/ssta_jja - ssta_mam/)
+    ssta_son = (/ssta_son- ssta_mam/)
+    ssta_djf = (/ssta_djf -ssta_mam/)
+    ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -116,7 +116,10 @@ begin
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
 
-
+    ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
@@ -126,7 +129,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16-minus-spring")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -174,18 +177,18 @@ begin
 
 
 
-  res@tmXBLabelFontHeightF=0.01
-  res@tmYLLabelFontHeightF=0.01
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=2.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.6
-  res@cnMaxLevelValF       =   0.6
+  res@cnMinLevelValF       =   0.0
+  res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.1
    ; res@cnFillPalette = "NCV_jaisnd"
-   ; res@cnFillPalette = "sunshine_9lev"
+   res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
   ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
@@ -193,7 +196,7 @@ begin
   res@cnInfoLabelOn = False
   
 
-  res@gsnLeftString="MAM"
+  res@gsnLeftString="Spring"
 
   ; res@mpShapeMode = "FreeAspect"
   ; res@vpHeightF = 0.2
@@ -202,35 +205,35 @@ begin
   plot=new(4,graphic)
 
   plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
-    res@gsnLeftString="JJA"
+    res@gsnLeftString="Summer"
   plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
-    res@gsnLeftString="SON"
+    res@gsnLeftString="Autumn"
   plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
-    res@gsnLeftString="DJF"
+    res@gsnLeftString="Winter"
   plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
 
-  res2 = res
-  res2@cnLevelSelectionMode = "ExplicitLevels"
-  res2@cnFillOn = False
-  res2@cnLinesOn = True
-  res2@cnLevels = (/0.55/)
-  res2@cnLineColors = "black"
-  res2@cnMonoLineColor  = True
-  res2@cnLineThicknessF = 2
-  res2@cnMonoLineThickness  = True
-  res2@gsnLeftString = ""
-  res2@cnInfoLabelOn = False
+  ; res2 = res
+  ; res2@cnLevelSelectionMode = "ExplicitLevels"
+  ; res2@cnFillOn = False
+  ; res2@cnLinesOn = True
+  ; res2@cnLevels = (/0.55/)
+  ; res2@cnLineColors = "black"
+  ; res2@cnMonoLineColor  = True
+  ; res2@cnLineThicknessF = 2
+  ; res2@cnMonoLineThickness  = True
+  ; res2@gsnLeftString = ""
+  ; res2@cnInfoLabelOn = False
   
-  plot1=new(4,graphic)
+  ; plot1=new(4,graphic)
 
-  plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
-  plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
-  plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
-  plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
+  ; plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
+  ; plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
+  ; plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
+  ; plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
 
-  do i=0,3
-  overlay(plot(i), plot1(i))
-  end do   
+  ; do i=0,3
+  ; overlay(plot(i), plot1(i))
+  ; end do   
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
@@ -314,12 +317,8 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@gsnMaximize = True
-pres@lbOrientation = "Horizontal"
-; pres@pmLabelBarHeightF = 0.15
-pres@pmLabelBarWidthF = 0.5
-pres@pmLabelBarHeightF = 0.1
-; pres@pmLabelBarOrthogonalPosF = 0.3
-
-gsn_panel(wks, plot, (/4,1/), pres)
+pres@lbOrientation = "Vertical"
+pres@pmLabelBarHeightF = 0.3
+gsn_panel(wks, plot, (/2,2/), pres)
 
 end

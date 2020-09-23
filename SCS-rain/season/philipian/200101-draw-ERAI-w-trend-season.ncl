@@ -48,7 +48,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201612
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -88,7 +88,7 @@ begin
     str = (/"1","2","3","4"/)
     iplot = new(4,graphic)
    
-    
+    se = (/"(a)","(b)","(c)","(d)"/)
 
   do i = 0,3
     w_annual = month_to_season(w, MONTH(i))
@@ -116,26 +116,26 @@ begin
    ;;;计算趋势
 
       
-    ; wgt_w_rc = regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
-    ; copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
-
-    ; prob_w = rc_test(wgt_w_rc)
-    
-
-    mk = trend_manken(wgt_w, False, 0)
-    wgt_w_rc := mk(1,:,:)
+    wgt_w_rc = regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
     copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
 
-    prob_w := mk(0,:,:)
-    prob_w = (/1 - prob_w/)
-    copy_VarCoords(wgt_w(1,:,:), prob_w)
+    prob_w = rc_test(wgt_w_rc)
+    
+
+    ; mk = trend_manken(wgt_w, False, 0)
+    ; wgt_w_rc := mk(1,:,:)
+    ; copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
+
+    ; prob_w := mk(0,:,:)
+    ; prob_w = (/1 - prob_w/)
+    ; copy_VarCoords(wgt_w(1,:,:), prob_w)
 
  
 
 
     ; prob_t  = prob_t*10^6
    ;;;
-   wgt_w_rc = (/wgt_w_rc*yearnum/)   
+   wgt_w_rc = (/wgt_w_rc*yearnum/) *100  
     
 
 
@@ -148,8 +148,9 @@ begin
     res@gsnDraw=False
     res@gsnAddCyclic = False
     res@gsnLeftStringFontHeightF=20.0
-    res@cnFillPalette="BlueWhiteOrangeRed"
-    res@cnFillPalette="BlueRed"
+    ; res@cnFillPalette="BlueWhiteOrangeRed"
+    ; res@cnFillPalette="BlueRed"
+    ; res@cnFillPalette = "MPL_PuOr"
     res@cnFillOn=True
     res@cnLinesOn=False
 
@@ -167,6 +168,10 @@ begin
     res@mpMaxLatF             = 30
     res@mpMinLonF             = 100
     res@mpMaxLonF             = 170 
+    ; res@mpFillOn = True
+    ; res@mpFillColor = "red"
+
+    ; res@mpFillDrawOrder = "PreDraw"
 
 
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -179,18 +184,25 @@ begin
     res@tmYLMode="Explicit"
 
 
-    res@tmXBLabelFontHeightF=0.015
-    res@tmYLLabelFontHeightF=0.015
-    res@tmXBMajorThicknessF=3.0
-    res@tmYLMajorThicknessF=3.0
-    res@tmBorderThicknessF=4.0
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -0.06
-    res@cnMaxLevelValF       =   0.06
-    res@cnLevelSpacingF      =  0.01
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+    ; res@cnMinLevelValF       =   -0.02
+    ; res@cnMaxLevelValF       =   0.02
+    ; res@cnLevelSpacingF      =  0.005
 
-    res@gsnLeftString = MONTH(i) + " W at 500 hPa "
+    res@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
+    gsn_define_colormap(wks2, "MPL_PuOr")
+    
+    res@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
+    res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
+
+
+    res@gsnLeftString = se(i) + MONTH(i) + " W at 500 hPa "
     plot(i) = gsn_csm_contour_map(wks2, wgt_w_rc, res)
 
 
@@ -231,9 +243,9 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.001
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
@@ -250,6 +262,11 @@ end do
 
  pres = True
  pres@gsnPanelLabelBar = True
+ ; pres@lbOrientation = "Vertical"
+ pres@lbLabelFontHeightF = 0.01
+
+ pres@lbOrientation = "Vertical"
+pres@pmLabelBarHeightF = 0.3
  gsn_panel(wks2, plot, (/2,2/), pres)
 
     

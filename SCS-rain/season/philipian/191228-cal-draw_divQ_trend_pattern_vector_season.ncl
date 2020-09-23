@@ -169,7 +169,7 @@ begin
    plot_tp = plot
 
    str = "" + ispan(1,4,1) + ""
-    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季-phipilian")
+    wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季-phipilian-curlwind")
 
 do i = 0,3    
       era_divQ_bar = month_to_season(DivQ, season(i))
@@ -282,8 +282,8 @@ do i = 0,3
   res@mpFillOn = False
   res@gsnScalarContour        = True
     ;;;;;;;LineArrow
-  res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  ; res@vcGlyphStyle="CurlyVector"
+  ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  res@vcGlyphStyle="CurlyVector"
    res@vcMonoLineArrowColor = True
   res@vcLineArrowColor = "black"
   res@vcMinDistanceF           = 0.025           ; thin vectors
@@ -299,7 +299,7 @@ do i = 0,3
   res@vcLineArrowHeadMinSizeF = 0.006
 
   res@vcRefMagnitudeF          = 1000.0
-  res@vcMinMagnitudeF          =100.0
+  ; res@vcMinMagnitudeF          =100.0
   res@gsnLeftString = season(i)
   plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res)
 
@@ -307,8 +307,8 @@ do i = 0,3
     resv                             = True 
     resv@gsnDraw                     = False
     resv@gsnFrame                    = False      ;don't advance frame
-    resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-    ; res@vcGlyphStyle="CurlyVector"
+    ; resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcGlyphStyle="CurlyVector"
 
     resv@vcMinDistanceF           = 0.025           ; thin vectors
 

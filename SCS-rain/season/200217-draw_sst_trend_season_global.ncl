@@ -43,7 +43,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201912.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -76,7 +76,7 @@ begin
     
     
     
-    wks   = gsn_open_wks("pdf", "全球季节平均SST的趋势-SCS-79-19")
+    wks   = gsn_open_wks("pdf", "全球季节平均SST的趋势-SCS-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -125,9 +125,9 @@ begin
 
   res@tmXBLabelFontHeightF=0.015
   res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -0.6
@@ -244,7 +244,7 @@ begin
      ; iplot = gsn_csm_contour(wks,prob_p ,res_pro)
 
     ;;;  
-      ; overlay(plot, iplot)
+      overlay(plot, iplot)
 
 
 

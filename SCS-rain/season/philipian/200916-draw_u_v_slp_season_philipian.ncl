@@ -39,7 +39,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201312
+    endmon = 201612
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -56,10 +56,10 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
 
-    u = short2flt(f1->u(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     f2 = addfile(filein(1),"r")
-    v = short2flt(f2->v(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     
     f3 = addfile(filein(2),"r")
@@ -86,7 +86,7 @@ begin
 
 
     str = "" + ispan(1,4,1) + ""
-    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-13")
+    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-16")
 
 
 

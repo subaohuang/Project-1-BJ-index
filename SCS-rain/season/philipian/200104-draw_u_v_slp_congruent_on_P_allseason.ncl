@@ -86,11 +86,11 @@ begin
      slp = (/rmMonAnnCycTLL(slp)/)
      p_t = (/rmMonAnnCycTLL(p_t)/)
 
-     p = dim_avg_n_Wrap(p_t(:,{0:15},{110:155}), (/1,2/))
+     p = dim_avg_n_Wrap(p_t(:,{0:15},{125:160}), (/1,2/))
 
      season = (/"MAM","JJA","SON","DJF"/)
 
-     wks   = gsn_open_wks("pdf", "U,V,SLP_congruent_on_P-allseason")
+     wks   = gsn_open_wks("pdf", "U,V,SLP_congruent_on_P-allseason-philipian")
 
      plot=new(8,graphic)
      str = ispan(1, 8, 1) +""
@@ -256,14 +256,14 @@ print("==========finish preprocessing data =============")
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
-  res@gsnLeftString = "(a)"+season(i)+"-observed"+" U,V,SLP linear trend" 
+  res@gsnLeftString = season(i)+"-observed"+" U,V,SLP linear trend" 
   plot(i*2) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
   res@vcRefMagnitudeF          = 2.0
   res@cnMinLevelValF       =   -80
   res@cnMaxLevelValF       =   80
   res@cnLevelSpacingF      =  20
 
-  res@gsnLeftString = "(b)"+season(i)+"-U,V,SLP linearly congruent with GPCP Pr"
+  res@gsnLeftString = season(i)+"-U,V,SLP linearly congruent with GPCP Pr"
     
   plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_p_rc,v_p_rc,slp_p_rc ,res)
 

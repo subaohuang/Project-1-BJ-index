@@ -15,49 +15,6 @@ begin
 return prob
 end
 undef("remove_enso_signal")
-function remove_enso_signal(data)
-  begin  
-  ; ;;;读入HadiSST海温数据
-      diri="/home/ys17-19/lsh/data/sst/"
-      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-      f1=addfile(fils1, "r")
-      date:=cd_calendar(f1->time, 1)
-
-      timeind:=ind(date.le.201512.and.date.ge.197901)
-
-      sst =  lonFlip(f1->sst(timeind,:,:))
-   
-      ssta=(/rmMonAnnCycTLL(sst)/)
-      copy_VarCoords(sst, ssta)
-
-      ssta_de = ssta
-      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
-      printVarSummary(ssta_index)
-
-      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-      printVarSummary(nino3_4)
-
-      
-      ; nino3_4_new = nino3_4                ;;;;前期ENSO
-      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
-      ; nino3_4_new(34) =ssta_index(35*12-1) 
-   
-      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
-  ;;;;;
-      data_de = data
-      ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
-      copy_VarCoords(data(1,:,:), data_rc)
-      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
-      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
-      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
-  
-      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
-      data_new = data 
-      data_new = (/data - data_relate_enso/)
-  return data_new
-end 
 
 function cal_season_trend(data,season)
   begin
@@ -88,15 +45,20 @@ begin
   
    ;;;读入HadiSST海温数据
     diri="/home/ys17-19/lsh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+    fils1=systemfunc("ls "+diri+"COBE_SST.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
+
+    
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
+
+
+    
     
 
    ;;;;cal season trend 
@@ -105,10 +67,10 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ; ssta_jja = (/ssta_jja - ssta_mam/)
-    ; ssta_son = (/ssta_son- ssta_mam/)
-    ; ssta_djf = (/ssta_djf -ssta_mam/)
-    ; ssta_mam = 0.0
+    ssta_jja = (/ssta_jja - ssta_mam/)
+    ssta_son = (/ssta_son- ssta_mam/)
+    ssta_djf = (/ssta_djf -ssta_mam/)
+    ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -126,7 +88,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
+    wks   = gsn_open_wks("pdf", "COBE-global季节平均SST的趋势-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -181,9 +143,15 @@ begin
   res@tmBorderThicknessF=2.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.6
+  ; res@cnMinLevelValF       =   -1.0
+  ; res@cnMaxLevelValF       =   1.0
+  ; res@cnLevelSpacingF      =  0.1
+
+  res@cnMinLevelValF       =   -.6
   res@cnMaxLevelValF       =   0.6
   res@cnLevelSpacingF      =  0.1
+
+  res@mpFillDrawOrder = "PostDraw"
    ; res@cnFillPalette = "NCV_jaisnd"
    ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
@@ -213,7 +181,7 @@ begin
   res2@cnLevelSelectionMode = "ExplicitLevels"
   res2@cnFillOn = False
   res2@cnLinesOn = True
-  res2@cnLevels = (/0.55/)
+  res2@cnLevels = (/0.6/)
   res2@cnLineColors = "black"
   res2@cnMonoLineColor  = True
   res2@cnLineThicknessF = 2
@@ -314,12 +282,8 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@gsnMaximize = True
-pres@lbOrientation = "Horizontal"
-; pres@pmLabelBarHeightF = 0.15
-pres@pmLabelBarWidthF = 0.5
-pres@pmLabelBarHeightF = 0.1
-; pres@pmLabelBarOrthogonalPosF = 0.3
-
-gsn_panel(wks, plot, (/4,1/), pres)
+pres@lbOrientation = "Vertical"
+pres@pmLabelBarHeightF = 0.15
+gsn_panel(wks, plot, (/2,2/), pres)
 
 end
