@@ -23,7 +23,7 @@ begin
     fils1 = "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECC.mon.0250-0299.nc"  
     fils1a= "/home/yangsong3/data-model/Lu_MM/B2000_f19g16_CTRL/B2000_f19g16_CTRL.PRECL.mon.0250-0299.nc"  
 
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.cam.h0.0251-0280.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring/B2000_alt_north_spring.cam.h1.0251-0280.nc"
 
   
     f1=addfile(fils1, "r")

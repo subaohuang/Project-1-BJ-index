@@ -105,10 +105,10 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ssta_jja = (/ssta_jja - ssta_mam/)
-    ssta_son = (/ssta_son- ssta_mam/)
-    ssta_djf = (/ssta_djf -ssta_mam/)
-    ssta_mam = 0.0
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -116,10 +116,10 @@ begin
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
 
-    ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
@@ -129,7 +129,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16-minus-spring")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

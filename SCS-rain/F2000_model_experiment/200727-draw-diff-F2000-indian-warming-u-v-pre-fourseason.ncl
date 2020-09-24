@@ -45,7 +45,7 @@ do i = 0,3
   PRECC_CT  =  f1->PRECC(timeind,:,:)
 
   PRE_CT = PRECC_CT
-  ; PRE_CT = (/PRECC_CT+PRECL_CT/)
+  PRE_CT = (/PRECC_CT+PRECL_CT/)
   ; PRE_CT = (/PRECL_CC/)  ;;;大尺度降水
   PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
@@ -53,7 +53,7 @@ do i = 0,3
   PRECC_id  =  f2->PRECC(timeind,:,:)
 
   PRE_id = PRECC_id
-  ; PRE_id = (/PRECC_id+PRECL_id/)
+  PRE_id = (/PRECC_id+PRECL_id/)
   ; PRE_id = (/PRECC_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
    
@@ -113,24 +113,37 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    ; res@cnFillPalette = "precip_diff_12lev"
-      res@cnFillPalette = "MPL_BrBG"
+    res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "MPL_BrBG"
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    res@cnFillPalette = "precip_diff_12lev"
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+    ; gsn_define_colormap(wks, "precip_diff_12lev")
+    res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
+    ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
+ 
 
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.25
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+
+    ; res@cnMinLevelValF       =   -1
+    ; res@cnMaxLevelValF       =   1
+    ; res@cnLevelSpacingF      =  0.2
     
+    res@tmXBLabelFontHeightF=0.01
+    res@tmYLLabelFontHeightF=0.01
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=2.0
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -10.0
+    res@mpMinLatF             = -5.0
     res@mpMaxLatF             = 30.0
     ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 70.0
+    res@mpMinLonF             = 100.0
     res@mpMaxLonF             = 170.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
@@ -149,7 +162,8 @@ do i = 0,3
      ;;;LineArrow
     ; res@gsnScalarContour        = True
     res@gsnScalarContour        = False
-    res@gsnLeftString = season(i)
+    res@gsnLeftString = season(i)+ " :SEN - CTRL"
+    res@gsnLeftStringFontHeightF  = 0.02
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
@@ -243,7 +257,7 @@ do i = 0,3
 
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
+    opt@gsnShadeMid     = 17         ; stipple
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越

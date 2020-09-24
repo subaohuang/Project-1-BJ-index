@@ -3,15 +3,35 @@
 ;;
 ;;lnshuheng 2020.02.17
 ;**********************************************************
-function  rc_test(ssta_rc)
+function  rc_test(ssta_rc1,ssta_rc2)
 begin
-  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
-   b = tval    ; b must be same size as tval (and df)
-   b = 0.5
-   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
-   copy_VarCoords(ssta_rc, prob)
+    df   = onedtond(ssta_rc1@nptxy, dimsizes(ssta_rc1)) - 2
+    df = 2
+    
+    p = new(dimsizes(df), float)
+    p  = 0.975
+    T = cdft_t(p, df)    ; T =  2.12
 
+     
+    interv = onedtond(ssta_rc1@rstd, dimsizes(ssta_rc1))*T
+    
+    interv = where(interv.eq.-4.302655e+30, 0.0, interv)
+   
+    diff = new(dimsizes(ssta_rc1),float)
+    diff = (/abs(ssta_rc2 - ssta_rc1)/)
+    diff@_FillValue = 1.0e+30
+
+    diff =  where(diff.ge.1.0.or.diff.le.0.0, 0.0, diff)
+    diff = where(diff.eq.1.0e+30, 0.0, diff)
+  
+  
+    prob = diff
+    prob =  where(diff.ge.interv, 0.02, 1.0)
+    prob!0 = "lat"
+    prob!1 = "lon"
+    ; prob&lat@units = "degree_north"
+    ; prob&lon@units = "degree_east"
+    copy_VarCoords(ssta_rc1, prob)
 return prob
 end
 undef("remove_enso_signal")
@@ -37,8 +57,6 @@ function remove_enso_signal(data)
 
       nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
       printVarSummary(nino3_4)
-
-      
       ; nino3_4_new = nino3_4                ;;;;前期ENSO
       ; nino3_4_new(0:33) = (/nino3_4(1:)/)
       ; nino3_4_new(34) =ssta_index(35*12-1) 
@@ -66,7 +84,6 @@ function cal_season_trend(data,season)
      ; ;;;;remove_enso_signal
      ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
      ; ;;;;
-
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
@@ -74,7 +91,10 @@ function cal_season_trend(data,season)
     dim = dimsizes(p_djf_r)
     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
+
+
     p_rc=(/p_rc*dim(0)/)
+  
   return p_rc
 end 
 
@@ -105,16 +125,21 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ; ssta_jja = (/ssta_jja - ssta_mam/)
-    ; ssta_son = (/ssta_son- ssta_mam/)
-    ; ssta_djf = (/ssta_djf -ssta_mam/)
-    ; ssta_mam = 0.0
+    ssta_jja = (/ssta_jja - ssta_mam/)
+    ssta_son = (/ssta_son- ssta_mam/)
+    ssta_djf = (/ssta_djf -ssta_mam/)
+    ssta_mam = 0.0
 
-    prob_mam = rc_test(ssta_mam)
-    prob_jja = rc_test(ssta_jja)
+    ; prob_mam = rc_test(ssta_mam)
 
-    prob_son = rc_test(ssta_son)
-    prob_djf = rc_test(ssta_djf)
+
+    prob_jja = rc_test(ssta_mam, ssta_jja)
+
+    prob_son = rc_test(ssta_mam, ssta_son)
+    prob_djf = rc_test(ssta_mam, ssta_djf)
+
+    prob_mam = prob_jja
+    prob_mam = 1.0
 
 
 
@@ -126,7 +151,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16-rmenso")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -137,8 +162,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
  
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlueDarkRed18"
+   res@cnFillPalette = "BlueWhiteOrangeRed"
+   ; res@cnFillPalette = "BlueDarkRed18"
    ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
@@ -282,7 +307,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.05/)
+    res_pro@cnLevels = (/0,0.1/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False
@@ -314,13 +339,12 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@gsnMaximize = True
-; pres@lbOrientation = "Horizontal"
-pres@lbOrientation = "Vertical"
-pres@pmLabelBarHeightF = 0.15
-; pres@pmLabelBarWidthF = 0.5
-; pres@pmLabelBarHeightF = 0.1
+pres@lbOrientation = "Horizontal"
+; pres@pmLabelBarHeightF = 0.15
+pres@pmLabelBarWidthF = 0.5
+pres@pmLabelBarHeightF = 0.1
 ; pres@pmLabelBarOrthogonalPosF = 0.3
 
-gsn_panel(wks, plot, (/2,2/), pres)
+gsn_panel(wks, plot, (/4,1/), pres)
 
 end

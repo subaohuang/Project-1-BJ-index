@@ -22,17 +22,17 @@ PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/
 
 STEP=3
 modelname=F_2000_CTRL
-variable=FLUT,FSNS,FLNS,LHFLX,SHFLX
+variable=FLUT,FSNS,FLNS,LHFLX,SHFLX,U10
 
 
 # step1 : merge the cesm data into a whole data by using cdo
   ### the prefix of data is usually CESM compet name ,alarm for time select
 
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012._OLR_heatflux.nc ] ; then
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_OLR_heatflux.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_OLR_heatflux.nc
-    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0101-4012_OLR_heatflux.nc
+    rm ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_OLR_heatflux.nc
+    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012_OLR_heatflux.nc
   fi
 
 # # step2 : interpolate the data from hybird level to pressure level

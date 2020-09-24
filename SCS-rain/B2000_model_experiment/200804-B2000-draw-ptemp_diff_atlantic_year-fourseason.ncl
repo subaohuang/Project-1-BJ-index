@@ -23,8 +23,8 @@ begin
 
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -80,8 +80,12 @@ begin
 
     ;;;t_test 
      prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     copy_VarCoords(PSL_indian_clm, prob_slp_indian)
-     printVarSummary(prob_slp_indian)
+   
+    prob_slp_indian!0 = "nlat"
+    prob_slp_indian!1 = "nlon"
+    prob_slp_indian@lat2d   = TLAT
+    prob_slp_indian@lon2d   = TLONG
+
     
      
 
@@ -101,10 +105,10 @@ begin
     ; res@cnRasterSmoothingOn=True
     res@trGridType = "TriangularMesh"
 
-    ; res@cnFillPalette = "hotcolr_19lev"
+    res@cnFillPalette = "BlueDarkRed18"
 
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
     ; gsn_define_colormap(wks, "BlRe")
     ; gsn_define_colormap(wks, "BlueDarkRed18")
@@ -152,13 +156,39 @@ begin
     ; res@vpWidthF = 0.7
     ; res@vpHeightF = 0.3
 
-    
+    res@tmXBLabelFontHeightF=0.01
+    res@tmYLLabelFontHeightF=0.01
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
+    res@gsnLeftStringFontHeightF = 0.02
+
     
     res@gsnRightString = ""
-    res@gsnLeftString = season(i)
-    res@gsnLeftStringFontHeightF = 10.0
+    res@gsnLeftString = season(i) + " :SEN -CTRL"
+
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
+
+    res2 = res
+    res2@cnLevelSelectionMode = "ExplicitLevels"
+    res2@cnFillOn = False
+    res2@cnLinesOn = True
+    res2@cnLevels = (/0.55/)
+    res2@cnLineColors = "black"
+    res2@cnMonoLineColor  = True
+    res2@cnLineThicknessF = 2
+    res2@cnMonoLineThickness  = True
+    res2@gsnLeftString = ""
+    res2@cnInfoLabelOn = False
+
+  
+
+    plot1(i) = gsn_csm_contour(wks, PSL_diff_indian, res2)
+   
+   
+    overlay(plot(i), plot1(i))
+ 
      
 
     ;;;画box
@@ -210,13 +240,16 @@ begin
     
 
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    ; overlay(plot(i), iplot(i))
+    overlay(plot(i), iplot(i))
 end do
      pres = True
+     pres@gsnMaximize = True
     pres@gsnPanelLabelBar = True
-    pres@lbOrientation  = "Vertical"
-    pres@pmLabelBarWidthF  = 0.06
-    pres@pmLabelBarHeightF = 0.15
+    ; pres@lbOrientation  = "Vertical"
+    pres@lbOrientation  = "Horizontal"
+    pres@pmLabelBarOrthogonalPosF = -0.02
+    ; pres@pmLabelBarWidthF  = 0.03
+    pres@pmLabelBarHeightF = 0.03
     pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)

@@ -97,11 +97,15 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
 
   res@mpLimitMode           = "LatLon"
   
-  res@mpMinLatF             = 0
-  res@mpMaxLatF             = 45
-  res@mpMinLonF             =100
-  res@mpMaxLonF             = 170
-
+  ; res@mpMinLatF             = 0
+  ; res@mpMaxLatF             = 45
+  ; res@mpMinLonF             =100
+  ; res@mpMaxLonF             = 170
+  
+  res@mpMinLatF             = -30
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 0 
+  res@mpMaxLonF             = 360
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -118,9 +122,9 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
 
   res@tmXBLabelFontHeightF=0.015
   res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
 
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3

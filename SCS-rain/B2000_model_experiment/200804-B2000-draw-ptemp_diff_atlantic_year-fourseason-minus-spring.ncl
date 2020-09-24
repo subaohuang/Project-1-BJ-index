@@ -2,7 +2,7 @@
 ;;
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
-function t_test(series1,series2)
+function t_test(series1,series2,series_mam)
 begin
   ;;;ttest 
       avg1 = dim_avg_n_Wrap(series1, 0)
@@ -15,16 +15,41 @@ begin
       simple_variance1  = dim_variance_n_Wrap(series1, 0)
       simple_variance2  = dim_variance_n_Wrap(series2, 0)
 
-      prob_p = ttest(avg1 ,simple_variance1, simple_size, avg2 ,simple_variance2 ,simple_size,False,False)
-     copy_VarCoords(avg1, prob_p)
+      prob_pt = ttest(avg1 ,simple_variance1, simple_size, avg2 ,simple_variance2 ,simple_size,False,True)
+      
+      
+     
+      t = student_t(prob_pt(0,:,:), simple_size)
+      std = dim_stddev_n(series1,0)
+      interv = t*std/sqrt(simple_size)  ;;;置信区间     
+    
+      interv = where(interv.eq.interv@_FillValue, 0.0, interv)
+       
+       printVarSummary(interv)
+    
+      diff = avg1 
+      diff = (/abs(avg2 - avg1 -series_mam)/)
+      prob_p = diff
+      printVarSummary(prob_p)
+      printVarSummary(interv)
+      prob_p = where(prob_p.ge.interv, 0.05, 2.0)
+      prob_p = where(prob_p.eq.prob_p@_FillValue, 2.0, prob_p)
+    
+   
+
+copy_VarCoords(avg1, prob_p)
+
+
 return prob_p
 end 
+
+
+
 begin
-
-
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP.h0.0251-0280.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP.h0.0251-0280.nc"
+fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
+fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc"
+ 
  
   
     f1=addfile(fils1, "r")
@@ -86,10 +111,12 @@ begin
       PSL_diff_indian = (/PSL_diff_indian - PSL_diff_spring/)
 
     ;;;t_test 
-     prob_slp_indian = t_test(PSL_indian,PSL_CT)
-     copy_VarCoords(PSL_indian_clm, prob_slp_indian)
-     printVarSummary(prob_slp_indian)
-    
+    prob_slp_indian := t_test(PSL_CT,PSL_indian, PSL_diff_spring)
+    prob_slp_indian!0 = "nlat"
+    prob_slp_indian!1 = "nlon"
+    prob_slp_indian@lat2d   = TLAT
+    prob_slp_indian@lon2d   = TLONG
+
      
 
     
@@ -108,15 +135,20 @@ begin
     ; res@cnRasterSmoothingOn=True
     res@trGridType = "TriangularMesh"
 
-    ; res@cnFillPalette = "hotcolr_19lev"
+    res@cnFillPalette = "BlueDarkRed18"
 
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    res@tmXBLabelFontHeightF=0.01
+    res@tmYLLabelFontHeightF=0.01
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
+    res@gsnLeftStringFontHeightF = 0.02
 
-    ; gsn_define_colormap(wks, "BlRe")
-    ; gsn_define_colormap(wks, "BlueDarkRed18")
- 
- 
+
+    res@gsnRightString = ""
+    res@gsnLeftString = season(i) + " Minus MAM"
+
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
@@ -161,9 +193,7 @@ begin
 
     
     
-    res@gsnRightString = ""
-    res@gsnLeftString = season(i)
-    res@gsnLeftStringFontHeightF = 10.0
+
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
      
 
@@ -191,6 +221,8 @@ begin
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
     res_pro@cnFillOn = True
+     res_pro@gsnLeftString = ""
+    res_pro@gsnRightString = ""
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
     res_pro@cnLevels = (/0,0.1/)
@@ -213,20 +245,68 @@ begin
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
+  
+
+ 
+    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+
+      if i.ne.0 then 
+    overlay(plot(i), iplot(i))
+    end if
+
+    ; ;;;打点
+    ; res_pro=True
+    ; res_pro@gsnDraw=False
+    ; res_pro@gsnFrame=False
+    ; res_pro@gsnLeftString = ""
+    ; res_pro@gsnRightString = ""
+    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    ; res_pro@cnLinesOn=False
+    ; res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    ; res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    ; res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    ; res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
+
+    ; res_pro@cnLineLabelsOn=False
+    ; res_pro@tmYRMode = "Automatic"
+    ; res_pro@cnInfoLabelOn=False
+    ; res_pro@trGridType = "TriangularMesh"
+
+    ; iplot=new(4,graphic)
+
+ 
+    ; iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+
     
 
-    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+    ; opt                      = True
+    ; opt@gsnShadeFillType     = "pattern"
+    ; opt@gsnShadeMid     = 17         ; stipple
+    ; ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; ; opt@gsnShadeHigh   = "green"
+    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+
+   
+    ; if i.ne.0 then 
+    ; iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
     ; overlay(plot(i), iplot(i))
+    ; end if
 end do
     pres = True
+     pres@gsnMaximize = True
     pres@gsnPanelLabelBar = True
-    pres@lbOrientation  = "Vertical"
-    pres@pmLabelBarWidthF  = 0.06
-    pres@pmLabelBarHeightF = 0.15
+    ; pres@lbOrientation  = "Vertical"
+    pres@lbOrientation  = "Horizontal"
+    pres@pmLabelBarOrthogonalPosF = -0.02
+    ; pres@pmLabelBarWidthF  = 0.03
+    pres@pmLabelBarHeightF = 0.03
     pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
   end
+  
+  
+
   
 

@@ -12,7 +12,7 @@ begin
 
     timeind:=ind(date.le.201612.and.date.ge.197901)
 
-    sst=lonFlip(f1->sst(timeind,:,:))
+    sst=f1->sst(timeind,:,:)
 
 
     sst_clm = dim_avg_n_Wrap(sst, 0)
@@ -40,10 +40,10 @@ begin
   res@mpLimitMode           = "LatLon"
   res@mpMinLatF             = -60
   res@mpMaxLatF             = 60
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  res@mpMinLonF             = -90
+  res@mpMaxLonF             = 30
 
-  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+  ; res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
   res@tmXTOn=False
   res@tmYROn=False
@@ -70,8 +70,8 @@ begin
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   12.0
-  res@cnMaxLevelValF       =   30.0
-  res@cnLevelSpacingF      =  2.0
+  res@cnMaxLevelValF       =   28.0
+  res@cnLevelSpacingF      =  1.0
 
   plot = gsn_csm_contour_map(wks, sst_clm, res)
 

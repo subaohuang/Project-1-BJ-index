@@ -17,26 +17,26 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/lsh_B2000_alt_north_year_WNP_nowindstress_new/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/
 # PRE_DIR_ORG=/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=lsh_B2000_alt_north_year_WNP_nowindstress_new
+modelname=B2000_alt_north_year
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 # variable=U,V
 
 
-# step1 : merge the cesm data into a whole data by using cdo
-  ### the prefix of data is usually CESM compet name ,alarm for time select
+#step1 : merge the cesm data into a whole data by using cdo
+  ## the prefix of data is usually CESM compet name ,alarm for time select
 
-  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc ] ; then
-  #   echo "don't exit merge file, procecing..."
-  #   cd $PRE_DIR_ORG
-  #   rm ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc
-  #   cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h0.0251-0280.nc
-  # fi
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc ] ; then
+    echo "don't exit merge file, procecing..."
+    cd $PRE_DIR_ORG
+    rm ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc
+    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0251-0280.nc
+  fi
 
 
   # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_UV.nc ] ; then
@@ -47,15 +47,15 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
   # fi
 
 #step2 : interpolate the data from hybird level to pressure level
-  # if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
-  #   echo "don't exit chazhi file, procecing..."
-  #   cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
-  #   pwd
-  #   ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280.nc\" \
-  #        outpath=\"${PRE_DIR_ORG}${modelname}.cam.h0.0251-0280_chazhi.nc\" \
-  #      /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
-  #   echo "finish CESM chazhi"
-  # fi 
+  if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+    echo "don't exit chazhi file, procecing..."
+    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+    pwd
+    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc\" \
+         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_chazhi.nc\" \
+       /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
+    echo "finish CESM chazhi"
+  fi 
 
  # cd $PRE_DIR_ORG
  # pwd
@@ -67,12 +67,12 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
  #  fi
 
 
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc ] ; then
-    echo "don't exit merge file, procecing..."
-    cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
-    cdo select,name=TEMP,TAUX,TAUY,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
-  fi
+  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc ] ; then
+  #   echo "don't exit merge file, procecing..."
+  #   cd $PRE_DIR_ORG
+  #   rm ${PRE_DIR_ORG}${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
+  #   cdo select,name=TEMP,TAUX,TAUY,level=500.0  ${modelname}.pop.h.*  ${modelname}.TEMP_taux_tauy.h0.0251-0280.nc
+  # fi
 
 
 # # step3 calculate mass stream function

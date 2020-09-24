@@ -8,11 +8,11 @@ begin
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addscs_"+season+"_notest.nc" 
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addscs_"+season+".nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addindianwarming_"+season+"_notest.nc" 
  
   plot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
-   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-scs-fourseason")
+   wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-add-fourseason")
 
 do i = 0,3
 
@@ -44,30 +44,43 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    ; res@cnFillPalette = "BlRe"
+    ; res@cnFillPalette = "BlueDarkRed18"
     res@cnFillPalette = "BlueWhiteOrangeRed"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1.0
-    res@cnMaxLevelValF       =   1.0
-    res@cnLevelSpacingF      =  0.2
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
+    res@cnLevelSpacingF      =  0.1
+
+    res@tmXBLabelFontHeightF=0.01
+    res@tmYLLabelFontHeightF=0.01
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=2.0
 
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -90.0
-    res@mpMaxLatF             = 90.0
+    res@mpMinLatF             = -60.0
+    res@mpMaxLatF             = 60.0
     res@mpMinLonF             = 0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF          = 180.0
+
+    res@gsnLeftString  = season(i)
   
     plot(i) =gsn_csm_contour_map(wks, sst_cpl_diff_re, res)
 end do
     pres = True
     pres@gsnPanelLabelBar = True
+    pres@gsnMaximize = True
+    pres@lbOrientation = "Vertical"
+   ; ; pres@pmLabelBarHeightF = 0.15
+   ;  pres@pmLabelBarWidthF = 0.5
+   ;  pres@pmLabelBarHeightF = 0.1
     gsn_panel(wks, plot, (/2,2/), pres)
 
 end 
