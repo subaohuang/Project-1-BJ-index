@@ -21,9 +21,9 @@ return prob_p
 end 
 
 begin
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_south/F_2000_atl_1degree_south.cam.h0.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_south/F_2000_atl_1degree_south.cam.h1.0101-4012_chazhi.nc"  
 
 
   f1=addfile(fils1, "r")
@@ -96,20 +96,28 @@ begin
     res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=True
     res@cnFillOn = True 
-    res@cnLinesOn =True
-    res@cnLineColor = "White"
+    res@cnLinesOn =False
+    ; res@cnLineColor = "White"
     res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
+    res@lbLabelFontHeightF = 0.01
+
+    ; res@cnFillPalette = "precip_diff_12lev"
+
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+
+    ; res@cnMinLevelValF       =   -1.0
+    ; res@cnMaxLevelValF       =   1.0
+    ; res@cnLevelSpacingF      =  0.2
+    
 
     res@cnFillPalette = "precip_diff_12lev"
-
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
-    res@cnLevelSpacingF      =  0.1
-    
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+    ; gsn_define_colormap(wks, "precip_diff_12lev")
+    res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
+    ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -123,6 +131,14 @@ begin
     ; res@mpMaxLatF             = 60.0
     ; res@mpMinLonF             = 0.0
     ; res@mpMaxLonF             = 360.0
+
+    res@gsnLeftString = "SEN - CTRL U,V,PRE"
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
+    res@gsnLeftStringFontHeightF  = 0.02
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False
@@ -135,7 +151,7 @@ begin
     ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = "Atlantic SST forcing"
+    res@gsnLeftString = "U,V,Preci response to south Atlantic 1degree Warming"
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
@@ -151,7 +167,8 @@ begin
     res@vcLineArrowHeadMaxSizeF=0.005
     res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
-
+   
+   res@pmLabelBarOrthogonalPosF= 0.1
     
     
     res@gsnRightString = ""
@@ -165,16 +182,16 @@ begin
    str3=unique_string("dum3")
    str4=unique_string("dum4")
    
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   ; ;;;画box
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 110
+   ; lon2 = 155
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-    plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
+   ; pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   ; pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ; ;;;
+   ;  plot@$str3$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
 
    
     ;;;打点

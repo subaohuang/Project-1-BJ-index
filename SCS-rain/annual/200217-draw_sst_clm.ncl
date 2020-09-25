@@ -51,6 +51,8 @@ begin
   res@tmYROn=False
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
+  res@gsnLeftString = "Climatology of SST in Atlantic"
+  res@gsnRightString = ""
 
   ; res@tmXBValues=(/30,90,150,210,270,330,387.5/)
   ; res@tmXBLabels=(/"30~S~o~N~E","90~S~o~N~E","150~S~o~N~E","150~S~o~N~W"\

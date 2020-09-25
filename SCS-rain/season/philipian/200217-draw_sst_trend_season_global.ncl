@@ -174,8 +174,8 @@ begin
 
 
 
-  res@tmXBLabelFontHeightF=0.01
-  res@tmYLLabelFontHeightF=0.01
+  res@tmXBLabelFontHeightF=0.015
+  res@tmYLLabelFontHeightF=0.015
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=2.0
@@ -194,6 +194,7 @@ begin
   
 
   res@gsnLeftString="MAM"
+  res@gsnLeftStringFontHeightF = 0.02
 
   ; res@mpShapeMode = "FreeAspect"
   ; res@vpHeightF = 0.2
@@ -314,12 +315,12 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@gsnMaximize = True
-; pres@lbOrientation = "Horizontal"
-pres@lbOrientation = "Vertical"
-pres@pmLabelBarHeightF = 0.15
-; pres@pmLabelBarWidthF = 0.5
-; pres@pmLabelBarHeightF = 0.1
-; pres@pmLabelBarOrthogonalPosF = 0.3
+pres@lbOrientation = "Horizontal"
+; pres@lbOrientation = "Vertical"
+; pres@pmLabelBarHeightF = 0.15
+pres@pmLabelBarWidthF = 0.45
+pres@pmLabelBarHeightF = 0.04
+pres@pmLabelBarOrthogonalPosF = -0.008
 
 gsn_panel(wks, plot, (/2,2/), pres)
 

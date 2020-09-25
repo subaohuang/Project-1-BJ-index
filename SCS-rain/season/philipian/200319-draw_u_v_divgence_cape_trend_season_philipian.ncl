@@ -137,6 +137,8 @@ begin
     wks1   = gsn_open_wks("pdf", "cape-trend-925hpa-scs")
     wks2   = gsn_open_wks("pdf", "olr-trend-scs")
 
+    add  = (/"(a)","(b)","(c)","(d)"/)
+
 
 do i = 0,3
    ;;;处理成年数据 
@@ -281,11 +283,11 @@ do i = 0,3
   res@tmXBOn=True
   res@tmYROn=False
 
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
-  res@tmBorderThicknessF=1.5
+  res@tmBorderThicknessF=1.0
   
   res@gsnScalarContour        = True
 
@@ -388,11 +390,14 @@ do i = 0,3
     res3@cnLevelSpacingF       = 5.0          ; set contour interval
     res3@cnFillPalette = "BlueWhiteOrangeRed"
     res3@cnLevelSelectionMode = "ExplicitLevels"
+
     ; gsn_define_colormap(wks2, "BlueWhiteOrangeRed")
     res3@cnLevels = (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
     res3@cnFillColors = (/2,5,30,40,-1,146,177,200,251/) 
     
-    res3@gsnLeftString  = season(i)+"-OLR trend"
+    res3@gsnLeftString  = add(i)+season(i)+" OLR trend"
+    res3@gsnLeftStringFontHeightF = 0.02
+    res3@lbLabelFontHeightF = 0.01
 
     plot2(i) = gsn_csm_contour_map(wks2,olr_rc,res3)
 
@@ -462,6 +467,7 @@ end do
   
     gsn_panel(wks, plot, (/2,2/), pres)
     gsn_panel(wks1, plot1, (/2,2/), pres)
+    pres@lbLabelFontHeightF = 0.01
     gsn_panel(wks2, plot2, (/2,2/), pres)
 
 

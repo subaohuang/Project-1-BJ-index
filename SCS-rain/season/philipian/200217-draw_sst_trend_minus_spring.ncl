@@ -6,16 +6,24 @@
 function  rc_test(ssta_rc1,ssta_rc2)
 begin
     df   = onedtond(ssta_rc1@nptxy, dimsizes(ssta_rc1)) - 2
-    df = 2
+    ; df = 37 -2
+ print(df)
+ exit()
+
     
     p = new(dimsizes(df), float)
-    p  = 0.975
+    p  = 0.975       ;;;1-0.05/2  ,如果选择0.01 0.995 2.72 ,9,975 2.03
+
     T = cdft_t(p, df)    ; T =  2.12
+print(T)
+exit()
 
      
     interv = onedtond(ssta_rc1@rstd, dimsizes(ssta_rc1))*T
     
     interv = where(interv.eq.-4.302655e+30, 0.0, interv)
+
+
    
     diff = new(dimsizes(ssta_rc1),float)
     diff = (/abs(ssta_rc2 - ssta_rc1)/)
@@ -29,6 +37,7 @@ begin
     prob =  where(diff.ge.interv, 0.02, 1.0)
     prob!0 = "lat"
     prob!1 = "lon"
+
     ; prob&lat@units = "degree_north"
     ; prob&lon@units = "degree_east"
     copy_VarCoords(ssta_rc1, prob)
@@ -81,9 +90,9 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ; ;;;;remove_enso_signal
-     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ; ;;;;
+     ;;;;remove_enso_signal
+         p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ;;;;
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
@@ -162,8 +171,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
  
-   res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlueDarkRed18"
+   ; res@cnFillPalette = "BlueWhiteOrangeRed"
+   res@cnFillPalette = "BlueDarkRed18"
    ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
@@ -317,7 +326,7 @@ begin
     res_pro@cnFillPattern = 17
     res_pro@cnFillDotSizeF = 0.001
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"

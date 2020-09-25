@@ -23,7 +23,7 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,convective—pre-indian-warming-foul-season")
@@ -130,11 +130,11 @@ do i = 0,3
     ; res@cnMaxLevelValF       =   1
     ; res@cnLevelSpacingF      =  0.2
     
-    res@tmXBLabelFontHeightF=0.01
-    res@tmYLLabelFontHeightF=0.01
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=2.0
+    res@tmBorderThicknessF=1.0
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -268,6 +268,7 @@ end do
   print("panel")
   pres = True
   pres@gsnPanelLabelBar = True
+  pres@lbLabelFontHeightF = 0.01
 
   gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")

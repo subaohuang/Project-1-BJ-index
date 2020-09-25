@@ -167,6 +167,7 @@ begin
    plot  = new(4,graphic)
    iplot = new(4,graphic)
    plot_tp = plot
+   add_a = (/"(a)","(b)","(c)","(d)"/)
 
    str = "" + ispan(1,4,1) + ""
     wks   = gsn_open_wks("pdf", "q_delta趋势以及箭头—四季-phipilian-curlwind")
@@ -250,6 +251,7 @@ do i = 0,3
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
   res@lbLabelStride=2
+
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
   ; res@mpMinLatF             = -5
@@ -273,8 +275,8 @@ do i = 0,3
   res@tmXBOn=True
   res@tmYROn=False
 
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
@@ -300,7 +302,8 @@ do i = 0,3
 
   res@vcRefMagnitudeF          = 1000.0
   ; res@vcMinMagnitudeF          =100.0
-  res@gsnLeftString = season(i)
+  res@gsnLeftString = add_a(i)+season(i) +" Integrated Moisture Flux Trend"
+  res@gsnLeftStringFontHeightF = 0.02
   plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res)
 
 
@@ -398,8 +401,9 @@ end do
  pres = True
  pres@gsnPanelLabelBar = True
  pres@lbOrientation = "vertical"
- pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
- pres@gsnPanelFigureStringsJust = "TopLeft"
+ pres@lbLabelFontHeightF = 0.01
+ ; pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
+ ; pres@gsnPanelFigureStringsJust = "TopLeft"
 
  gsn_panel(wks, plot, (/2,2/), pres)
  
