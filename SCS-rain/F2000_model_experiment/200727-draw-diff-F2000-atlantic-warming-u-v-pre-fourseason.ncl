@@ -23,8 +23,8 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-foul-season")
   
@@ -128,10 +128,10 @@ do i = 0,3
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -10.0
-    res@mpMaxLatF             = 30.0
+    res@mpMinLatF             = -40.0
+    res@mpMaxLatF             = 40.0
     ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 70.0
+    res@mpMinLonF             = 30.0
     res@mpMaxLonF             = 170.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
@@ -148,7 +148,7 @@ do i = 0,3
     res@vpHeightF = 0.3
     ;;
      ;;;LineArrow
-    ; res@gsnScalarContour        = True
+    res@gsnScalarContour        = True
     res@gsnLeftString = season(i)
 
     
@@ -169,9 +169,9 @@ do i = 0,3
     
     
     res@gsnRightString = ""
-    ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
 
-    plot(i) = gsn_csm_contour_map(wks,PRE_diff,res)
+    ; plot(i) = gsn_csm_contour_map(wks,PRE_diff,res)
 
 
      pgres=True
@@ -250,7 +250,7 @@ do i = 0,3
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.01,opt)
-    overlay(plot(i), iplot(i))
+    ; overlay(plot(i), iplot(i))
     print("finish subset figure")
 end do
   print("panel")

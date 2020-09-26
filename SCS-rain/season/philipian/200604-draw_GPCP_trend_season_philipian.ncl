@@ -87,7 +87,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
-  res@gsnLeftStringFontHeightF=20.0
+  
   res@cnFillPalette="NCV_blu_red"
   res@cnFillOn=True
   res@cnLinesOn=False
@@ -117,12 +117,19 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   res@tmYROn=False
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
-  res@tmXBLabelFontHeightF      = 0.02    ;font height of tick labels
-  res@tmYLLabelFontHeightF      = 0.02
+  res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
+  res@tmYLLabelFontHeightF      = 0.025
+  res@gsnLeftStringFontHeightF = 0.03
+  res@tmYLMinorOn = True
+  
+  res@tmXBValues = (/100,120,140,160/) 
+  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
-  res@tmXBMajorThicknessF=2.0
-  res@tmYLMajorThicknessF=2.0
-  res@tmBorderThicknessF=2.0
+
+
+  ; res@tmXBMajorThicknessF=2.0
+  ; res@tmYLMajorThicknessF=2.0
+  res@tmBorderThicknessF=1.0
 
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
@@ -141,15 +148,15 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   
  
 
-  res@gsnLeftString="(a)GPCP Pre Spring trend " 
+  res@gsnLeftString="(a) MAM Precip trend " 
 
   plot = new(4,graphic)
   plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
-  res@gsnLeftString="(b)GPCP Pre Summer trend " 
+  res@gsnLeftString="(b) JJA Precip trend " 
   plot(1) = gsn_csm_contour_map(wks, rc_jja, res)
-  res@gsnLeftString="(c)GPCP Pre Autumn trend " 
+  res@gsnLeftString="(c) SON Precip trend " 
   plot(2) = gsn_csm_contour_map(wks, rc_son, res)
-  res@gsnLeftString="(d)GPCP Pre Winter trend " 
+  res@gsnLeftString="(d) DJF Precip trend " 
   plot(3) = gsn_csm_contour_map(wks, rc_djf, res)
 
 
@@ -159,19 +166,19 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
  
   ;;;添加赤道直线
 
-   pgx=ispan(30,390,10)
-   pgy=new(dimsizes(pgx),typeof(pgx))
-   pgy=0
+   ; pgx=ispan(30,390,10)
+   ; pgy=new(dimsizes(pgx),typeof(pgx))
+   ; pgy=0
 
    pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=1.0
    pgres@gsLineDashPattern=1
    
-   str = ispan(1, 4, 1) + ""
-   do i =0,3 
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   end do 
+   ; str = ispan(1, 4, 1) + ""
+   ; do i =0,3 
+   ; plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+   ; end do 
 
 
 
@@ -242,7 +249,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@lbLabelStrings = res@cnLevels +""
-pres@lbLabelFontHeightF = 0.012
+pres@lbLabelFontHeightF = 0.01
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

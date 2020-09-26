@@ -27,6 +27,8 @@ begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_" +two+"/"+"F_2000_atl_1degree"+"_"+two+".cam.h1.0101-4012_OLR_heatflux.nc"
   
+
+
   wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-season-global")
   
   plot = new(2,graphic)

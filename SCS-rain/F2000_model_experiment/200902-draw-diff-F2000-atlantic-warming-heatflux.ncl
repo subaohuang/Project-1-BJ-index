@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-所有通量-alt-warming-foul-season-global")
+  wks=gsn_open_wks("pdf", "CESM-F2000-潜热通量-alt-warming-foul-season-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -48,8 +48,9 @@ do i = 0,3
   FLNS = f1->FLNS(timeind,:,:)
   FSNS = f1->FSNS(timeind,:,:)
 
-  PRE_CT = SHFLX
-  PRE_CT = (/FSNS - LHFLX - SHFLX - FLNS /)
+  PRE_CT = LHFLX
+  ; PRE_CT = (/FSNS - LHFLX - SHFLX - FLNS /)
+  ; PRE_CT = (/FSNS  - SHFLX - FLNS /)
  
 
   LHFLX_id =  f2->LHFLX(timeind,:,:)
@@ -58,8 +59,9 @@ do i = 0,3
   FSNS_id = f2->FSNS(timeind,:,:)
 
 
-  PRE_id =  SHFLX_id
-  PRE_id = (/ FSNS_id -  LHFLX_id - SHFLX_id - FLNS_id/)
+  PRE_id =  LHFLX_id
+  ; PRE_id = (/ FSNS_id -  LHFLX_id - SHFLX_id - FLNS_id/)
+  ; PRE_id = (/ FSNS_id  - SHFLX_id - FLNS_id/)
 
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
@@ -68,14 +70,14 @@ do i = 0,3
 
 
 
-  PRE_diff = PRE_indian_clm
+  PRE_diff = PRE_CT_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
-    if i.eq.0 
-    PRE_diff_mam = PRE_diff
-  end if
+  ;   if i.eq.0 
+  ;   PRE_diff_mam = PRE_diff
+  ; end if
   
-    PRE_diff = (/PRE_diff - PRE_diff_mam/)
+  ;   PRE_diff = (/PRE_diff - PRE_diff_mam/)
 
 
   ; ;;;;U,V
@@ -130,15 +132,15 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     ; res@cnFillPalette = "precip_diff_12lev"
-      res@cnFillPalette = "BlueWhiteOrangeRed"
+      ; res@cnFillPalette = "BlueWhiteOrangeRed"
       ; res@cnFillPalette = "matlab_jet"
       ; res@cnFillPalette = "BlueDarkRed18"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -20.0
-    res@cnMaxLevelValF       =   20.0
-    res@cnLevelSpacingF      =  5.0
+    res@cnMinLevelValF       =   -10.0
+    res@cnMaxLevelValF       =   10.0
+    res@cnLevelSpacingF      =  2.0
 
     res@tmXTOn=False
     res@tmYROn=False

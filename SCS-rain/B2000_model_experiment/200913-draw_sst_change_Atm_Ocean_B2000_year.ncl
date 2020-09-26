@@ -42,8 +42,8 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
-   lat1 = -30
-   lat2 = 30
+   lat1 = -90
+   lat2 = 90
    lon1 = 0
    lon2 = 360
 
@@ -57,7 +57,7 @@ begin
 
 ;;;;读入控制实验结果
     diri="/home/ys17-19/lsh/CESM-data/B/"+ modelname+"/"
-    fils1=systemfunc("ls "+diri+""+modelname+".TEMP.h0.0251-0280.nc")
+    fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h0.0251-0280.nc")
     f1=addfile(fils1, "r")
     date=cd_calendar(f1->time, 1)
 
@@ -71,8 +71,8 @@ begin
 
     sst_ct = sst(:,{lat1:lat2},{lon1:lon2})
     
-;;;read NCEP-NCAR heat flux data
-    fils3 = diri + modelname+".cam.h0.0251-0280_OLR_heatflux.nc"
+;;;read data heat flux datatondc(plot, x_in, y_in, x_out, y_out)
+    fils3 = diri + modelname+".cam.h1.0251-0280_OLR_heatflux.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -94,7 +94,7 @@ begin
      modelname = "B2000_alt_north_year"
     ;;;;
     diri="/home/ys17-19/lsh/CESM-data/B/"+ modelname+"/"
-    fils1=systemfunc("ls "+diri+""+modelname+".TEMP.h0.0251-0280.nc")
+    fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h0.0251-0280.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
@@ -108,7 +108,7 @@ begin
     sst_sen = sst(:,{lat1:lat2},{lon1:lon2})
     
 ;;;read NCEP-NCAR heat flux data
-    fils3 = diri+modelname+".cam.h0.0251-0280_OLR_heatflux.nc"
+    fils3 = diri+modelname+".cam.h1.0251-0280_OLR_heatflux.nc"
     f3 = addfile(fils3, "r")
 
     date:=cd_calendar(f3->time, 1)
@@ -199,9 +199,9 @@ print("*********开始画图********")
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
   res@mpFillDrawOrder = "PostDraw"
-  res@mpMinLatF             = -10
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             =70
+  res@mpMinLatF             = -40
+  res@mpMaxLatF             = 40
+  res@mpMinLonF             =30
   res@mpMaxLonF             = 170
    ; lat1 = 0
    ; lat2 = 15
@@ -235,8 +235,8 @@ print("*********开始画图********")
   res@gsnRightString = ""
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -1.0
-  res@cnMaxLevelValF       =   1.0
+  res@cnMinLevelValF       =   -0.6
+  res@cnMaxLevelValF       =   0.6
   res@cnLevelSpacingF      =  0.1
 
 

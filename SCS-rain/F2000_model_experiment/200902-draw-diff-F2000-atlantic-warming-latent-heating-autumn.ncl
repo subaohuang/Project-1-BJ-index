@@ -21,19 +21,24 @@ return prob_p
 end 
 
 begin
-season_r = (/"spring","summer","autumn","winter"/)
-season = (/"MAM","JJA","SON","DJF"/)
+
+  ; two = (/"north","south"/)
+
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
-  
-  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-global")
-  
-  plot = new(4,graphic)
-  iplot = new(4,graphic)
-  str3 = ispan(1,4,1) + ""
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_" +two+"/"+"F_2000_atl_1degree"+"_"+two+".cam.h1.0101-4012_OLR_heatflux.nc"
+  fils2 = new(2,string)
+  fils2(0) = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_spring_notest_wholeatl/F_2000_atl_spring_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils2(1) = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_autumn_notest_wholeatl/F_2000_atl_autumn_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
 
+  
+  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-season-global-autumn-test")
+  
+  plot = new(2,graphic)
+  iplot = new(2,graphic)
+  str3 = ispan(1,2,1) + ""
 
-do i = 0,3
+season = (/"MAM","SON"/)
+do i = 0,1
   ; f1=addfile(fils2(0), "r")
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
@@ -46,18 +51,17 @@ do i = 0,3
   PRECC_CT  =  f1->LHFLX(timeind,:,:)
 
   PRE_CT = PRECC_CT
- 
+  ; PRE_CT = (/-1*PRE_CT/)
 
   PRECC_id  =  f2->LHFLX(timeind,:,:)
 
 
   PRE_id = PRECC_id
 
+  ; PRE_id = (/-1*PRE_id/)
+
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
-
-  ; PRE_CT_clm = dim_avg_n_Wrap(PRE_CT, 0)
-  ; PRE_indian_clm =dim_avg_n_Wrap(PRE_id, 0)
 
   PRE_diff = PRE_indian_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
@@ -85,8 +89,7 @@ do i = 0,3
  
 
   ;;;t_test 
-    prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
-    ; prob_p = t_test(PRE_CT ,PRE_id)
+    
     ; prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
   
   ;;;
@@ -99,6 +102,7 @@ do i = 0,3
    ; else 
     ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
    ; end if
+   prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
 
     ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
@@ -113,27 +117,35 @@ do i = 0,3
 
 
     res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
+    res@lbLabelBarOn=True
     res@cnFillOn = True 
     res@cnLinesOn =False
-    res@cnLineColor = "White"
+  
     res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
+  res@gsnLeftStringFontHeightF  = 0.02
+   res@pmLabelBarOrthogonalPosF= 0.1
+
     ; res@cnFillPalette = "precip_diff_12lev"
-    res@cnFillPalette = "BlueWhiteOrangeRed"
-    ; res@cnFillPalette = "matlab_jet"
-    ; res@cnFillPalette = "BlRe"
+      res@cnFillPalette = "BlueWhiteOrangeRed"
+      ; res@cnFillPalette = "matlab_jet"
+      ; res@cnFillPalette = "BlRe"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    ; res@cnMinLevelValF       =   -10.0
-    ; res@cnMaxLevelValF       =   10.0
-    ; res@cnLevelSpacingF      =  2.0
-    res@cnMinLevelValF       =   -5.0
-    res@cnMaxLevelValF       =   5.0
-    res@cnLevelSpacingF      =  1.0
+    res@cnMinLevelValF       =   -10.0
+    res@cnMaxLevelValF       =   10.0
+    res@cnLevelSpacingF      =  2.0
+    ;    res@cnMinLevelValF       =   -4.0
+    ; res@cnMaxLevelValF       =   4.0
+    ; res@cnLevelSpacingF      =  1.0
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -144,10 +156,10 @@ do i = 0,3
     ; ; res@mpMinLonF             = 40.0
     ; res@mpMinLonF             = 70.0
     ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -40.0
-    res@mpMaxLatF             = 40.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 150.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
+    res@mpMinLonF             = 30.0
+    res@mpMaxLonF             = 155.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
@@ -161,7 +173,7 @@ do i = 0,3
      ;;;LineArrow
     res@gsnScalarContour        = True
   
-    res@gsnLeftString = season(i)
+    ; res@gsnLeftString = season(i)
 
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
@@ -177,8 +189,13 @@ do i = 0,3
     res@vcLineArrowHeadMaxSizeF=0.005
     res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
-
     
+    if i.eq.0 then
+    res@gsnLeftString = "Surface Latent Heating Flux response to north Atlantic 1degree Warming"
+    else
+    res@gsnLeftString = "Surface Latent Heating Flux response to south Atlantic 1degree Warming"
+     end if
+    res@gsnLeftStringFontHeightF = 0.015
     
     res@gsnRightString = ""
     ; plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
@@ -192,16 +209,16 @@ do i = 0,3
    pgres@gsLineDashPattern=0
  
    
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
+   ; ;;;画box
+   ; lat1 = 0
+   ; lat2 = 15
+   ; lon1 = 125
+   ; lon2 = 160
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-    plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   ; pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   ; pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ; ;;;
+   ;  plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
     ;;;打点
     res_pro=True
@@ -211,7 +228,7 @@ do i = 0,3
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.01/)
+    res_pro@cnLevels = (/0,0.1/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
 
@@ -231,14 +248,17 @@ do i = 0,3
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-    ; overlay(plot(i), iplot(i))
+    overlay(plot(i), iplot(i))
     print("finish subset figure")
 end do
   print("panel")
   pres = True
-  pres@gsnPanelLabelBar = True
+  ; pres@gsnPanelLabelBar = True
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  ; pres@pmLabelBarOrthogonalPosF= 0.1
+    
+
+  gsn_panel(wks, plot, (/2,1/), pres)
   print("done script")
 end
   

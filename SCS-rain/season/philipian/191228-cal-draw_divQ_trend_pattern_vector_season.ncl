@@ -275,11 +275,17 @@ do i = 0,3
   res@tmXBOn=True
   res@tmYROn=False
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
+  res@tmXBLabelFontHeightF=0.025
+  res@tmYLLabelFontHeightF=0.025
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
+
+  res@gsnLeftStringFontHeightF = 0.03
+  res@tmXBValues = (/100,120,140,160/) 
+  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+
 
   res@mpFillOn = False
   res@gsnScalarContour        = True
@@ -302,8 +308,8 @@ do i = 0,3
 
   res@vcRefMagnitudeF          = 1000.0
   ; res@vcMinMagnitudeF          =100.0
-  res@gsnLeftString = add_a(i)+season(i) +" Integrated Moisture Flux Trend"
-  res@gsnLeftStringFontHeightF = 0.02
+  res@gsnLeftString = add_a(i)+" "+season(i) +" Integrated Moisture Flux Trend"
+  
   plot(i)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res)
 
 
@@ -400,8 +406,8 @@ end do
 
  pres = True
  pres@gsnPanelLabelBar = True
- pres@lbOrientation = "vertical"
- pres@lbLabelFontHeightF = 0.01
+ ; pres@lbOrientation = "vertical"
+ pres@lbLabelFontHeightF = 0.02
  ; pres@gsnPanelFigureStrings = (/"a","b","c","d"/)
  ; pres@gsnPanelFigureStringsJust = "TopLeft"
 
