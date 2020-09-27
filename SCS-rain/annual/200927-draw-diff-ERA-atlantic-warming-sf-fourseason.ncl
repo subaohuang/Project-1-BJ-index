@@ -20,7 +20,7 @@ begin
 ;;==========================================================
     ;;;read data
     path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-    var_name = (/"uwnd","vwnd","slp"/)
+    var_name = (/"uwnd","vwnd"/)
     filein = path_wind + var_name +".mon.mean.nc"
         
     ; ;;;region 
@@ -56,21 +56,21 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
 
-    u = short2flt(f1->u(timeind,{500},{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     f2 = addfile(filein(1),"r")
-    v = short2flt(f2->v(timeind,{500},{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     
-    f3 = addfile(filein(2),"r")
-    ; f3 = addfile("/home/ys17-19/lsh/data/Hadley-slp/slp.mnmean.real.nc","r")
+    ; f3 = addfile(filein(2),"r")
+    f3 = addfile("/home/ys17-19/lsh/Project/SCS-rain/annual/era_interium_sf_vp.nc","r")
     date :=cd_calendar(f3->time, 1)
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    slp = short2flt(f3->msl(timeind,{lat1:lat2},{lon1:lon2}))      
+    slp = f3->sf(timeind,{850},{lat1:lat2},{lon1:lon2})      
     ; slp = short2flt(f3->slp(timeind,{lat1:lat2},{lon1:lon2}))        
     printVarSummary(slp)
    
-    ; slp = (/slp*100/)
+    slp = (/slp/10^6/)
   
 ;;;choose season
    se = (/"(a)","(b)","(c)","(d)"/)
@@ -88,7 +88,7 @@ begin
 
 
     str = "" + ispan(1,4,1) + ""
-    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-16-500")
+    wks = gsn_open_wks("pdf", "u,v,sf趋势-scs-16-500")
 
 
 
@@ -152,9 +152,9 @@ do i = 0,3
   res@gsnContourPosLineDashPattern = 0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -60.0
-  res@cnMaxLevelValF       =   60.0
-  res@cnLevelSpacingF      =  10.0
+  res@cnMinLevelValF       =   -3.6
+  res@cnMaxLevelValF       =   3.6
+  res@cnLevelSpacingF      =  0.4
 
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False

@@ -13,7 +13,7 @@ begin
  
   plot1 = new(4,graphic)
   plot2 = new(4,graphic)
-  wks = gsn_open_wks("eps","Q1,非绝热加热,深对流加热的profile-lindata-era-2016-philipian-season")                  ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2015-philipian-season")                  ; send graphics to PNG file
 
 
 
@@ -49,7 +49,7 @@ do i=0,3
   f3 = addfile(fils, "r")
   date = cd_calendar(f3->time, 1)
 
-  timeind = ind(date.le.201612.and.date.ge.197901)
+  timeind = ind(date.le.201512.and.date.ge.197901)
 
   q1 = f3->Q_time(timeind,:,:,:)
 

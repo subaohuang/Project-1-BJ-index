@@ -20,7 +20,7 @@ begin
 ;;==========================================================
     ;;;read data
     path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-    var_name = (/"uwnd","vwnd","slp"/)
+    var_name = (/"uwnd","vwnd","wwnd"/)
     filein = path_wind + var_name +".mon.mean.nc"
         
     ; ;;;region 
@@ -39,7 +39,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201612
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -56,20 +56,22 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.startmon.and.date.le.endmon)
 
-    u = short2flt(f1->u(timeind,{500},{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     f2 = addfile(filein(1),"r")
-    v = short2flt(f2->v(timeind,{500},{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     
     f3 = addfile(filein(2),"r")
     ; f3 = addfile("/home/ys17-19/lsh/data/Hadley-slp/slp.mnmean.real.nc","r")
     date :=cd_calendar(f3->time, 1)
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    slp = short2flt(f3->msl(timeind,{lat1:lat2},{lon1:lon2}))      
-    ; slp = short2flt(f3->slp(timeind,{lat1:lat2},{lon1:lon2}))        
+    slp = short2flt(f3->w(timeind,{500},{lat1:lat2},{lon1:lon2}))      
+    ; slp = short2flt(f3->slp(timeind,{lat1:lat2},{lon1:lon2}))   
+    slp = (/slp*-1/)     
     printVarSummary(slp)
-   
+
+
     ; slp = (/slp*100/)
   
 ;;;choose season
@@ -88,7 +90,7 @@ begin
 
 
     str = "" + ispan(1,4,1) + ""
-    wks = gsn_open_wks("pdf", "u,v,slp趋势-scs-16-500")
+    wks = gsn_open_wks("pdf", "u,v,omega趋势-scs-16")
 
 
 
@@ -113,7 +115,8 @@ do i = 0,3
    u_rc = (/u_rc*yearnum/)
    v_rc = (/v_rc*yearnum/)
   
-
+   slp_rc = (/slp_rc/) *100  
+   
 
    ;;;显著性检验
     
@@ -142,19 +145,21 @@ do i = 0,3
   
  
   ; res@cnFillPalette = "BlueWhiteOrangeRed"
-  res@cnFillPalette = "BlueRed"
+  ; res@cnFillPalette = "BlueRed"
 
   res@cnFillOn=True
-  res@cnLinesOn= True
+  res@cnLinesOn= False
   
   res@cnLineThicknessF = 2.0
   res@gsnContourNegLineDashPattern = 14
   res@gsnContourPosLineDashPattern = 0
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -60.0
-  res@cnMaxLevelValF       =   60.0
-  res@cnLevelSpacingF      =  10.0
+  res@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
+  gsn_define_colormap(wks, "MPL_PuOr")
+
+  res@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
+  res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
+
 
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
@@ -174,6 +179,8 @@ do i = 0,3
    ; lat2 = 45
    ; lon1 = 90
    ; lon2 = 160
+
+
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -218,13 +225,17 @@ do i = 0,3
   res@mpFillColor = "White"
   res@mpFillDrawOrder = "PostDraw"
 
+
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
 
-  res@gsnLeftString  = se(i)+" " + season(i)+" U,V at 850hPa and SLP trend"
+  res@gsnLeftString  = se(i)+" " + season(i)+" U,V at 850hPa trend"
+  res@gsnLeftStringFontHeightF = 0.02
   res@gsnLeftStringOrthogonalPosF = -.15
-  plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
+  ; plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
+  plot(i) = gsn_csm_vector_map(wks,u_rc,v_rc,res)
+
 
 
 
@@ -248,7 +259,8 @@ do i = 0,3
   resv@vcVectorDrawOrder="PostDraw"
 
   resv@vcMonoLineArrowColor = True
-  resv@vcLineArrowColor = "green"
+  ; resv@vcLineArrowColor = "green"
+  resv@vcLineArrowColor = "blue"
   resv@vcLineArrowThicknessF=1.5
 
   resv@vcRefAnnoOn    = False
@@ -317,15 +329,13 @@ do i = 0,3
 end do 
     pres = True
     pres@gsnMaximize = True
-    pres@gsnPanelLabelBar  = True
+    pres@gsnPanelLabelBar  = False
     pres@lbLabelStride = 2
     pres@lbLabelFontHeightF = 0.015
   
     ; pres@lbOrientation = "Vertical"
   
     gsn_panel(wks, plot, (/2,2/), pres)
-
-
 
 end
     

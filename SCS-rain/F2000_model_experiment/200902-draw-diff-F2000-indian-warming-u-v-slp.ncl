@@ -154,12 +154,12 @@ do i = 0,3
     res@gsnScalarContour        = True
   
     res@gsnLeftString = season(i)+ " :SEN - CTRL"
-    res@tmXBLabelFontHeightF=0.02
-    res@tmYLLabelFontHeightF=0.02
+    res@tmXBLabelFontHeightF=0.025
+    res@tmYLLabelFontHeightF=0.025
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
-     res@gsnLeftStringFontHeightF  = 0.02
+    res@gsnLeftStringFontHeightF  = 0.03
 
     
     ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
@@ -234,8 +234,9 @@ do i = 0,3
 end do
   print("panel")
   pres = True
+  pres@gsnMaximize = True
   pres@gsnPanelLabelBar = True
-  pres@lbLabelFontHeightF = 0.01
+  pres@lbLabelFontHeightF = 0.015
 
   gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")

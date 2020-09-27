@@ -323,11 +323,11 @@ print("*******开始计算相关系数*****************")
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
 
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
+  res@tmXBLabelFontHeightF=0.025
+  res@tmYLLabelFontHeightF=0.025
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -1.0
@@ -337,9 +337,10 @@ print("*******开始计算相关系数*****************")
   res@cnMaxLevelValF       =   0.5
   res@cnLevelSpacingF      =  0.05
 
-
+  
+  res@gsnLeftStringFontHeightF = 0.025
  
-  res@gsnLeftString = season(i)+"_SST&GPCP"
+  res@gsnLeftString = season(i)+" Precip associated with Indian SST"
   plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)
   res@gsnLeftString = season(i)+"_DSST&GPCP"
   plot1(i) = gsn_csm_contour_map(wks1, r_dsst_p, res)
@@ -355,8 +356,8 @@ print("*******开始计算相关系数*****************")
     pgres@gsLineDashPattern=1
   
 
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   plot1@$str(i)$ = gsn_add_polyline(wks1, plot1(i), pgx, pgy, pgres)
+   ; plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+   ; plot1@$str(i)$ = gsn_add_polyline(wks1, plot1(i), pgx, pgy, pgres)
 
 
 
@@ -406,7 +407,7 @@ print("*******开始计算相关系数*****************")
 
     opt                      = True
     opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
+    opt@gsnShadeMid     = 17        ; stipple
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
@@ -427,6 +428,7 @@ end do
 
   pres = True
   pres@gsnPanelLabelBar  = True
+  pres@lbLabelFontHeightF = 0.015
 
   gsn_panel(wks, plot, (/2,2/), pres)
   gsn_panel(wks1, plot1, (/2,2/), pres)

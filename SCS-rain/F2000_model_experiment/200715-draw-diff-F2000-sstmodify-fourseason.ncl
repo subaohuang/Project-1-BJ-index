@@ -14,6 +14,8 @@ season = (/"MAM","JJA","SON","DJF"/)
   str3 = ispan(1,4,1) + ""
    wks=gsn_open_wks("pdf", "diff-cesmsstdata2modify-add-fourseason")
 
+  se = (/"(a)","(b)","(c)","(d)"/)
+
 do i = 0,3
 
     f1 = addfile(fils1, "r")
@@ -53,34 +55,34 @@ do i = 0,3
     res@cnMaxLevelValF       =   0.6
     res@cnLevelSpacingF      =  0.1
 
-    res@tmXBLabelFontHeightF=0.01
-    res@tmYLLabelFontHeightF=0.01
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=2.0
+    res@tmBorderThicknessF=1.0
 
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -60.0
-    res@mpMaxLatF             = 60.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
-    res@mpCenterLonF          = 180.0
+    res@mpMinLatF             = -40.0
+    res@mpMaxLatF             = 40.0
+    res@mpMinLonF             = 30.0
+    res@mpMaxLonF             = 170.0
+    ; res@mpCenterLonF          = 180.0
 
-    res@gsnLeftString  = season(i)
+    res@gsnLeftString  = se(i) + " "+season(i)+ " SST warming add to Cam4 model"
   
     plot(i) =gsn_csm_contour_map(wks, sst_cpl_diff_re, res)
 end do
     pres = True
     pres@gsnPanelLabelBar = True
     pres@gsnMaximize = True
-    pres@lbOrientation = "Vertical"
-   ; ; pres@pmLabelBarHeightF = 0.15
+    ; pres@lbOrientation = "Vertical"
+   pres@pmLabelBarHeightF = 0.15
    ;  pres@pmLabelBarWidthF = 0.5
-   ;  pres@pmLabelBarHeightF = 0.1
+    pres@pmLabelBarHeightF = 0.1
     gsn_panel(wks, plot, (/2,2/), pres)
 
 end 

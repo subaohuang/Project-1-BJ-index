@@ -154,15 +154,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
-
-  ; res@mpMinLatF             = -5
+  ; res@mpMinLatF             = -30
   ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             = 100
-  ; res@mpMaxLonF             = 170
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
+
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 100
+  res@mpMaxLonF             = 170
 
 
 
@@ -177,11 +177,16 @@ begin
 
 
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
-  res@tmBorderThicknessF=2.0
+    res@tmXBLabelFontHeightF=0.025
+    res@tmYLLabelFontHeightF=0.025
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+  res@gsnLeftStringFontHeightF = 0.03
+
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   0.0
@@ -196,7 +201,8 @@ begin
   res@cnInfoLabelOn = False
   
 
-  res@gsnLeftString="Spring"
+  res@gsnLeftString="(a) MAM SST trend"
+
 
   ; res@mpShapeMode = "FreeAspect"
   ; res@vpHeightF = 0.2
@@ -205,11 +211,11 @@ begin
   plot=new(4,graphic)
 
   plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
-    res@gsnLeftString="Summer"
+  res@gsnLeftString="(b) JJA SST trend"
   plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
-    res@gsnLeftString="Autumn"
+  res@gsnLeftString="(c) SON SST trend"
   plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
-    res@gsnLeftString="Winter"
+  res@gsnLeftString="(d) DJF SST trend"
   plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
 
   ; res2 = res
@@ -250,9 +256,9 @@ begin
 
   str = ispan(1, 4, 1) + ""
     plot_add = new(4,graphic)
-  do i = 0,3
-  plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   end do 
+  ; do i = 0,3
+  ; plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+  ;  end do 
   ;;;添加indo-pacific warm pool
     ; ;;添加区域
    ;;warm pool
@@ -317,8 +323,11 @@ begin
 pres = True
 pres@gsnPanelLabelBar  = True
 pres@gsnMaximize = True
-pres@lbOrientation = "Vertical"
-pres@pmLabelBarHeightF = 0.3
+; pres@lbOrientation = "Vertical"
+pres@lbOrientation = "Horizontal"
+; pres@pmLabelBarHeightF = 0.3
+pres@lbLabelFontHeightF = 0.02
+; pres@lbLabelStride = 2
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

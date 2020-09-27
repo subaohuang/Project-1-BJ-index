@@ -270,6 +270,10 @@ do i = 0,3
   res@mpMaxLatF             = 30
   res@mpMinLonF             = 100
   res@mpMaxLonF             = 170
+
+  res@tmXBValues = (/100,120,140,160/) 
+  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
   ;  ;   lat1 = -5
    ; lat2 = 45
    ; lon1 = 90
@@ -283,8 +287,8 @@ do i = 0,3
   res@tmXBOn=True
   res@tmYROn=False
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
+  res@tmXBLabelFontHeightF=0.025
+  res@tmYLLabelFontHeightF=0.025
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
@@ -395,8 +399,8 @@ do i = 0,3
     res3@cnLevels = (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
     res3@cnFillColors = (/2,5,30,40,-1,146,177,200,251/) 
     
-    res3@gsnLeftString  = add(i)+season(i)+" OLR trend"
-    res3@gsnLeftStringFontHeightF = 0.02
+    res3@gsnLeftString  = add(i)+" "+season(i)+" OLR trend"
+    res3@gsnLeftStringFontHeightF = 0.03
     res3@lbLabelFontHeightF = 0.01
 
     plot2(i) = gsn_csm_contour_map(wks2,olr_rc,res3)
@@ -463,11 +467,11 @@ do i = 0,3
 end do 
     pres = True
     pres@gsnPanelLabelBar  = True
-    pres@lbOrientation = "Vertical"
+    ; pres@lbOrientation = "Vertical"
   
     gsn_panel(wks, plot, (/2,2/), pres)
     gsn_panel(wks1, plot1, (/2,2/), pres)
-    pres@lbLabelFontHeightF = 0.01
+    pres@lbLabelFontHeightF = 0.015
     gsn_panel(wks2, plot2, (/2,2/), pres)
 
 

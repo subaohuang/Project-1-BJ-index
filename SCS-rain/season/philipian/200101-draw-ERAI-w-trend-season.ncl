@@ -147,7 +147,7 @@ begin
     res@gsnFrame=False
     res@gsnDraw=False
     res@gsnAddCyclic = False
-    res@gsnLeftStringFontHeightF=20.0
+   
     ; res@cnFillPalette="BlueWhiteOrangeRed"
     ; res@cnFillPalette="BlueRed"
     ; res@cnFillPalette = "MPL_PuOr"
@@ -184,11 +184,14 @@ begin
     res@tmYLMode="Explicit"
 
 
-    res@tmXBLabelFontHeightF=0.02
-    res@tmYLLabelFontHeightF=0.02
+    res@tmXBLabelFontHeightF=0.025
+    res@tmYLLabelFontHeightF=0.025
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
 
     ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
     ; res@cnMinLevelValF       =   -0.02
@@ -202,7 +205,8 @@ begin
     res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
 
 
-    res@gsnLeftString = se(i) + MONTH(i) + " W at 500 hPa "
+    res@gsnLeftString = se(i) + " "+MONTH(i) + " W at 500 hPa "
+    res@gsnLeftStringFontHeightF = 0.03
     plot(i) = gsn_csm_contour_map(wks2, wgt_w_rc, res)
 
 
@@ -263,10 +267,10 @@ end do
  pres = True
  pres@gsnPanelLabelBar = True
  ; pres@lbOrientation = "Vertical"
- pres@lbLabelFontHeightF = 0.01
+ pres@lbLabelFontHeightF = 0.015
 
- pres@lbOrientation = "Vertical"
-pres@pmLabelBarHeightF = 0.3
+;  pres@lbOrientation = "Vertical"
+; pres@pmLabelBarHeightF = 0.3
  gsn_panel(wks2, plot, (/2,2/), pres)
 
     
