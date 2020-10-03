@@ -25,7 +25,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.199812.and.date.ge.197901)
+    timeind:=ind(date.le.201012.and.date.ge.199901)
 
     sst=lonFlip(f1->sst(timeind,:,:))
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -56,7 +56,7 @@ begin
     ; print(ssta_rc)
     
     
-    wks   = gsn_open_wks("pdf", "年平均SST趋势-global-1979-1998")
+    wks   = gsn_open_wks("pdf", "年平均SST趋势-global-1999-2010")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -132,7 +132,7 @@ begin
 
   ; res@gsnLeftString="HadISST sst trend"
   ; res@gsnLeftString="SST trend (remove regional average)"
-  res@gsnLeftString="SST trend 1999-2016"
+  res@gsnLeftString="SST trend 1990-2016"
   plot = gsn_csm_contour_map(wks, ssta_rc, res)
 
   res2 = res
