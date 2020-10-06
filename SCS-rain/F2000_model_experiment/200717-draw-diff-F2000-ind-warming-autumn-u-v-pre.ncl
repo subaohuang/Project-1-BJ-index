@@ -22,11 +22,11 @@ end
 
 begin
 
-  season  = "MAM"
+  season  = "SON"
 
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindianwarming/F_2000_indian.cam.h0.0101-4012_chazhi.nc"  
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_ind_spring_notest_addson/F_2000_ind_spring_notest_addson.cam.h1.0101-4012_chazhi.nc"  
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_ind_autumn_notest_addmam/F_2000_ind_autumn_notest_addmam.cam.h1.0101-4012_chazhi.nc"  
 
 
   f1=addfile(fils1, "r")
@@ -89,7 +89,7 @@ begin
     ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 
 
-   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian-"+season+"add_sonwarming")
+   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_pattern-indian-"+season+"add_mamwarming")
 
     res=True
     res@gsnDraw=False

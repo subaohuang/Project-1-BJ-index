@@ -29,7 +29,7 @@ begin
   
 
 
-  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-season-global")
+  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-1degree-latent-heating")
   
   plot = new(2,graphic)
   iplot = new(2,graphic)
@@ -58,8 +58,12 @@ do i = 0,1
 
   PRE_id = (/-1*PRE_id/)
 
-  PRE_CT_clm = dim_avg_n_Wrap(PRE_CT,  0)
-  PRE_indian_clm =dim_avg_n_Wrap(PRE_id, 0)
+  ; PRE_CT_clm = dim_avg_n_Wrap(PRE_CT,  0)
+  ; PRE_indian_clm =dim_avg_n_Wrap(PRE_id, 0)
+
+
+  PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT,"MAM"),0)
+  PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id,"MAM"),0)
 
   PRE_diff = PRE_indian_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
@@ -72,7 +76,7 @@ do i = 0,1
 
 
   ; ;;;;U,V
-  ; u_CT  =  f1->U(timeind,{850},:,:)
+  ; u_CT  =  f1->USStates(timeind,{850},:,:)
 
   ; u_id  =  f2->U(timeind,{850},:,:)
 

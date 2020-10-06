@@ -17,9 +17,9 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_ind_spring_notest_addson/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_ind_autumn_notest_addmam/
 STEP=3
-modelname=F_2000_ind_spring_notest_addson
+modelname=F_2000_ind_autumn_notest_addmam
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 
