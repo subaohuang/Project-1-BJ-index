@@ -17,19 +17,20 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/
+# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth/
 # PRE_DIR_ORG=/home/yangsong3/data-model/lsh/CESM/B/B2000_alt_north_year_WNPCLM_nudge2NTACLM_2buffer/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=B2000_alt_north_year
+modelname=B2000_alt_north_spring_fixmonth
 
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 # variable=U,V
 
 
 #step1 : merge the cesm data into a whole data by using cdo
-  ## the prefix of data is usually CESM compet name ,alarm for time select
+  # the prefix of data is usually CESM compet name ,alarm for time select
 
   if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc ] ; then
     echo "don't exit merge file, procecing..."
@@ -89,6 +90,14 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 #      ./191209-mass_streamfunciton_cesm-F2000.ncl
 #    echo "finish CESM mass_stream function"
 #   fi
+
+
+  # if  [ ! -e  ${PRE_DIR_ORG}${modelname}.mld.h0.0251-0280.nc ] ; then
+  #   echo "don't exit merge file, procecing..."
+  #   cd $PRE_DIR_ORG
+  #   rm ${PRE_DIR_ORG}${modelname}.mld.h0.0251-0280.nc
+  #   cdo select,name=HMXL  ${modelname}.pop.h.*  ${modelname}.mld.h0.0251-0280.nc
+  # fi
   
    echo "finish this script"
 #-----------------------------------------------------------
