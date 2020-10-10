@@ -24,7 +24,7 @@ begin
 ; season = "MAM"
 
     fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"  
-    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth/B2000_alt_north_spring_fixmonth.cam.h1.0251-0280_chazhi.nc"
+    fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_winter_fixmonth/B2000_alt_north_winter_fixmonth.cam.h1.0251-0280_chazhi.nc"
 
   
     f1=addfile(fils1, "r")
@@ -67,7 +67,7 @@ begin
 
 
   season = (/"MAM","JJA","SON","DJF"/)
-  wks=gsn_open_wks("pdf", "diff-slp,u,v-restore-altantic-spring-season.pdf")
+  wks=gsn_open_wks("pdf", "diff-slp,u,v-restore-altantic-winter-season.pdf")
 
   plot = new(4,graphic)
   str3 = ispan(1, 4, 1) +""
