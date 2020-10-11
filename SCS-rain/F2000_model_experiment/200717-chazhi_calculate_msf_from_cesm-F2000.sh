@@ -17,13 +17,13 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_ind_autumn_notest_addmam/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_spring_notest/
 STEP=3
-modelname=F_2000_ind_autumn_notest_addmam
+modelname=F_2000_atl_spring_notest
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q
 
 
-step1 : merge the cesm data into a whole data by using cdo
+#step1 : merge the cesm data into a whole data by using cdo
   ## the prefix of data is usually CESM compet name ,alarm for time select
 
   if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc ] ; then
@@ -33,16 +33,16 @@ step1 : merge the cesm data into a whole data by using cdo
     cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012.nc
   fi
 
-# step2 : interpolate the data from hybird level to pressure level
-  if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
-    echo "don't exit chazhi file, procecing..."
-    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
-    pwd
-    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc\" \
-         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_chazhi.nc\" \
-       /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
-    echo "finish CESM chazhi"
-  fi 
+# # step2 : interpolate the data from hybird level to pressure level
+#   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+#     echo "don't exit chazhi file, procecing..."
+#     cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+#     pwd
+#     ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc\" \
+#          outpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_chazhi.nc\" \
+#        /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
+#     echo "finish CESM chazhi"
+#   fi 
 # # step3 calculate mass stream function
 
 #   if  [ ! -e /home/ys17-19/lsh/data/wc-result/msf_${modelname}_0101-4012.nc ] ; then
