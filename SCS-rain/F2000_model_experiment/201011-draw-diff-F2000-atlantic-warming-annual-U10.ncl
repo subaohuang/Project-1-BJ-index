@@ -23,21 +23,19 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
-  
-  wks=gsn_open_wks("pdf", "CESM-F2000-10m风速-alt-warming-foul-season-global")
+fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_annual_notest_wholeatl/F_2000_atl_annual_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
+
+  wks=gsn_open_wks("pdf", "CESM-F2000-10m风速-alt-warming-annual-foul-season-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
 
-
-do i = 0,3
-  ; f1=addfile(fils2(0), "r")
+ ; f1=addfile(fils2(0), "r")
   f1=addfile(fils1, "r")
-  f2=addfile(fils2(i), "r")
-  print("读入file"+fils2(i))
+  f2=addfile(fils2, "r")
+
 
   date=cd_calendar(f1->time, 1)
   timeind=ind(date.ge.601.and.date.le.4012)
@@ -52,6 +50,8 @@ do i = 0,3
 
 
   PRE_id = PRECC_id
+do i = 0,3
+ 
 
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
@@ -117,13 +117,15 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-     res@cnFillPalette = "MPL_RdBu"
+    ; res@cnFillPalette = "precip_diff_12lev"
+      ; res@cnFillPalette = "BlueWhiteOrangeRed"
+      res@cnFillPalette = "MPL_RdBu"
       ; res@cnFillPalette = "BlRe"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -0.6
-    res@cnMaxLevelValF       =   0.6
+    res@cnMinLevelValF       =   -0.8
+    res@cnMaxLevelValF       =   0.8
     res@cnLevelSpacingF      =  0.2
     ;    res@cnMinLevelValF       =   -4.0
     ; res@cnMaxLevelValF       =   4.0

@@ -27,11 +27,11 @@ begin
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_1degree_" +two+"/"+"F_2000_atl_1degree"+"_"+two+".cam.h1.0101-4012_OLR_heatflux.nc"
   fils2 = new(2,string)
-  fils2(0) = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_spring_notest_wholeatl/F_2000_atl_spring_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils2(0) = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_spring_notest_wholeatl_new/F_2000_atl_spring_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
   fils2(1) = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_autumn_notest_wholeatl/F_2000_atl_autumn_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc"
 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-season-global-autumn-test")
+  wks=gsn_open_wks("pdf", "201012-CESM-F2000-潜热-alt-warming-spring&autumn")
   
   plot = new(2,graphic)
   iplot = new(2,graphic)
@@ -125,24 +125,25 @@ do i = 0,1
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
-  res@tmBorderThicknessF=1.0
-  res@gsnLeftStringFontHeightF  = 0.02
-   res@pmLabelBarOrthogonalPosF= 0.1
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
+    res@gsnLeftStringFontHeightF  = 0.02
+    res@pmLabelBarOrthogonalPosF= 0.1
 
-    ; res@cnFillPalette = "precip_diff_12lev"
-      res@cnFillPalette = "BlueWhiteOrangeRed"
-      ; res@cnFillPalette = "matlab_jet"
-      ; res@cnFillPalette = "BlRe"
+     ; res@cnFillPalette = "precip_diff_12lev"
+    gsn_define_colormap(wks,"MPL_RdBu")
+    ; res@cnFillPalette = "matlab_jet"
+    ; res@cnFillPalette = "BlRe"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
     res@cnMinLevelValF       =   -10.0
     res@cnMaxLevelValF       =   10.0
     res@cnLevelSpacingF      =  2.0
+
     ;    res@cnMinLevelValF       =   -4.0
     ; res@cnMaxLevelValF       =   4.0
     ; res@cnLevelSpacingF      =  1.0
@@ -150,16 +151,13 @@ do i = 0,1
     res@tmXTOn=False
     res@tmYROn=False
 
+
     res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 30.0
-    ; ; res@mpMinLonF             = 40.0
-    ; res@mpMinLonF             = 70.0
-    ; res@mpMaxLonF             = 170.0
     res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 40.0
     res@mpMinLonF             = 30.0
-    res@mpMaxLonF             = 155.0
+    res@mpMaxLonF             = 110.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
@@ -242,13 +240,24 @@ do i = 0,1
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-   
+
     res_pro@gsnCenterString = ""
     ; res_pro@cnLineLabelBackgroundColor="Transparent"
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-    overlay(plot(i), iplot(i))
+    ; overlay(plot(i), iplot(i))
+
+    plot2 = plot(i)
+    getvalues plot2@contour
+    "cnFillColors": cnFillColors
+    end getvalues
+    print(cnFillColors)
+    dim = dimsizes(cnFillColors)
+    ;;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
+    NhlSetColor(wks, cnFillColors(dim/2-1),1, 1, 1)
+    NhlSetColor(wks, cnFillColors(dim/2),1, 1, 1)
+   
     print("finish subset figure")
 end do
   print("panel")

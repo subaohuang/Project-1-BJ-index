@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-风速和潜热-alt-warming-foul-global")
+  wks=gsn_open_wks("pdf", "CESM-F2000-潜热-alt-warming-foul-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -122,32 +122,26 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     ; res@cnFillPalette = "precip_diff_12lev"
-    res@cnFillPalette = "BlueWhiteOrangeRed"
+    gsn_define_colormap(wks,"MPL_RdBu")
     ; res@cnFillPalette = "matlab_jet"
     ; res@cnFillPalette = "BlRe"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    ; res@cnMinLevelValF       =   -10.0
-    ; res@cnMaxLevelValF       =   10.0
-    ; res@cnLevelSpacingF      =  2.0
-    res@cnMinLevelValF       =   -5.0
-    res@cnMaxLevelValF       =   5.0
-    res@cnLevelSpacingF      =  1.0
+    res@cnMinLevelValF       =   -10.0
+    res@cnMaxLevelValF       =   10.0
+    res@cnLevelSpacingF      =  2.0
 
     res@tmXTOn=False
     res@tmYROn=False
 
+
     res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -10.0
-    ; res@mpMaxLatF             = 30.0
-    ; ; res@mpMinLonF             = 40.0
-    ; res@mpMinLonF             = 70.0
-    ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -40.0
-    res@mpMaxLatF             = 40.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 150.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 40.0
+    res@mpMinLonF             = 30.0
+    res@mpMaxLonF             = 110.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
@@ -231,8 +225,18 @@ do i = 0,3
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-    ; overlay(plot(i), iplot(i))
+    overlay(plot(i), iplot(i))
     print("finish subset figure")
+     plot2 = plot(i)
+    getvalues plot2@contour
+    "cnFillColors": cnFillColors
+    end getvalues
+    print(cnFillColors)
+    dim = dimsizes(cnFillColors)
+    ;;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
+    NhlSetColor(wks, cnFillColors(dim/2-1),1, 1, 1)
+    NhlSetColor(wks, cnFillColors(dim/2),1, 1, 1)
+   
 end do
   print("panel")
   pres = True

@@ -24,37 +24,40 @@ begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_annual_notest_wholeatl/F_2000_atl_annual_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-10m风速-alt-warming-foul-season-global")
+  wks=gsn_open_wks("pdf", "201011-CESM-F2000-潜热-alt-warming-annual-foul-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
 
-
-do i = 0,3
-  ; f1=addfile(fils2(0), "r")
   f1=addfile(fils1, "r")
-  f2=addfile(fils2(i), "r")
-  print("读入file"+fils2(i))
+  f2=addfile(fils2, "r")
+
 
   date=cd_calendar(f1->time, 1)
   timeind=ind(date.ge.601.and.date.le.4012)
 
 
-  PRECC_CT  =  f1->U10(timeind,:,:)
+  PRECC_CT  =  f1->LHFLX(timeind,:,:)
 
   PRE_CT = PRECC_CT
  
 
-  PRECC_id  =  f2->U10(timeind,:,:)
+  PRECC_id  =  f2->LHFLX(timeind,:,:)
 
 
   PRE_id = PRECC_id
 
+do i = 0,3
+  ; f1=addfile(fils2(0), "r")
+
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
+
+  ; PRE_CT_clm = dim_avg_n_Wrap(PRE_CT, 0)
+  ; PRE_indian_clm =dim_avg_n_Wrap(PRE_id, 0)
 
   PRE_diff = PRE_indian_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
@@ -83,6 +86,7 @@ do i = 0,3
 
   ;;;t_test 
     prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
+    ; prob_p = t_test(PRE_CT ,PRE_id)
     ; prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
   
   ;;;
@@ -117,16 +121,22 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-     res@cnFillPalette = "MPL_RdBu"
-      ; res@cnFillPalette = "BlRe"
+    ; res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "MPL_RdBu"
+    gsn_define_colormap(wks,"MPL_RdBu")
+    ; res@cnFillPalette = "matlab_jet"
+    ; res@cnFillPalette = "BlRe"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -0.6
-    res@cnMaxLevelValF       =   0.6
-    res@cnLevelSpacingF      =  0.2
-    ;    res@cnMinLevelValF       =   -4.0
-    ; res@cnMaxLevelValF       =   4.0
+    res@cnMinLevelValF       =   -16.0
+    res@cnMaxLevelValF       =   16.0
+    res@cnLevelSpacingF      =  2.0
+
+
+    
+    ; res@cnMinLevelValF       =   -5.0
+    ; res@cnMaxLevelValF       =   5.0
     ; res@cnLevelSpacingF      =  1.0
 
     res@tmXTOn=False
@@ -138,10 +148,10 @@ do i = 0,3
     ; ; res@mpMinLonF             = 40.0
     ; res@mpMinLonF             = 70.0
     ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -40.0
-    res@mpMaxLatF             = 40.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 150.0
+    res@mpMinLatF             = -30.0
+    res@mpMaxLatF             = 30.0
+    res@mpMinLonF             = 30.0
+    res@mpMaxLonF             = 120.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False
@@ -225,8 +235,19 @@ do i = 0,3
     ; res_pro@cnLineThicknessF = 3.
     ; res_pro@cnFillOn        = True
     iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-    ; overlay(plot(i), iplot(i))
+    overlay(plot(i), iplot(i))
     print("finish subset figure")
+    plot2 = plot(i)
+    getvalues plot2@contour
+    "cnFillColors": cnFillColors
+    end getvalues
+    print(cnFillColors)
+    dim = dimsizes(cnFillColors)
+    ;;;将中间位置的颜色设置成白色，白色的rgb值是1,1,1
+    NhlSetColor(wks, cnFillColors(dim/2-1),1, 1, 1)
+    NhlSetColor(wks, cnFillColors(dim/2),1, 1, 1)
+   
+
 end do
   print("panel")
   pres = True

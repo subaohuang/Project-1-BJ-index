@@ -39,19 +39,19 @@ do i = 0,3
   print("读入file"+fils2(i))
 
   date=cd_calendar(f1->time, 1)
-  timeind=ind(date.ge.601.and.date.le.4012)
+  timeind:=ind(date.ge.601.and.date.le.4012)
 
   ;;;;U,V
   u_CT  =  f1->U(timeind,{992},:,:)
   v_CT  =  f1->V(timeind,{992},:,:)
-
+  
   u_id  =  f2->U(timeind,{992},:,:)
   v_id  =  f2->V(timeind,{992},:,:)
 
   
   dim  = dimsizes(u_id)
   
-  u_diff = u_CT(0:2,:,:)
+  u_diff = u_CT(0:11,:,:)
 
 
   v_diff = u_diff
@@ -64,17 +64,17 @@ do i = 0,3
 
   if season(i).ne."DJF" then
     do j = 0,2
-      u_diff(j,:,:) = dim_avg_n_Wrap(u_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(j+m(i):dim(0)-1:12,:,:),0)
-      v_diff(j,:,:) = dim_avg_n_Wrap(v_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(j+m(i):dim(0)-1:12,:,:),0)
+      u_diff(j+m(i),:,:) = dim_avg_n_Wrap(u_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(j+m(i):dim(0)-1:12,:,:),0)
+      v_diff(j+m(i),:,:) = dim_avg_n_Wrap(v_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(j+m(i):dim(0)-1:12,:,:),0)
     end do 
   else 
-      u_diff(0,:,:) = dim_avg_n_Wrap(u_id(11:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(11:dim(0)-1:12,:,:),0)
-      u_diff(1,:,:) = dim_avg_n_Wrap(u_id(0:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(0:dim(0)-1:12,:,:),0)
-      u_diff(2,:,:) = dim_avg_n_Wrap(u_id(1:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(1:dim(0)-1:12,:,:),0)
+      u_diff(11,:,:) = dim_avg_n_Wrap(u_id(11:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(11:dim(0)-1:12,:,:),0)
+      u_diff(0,:,:) = dim_avg_n_Wrap(u_id(0:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(0:dim(0)-1:12,:,:),0)
+      u_diff(1,:,:) = dim_avg_n_Wrap(u_id(1:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(1:dim(0)-1:12,:,:),0)
 
-      v_diff(0,:,:) = dim_avg_n_Wrap(v_id(11:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(11:dim(0)-1:12,:,:),0)
-      v_diff(1,:,:) = dim_avg_n_Wrap(v_id(0:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(0:dim(0)-1:12,:,:),0)
-      v_diff(2,:,:) = dim_avg_n_Wrap(v_id(1:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(1:dim(0)-1:12,:,:),0)
+      v_diff(11,:,:) = dim_avg_n_Wrap(v_id(11:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(11:dim(0)-1:12,:,:),0)
+      v_diff(0,:,:) = dim_avg_n_Wrap(v_id(0:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(0:dim(0)-1:12,:,:),0)
+      v_diff(1,:,:) = dim_avg_n_Wrap(v_id(1:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(1:dim(0)-1:12,:,:),0)
   end if 
 
 
@@ -93,13 +93,16 @@ do i = 0,3
     v_diff@_FillValue = 10^9
 ;;;;;
 
+end do 
+
 ;;-----------------------写入nc文件---------------------------
-    ; system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/nyf.ncep.T62.050923_atlwarming_wind_"+season(i)+".nc")   ; remove any pre-existing file
-    ; ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/nyf.ncep.T62.050923_atlwarming_wind_"+season(i)+".nc","c")  ; open output netCDF file
+    
+    ; system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_"+season(i)+".nc")   ; remove any pre-existing file
+    ; ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_"+season(i)+".nc","c")  ; open output netCDF file
 
-    system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_"+season(i)+".nc")   ; remove any pre-existing file
-    ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_"+season(i)+".nc","c")  ; open output netCDF file
 
+    system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind.nc")   ; remove any pre-existing file
+    ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind.nc","c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
 
@@ -109,6 +112,5 @@ do i = 0,3
     ;===================================================================
        ncdf->u_diff  =  u_diff                           ; 4D               
        ncdf->v_diff  = v_diff                       ; 3D
-end do 
        
 end 

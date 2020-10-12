@@ -27,6 +27,10 @@ undef("cesm_hybird2pre")
     OMEGA = f1->OMEGA
     PRECL = f1->PRECL
     PRECC = f1->PRECC
+    UBOT = f1->UBOT
+    VBOT = f1->VBOT
+    TREFHT = f1->TREFHT
+
 
     lat = f1->lat
     lon = f1->lon  

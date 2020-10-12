@@ -17,7 +17,7 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_atl_spring_notest_wholeatl/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_atl_spring_notest_wholeatl_new/	
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
