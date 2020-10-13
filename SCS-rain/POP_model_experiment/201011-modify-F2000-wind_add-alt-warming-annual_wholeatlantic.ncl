@@ -31,43 +31,47 @@ season = (/"MAM","JJA","SON","DJF"/)
   ; plot = new(4,graphic)
   ; iplot = new(4,graphic)
   ; str3 = ispan(1,4,1) + ""
-
-
-do i = 0,3
+  m = (/2,5,8,0/)
   f1=addfile(fils1, "r")
-  f2=addfile(fils2(i), "r")
-  print("读入file"+fils2(i))
-
   date=cd_calendar(f1->time, 1)
   timeind:=ind(date.ge.601.and.date.le.4012)
 
   ;;;;U,V
   u_CT  =  f1->U(timeind,{992},:,:)
   v_CT  =  f1->V(timeind,{992},:,:)
-  
+
+  u_diff = u_CT(0:11,:,:)
+  v_diff = u_diff
+
+  printVarSummary(u_diff)
+
+do i = 0,3
+
+  f2=addfile(fils2(i), "r")
+  print("读入file"+fils2(i))
+
   u_id  =  f2->U(timeind,{992},:,:)
   v_id  =  f2->V(timeind,{992},:,:)
 
   
   dim  = dimsizes(u_id)
   
-  u_diff = u_CT(0:11,:,:)
-
-
-  v_diff = u_diff
-
-  printVarSummary(u_diff)
-
- 
-
-  m = (/2,5,8,0/)
-
   if season(i).ne."DJF" then
+    print(m(i))
     do j = 0,2
+      print(j+m(i))
       u_diff(j+m(i),:,:) = dim_avg_n_Wrap(u_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(j+m(i):dim(0)-1:12,:,:),0)
       v_diff(j+m(i),:,:) = dim_avg_n_Wrap(v_id(j+m(i):dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(j+m(i):dim(0)-1:12,:,:),0)
     end do 
   else 
+    ;   u_diff(2,:,:) = dim_avg_n_Wrap(u_id(2:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(2:dim(0)-1:12,:,:),0)
+    ;   u_diff(3,:,:) = dim_avg_n_Wrap(u_id(3:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(3:dim(0)-1:12,:,:),0)
+    ;   u_diff(4,:,:) = dim_avg_n_Wrap(u_id(4:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(4:dim(0)-1:12,:,:),0)
+      
+    ;   v_diff(2,:,:) = dim_avg_n_Wrap(v_id(2:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(2:dim(0)-1:12,:,:),0)
+    ;   v_diff(3,:,:) = dim_avg_n_Wrap(v_id(3:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(3:dim(0)-1:12,:,:),0)
+    ;   v_diff(4,:,:) = dim_avg_n_Wrap(v_id(4:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(v_CT(4:dim(0)-1:12,:,:),0)
+      
       u_diff(11,:,:) = dim_avg_n_Wrap(u_id(11:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(11:dim(0)-1:12,:,:),0)
       u_diff(0,:,:) = dim_avg_n_Wrap(u_id(0:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(0:dim(0)-1:12,:,:),0)
       u_diff(1,:,:) = dim_avg_n_Wrap(u_id(1:dim(0)-1:12,:,:),0) - dim_avg_n_Wrap(u_CT(1:dim(0)-1:12,:,:),0)
@@ -94,6 +98,113 @@ do i = 0,3
 ;;;;;
 
 end do 
+
+;;;;画图
+ wks = gsn_open_wks("pdf", "diff-modify-wind")
+
+;;;draw_plot 
+  plot  =new(4,graphic)
+
+  res=True
+  res@gsnFrame=False
+  res@gsnDraw=False
+  res@gsnAddCyclic = False
+  
+ 
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueRed"
+
+  res@cnFillOn=True
+  res@cnLinesOn= False
+  
+  res@cnLineThicknessF = 2.0
+  res@gsnContourNegLineDashPattern = 14
+  res@gsnContourPosLineDashPattern = 0
+
+  ; res@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
+  ; gsn_define_colormap(wks, "MPL_PuOr")
+
+  ; res@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
+  ; res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
+
+
+  res@cnLineLabelsOn=False
+  res@lbLabelBarOn=False
+  res@lbLabelStride=2
+  res@lbOrientation="Vertical"
+  res@lbLabelStride = 2 
+  res@mpLimitMode           = "LatLon"
+  res@mpMinLatF             = -60
+  res@mpMaxLatF             = 60
+  res@mpMinLonF             = 0
+  res@mpMaxLonF             = 360
+  
+  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+  res@tmXTOn=False
+  res@tmYROn=False
+  res@tmXBOn=True
+  res@tmYROn=False
+
+  res@tmXBLabelFontHeightF=0.025
+  res@tmYLLabelFontHeightF=0.025
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+  res@tmBorderThicknessF=1.0
+
+  ; res@tmXBValues = (/100,120,140,160/) 
+  ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+  
+  res@gsnScalarContour        = True
+
+  ;;;;;;;LineArrow
+  res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res@vcGlyphStyle="CurlyVector"
+
+  res@vcMinDistanceF           = 0.022           ; thin vectors
+  ; res@vcMinMagnitudeF          =0.04
+  ; res@vcRefAnnoJust = "TopLeft"
+  res@vcRefAnnoBackgroundColor = "Transparent"
+  res@vcRefAnnoPerimOn = False
+  res@vcRefAnnoOrthogonalPosF = -1.2
+  res@vcRefMagnitudeF          = 2.0
+  res@vcRefLengthF             = 0.1     ; define length of v
+  res@vcLineArrowThicknessF=1.5
+  ; res@vcLineArrowHeadMaxSizeF=0.008
+  ; res@vcLineArrowHeadMinSizeF=0.008
+  res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  res@vcLineArrowHeadMinSizeF = 0.006
+
+  ; res@vcVectorDrawOrder="PostDraw"
+  res@mpFillOn =True
+  res@mpFillColor = "White"
+  res@mpFillDrawOrder = "PostDraw"
+
+
+  ; res@mpShapeMode="FreeAspect"
+  ; res@vpHeightF=0.3
+  ; res@vpWidthF=0.8
+
+  ; res@gsnLeftString  = se(i)+" " + season(i)+" U,V at 992hPa trend"
+  res@gsnLeftStringFontHeightF = 0.02
+  res@gsnLeftStringOrthogonalPosF = -.15
+  ; plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
+
+
+
+  plot(0) = gsn_csm_vector_map(wks,dim_avg_n_Wrap(u_diff(2:4,:,:),0),dim_avg_n_Wrap(v_diff(2:4,:,:),0) ,res)
+  plot(1) = gsn_csm_vector_map(wks,dim_avg_n_Wrap(u_diff(5:7,:,:),0),dim_avg_n_Wrap(v_diff(5:7,:,:),0) ,res)
+  plot(2) = gsn_csm_vector_map(wks,dim_avg_n_Wrap(u_diff(8:10,:,:),0),dim_avg_n_Wrap(v_diff(8:10,:,:),0) ,res)
+  plot(3) = gsn_csm_vector_map(wks,dim_avg_n_Wrap(u_diff(0:1,:,:),0),dim_avg_n_Wrap(v_diff(0:1,:,:),0) ,res)
+
+
+pres =True
+gsn_panel(wks, plot, (/2,2/), pres)
+
+
+
+
 
 ;;-----------------------写入nc文件---------------------------
     
