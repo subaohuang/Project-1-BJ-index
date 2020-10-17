@@ -24,7 +24,7 @@ begin
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
   fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_CTRL/lsh_C_CTRL.TEMP_TAUX_TAUY.h0.0001-0030.nc"
-  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_addaltwind_spring/lsh_C_addaltwind_spring.TEMP_TAUX_TAUY.h0.0001-0030.nc"
+  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_addaltwind_spring_new/lsh_C_addaltwind_spring_new.TEMP_TAUX_TAUY.h0.0001-0030.nc"
  
   
     f1=addfile(fils1, "r")
@@ -39,8 +39,8 @@ begin
     
     print(date1)
 
-    timeind1=ind(date1.ge.501.and.date1.le.03012)
-    timeind2=ind(date2.ge.501.and.date2.le.03012)
+    timeind1=ind(date1.ge.101.and.date1.le.01012)
+    timeind2=ind(date2.ge.101.and.date2.le.01012)
 
 
     PSL_CT  =  f1->TEMP(timeind1,0,:,:)

@@ -24,7 +24,7 @@ begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest_wholeatl/"+"F_2000_atl_"+season_r+"_notest_wholeatl.cam.h1.0101-4012.nc" 
   
   ; wks=gsn_open_wks("pdf", "CESM-F2000-u,v,OMEGA-alt-warming-foul-season-global")
   

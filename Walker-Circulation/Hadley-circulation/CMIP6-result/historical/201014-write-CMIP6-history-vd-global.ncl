@@ -6,10 +6,10 @@
 ;  "CESM2-WACCM" , "EC-Earth3-Veg",  "GISS-E2-1-G", "IPSL-CM6A-LR" ,"MRI-ESM2-0","SAM0-UNICON",\
 ; "BCC-ESM1","CNRM-CM6-1","FGOALS-f3-L","GISS-E2-1-G-CC","MCM-UA-1-0","NESM3"/)
 
-model_name = (/"CESM2-WACCM" , "EC-Earth3-Veg",  "GISS-E2-1-G", "IPSL-CM6A-LR" ,"MRI-ESM2-0","SAM0-UNICON",\
-"BCC-ESM1","CNRM-CM6-1","FGOALS-f3-L","GISS-E2-1-G-CC","MCM-UA-1-0","NESM3"/)
+; model_name = (/"CESM2-WACCM" , "EC-Earth3-Veg",  "GISS-E2-1-G", "IPSL-CM6A-LR" ,"MRI-ESM2-0","SAM0-UNICON",\
+; "BCC-ESM1","CNRM-CM6-1","FGOALS-f3-L","GISS-E2-1-G-CC","MCM-UA-1-0","NESM3"/)
 
-
+model_name = (/ "CAMS-CSM1-0","CNRM-CM6-1"/)
 
 
 dim_model = dimsizes(model_name)
@@ -31,9 +31,12 @@ do i = 0,dim_model-1
 
     time=f1[:]->time    ;;;这里用了20cr的time，因为jra的time是一个个来的
     date:=cd_calendar(time, 1)
-    delete(time)
+
+
     timeind:=ind(date.le.yearend.and.date.ge.yearstart)
-     
+    time_r = time(timeind)
+    print(date(timeind))
+  
     print("读入风场")
     plev := doubletofloat(f1[0]->plev)
 
@@ -141,12 +144,14 @@ do i = 0,dim_model-1
     setfileoption(fout,"DefineMode",False)
 
 
-    fout->time=(/vd&time/)
+    fout->time=(/time_r/)
     fout->level=(/vd&level/)
     fout->lat=(/vd&lat/)
     fout->lon=(/vd&lon/)
     fout->vd = (/vd/)
     delete(vd)
+   delete(time_r)
+   delete(time)
  print("********************************finish calculate"+" "+model+"************************************")
  end do 
 
