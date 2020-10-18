@@ -27,8 +27,9 @@ begin
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
   fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_CTRL/lsh_C_CTRL.TEMP_TAUX_TAUY.h0.0001-0030.nc"
-    ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
-  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_addaltwind_spring_new/lsh_C_addaltwind_spring_new.TEMP_TAUX_TAUY.h0.0001-0010.nc"
+    
+  ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_addaltwind_autumn_new/lsh_C_addaltwind_autumn_new.TEMP_TAUX_TAUY.h0.0001-0010.nc"
+  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/C/lsh_C_addaltwind_autumn/lsh_C_addaltwind_autumn.TEMP_TAUX_TAUY.h0.0001-0030.nc"
  
   
     f1=addfile(fils1, "r")
@@ -41,12 +42,12 @@ begin
     date1=cd_calendar(time1, 1)
     date2=cd_calendar(time2, 1)
     
-  
+   
 
-    timeind1=ind(date1.ge.101.and.date1.le.01012)
+    timeind1=ind(date1.ge.101.and.date1.le.3012)
 
     ; timeind1=ind(date1.ge.25101.and.date1.le.28012)
-    timeind2=ind(date2.ge.101.and.date2.le.01012)
+    timeind2=ind(date2.ge.101.and.date2.le.3012)
 
 
     PSL_CT_r  =  f1->TEMP(timeind1,0,:,:)
@@ -117,7 +118,7 @@ begin
 
 
     season = (/"MAM","JJA","SON","DJF"/)
-    wks=gsn_open_wks("pdf", "201016-diff-Potensial-temperature-by-addwind-POPmodel-spring-new")
+    wks=gsn_open_wks("pdf", "201016-diff-Potensial-temperature-by-addwind-POPmodel-autumn")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
@@ -211,17 +212,17 @@ begin
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; res@cnMinLevelValF       =   -0.05
-    ; res@cnMaxLevelValF       =   0.05
-    ; res@cnLevelSpacingF      =  0.01
+    res@cnMinLevelValF       =   -0.1
+    res@cnMaxLevelValF       =   0.1
+    res@cnLevelSpacingF      =  0.01
     
-    ; res@cnMinLevelValF       =   -0.2
-    ; res@cnMaxLevelValF       =   0.2
-    ; res@cnLevelSpacingF      =  0.02
+    ; ; res@cnMinLevelValF       =   -0.2
+    ; ; res@cnMaxLevelValF       =   0.2
+    ; ; res@cnLevelSpacingF      =  0.02
 
-    res@cnMinLevelValF       =   -0.6
-    res@cnMaxLevelValF       =   0.6
-    res@cnLevelSpacingF      =  0.1
+    ; res@cnMinLevelValF       =   -0.6
+    ; res@cnMaxLevelValF       =   0.6
+    ; res@cnLevelSpacingF      =  0.1
     
     
     ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)

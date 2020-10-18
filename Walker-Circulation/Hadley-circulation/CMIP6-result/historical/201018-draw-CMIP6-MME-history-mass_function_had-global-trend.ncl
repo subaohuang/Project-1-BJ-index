@@ -30,7 +30,7 @@ model_name = (/"ACCESS-CM2","ACCESS-ESM1-5", "BCC-ESM1",\
 
 dim_model = dimsizes(model_name)
 
-plot = new(dim_model,graphic)
+plot = new(1,graphic)
 iplot= plot
 plot1 = plot
 
@@ -41,15 +41,16 @@ pi=get_pi("double")
 dfi=(pi*10)/180
 
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
+wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流的趋势")
 
-    wks = gsn_open_wks("pdf", "30个CMIP模式东太平洋哈德来环流的趋势")
+msf_total = new((/dim_model,1380,11,72,144/),float)
 do k = 0,dim_model-1
 ;;;;
 
     model = model_name(k)
 
     print("*******************start calculate"+" "+model+"**********************************************")
-    yearstart = 190001
+    yearstart = 185001
     yearend = 201412
     fils1 :=  (/"/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/1850-1949/msf_"+model+"_history_r1i1p1f1_185001-194912.nc",\
                "/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/1950-2014/msf_"+model+"_history_r1i1p1f1_195001-201412.nc"/)
@@ -59,12 +60,77 @@ do k = 0,dim_model-1
     time:=f1[:]->time    ;;;这里用了20cr的time，因为jra的time是一个个来的
     date:=cd_calendar(time, 1)
     delete(time)
+
     timeind:=ind(date.le.yearend.and.date.ge.yearstart)
     delete(date)     
-    msf := f1[:]->msf(timeind,:,:,:)
-    msf = (msf/10^10)
+    msf_r := f1[:]->msf(timeind,:,:,:)
+    msf_r = (msf_r/10^10)
+    printVarSummary(msf_r)
+
+    msf_total(k,:,:,:,:) = msf_r
+     print("********************************finish calculate"+" "+model+"************************************")
+
+end  do 
+
+
+    msf = dim_avg_n_Wrap(msf_total, 0)
+
     printVarSummary(msf)
+    ntime = dimsizes(msf&time)
+    nlev = dimsizes(msf&level)
+    nlat = dimsizes(msf&lat)
+    nlon = dimsizes(msf&lon)
+
+  print("***************开始写nc文件****************************")
+;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
+    diro=diri_output
+    filo1="msf_mme_history_r1i1p1f1_185001-201412.nc"
+    system("/bin/rm -f "+diro + filo1+"")
+    setfileoption("nc","Format","LargeFile")
+    fout=addfile(diro + filo1,"c")
+    setfileoption(fout,"DefineMode",True)
+   ;======================================文件名
+    fAtt               = True            ; assign file attributes
+    fAtt@title         = "CMIP6 historical run Mass stream Function for Hadley"    
+    fAtt@creation_date = systemfunc("date")
+    fileattdef( fout, fAtt)            ; copys file attributes    
+    ;----------------------------坐标变量的定义
+    dimnames=(/"time","level","lat","lon"/)
+    dimsize=(/ntime,nlev,nlat,nlon/)
+    dimunlim=(/False,False,False,False/)
+    filedimdef(fout, dimnames, dimsize, dimunlim)
+ ;-----------------------------定义变量名，类型和维数
+    filevardef(fout, "time",typeof(msf&time), (/"time"/))
+    filevardef(fout, "level",typeof(msf&level), (/"level"/))
+    filevardef(fout, "lat", typeof(msf&lat),(/"lat"/))
+    filevardef(fout, "lon", typeof(msf&lon),(/"lon"/))
+
    
+    filevardef(fout, "msf", typeof(msf),(/"time","level","lat","lon"/))
+
+   
+    filevarattdef(fout, "level", msf&level)
+    filevarattdef(fout, "lat", msf&lat)
+    filevarattdef(fout, "lon", msf&lon)
+    filevarattdef(fout, "time", msf&time)
+    filevarattdef(fout, "msf", msf)
+ 
+    
+    setfileoption(fout,"DefineMode",False)
+
+
+    fout->time=(/msf&time/)
+    fout->level=(/msf&level/)
+    fout->lat=(/msf&lat/)
+    fout->lon=(/msf&lon/)
+    fout->msf = (/msf/)
+    delete(msf)
+ print("********************************finish calculate"+" "+model+"************************************")
+   
+
+    printVarSummary(msf_total)
+
+    msf = dim_avg_n_Wrap(msf_total, 0) ;;;mme
 
     msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
 
@@ -75,13 +141,13 @@ do k = 0,dim_model-1
 
     dim = dimsizes(msf_mean_annual)
 
-   ;;;计算趋势
+    ;;;计算趋势
     ; rc = msf_mean_annual(1,:,:)
     rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-60:60}),0,0)
-    
-     copy_VarCoords(msf_mean_annual(1,:,{-60:60}), rc)
 
-     rc  = (/rc*dim(0)/)
+    copy_VarCoords(msf_mean_annual(1,:,{-60:60}), rc)
+
+    rc  = (/rc*dim(0)/)
 
 
     prob := rc_test(rc)
@@ -102,21 +168,19 @@ do k = 0,dim_model-1
    
     res@cnLinesOn=False
     res@cnLevelSelectionMode ="ManualLevels"
-    res@cnMinLevelValF = -1.6
-    res@cnMaxLevelValF = 1.6
-    res@cnLevelSpacingF = 0.2
+    res@cnMinLevelValF = -1.0
+    res@cnMaxLevelValF = 1.0
+    res@cnLevelSpacingF = 0.25
 
-    res@lbLabelBarOn =False
+    res@lbLabelBarOn =True
     res@cnLineLabelsOn = False
     res@cnInfoLabelOn = False
 
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
-   
-    res@tmXBLabelFontHeightF=0.015
-    res@tmYLLabelFontHeightF=0.015
-
+  
+    
     res@tiYAxisString=""
     res@tmXTOn=False
     res@tmYROn=False
@@ -132,9 +196,8 @@ do k = 0,dim_model-1
     res@vpWidthF=0.7
 
     ;;;;
-    res@gsnLeftString = model
-    res@gsnLeftStringFontHeightF = 0.02
-    plot(k) = gsn_csm_pres_hgt(wks,rc,res)
+    res@gsnLeftString = "CMIP6 Historical MME"
+    plot = gsn_csm_pres_hgt(wks,rc,res)
 
 
     ;;;打点
@@ -152,7 +215,7 @@ do k = 0,dim_model-1
     res_pro@cnInfoLabelOn=False
 
    
-    iplot(k)=gsn_csm_contour(wks,prob,res_pro)
+    iplot=gsn_csm_contour(wks,prob,res_pro)
 
 
     opt                      = True
@@ -162,9 +225,9 @@ do k = 0,dim_model-1
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density
     opt@gsnShadeFillDotSizeF = 0.05      ; make dots larger
 
-    iplot(k) = gsn_contour_shade(iplot(k), 0,0.1, opt)
+    iplot = gsn_contour_shade(iplot, 0,0.1, opt)
     ;;;  
-    overlay(plot(k), iplot(k))
+    overlay(plot, iplot)
 
 
     ;;;画气候态的等值线
@@ -180,24 +243,12 @@ do k = 0,dim_model-1
     res@gsnContourNegLineDashPattern=1
     res@gsnContourZeroLineThicknessF=1.0
 
-    plot1(k) = gsn_csm_pres_hgt(wks, msf_mean_clm, res)
-  
- 
+    plot1 = gsn_csm_pres_hgt(wks, msf_mean_clm, res)
     ;;;  
-    overlay(plot(k), plot1(k))
- print("********************************finish calculate"+" "+model+"************************************")
- end do 
+    overlay(plot, plot1)
 
-
-pres = True
-pres@gsnMaximize = True
-pres@gsnPanelLabelBar = True
-pres@pmLabelBarHeightF = 0.05
-pres@pmLabelBarWidthF  = 0.6
-pres@pmLabelBarOrthogonalPosF = -0.02
-; pres@lbOrientation = "Vertical"
-; pres@lbLabelFontHeightF = 0.01
-gsn_panel(wks, plot, (/6,5/), pres)
+    draw(plot)
+    frame(wks)
 end 
 
 

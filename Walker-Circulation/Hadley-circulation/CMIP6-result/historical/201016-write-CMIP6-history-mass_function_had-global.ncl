@@ -3,8 +3,12 @@ begin
 ; model_name = (/"CESM2",  "EC-Earth3"  , "GFDL-ESM4"  ,"MPI-ESM1-2-HR" ,\
 ;  "CESM2-WACCM" , "EC-Earth3-Veg",  "GISS-E2-1-G", "IPSL-CM6A-LR" ,"MRI-ESM2-0","SAM0-UNICON",\
 ; "BCC-ESM1","CNRM-CM6-1","FGOALS-f3-L","GISS-E2-1-G-CC","MCM-UA-1-0","NESM3"/)
+model_name = (/"CNRM-CM6-1","CNRM-ESM2-1"\
+   , "E3SM-1-0", "EC-Earth3","EC-Earth3-Veg","FGOALS-f3-L",  "FGOALS-g3", \
+  "GFDL-ESM4",    "GISS-E2-1-G",  "GISS-E2-1-G-CC",   "GISS-E2-1-H"\
+        ,"HadGEM3-GC31-LL","IPSL-CM6A-LR",   "MCM-UA-1-0","MIROC6", \
+        "MIROC-ES2L","MPI-ESM1-2-HR","MRI-ESM2-0","NESM3","NorCPM1",  "NorESM2-LM","SAM0-UNICON","UKESM1-0-LL"/)
 
-model_name = (/ "CAMS-CSM1-0","CNRM-CM6-1"/)
 ; model_name = (/"CESM2-WACCM" , "EC-Earth3-Veg"/)
 
 dim_model = dimsizes(model_name)
@@ -14,24 +18,23 @@ g=9.8
 pi=get_pi("double")
 dfi=(pi*10)/180
 
-diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
+diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/1850-1949/"
 do k = 0,dim_model-1
 ;;;;
     model = model_name(k)
 
     print("*******************start calculate"+" "+model+"**********************************************")
-    yearstart = 195001
-    yearend = 201412
-    fils1 := "/home/yangsong3/data-observation/linshh/CMIP6-derived/vd/vd_"+model+"_history_r1i1p1f1_195001-201412.nc"
+    yearstart = 185001
+    yearend = 194912
+    fils1 := "/home/yangsong3/data-observation/linshh/CMIP6-derived/vd/1850-1949/vd_"+model+"_history_r1i1p1f1_185001-194912.nc"
     f1 := addfile(fils1, "r")
     
     time:=f1->time    ;;;这里用了20cr的time，因为jra的time是一个个来的
     date:=cd_calendar(time, 1)
     delete(time)
     print(date)
+ 
     timeind:=ind(date.le.yearend.and.date.ge.yearstart)
-    print(date(timeind))
-    exit()
     delete(date)     
     vd := f1->vd(timeind,:,:,:)
     
@@ -176,7 +179,7 @@ do k = 0,dim_model-1
     print("***************开始写nc文件****************************")
 ;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
     diro=diri_output
-    filo1="msf_"+model+"_history_r1i1p1f1_195001-201412.nc"
+    filo1="msf_"+model+"_history_r1i1p1f1_185001-194912.nc"
     system("/bin/rm -f "+diro + filo1+"")
     setfileoption("nc","Format","LargeFile")
     fout=addfile(diro + filo1,"c")

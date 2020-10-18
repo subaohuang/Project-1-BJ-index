@@ -9,8 +9,15 @@
 ; model_name = (/"CESM2-WACCM" , "EC-Earth3-Veg",  "GISS-E2-1-G", "IPSL-CM6A-LR" ,"MRI-ESM2-0","SAM0-UNICON",\
 ; "BCC-ESM1","CNRM-CM6-1","FGOALS-f3-L","GISS-E2-1-G-CC","MCM-UA-1-0","NESM3"/)
 
-model_name = (/ "CAMS-CSM1-0","CNRM-CM6-1"/)
 
+; model_name = (/"ACCESS-CM2","ACCESS-ESM1-5", "BCC-ESM1",\
+;               "CAMS-CSM1-0","CanESM5","CESM2","CESM2-WACCM","CNRM-CM6-1","CNRM-ESM2-1"\
+;    , "E3SM-1-0", "EC-Earth3","EC-Earth3-Veg","FGOALS-f3-L",  "FGOALS-g3", \
+;   "GFDL-ESM4",    "GISS-E2-1-G",  "GISS-E2-1-G-CC",   "GISS-E2-1-H"\
+;         ,"HadGEM3-GC31-LL","IPSL-CM6A-LR",   "MCM-UA-1-0","MIROC6", \
+;         "MIROC-ES2L","MPI-ESM1-2-HR","MRI-ESM2-0","NESM3","NorCPM1",  "NorESM2-LM","SAM0-UNICON","UKESM1-0-LL"/)
+
+model_name = (/"NorESM2-LM"/)
 
 dim_model = dimsizes(model_name)
 do i = 0,dim_model-1
@@ -18,10 +25,10 @@ do i = 0,dim_model-1
     model = model_name(i)
 
     print("*******************start calculate"+" "+model+"**********************************************")
-    diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/vd/"
+    diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/vd/1850-1949/"
     
-    yearstart = 195001
-    yearend = 201412
+    yearstart = 185001
+    yearend = 194912
 
     fils1 := systemfunc("ls /home/yangsong3/data-observation/cmip6/"+model+"/historical/uv_fixed/ua_Amon_"+model+"_historical_"+"*")
     fils2 := systemfunc("ls /home/yangsong3/data-observation/cmip6/"+model+"/historical/uv_fixed/va_Amon_"+model+"_historical_"+"*")
@@ -36,7 +43,7 @@ do i = 0,dim_model-1
     timeind:=ind(date.le.yearend.and.date.ge.yearstart)
     time_r = time(timeind)
     print(date(timeind))
-  
+
     print("读入风场")
     plev := doubletofloat(f1[0]->plev)
 
@@ -109,7 +116,7 @@ do i = 0,dim_model-1
     print("***************开始写nc文件****************************")
 ;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
     diro=diri_output
-    filo1="vd_"+model+"_history_r1i1p1f1_195001-201412.nc"
+    filo1="vd_"+model+"_history_r1i1p1f1_185001-194912.nc"
     system("/bin/rm -f "+diro + filo1+"")
     setfileoption("nc","Format","LargeFile")
     fout=addfile(diro + filo1,"c")
@@ -137,7 +144,7 @@ do i = 0,dim_model-1
     filevarattdef(fout, "level", vd&level)
     filevarattdef(fout, "lat", vd&lat)
     filevarattdef(fout, "lon", vd&lon)
-    filevarattdef(fout, "time", vd&time)
+    filevarattdef(fout, "time", time_r)
     filevarattdef(fout, "vd", vd)
  
     
