@@ -23,8 +23,8 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest_wholeatl/"+"F_2000_atl_"+season_r+"_notest_wholeatl.cam.h1.0101-4012.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_" + season_r +"_notest_wholeatl/"+"F_2000_atl_"+season_r+"_notest_wholeatl.cam.h1.0101-4012.nc" 
   
   ; wks=gsn_open_wks("pdf", "CESM-F2000-u,v,OMEGA-alt-warming-foul-season-global")
   
@@ -37,8 +37,8 @@ season = (/"MAM","JJA","SON","DJF"/)
   timeind:=ind(date.ge.601.and.date.le.4012)
 
   ;;;;U,V
-  u_CT  =  f1->U(timeind,{992},:,:)
-  v_CT  =  f1->V(timeind,{992},:,:)
+  u_CT  =  f1->UBOT(timeind,:,:)
+  v_CT  =  f1->VBOT(timeind,:,:)
 
   u_diff = u_CT(0:11,:,:)
   v_diff = u_diff
@@ -50,8 +50,8 @@ do i = 0,3
   f2=addfile(fils2(i), "r")
   print("读入file"+fils2(i))
 
-  u_id  =  f2->U(timeind,{992},:,:)
-  v_id  =  f2->V(timeind,{992},:,:)
+  u_id  =  f2->UBOT(timeind,:,:)
+  v_id  =  f2->VBOT(timeind,:,:)
 
   
   dim  = dimsizes(u_id)
@@ -212,8 +212,8 @@ gsn_panel(wks, plot, (/2,2/), pres)
     ; ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_"+season(i)+".nc","c")  ; open output netCDF file
 
 
-    system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind.nc")   ; remove any pre-existing file
-    ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind.nc","c")  ; open output netCDF file
+    system("/bin/rm -f /home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_10m.nc")   ; remove any pre-existing file
+    ncdf = addfile("/home/ys17-19/lsh/Project/SCS-rain/POP_model_experiment/cam_atlwarming_wind_10m.nc","c")  ; open output netCDF file
 
     filedimdef(ncdf,"time",-1,True)  ; make time an UNLIMITED dimension; recommended  for most applications
 

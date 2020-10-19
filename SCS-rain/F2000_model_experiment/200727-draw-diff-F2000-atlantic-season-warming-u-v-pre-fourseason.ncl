@@ -23,12 +23,12 @@ end
 begin
   season_r = (/"summer"/)
   season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
 
 
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
 
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-"+season_r+"-foul-season")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-"+season_r+"-foul-season-test")
 
   plot = new(4,graphic)
   iplot = new(4,graphic)
