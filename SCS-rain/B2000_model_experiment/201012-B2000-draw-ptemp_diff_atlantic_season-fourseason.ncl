@@ -24,8 +24,8 @@ season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
 
    
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_"+season_r+"_fixmonth/B2000_alt_north_"+season_r+"_fixmonth.TEMP.h0.0251-0280.nc"
+  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
+  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_"+season_r+"_fixmonth/B2000_alt_north_"+season_r+"_fixmonth.TEMP.h0.0251-0280.nc"
  
   
 
@@ -59,7 +59,7 @@ season = (/"MAM","JJA","SON","DJF"/)
 
   
 
-    PSL_indian  =  f2->TEMP(timeind2,0,:,:)
+    PSL_indian  :=  f2->TEMP(timeind2,0,:,:)
     TLAT = f2->TLAT
     TLONG = f2->TLONG
    
@@ -87,6 +87,18 @@ season = (/"MAM","JJA","SON","DJF"/)
     prob_slp_indian!1= "nlon"
     prob_slp_indian@lat2d   = TLAT
     prob_slp_indian@lon2d   = TLONG
+       ;;;mask
+    if season(i).eq."DJF"
+    ;;;mask and leave the altantic ocean 
+        mask_file = addfile ("/home/yangsong3/data-observation/linshh/CESM-data/B/gx1v6.pop.region_mask.nc", "r")
+        x = mask_file->REGION_MASK
+        x@lat2d   = mask_file->TLAT
+        x@lon2d   = mask_file->TLONG
+        prob_slp_indian = where(x.eq.6, 2, prob_slp_indian)
+    end if
+    ;;;;
+
+
     ;;;
 
      
@@ -118,8 +130,8 @@ season = (/"MAM","JJA","SON","DJF"/)
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    res@cnMinLevelValF       =   -0.5
-    res@cnMaxLevelValF       =   0.5
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
     res@cnLevelSpacingF      =  0.1
     
     ; res@cnMinLevelValF       =   -1.5
@@ -152,6 +164,19 @@ season = (/"MAM","JJA","SON","DJF"/)
     res@mpGeophysicalLineThicknessF = 1.5
     
 
+    res@tmXBLabelFontHeightF=0.01
+    res@tmYLLabelFontHeightF=0.01
+    res@tmXBMajorThicknessF=1.0
+    res@tmYLMajorThicknessF=1.0
+    res@tmBorderThicknessF=1.0
+    res@gsnLeftStringFontHeightF = 0.02
+
+
+    
+    res@gsnRightString = ""
+    res@gsnLeftString= "SST change in response to "+ season(i)+ " Atl Warimng"
+    ; res@gsnLeftString = ""
+
 
     ; res@mpShapeMode = "FreeAspect"
     ; res@vpWidthF = 0.7
@@ -160,8 +185,8 @@ season = (/"MAM","JJA","SON","DJF"/)
     
     
     res@gsnRightString = ""
-    res@gsnLeftString = season(i)
-    res@gsnLeftStringFontHeightF = 10.0
+
+ 
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
      
@@ -200,10 +225,10 @@ season = (/"MAM","JJA","SON","DJF"/)
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.003
+    res_pro@cnFillDotSizeF = 0.002
   
     res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","white","Transparent"/)
+    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
@@ -215,13 +240,16 @@ season = (/"MAM","JJA","SON","DJF"/)
     iplot = new(4,graphic)
 
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
-    ; overlay(plot(i), iplot(i))
+    overlay(plot(i), iplot(i))
 end do
-    pres = True
+     pres = True
+     pres@gsnMaximize = True
     pres@gsnPanelLabelBar = True
-    pres@lbOrientation  = "Vertical"
-    pres@pmLabelBarWidthF  = 0.06
-    pres@pmLabelBarHeightF = 0.15
+    ; pres@lbOrientation  = "Vertical"
+    pres@lbOrientation  = "Horizontal"
+    pres@pmLabelBarOrthogonalPosF = -0.02
+    ; pres@pmLabelBarWidthF  = 0.03
+    pres@pmLabelBarHeightF = 0.03
     pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)

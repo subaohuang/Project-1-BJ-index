@@ -7,16 +7,16 @@ function  rc_test(ssta_rc1,ssta_rc2)
 begin
     df   = onedtond(ssta_rc1@nptxy, dimsizes(ssta_rc1)) - 2
     ; df = 37 -2
- print(df)
- exit()
+ ; print(df)
+ ; exit()
 
     
     p = new(dimsizes(df), float)
     p  = 0.975       ;;;1-0.05/2  ,如果选择0.01 0.995 2.72 ,9,975 2.03
 
     T = cdft_t(p, df)    ; T =  2.12
-print(T)
-exit()
+; print(T)
+; exit()
 
      
     interv = onedtond(ssta_rc1@rstd, dimsizes(ssta_rc1))*T
@@ -90,9 +90,9 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ;;;;remove_enso_signal
-         p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ;;;;
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
@@ -116,7 +116,7 @@ end
 begin
   
    ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -160,7 +160,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16-minus-spring")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -171,8 +171,8 @@ begin
   res@gsnLeftStringFontHeightF=20.0
   
  
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlueDarkRed18"
+   res@cnFillPalette = "BlueWhiteOrangeRed"
+   ; res@cnFillPalette = "BlueDarkRed18"
    ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
