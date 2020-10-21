@@ -23,10 +23,10 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addatlanticwarimg_" + season_r +"_notest/"+"F_2000_atl_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_" + season_r +"_notest_wholeatl/"+"F_2000_atl_"+season_r+"_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-潜热通量-alt-warming-foul-season-global")
+  wks=gsn_open_wks("pdf", "CESM-F2000-除了潜热通量-alt-warming-foul-season-global")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -50,7 +50,7 @@ do i = 0,3
 
   PRE_CT = LHFLX
   ; PRE_CT = (/FSNS - LHFLX - SHFLX - FLNS /)
-  ; PRE_CT = (/FSNS  - SHFLX - FLNS /)
+  PRE_CT = (/FSNS  - SHFLX - FLNS /)
  
 
   LHFLX_id =  f2->LHFLX(timeind,:,:)
@@ -61,7 +61,7 @@ do i = 0,3
 
   PRE_id =  LHFLX_id
   ; PRE_id = (/ FSNS_id -  LHFLX_id - SHFLX_id - FLNS_id/)
-  ; PRE_id = (/ FSNS_id  - SHFLX_id - FLNS_id/)
+  PRE_id = (/ FSNS_id  - SHFLX_id - FLNS_id/)
 
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
   PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
@@ -130,6 +130,8 @@ do i = 0,3
     res@cnLineLabelInterval = 2
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
+
+       res@cnFillPalette = "BlueWhiteOrangeRed"
 
     ; res@cnFillPalette = "precip_diff_12lev"
       ; res@cnFillPalette = "BlueWhiteOrangeRed"

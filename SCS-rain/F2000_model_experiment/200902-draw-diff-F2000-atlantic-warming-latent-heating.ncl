@@ -23,7 +23,7 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_atl_" + season_r +"_notest_wholeatl/"+"F_2000_atl_"+season_r+"_notest_wholeatl.cam.h1.0101-4012_OLR_heatflux.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-潜热-alt-warming-foul-global-new")
@@ -142,7 +142,7 @@ do i = 0,3
     res@mpMaxLatF             = 30.0
     ; res@mpMinLonF             = 40.0
     res@mpMinLonF             = 30.0
-    res@mpMaxLonF             = 110.0
+    res@mpMaxLonF             = 120.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2.0
     res@mpFillOn = False

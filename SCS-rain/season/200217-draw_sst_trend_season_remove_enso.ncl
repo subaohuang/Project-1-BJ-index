@@ -50,7 +50,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201312.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst =  lonFlip(f1->sst(timeind,:,:))
  
@@ -103,7 +103,7 @@ begin
     
   
 
-    wks   = gsn_open_wks("pdf", "季节平均SST的趋势-SCS-79-13-global-没去趋势做回归")
+    wks   = gsn_open_wks("pdf", "201021-季节平均SST的趋势-SCS-79-15-global-去掉ENSO影响")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

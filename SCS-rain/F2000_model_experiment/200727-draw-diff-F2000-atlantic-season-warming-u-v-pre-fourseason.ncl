@@ -122,8 +122,8 @@ do i = 0,3
 
 
     
-    res@tmXBLabelFontHeightF=0.01
-    res@tmYLLabelFontHeightF=0.01
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
@@ -172,13 +172,14 @@ do i = 0,3
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.02           ; thin vectors
+    res@vcMinDistanceF           = 0.02          ; thin vectors
     ; res@vcMinMagnitudeF          =0.02
     ; res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 1.5
-    res@vcRefLengthF             = 0.05     ; define length of v
+    res@vcRefMagnitudeF          = 1.6
+    res@vcRefLengthF             = 0.06     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-    ; res@vcLineArrowThicknessF=1.5
+    res@vcLineArrowThicknessF=1.5
+
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
