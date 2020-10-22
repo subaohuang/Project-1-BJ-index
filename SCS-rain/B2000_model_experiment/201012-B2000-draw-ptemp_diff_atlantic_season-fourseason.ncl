@@ -121,10 +121,10 @@ season = (/"MAM","JJA","SON","DJF"/)
     ; res@cnFillPalette = "hotcolr_19lev"
 
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
     ; gsn_define_colormap(wks, "BlueRed")
-    gsn_define_colormap(wks, "BlueDarkRed18")
+    ; gsn_define_colormap(wks, "BlueDarkRed18")
  
  
 
@@ -225,7 +225,7 @@ season = (/"MAM","JJA","SON","DJF"/)
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnFillDotSizeF = 0.001
   
     res_pro@cnMonoFillColor = False
     res_pro@cnFillColors = (/"Transparent","black","Transparent"/)

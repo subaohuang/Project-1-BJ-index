@@ -23,8 +23,8 @@ begin
 
 
   ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
-  fils1 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc"
+  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h0.0251-0280.nc"
+  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h0.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -105,10 +105,10 @@ begin
     ; res@cnRasterSmoothingOn=True
     res@trGridType = "TriangularMesh"
 
-    res@cnFillPalette = "BlueDarkRed18"
+    ; res@cnFillPalette = "BlueDarkRed18"
 
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
 
     ; gsn_define_colormap(wks, "BlRe")
     ; gsn_define_colormap(wks, "BlueDarkRed18")
@@ -174,7 +174,7 @@ begin
     res2@cnLevelSelectionMode = "ExplicitLevels"
     res2@cnFillOn = False
     res2@cnLinesOn = True
-    res2@cnLevels = (/0.55/)
+    res2@cnLevels = (/0.5/)
     res2@cnLineColors = "black"
     res2@cnMonoLineColor  = True
     res2@cnLineThicknessF = 2
