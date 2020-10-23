@@ -37,7 +37,7 @@ end
 begin
   
    ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -47,7 +47,7 @@ begin
     sst=f1->sst(timeind,:,:)
     ssta= sst
     ; copy_VarCoords(sst, ssta)
-  
+   
 
    ;;;;cal season trend 
   
@@ -55,6 +55,13 @@ begin
     ssta_jja = dim_avg_n_Wrap(month_to_season(ssta, "JJA"), 0)
     ssta_son = dim_avg_n_Wrap(month_to_season(ssta, "SON"), 0)
     ssta_djf = dim_avg_n_Wrap(month_to_season(ssta, "DJF"), 0)
+
+
+
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son - ssta_mam/)
+    ; ssta_djf = (/ssta_djf - ssta_mam/)
+    ; ssta_mam = 0.0
 
 
     
@@ -71,7 +78,7 @@ begin
   
   res@cnFillPalette = "matlab_jet"
    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-
+   ; res@cnFillPalette = "BlueRed"
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
@@ -81,16 +88,16 @@ begin
   res@lbLabelBarOn=False
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
-  res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             = 60
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
+  ; res@mpLimitMode           = "LatLon"
+  ; res@mpMinLatF             = -60
+  ; res@mpMaxLatF             = 60
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
 
-  ; res@mpMinLatF             = 0
-  ; res@mpMaxLatF             = 15
-  ; res@mpMinLonF             =110
-  ; res@mpMaxLonF             = 155
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 70
+  res@mpMaxLonF             = 170
 
 
 
@@ -115,6 +122,8 @@ begin
   res@cnMinLevelValF       =   23
   res@cnMaxLevelValF       =   30
   res@cnLevelSpacingF      =  0.5
+
+
 
   res@cnInfoLabelOn = False
   
@@ -150,9 +159,9 @@ begin
   plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
   plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
 
-  do i=0,3
-  overlay(plot(i), plot1(i))
-  end do   
+  ; do i=0,3
+  ; overlay(plot(i), plot1(i))
+  ; end do   
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 

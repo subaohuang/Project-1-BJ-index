@@ -43,7 +43,7 @@ dfi=(pi*10)/180
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
 wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流的趋势")
 
-msf_total = new((/dim_model,1380,11,72,144/),float)
+
 
 ;;;;
    
@@ -89,6 +89,7 @@ msf_total = new((/dim_model,1380,11,72,144/),float)
     prob&level@units = "hPa"
     
 
+
 ;;;;;draw 
     res = True
     res@gsnDraw=False
@@ -108,6 +109,8 @@ msf_total = new((/dim_model,1380,11,72,144/),float)
     res@lbLabelBarOn =True
     res@cnLineLabelsOn = False
     res@cnInfoLabelOn = False
+    
+
 
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
@@ -129,7 +132,8 @@ msf_total = new((/dim_model,1380,11,72,144/),float)
     res@vpWidthF=0.7
 
     ;;;;
-    res@gsnLeftString = "CMIP6 Historical MME"
+    res@gsnLeftString = "Linear trend of Regional Hadley Circulation"
+    res@gsnLeftStringFontHeightF = 0.015
     plot = gsn_csm_pres_hgt(wks,rc,res)
 
 
@@ -168,10 +172,10 @@ msf_total = new((/dim_model,1380,11,72,144/),float)
     res@gsnLeftString=""
     res@cnLevelSelectionMode = "ExplicitLevels"
     res@cnLinesOn=True
-    res@cnLevels = ispan(-8,8,2)
+    res@cnLevels = ispan(-8,8,1)
     res@cnLineLabelsOn=True
-    res@cnLineLabelBackgroundColor="Transparent"
-    res@cnLineThicknessF = 1.
+    res@cnLineLabelBackgroundColor="White"
+    res@cnLineThicknessF = 2.
     res@cnFillOn = False
     res@gsnContourNegLineDashPattern=1
     res@gsnContourZeroLineThicknessF=1.0

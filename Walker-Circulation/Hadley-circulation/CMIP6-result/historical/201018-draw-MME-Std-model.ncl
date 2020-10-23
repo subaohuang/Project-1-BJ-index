@@ -102,7 +102,7 @@ do k = 0,dim_model-1
 
         std1 = dim_stddev_n(ssta_mean(0:49,:), 0)
 
-        std2 = dim_stddev_n(ssta_mean(50:,:), 0)
+        std2 = dim_stddev_n(ssta_mean(59:,:), 0)
 
         x = ssta_mean&lon
         delete(ssta_mean)
@@ -126,17 +126,17 @@ end do
     res               = True                   ; plot mods desired
     res@gsnDraw = False
     res@gsnFrame = False
-    res@tiMainString  = "Standard deviations of SSTA in CMIP6 MME"   ; title
-    res@tiMainFontHeightF = 0.02
+    res@tiMainString  = "Standard deviations of SSTA in CMIP6 Historical run"   ; title
+    res@tiMainFontHeightF = 0.015
     res@tiYAxisString = "SST anomaly s.d."           ; y axis title
     res@tiXAxisString = ""
     
 
-    res@tmXBLabelFontHeightF=0.02
-    res@tmYLLabelFontHeightF=0.02
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
+    ; res@tmXBLabelFontHeightF=0.02
+    ; res@tmYLLabelFontHeightF=0.02
+    ; res@tmXBMajorThicknessF=1.0
+    ; res@tmYLMajorThicknessF=1.0
+    ; res@tmBorderThicknessF=1.0
 
 
     
@@ -198,6 +198,33 @@ end do
     
     overlay(mid_plot, plot_std1)
     overlay(mid_plot, plot_std2)
+
+    
+    ;;添加legend 
+    gres = True
+    gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+    gres@XPosPercent = 8    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+
+    lineres = True
+    ; lineres@lgLineColors = (/"black"，/) ; line colors
+    lineres@lgLineColors       = (/"Blue","red"/) ; colors chosen
+    lineres@lgLineThicknesses = 4.0                       ; line thicknesses
+    lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+
+    textres = True
+
+    textres@lgLabels = (/"1900-1950","1960-2014"/)
+    textres@lgLabelFontHeightF = 0.01
+    ; textres@lgLabelOpacity = (/0/) 
+
+
+    mid = simple_legend(wks,mid_plot,gres,lineres,textres)   
+   
+
+
+
+
 draw(mid_plot)
 frame(wks)
 end

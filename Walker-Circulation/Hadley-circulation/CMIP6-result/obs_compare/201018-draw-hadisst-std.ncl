@@ -24,7 +24,7 @@ begin
 
     std1 = dim_stddev_n(ssta_mean(0:49,:), 0)
 
-    std2 = dim_stddev_n(ssta_mean(50:,:), 0)
+    std2 = dim_stddev_n(ssta_mean(59:,:), 0)
 
     x = ssta_mean&longitude
 
@@ -38,10 +38,12 @@ data_all = (/std1,std2/)
     wks = gsn_open_wks("pdf","STD-HadISST")         ; send graphics to PNG file
 
     res               = True                   ; plot mods desired
-    res@tiMainString  = "Standard deviations of SSTA"   ; title
+    res@gsnDraw = False
+    res@gsnFrame = False
+    res@tiMainString  = "Standard deviations of SSTA in HadISST"   ; title
     res@tiYAxisString = "SST anomaly s.d."           ; y axis title
-
-
+   
+    res@tiMainFontHeightF = 0.015
     res@xyLineColors      = (/"blue","red"/)  ; line colors
     res@xyLineThicknesses = (/4.0,4.0/)        ; line thicknesses
     res@xyDashPatterns    = (/0.0,0.0/)        ; line patterns
@@ -54,8 +56,16 @@ data_all = (/std1,std2/)
 
     res@trXMaxF = 280.0
     res@trXMinF = 120.0
+
+    res@trYMinF = 0.0
+    res@trYMaxF = 1.0
+
+    
+
+
     res@tmXTOn = False
-    res@tmYLOn  = False
+    res@tmYROn  = False
+    ; res@tmYLOn  = False
 
     ; res@tmXBValues=(/0,90,180,270,357.5/)
     ; res@tmXBLabels=(/"0","90~S~o~N~E","180","90~S~o~N~W","0"/)
@@ -70,6 +80,33 @@ data_all = (/std1,std2/)
     res@tmXBMinorValues=ispan(120,280,15)
     res@tmYRMode="Automatic"
 
-  plot = gsn_xy(wks,x,data_all,res)          ; Draw an XY plot with 1 curve.
+
+
+
+  plot = gsn_csm_xy(wks,x,data_all,res)          ; Draw an XY plot with 1 curve.
+
+         ;;添加legend 
+    gres = True
+    gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+    gres@XPosPercent = 8    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+
+    lineres = True
+    ; lineres@lgLineColors = (/"black"，/) ; line colors
+    lineres@lgLineColors       = (/"Blue","red"/) ; colors chosen
+    lineres@lgLineThicknesses = 4.0                       ; line thicknesses
+    lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+
+    textres = True
+
+    textres@lgLabels = (/"1900-1950","1960-2014"/)
+    textres@lgLabelFontHeightF = 0.01
+    ; textres@lgLabelOpacity = (/0/) 
+
+
+    mid = simple_legend(wks,plot,gres,lineres,textres)   
+
+draw(plot)
+frame(wks)
   
 end
