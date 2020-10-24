@@ -128,16 +128,16 @@ begin
   res@cnInfoLabelOn = False
   
 
-  res@gsnLeftString="Spring"
+  res@gsnLeftString="MAM SST Climatology"
 
   plot=new(4,graphic)
 
   plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
-    res@gsnLeftString="Summer"
+    res@gsnLeftString="JJA SST Climatology"
   plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
-    res@gsnLeftString="Autumn"
+    res@gsnLeftString="SON SST Climatology"
   plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
-    res@gsnLeftString="Winter"
+    res@gsnLeftString="DJF SST Climatology"
   plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
 
   res2 = res
