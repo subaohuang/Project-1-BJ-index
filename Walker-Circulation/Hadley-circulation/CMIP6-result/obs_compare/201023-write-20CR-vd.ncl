@@ -4,7 +4,7 @@
 
 ;;;;
     model = "20CR"
-    diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/vd/ssp585/"
+    diri_output="/home/yangsong3/data-observation/linshh/obs-derived/vd/"
     
     yearstart = 187101
     yearend = 201212
@@ -24,11 +24,17 @@
     print(date(timeind))
 
     print("读入风场")
-    plev := doubletofloat(f1[0]->plev)
+    plev = f1->level
+    
+    print(plev)
+    exit()
 
-    z0=(/1000.0,925.0,850.0,700.0,600.0,500.0,400.0,300.0,250.0,150.0,100.0/)
+    z0=(/1000,925,850,700,600,500,400,300,250,150,100/)*1.0
 
     levind=get1Dindex(plev,z0)
+
+    print(levind)
+    exit()
   
 
     uwnd := f1->uwnd(timeind,levind,:,:)  ;;;195801-201212
@@ -39,7 +45,7 @@
     delete(f2)
 
       
-   print("*********************开始计算辐散风******************************")  
+    print("*********************开始计算辐散风******************************")  
     vrdvx=uv2vrdvF(uwnd,vwnd)
     ; vrdvx=uv2dv_cfd(uwnd, vwnd, uwnd&lat, vwnd&lon, 0)
     uvd=dv2uvF(vrdvx(1,:,:,:,:))
@@ -56,7 +62,7 @@
     printVarSummary(vd)
     delete(uwnd)
     delete(vwnd)
-     
+
     dim = dimsizes(vd)
     ntime = dim(0)
     nlev = dim(1)
