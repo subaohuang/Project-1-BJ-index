@@ -95,6 +95,12 @@ begin
     timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
+
+    sst_mam_clm = dim_avg_n_Wrap(month_to_season(sst, "MAM"), 0)
+    sst_jja_clm = dim_avg_n_Wrap(month_to_season(sst, "JJA"), 0)
+    sst_son_clm = dim_avg_n_Wrap(month_to_season(sst, "SON"), 0)
+    sst_djf_clm = dim_avg_n_Wrap(month_to_season(sst, "DJF"), 0)
+
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
     
@@ -115,6 +121,8 @@ begin
 
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
+
+
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
@@ -177,13 +185,13 @@ begin
 
 
 
-    res@tmXBLabelFontHeightF=0.025
-    res@tmYLLabelFontHeightF=0.025
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
+  res@tmXBLabelFontHeightF=0.025
+  res@tmYLLabelFontHeightF=0.025
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
 
-    res@tmXBValues = (/100,120,140,160/) 
-    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+  res@tmXBValues = (/100,120,140,160/) 
+  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
   res@gsnLeftStringFontHeightF = 0.03
 
@@ -192,8 +200,8 @@ begin
   res@cnMinLevelValF       =   0.0
   res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.1
-   ; res@cnFillPalette = "NCV_jaisnd"
-   res@cnFillPalette = "sunshine_9lev"
+  ; res@cnFillPalette = "NCV_jaisnd"
+  res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
   ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
@@ -218,28 +226,35 @@ begin
   res@gsnLeftString="(d) DJF SST trend"
   plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
 
-  ; res2 = res
-  ; res2@cnLevelSelectionMode = "ExplicitLevels"
-  ; res2@cnFillOn = False
-  ; res2@cnLinesOn = True
-  ; res2@cnLevels = (/0.55/)
-  ; res2@cnLineColors = "black"
-  ; res2@cnMonoLineColor  = True
-  ; res2@cnLineThicknessF = 2
-  ; res2@cnMonoLineThickness  = True
-  ; res2@gsnLeftString = ""
-  ; res2@cnInfoLabelOn = False
+  res2 = res
+  res2@cnLevelSelectionMode = "ExplicitLevels"
+  res2@cnFillOn = False
+  res2@cnLinesOn = True
+  res2@cnLevels = fspan(26.0, 30.0, 9)
+  res2@cnLineLabelStrings =   res2@cnLevels  + ""
+  res2@cnLineLabelDensityF = 1.3
+
+
+  res2@cnLineColors = "black"
+  res2@cnMonoLineColor  = True
+  res2@cnLineThicknessF = 2
+  res2@cnMonoLineThickness  = True
+  res2@gsnLeftString = ""
+  res2@cnInfoLabelOn = False
+  res2@cnLineLabelsOn = True
+  res2@cnLineLabelInterval = 1
+  res2@cnLineLabelBackgroundColor = "White"
   
-  ; plot1=new(4,graphic)
+  plot1=new(4,graphic)
 
-  ; plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
-  ; plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
-  ; plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
-  ; plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
+  plot1(0) = gsn_csm_contour(wks, sst_mam_clm, res2)
+  plot1(1) = gsn_csm_contour(wks, sst_jja_clm, res2)
+  plot1(2) = gsn_csm_contour(wks, sst_son_clm, res2)
+  plot1(3) = gsn_csm_contour(wks, sst_djf_clm, res2)
 
-  ; do i=0,3
-  ; overlay(plot(i), plot1(i))
-  ; end do   
+  do i=0,3
+  overlay(plot(i), plot1(i))
+  end do   
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 

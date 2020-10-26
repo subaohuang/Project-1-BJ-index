@@ -201,25 +201,25 @@ begin
     lon2 = 180
   ;;;
 
-    
+
     f1 = addfile(filein(0),"r")
 
     date :=cd_calendar(f1->time, 1)
     ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
-        timeind :=ind(date.ge.197901.and.date.le.201512)
+    timeind :=ind(date.ge.197901.and.date.le.201512)
 
-        yearnum = 37
+    yearnum = 37
 
     u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
 
     f1 = addfile(filein(1),"r")
     v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
 
-    
+
     f3 = addfile(filein(2),"r")
     date :=cd_calendar(f3->time, 1)
     ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
-      timeind :=ind(date.ge.197901.and.date.le.201512)
+    timeind :=ind(date.ge.197901.and.date.le.201512)
     q = short2flt(f3->q(timeind,:,{lat1:lat2},{lon1:lon2}))        
     ;;;
 print("=====finish read data==========")

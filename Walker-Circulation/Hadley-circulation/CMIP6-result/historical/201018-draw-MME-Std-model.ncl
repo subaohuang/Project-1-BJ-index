@@ -93,6 +93,7 @@ do k = 0,dim_model-1
         ssta :=(/rmMonAnnCycTLL(sst)/)
         copy_VarCoords(sst, ssta)
         printVarSummary(ssta)
+    
     ;;;
 ;;;;
 

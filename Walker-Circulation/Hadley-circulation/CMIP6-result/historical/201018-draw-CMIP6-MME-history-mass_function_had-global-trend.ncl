@@ -41,7 +41,7 @@ pi=get_pi("double")
 dfi=(pi*10)/180
 
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
-wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流的趋势")
+wks = gsn_open_wks("pdf", "MME的CMIP6模式-180-270哈德来环流的趋势")
 
 
 
@@ -64,7 +64,8 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流的趋势
     printVarSummary(msf)
 
   
-    msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
+    ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
+    msf_mean = dim_avg_n_Wrap(msf(:,:,:,{180:270}), (/3/))
 
 
 

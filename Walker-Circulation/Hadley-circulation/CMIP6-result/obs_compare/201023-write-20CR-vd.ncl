@@ -26,19 +26,15 @@
     print("读入风场")
     plev = f1->level
     
-    print(plev)
-    exit()
+    ; print(plev)
+    ; exit()
 
-    z0=(/1000,925,850,700,600,500,400,300,250,150,100/)*1.0
+    ; z0=(/1000,950,850,700,600,500,400,300,250,150,100/)*1.0
 
-    levind=get1Dindex(plev,z0)
+    ; levind=get1Dindex(plev,z0)
 
-    print(levind)
-    exit()
-  
-
-    uwnd := f1->uwnd(timeind,levind,:,:)  ;;;195801-201212
-    vwnd := f2->vwnd(timeind,levind,:,:)  ;;;
+    uwnd := f1->uwnd(timeind,:,::-1,:)  ;;;195801-201212
+    vwnd := f2->vwnd(timeind,:,::-1,:)  ;;;
     
 
     delete(f1)
