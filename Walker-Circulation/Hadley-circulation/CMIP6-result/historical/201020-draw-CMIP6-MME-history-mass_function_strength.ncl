@@ -49,7 +49,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
    
     yearstart = 190001
     yearend = 201412
-    fils1 :=  (/"/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/msf_mme_history_r1i1p1f1_185001-201412.nc"/)
+    fils1 :=  (/"/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/mme/msf_mme_history_r1i1p1f1_185001-201412.nc"/)
 
     f1 := addfile(fils1, "r")
     
@@ -79,6 +79,10 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
    
     msf_mean_annual_vermean = (/-1*msf_mean_annual_vermean/)
 
+    msf_mean_annual_9 =  runave_n(msf_mean_annual_vermean, 11, 0, 0)
+
+  
+
    
 
 
@@ -103,12 +107,22 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
     res  = True
     res@vpHeightF = 0.3
     res@vpWidthF = 0.7
-    res@tiYAxisString = "strenth"
+    res@tiYAxisString = "Intensity"
+    res@tiMainString  = "Time series of HC intensity in CMIP6 Historical run"   ; title'
+    res@tiMainFontHeightF = 0.02
+    res@trXMinF = 1900
+    res@trXMaxF = 2014
+
+
+    res@xyLineColors      = (/"blue","red"/)  ; line colors
+    res@xyLineThicknesses = (/4.0,4.0/)        ; line thicknesses
+    res@xyDashPatterns    = (/0.0,0.0/)        ; line patterns
+
     x = ispan(1900,2014,1)
 
 
 
-    plot = gsn_csm_xy(wks, x, msf_mean_annual_vermean, res)
+    plot = gsn_csm_xy(wks, x, (/msf_mean_annual_vermean,msf_mean_annual_9/) , res)
     ;;;  
 end 
 

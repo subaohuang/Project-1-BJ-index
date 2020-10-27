@@ -70,7 +70,7 @@ begin
 
     yearnum = endyear - startyear +1
   ;;
-  order  = (/"(a)","(b)","(c)","(d)"/)
+  order  = (/"(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)"/)
  
 
 ;;;读入HadiSST海温数据
@@ -259,18 +259,32 @@ begin
     printVarSummary(w_chazhi)
  
     w_chazhi=(/rmMonAnnCycTLL(w_chazhi)/)
+;;;;;
 
+
+    f6 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/olr_chazhi_1979-2015.nc", "r")
+    ;;;region
+    lat1 = -90
+    lat2 = 90
+    lon1 = 0
+    lon2 = 360
+
+    date:=cd_calendar(f6->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    olr_chazhi = f6->olr_chazhi
+
+;;;;;
 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数")
+    wks   = gsn_open_wks("pdf", "GPCP&olr回归到印度洋SST的回归系数")
   
-    plot=new(4,graphic)
+    plot=new(8,graphic)
     plot1 = plot
 
-    str = (/"1","2","3","4"/)
+    str = ispan(1,8,1)+ ""
  
-    iplot = new(4,graphic)
+    iplot = new(8,graphic)
 
     season =  (/"MAM","JJA","SON","DJF"/)
 ;;;;;
@@ -333,6 +347,11 @@ do i =0,3
   ;;;;;要分析的变量
   w_annual = month_to_season(w_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
 
+
+
+  ;;;;;要分析的变量
+  olr_annual = month_to_season(olr_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
+
     
 
 
@@ -376,6 +395,14 @@ do i =0,3
 
     r_sst_w = (/r_sst_w*ssta_index_rc/)
     ;;;;;
+   
+    ;;;correlation with sst
+    r_sst_olr := regCoef_n(ssta_index, olr_annual, 0, 0)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_olr)
+
+    r_sst_olr = (/r_sst_olr*ssta_index_rc/)
+    ;;;;;
+
 
 
 
@@ -407,6 +434,15 @@ do i =0,3
     prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
     ;;;;
 
+     ;;;t test 
+    prob_p4= rc_test(r_sst_olr)
+
+    printVarSummary(prob_p4)
+
+    prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+    ;;;;
+
+
     r_sst_u = where(r_sst_u.le.0.1.or.r_sst_v.le.0.1, r_sst_u, r_sst_u@_FillValue)
 
 
@@ -430,9 +466,15 @@ do i =0,3
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
-  res@lbLabelStride=2
-  res@lbOrientation="Vertical"
+  if i.eq.3 then
+  res@lbLabelBarOn= True
+  else
+  res@lbLabelBarOn= False
+  end if
+  res@pmLabelBarOrthogonalPosF = 0.1
+
+  res@lbLabelStride=1
+  res@lbOrientation="horizontal"
   res@mpLimitMode           = "LatLon"
   ; res@mpMinLatF             = lat1
   ; res@mpMaxLatF             = lat2
@@ -453,8 +495,8 @@ do i =0,3
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
 
-  res@tmXBLabelFontHeightF=0.025
-  res@tmYLLabelFontHeightF=0.025
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
@@ -482,8 +524,10 @@ do i =0,3
   res@vcRefLengthF             = 0.08     ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcVectorDrawOrder="PostDraw"
-
-  res@vcLineArrowThicknessF=1.5
+  
+  ; resv@vcMonoLineArrowColor = True
+  ; resv@vcLineArrowColor = "blue"
+  ; res@vcLineArrowThicknessF=1.5
   ; res@vcLineArrowHeadMaxSizeF=0.01
   ; res@vcLineArrowHeadMinSizeF=0.01
   res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
@@ -495,9 +539,37 @@ do i =0,3
 
   res@gsnLeftStringFontHeightF = 0.02
  
-  res@gsnLeftString = order(i)+" "+ season(i)+ " linear congruency of Precip and 850 hPa U,V trend with TIOST"
+  res@gsnLeftString = order(i*2)+" "+ season(i)+ " linear congruency of Precip & 850UV trend with TIOST"
 
-  plot(i) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_p, res)
+  res@cnExplicitLabelBarLabelsOn = True
+  res@lbLabelStrings =  res@cnLevels
+  res@vcExplicitLabelBarLabelsOn = True
+  res@stExplicitLabelBarLabelsOn = True
+  res@lbLabelFontHeightF = 0.018
+  res@lbAutoManage = False
+
+  plot(i*2) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_p, res)
+
+  
+  ; delete(res@cnLevelSelectionMode)
+  delete(res@cnFillPalette)
+  ; delete(res@cnLevels)
+  delete(res@cnFillColors)
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "MPL_bwr"
+
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+
+  res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+
+  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+  ; res@cnMinLevelValF      = -2.5       ; set min contour level
+  ; res@cnMaxLevelValF      = 2.5      ; set max contour level
+  ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
+
+  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " linear congruency of OLR trend with TIOST"
+
+  plot(i*2+1) = gsn_csm_contour_map(wks, r_sst_olr, res)
 
   ; plot(i) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_w, res)
   
@@ -551,7 +623,8 @@ do i =0,3
    ;;;
 
    
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   plot@$str(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
+   plot@$str(i*2+1)$ = gsn_add_polyline(wks, plot(i*2+1), pgx_pool, pgy_pool, pgres)
    
 
 
@@ -571,7 +644,9 @@ do i =0,3
     res_pro@cnInfoLabelOn=False
 
 
-    iplot(i) = gsn_csm_contour(wks,prob_p1,res_pro)
+    iplot(i*2) = gsn_csm_contour(wks,prob_p1,res_pro)
+
+    iplot(i*2+1) = gsn_csm_contour(wks,prob_p4,res_pro)
    
      
     
@@ -583,13 +658,15 @@ do i =0,3
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
+    iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.1,opt)
+    iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.1,opt)
    
 
 
     ;;;  
     
-      overlay(plot(i), iplot(i))
+      overlay(plot(i*2), iplot(i*2))
+      overlay(plot(i*2+1), iplot(i*2+1))
    
       delete(lat1)
       delete(lat2)
@@ -598,10 +675,11 @@ do i =0,3
 end do
 
   pres = True
-  pres@gsnPanelLabelBar  = True
-  pres@lbLabelFontHeightF = 0.015
+  pres@gsnMaximize = True
+  
+  pres@gsnPanelBottom = 0.05
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/4,2/), pres)
   
  
  print("done")

@@ -130,20 +130,37 @@ begin
     res@tmXTOn=False
     res@tmYROn=False
 
-    res@mpLimitMode           = "LatLon"
+    ; res@mpLimitMode           = "LatLon"
      
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
-    res@mpCenterLonF = 180.0
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+    ; res@mpCenterLonF = 180.0
 
     ; res@mpMinLatF             = -10.0
     ; res@mpMaxLatF             = 50.0
     ; res@mpMinLonF             = 60.0
     ; res@mpMaxLonF             = 160.0
 
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -30
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = -80
+    res@mpMaxLonF             = 280
 
+    res@mpCenterLonF          = 100
+    ; res@mpMinLatF             = -5
+    ; res@mpMaxLatF             = 30
+    ; res@mpMinLonF             = 100
+    ; res@mpMaxLonF             = 170
+
+
+    res@tmXBMode="Explicit"
+    ; res@tmYLMode="Explicit"
+
+    res@tmXBValues = (/-60,0,60,120,180,240/) 
+    res@tmXBLabels = (/"60W","0","60E","120E","180","120W"/) 
 
 
     res@mpFillOn = False
@@ -165,7 +182,7 @@ begin
 
     
     res@gsnRightString = ""
-    res@gsnLeftString = season(i) + " :SEN -CTRL"
+    res@gsnLeftString = season(i) + " SST diff(SEN -CTRL)"
 
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
@@ -247,9 +264,9 @@ end do
     pres@gsnPanelLabelBar = True
     ; pres@lbOrientation  = "Vertical"
     pres@lbOrientation  = "Horizontal"
-    pres@pmLabelBarOrthogonalPosF = -0.02
+    ; pres@pmLabelBarOrthogonalPosF = -0.01
     ; pres@pmLabelBarWidthF  = 0.03
-    pres@pmLabelBarHeightF = 0.03
+    pres@pmLabelBarHeightF = 0.04
     pres@lbLabelStride = 2  
     
     gsn_panel(wks, plot, (/2,2/), pres)
