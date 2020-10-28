@@ -495,11 +495,17 @@ do i =0,3
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
 
+  res@tmBorderThicknessF=1.0
+
   res@tmXBLabelFontHeightF=0.02
   res@tmYLLabelFontHeightF=0.02
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
-  res@tmBorderThicknessF=1.0
+
+  res@tmXBValues = (/100,120,140,160/) 
+  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+
 
 
   res@gsnScalarContour        = True
@@ -527,7 +533,7 @@ do i =0,3
   
   ; resv@vcMonoLineArrowColor = True
   ; resv@vcLineArrowColor = "blue"
-  ; res@vcLineArrowThicknessF=1.5
+  res@vcLineArrowThicknessF=1.2
   ; res@vcLineArrowHeadMaxSizeF=0.01
   ; res@vcLineArrowHeadMinSizeF=0.01
   res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows

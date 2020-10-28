@@ -27,6 +27,9 @@ season = (/"MAM","JJA","SON","DJF"/)
 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-OLR-indian-warming-foul-season")
+
+  order  = (/"(a)","(b)","(c)","(d)"/)
+ 
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -137,7 +140,7 @@ do i = 0,3
      ;;;LineArrow
     ; res@gsnScalarContour        = True
     res@gsnScalarContour        = False
-    res@gsnLeftString = season(i)+ " OLR diff("+season(i)+"_ind - CTRL)"
+    res@gsnLeftString = order(i) + season(i)+ " OLR diff("+season(i)+"_ind - CTRL)"
     res@gsnLeftStringFontHeightF  = 0.02
 
 
@@ -230,6 +233,7 @@ end do
   pres = True
   pres@gsnPanelLabelBar = True
   pres@lbLabelFontHeightF = 0.015
+  pres@pmLabelBarParallelPosF = 0.028    ;;;左右位置 
 
   gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")

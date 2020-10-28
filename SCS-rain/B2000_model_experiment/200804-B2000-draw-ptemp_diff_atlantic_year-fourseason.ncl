@@ -67,6 +67,10 @@ begin
     plot1 =new(4,graphic)
     iplot = new(4,graphic)
 
+     order  = (/"(a)","(b)","(c)","(d)"/)
+    
+     plot_add = new(4,graphic)
+
   do i=0,3
 
     PSL_CT_clm = dim_avg_n_Wrap(month_to_season(PSL_CT, season(i)), 0)
@@ -173,8 +177,8 @@ begin
     ; res@vpWidthF = 0.7
     ; res@vpHeightF = 0.3
 
-    res@tmXBLabelFontHeightF=0.01
-    res@tmYLLabelFontHeightF=0.01
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
@@ -182,7 +186,7 @@ begin
 
     
     res@gsnRightString = ""
-    res@gsnLeftString = season(i) + " SST diff(SEN -CTRL)"
+    res@gsnLeftString = order(i) + season(i) + " SST diff(SEN -CTRL)"
 
  
     plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
@@ -224,6 +228,24 @@ begin
     ;;;
     
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
+
+
+
+    ;;;添加赤道直线
+    pgx=ispan(30,390,10)
+    pgy=new(dimsizes(pgx),typeof(pgx))
+    pgy=0
+
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=1.0
+    pgres@gsLineDashPattern=1
+
+
+
+
+    plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+
    
 
      ;;;打点
@@ -259,16 +281,20 @@ begin
     iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
     overlay(plot(i), iplot(i))
 end do
-     pres = True
-     pres@gsnMaximize = True
-    pres@gsnPanelLabelBar = True
-    ; pres@lbOrientation  = "Vertical"
-    pres@lbOrientation  = "Horizontal"
-    ; pres@pmLabelBarOrthogonalPosF = -0.01
-    ; pres@pmLabelBarWidthF  = 0.03
+    pres = True
+    pres@gsnPanelLabelBar  = True
+    pres@gsnMaximize = True
+    pres@lbLabelStride = 1
+    pres@lbOrientation = "Horizontal"
+    ; pres@lbOrientation = "Vertical"
+    ; pres@pmLabelBarHeightF = 0.15
+    pres@pmLabelBarWidthF = 0.45
     pres@pmLabelBarHeightF = 0.04
-    pres@lbLabelStride = 2  
-    
+    pres@pmLabelBarOrthogonalPosF = -0.008   ;;;上下位置
+    pres@pmLabelBarParallelPosF = 0.02    ;;;左右位置 
+    pres@lbLabelFontHeightF = 0.01
+    pres@lbAutoManage =False
+
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
   end

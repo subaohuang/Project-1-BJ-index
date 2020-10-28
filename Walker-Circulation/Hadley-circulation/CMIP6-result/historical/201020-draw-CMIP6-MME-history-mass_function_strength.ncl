@@ -66,11 +66,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
   
     msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
 
-
-
     msf_mean_annual = month_to_annual(msf_mean, 1)
-
-
 
 
     ;;;;;区域平均
@@ -79,51 +75,127 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
    
     msf_mean_annual_vermean = (/-1*msf_mean_annual_vermean/)
 
+    msf_mean_annual_vermean = (/dim_standardize_n(msf_mean_annual_vermean, 1, 0)/)
+
     msf_mean_annual_9 =  runave_n(msf_mean_annual_vermean, 11, 0, 0)
+;;;;
 
   
+    fils2 :=  (/"/home/ys17-19/lsh/Project/Walker-Circulation/Hadley-circulation/CMIP6-result/historical/Vep_timeseries_1900-2014.nc"/)
+
+    f2 := addfile(fils2, "r")
+
+    time:=f2->time    ;;;这里用了20cr的time，因为jra的time是一个个来的
+    date:=cd_calendar(time, 1)
+    delete(time)
+
+    timeind:=ind(date.le.yearend.and.date.ge.yearstart)
+    delete(date)     
+    vep_all = f2->vep_all(:,timeind)
+
+    vep_all_annual = month_to_annual(vep_all(time|:,model_name|:), 0)
+
+    printVarSummary(vep_all_annual)
+
+    vep_annual = dim_avg_n_Wrap(vep_all_annual, 1)
+  
+    vep_annual = (/dim_standardize_n(vep_annual, 1, 0)/)
+
+;;;
+
+
+;;;计算相关系数
+   corr = escorc_n(vep_annual, msf_mean_annual_vermean, 0, 0)
+;;;
+
+
+;;;计算趋势
+   
+    x = ispan(1900,2014,1)
+
+    dim = dimsizes(msf_mean_annual_vermean)
+
+    rc_msf = regCoef_n(x,msf_mean_annual_vermean,0,0)
+ 
+    y_msf = rc_msf*x + rc_msf@yintercept
+
+    rc_vep = regCoef_n(x,vep_annual,0,0)
+ 
+    y_vep = rc_vep*x + rc_vep@yintercept
+;;;;
+
+
+;;;计算解释趋势
 
    
+  rc_msf_vep = regCoef_n(msf_mean_annual_vermean,vep_annual,0,0)
 
+  rc_realte_msf = rc_msf_vep*rc_msf
 
+  percent = rc_realte_msf/rc_vep
 
+  print("解释百分比= "+percent)
 
+ print( "HCtrend="+sprintf("%4.3f",rc_msf*10))
+ print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
+  print( "解释trend="+sprintf("%4.3f",rc_realte_msf*10))
 
-
-    ; ;;;计算趋势
-    ; ; rc = msf_mean_annual(1,:,:)
-    ; rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-60:60}),0,0)
-
-    ; copy_VarCoords(msf_mean_annual(1,:,{-60:60}), rc)
-
-    ; rc  = (/rc*dim(0)/)
-
-
-    ; prob := rc_test(rc)
-
-    ; copy_VarCoords(msf_mean_annual(1,:,{-60:60}), prob)
-    ; prob&level@units = "hPa"
-    
+;;;;
     res  = True
+    res@gsnDraw = False
+    res@gsnFrame = False
     res@vpHeightF = 0.3
     res@vpWidthF = 0.7
-    res@tiYAxisString = "Intensity"
-    res@tiMainString  = "Time series of HC intensity in CMIP6 Historical run"   ; title'
+    ; res@tiYAxisString = "Intensity"
+    res@tiMainString  = "Time series of HC intensity&CEW index"   ; title'
     res@tiMainFontHeightF = 0.02
     res@trXMinF = 1900
     res@trXMaxF = 2014
 
 
-    res@xyLineColors      = (/"blue","red"/)  ; line colors
-    res@xyLineThicknesses = (/4.0,4.0/)        ; line thicknesses
-    res@xyDashPatterns    = (/0.0,0.0/)        ; line patterns
 
-    x = ispan(1900,2014,1)
-
+    res@xyLineColors      = (/"red","blue","red","blue"/)  ; line colors
+    res@xyLineThicknesses = (/2.0,2.0,1.0,1.0/)        ; line thicknesses
+    res@xyDashPatterns    = (/0.0,0.0,1.0,1.0/)        ; line patterns
 
 
-    plot = gsn_csm_xy(wks, x, (/msf_mean_annual_vermean,msf_mean_annual_9/) , res)
+
+    plot = gsn_csm_xy(wks, x, (/msf_mean_annual_vermean,vep_annual,y_msf,y_vep/) , res)
     ;;;  
+
+    ;;添加legend 
+    gres = True
+    gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+    gres@XPosPercent = 8    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+
+    lineres = True
+    ; lineres@lgLineColors = (/"black"，/) ; line colors
+    lineres@lgLineColors       = (/"Blue","red"/) ; colors chosen
+    lineres@lgLineThicknesses = 4.0                       ; line thicknesses
+    lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+
+    textres = True
+
+    textres@lgLabels = (/"HC intensity","CEW index"/)
+    textres@lgLabelFontHeightF = 0.008
+    ; textres@lgLabelOpacity = (/0/) 
+
+    mid = simple_legend(wks,plot,gres,lineres,textres)   
+
+
+    ;;;;添加相关系数
+
+    resxy = True
+
+    resxy@txFontHeightF = 0.02
+
+    txid = gsn_add_text(wks,plot,"Corr =" +sprintf("%3.2f",corr), 2000.0, 2.4 ,resxy)
+    
+    draw(plot)
+    frame(wks)
+   
+
 end 
 
 
