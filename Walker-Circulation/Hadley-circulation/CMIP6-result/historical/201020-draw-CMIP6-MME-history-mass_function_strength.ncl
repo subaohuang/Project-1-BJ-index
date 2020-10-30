@@ -98,9 +98,37 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
     printVarSummary(vep_all_annual)
 
     vep_annual = dim_avg_n_Wrap(vep_all_annual, 1)
-  
-    vep_annual = (/dim_standardize_n(vep_annual, 1, 0)/)
 
+    ; vep_annual = (/dim_standardize_n(vep_annual, 1, 0)/)
+  
+;;;;;;
+
+    fils3 :=  (/"/home/ys17-19/lsh/Project/Walker-Circulation/Hadley-circulation/CMIP6-result/historical/sstg_timeseries_1900-2014.nc"/)
+
+    f3 := addfile(fils3, "r")
+
+    time:=f3->time    ;;;这里用了20cr的time，因为jra的time是一个个来的
+    date:=cd_calendar(time, 1)
+    delete(time)
+
+    timeind:=ind(date.le.yearend.and.date.ge.yearstart)
+    delete(date)     
+    sstg_all = f3->sstg_all(:,timeind)
+
+    sstg_all_annual = month_to_annual(sstg_all(time|:,model_name|:), 0)
+   
+    printVarSummary(sstg_all_annual)
+
+
+    print("num="+num(ismissing(sstg_all_annual)))
+    
+    sstg_annual = dim_avg_n(sstg_all_annual, 1)
+    ; sstg_annual = sstg_all_annual(:,6)
+
+
+    sstg_annual = (/dim_standardize_n(sstg_annual, 1, 0)/)
+
+    
 ;;;
 
 
@@ -122,23 +150,41 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
     rc_vep = regCoef_n(x,vep_annual,0,0)
  
     y_vep = rc_vep*x + rc_vep@yintercept
+
+    rc_sstg = regCoef_n(x,sstg_annual,0,0)
 ;;;;
 
 
 ;;;计算解释趋势
 
    
-  rc_msf_vep = regCoef_n(msf_mean_annual_vermean,vep_annual,0,0)
+    ; rc_msf_vep = regCoef_n(msf_mean_annual_vermean,vep_annual,0,0)
 
-  rc_realte_msf = rc_msf_vep*rc_msf
+    ; rc_realte_msf = rc_msf_vep*rc_msf
 
-  percent = rc_realte_msf/rc_vep
+    ; percent = rc_realte_msf/rc_vep
 
-  print("解释百分比= "+percent)
+    ; print("解释百分比= "+percent)
+ ;     print( "HCtrend="+sprintf("%4.3f",rc_msf*10))
+ ; print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
+ ;  print( "解释trend="+sprintf("%4.3f",rc_realte_msf*10))
+ ;  exit()
 
- print( "HCtrend="+sprintf("%4.3f",rc_msf*10))
- print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
-  print( "解释trend="+sprintf("%4.3f",rc_realte_msf*10))
+
+
+    rc_sstg_vep = regCoef_n(sstg_annual,vep_annual,0,0)
+
+    rc_realte_sstg = rc_sstg_vep*rc_sstg
+
+    percent = rc_realte_sstg/rc_vep
+
+    print("解释百分比= "+percent)
+
+
+    print( "SSTGtrend="+sprintf("%4.3f",rc_sstg*10))
+    print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
+    print( "解释trend="+sprintf("%4.3f",rc_realte_sstg*10))
+    exit()
 
 ;;;;
     res  = True
