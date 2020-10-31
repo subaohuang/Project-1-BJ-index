@@ -65,10 +65,16 @@ do k = 0,dim_model-1
         delete(date)     
         sst = lonFlip(f1[:]->tos(timeind,:,:))
     end if
+
+    if k.eq.12 then 
+    sst =  where(sst.ge.40.0 , sst@_FillValue , sst)
+    end if
         delete(timeind)
         ssta :=(/rmMonAnnCycTLL(sst)/)
         copy_VarCoords(sst, ssta)
         printVarSummary(ssta)
+
+
 ;;;;
 
 
