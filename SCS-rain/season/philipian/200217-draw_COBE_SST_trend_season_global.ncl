@@ -44,12 +44,12 @@ end
 begin
   
    ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"COBE_SST.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201612.and.date.ge.197901)
+    timeind:=ind(date.le.201312.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
 
@@ -67,10 +67,10 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ssta_jja = (/ssta_jja - ssta_mam/)
-    ssta_son = (/ssta_son- ssta_mam/)
-    ssta_djf = (/ssta_djf -ssta_mam/)
-    ssta_mam = 0.0
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -88,7 +88,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "COBE-global季节平均SST的趋势-79-16")
+    wks   = gsn_open_wks("pdf", "COBE-global季节平均SST的趋势-79-13")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -147,8 +147,8 @@ begin
   ; res@cnMaxLevelValF       =   1.0
   ; res@cnLevelSpacingF      =  0.1
 
-  res@cnMinLevelValF       =   -.6
-  res@cnMaxLevelValF       =   0.6
+  res@cnMinLevelValF       =   -.7
+  res@cnMaxLevelValF       =   0.7
   res@cnLevelSpacingF      =  0.1
 
   res@mpFillDrawOrder = "PostDraw"

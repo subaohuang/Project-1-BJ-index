@@ -23,10 +23,10 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r +"_notest_wholeind/"+"F_2000_ind_"+season_r+"_notest_wholeind.cam.h1.0101-4012_chazhi.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,pre-indian-warming-foul-season-test")
+  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,pre-indian-warming-foul-season-wholeind")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -151,7 +151,7 @@ do i = 0,3
     ; res@mpMaxLonF             = 170.0
     res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 30.0
+    res@mpMinLonF             = 30
     res@mpMaxLonF             = 170.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)

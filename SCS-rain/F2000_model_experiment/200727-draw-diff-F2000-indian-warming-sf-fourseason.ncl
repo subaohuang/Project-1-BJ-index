@@ -23,7 +23,7 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_vp_sf.nc"
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_vp_sf.nc"
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_vp_sf.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-sf-indian-warming-foul-season")
@@ -118,24 +118,24 @@ do i = 0,3
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1.2
-    res@cnMaxLevelValF       =   1.2
-    res@cnLevelSpacingF      =  0.2
+    res@cnMinLevelValF       =   -1.6
+    res@cnMaxLevelValF       =   1.6
+    res@cnLevelSpacingF      =  0.4
     
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -10.0
+    ; res@mpMinLatF             = -10.0
+    ; res@mpMaxLatF             = 30.0
+    ; ; res@mpMinLonF             = 40.0
+    ; res@mpMinLonF             = 70.0
+    ; res@mpMaxLonF             = 170.0
+    res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 70.0
+    res@mpMinLonF             = 30.0
     res@mpMaxLonF             = 170.0
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
-    ; res@mpMinLonF             = 0.0
-    ; res@mpMaxLonF             = 360.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False

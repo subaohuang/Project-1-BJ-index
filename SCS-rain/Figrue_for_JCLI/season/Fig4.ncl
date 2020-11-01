@@ -52,11 +52,11 @@ begin
 
     str = ispan(1,9,1)+""
 
-    wks   = gsn_open_wks("pdf", "fig4.pdf")
+    wks   = gsn_open_wks("pdf", "fig4-2015.pdf")
 
     ;;;time span
     startmon =197901
-    endmon = 201612
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -70,7 +70,7 @@ begin
 
     f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f1->precip(timeind,:,:)
    
     delete(p&time)

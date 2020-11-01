@@ -26,7 +26,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h0.00"+"*")
 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-OLR-indian-warming-foul-season")
+  wks=gsn_open_wks("pdf", "CESM-F2000-OLR-indian-warming-foul-season-whole-ind")
 
   order  = (/"(a)","(b)","(c)","(d)"/)
  
@@ -39,9 +39,12 @@ f1=addfiles(fils1, "r")
 
 
 do i = 0,3
-
-  fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r(i) +"_notest/"+"F_2000_ind_"+season_r(i)+"_notest.cam.h0.00"+"*")
-
+   
+  ; if i.ne.3  then 
+  fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r(i) +"_notest_wholeind/"+"F_2000_ind_"+season_r(i)+"_notest_wholeind.cam.h0.00"+"*")
+; else  
+  ; fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r(i) +"_notest/"+"F_2000_ind_"+season_r(i)+"_notest.cam.h0.00"+"*")
+; end if
   f2=addfiles(fils2, "r")
 
 
@@ -92,6 +95,7 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     res@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res@cnFillPalette = "BlRe"
     ; ; res@cnFillPalette = "MPL_BrBG"
 
     ; res@cnFillPalette = "precip_diff_12lev"

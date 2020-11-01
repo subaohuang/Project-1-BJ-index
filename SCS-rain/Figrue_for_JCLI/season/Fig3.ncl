@@ -49,7 +49,7 @@ begin
 
     ;;;time span
     startmon =197901
-    endmon = 201612
+    endmon = 201512
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -63,7 +63,7 @@ begin
 
     f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f1->precip(timeind,:,:)
    
     delete(p&time)
@@ -293,7 +293,7 @@ print("=====finish read data==========")
 ; ; ==============================================================
     ;;;;Q component
     Q_rc =  cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
-    yearnum = 38
+    yearnum = 37
     
     q_rc = Q_rc[0]
     qu_rc  =  Q_rc[1]
@@ -474,6 +474,8 @@ print("=====finish read data==========")
 
 
     olr_annual = month_to_season(olr, season(i))
+    printVarSummary(olr_annual)
+    
     olr_rc = regCoef_n(ispan(1, yearnum, 1), olr_annual, 0, 0)
     copy_VarCoords(olr_annual(1,:,:),olr_rc)
     olr_rc = (/olr_rc*yearnum/)

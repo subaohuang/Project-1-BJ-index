@@ -63,9 +63,9 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ;;;;remove_enso_signal
-         p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ;;;;
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
 
       if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
@@ -92,7 +92,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201512.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -126,7 +126,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-15-removeenso")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -227,7 +227,7 @@ begin
   res2@cnFillOn = False
   res2@cnLinesOn = True
   delete(res2@cnLevels)
-  res2@cnLevels = (/0.55/)
+  res2@cnLevels = (/0.6/)
   res2@cnLineColors = "black"
   res2@cnMonoLineColor  = True
   res2@cnLineThicknessF = 2
