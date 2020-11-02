@@ -24,13 +24,19 @@ begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h0.0101-4012_chazhi.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
+
+  fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,pre-indian-warming-foul-season-test")
+  wks=gsn_open_wks("pdf", "Fig.7")
   
-  plot = new(4,graphic)
-  iplot = new(4,graphic)
-  str3 = ispan(1,4,1) + ""
+  plot = new(8,graphic)
+  iplot = new(8,graphic)
+  str3 = ispan(1,8,1) + ""
+
+  order  = (/"(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)"/)
+ 
 
 
 do i = 0,3
@@ -84,21 +90,36 @@ do i = 0,3
   v_diff = (/v_indian_clm - v_CT_clm/)
 
   ;;;t_test 
-    prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
-    prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
-    prob_v = t_test( month_to_season(v_CT, season(i)) ,month_to_season(v_id, season(i)))
+  prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
+  prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
+  prob_v = t_test( month_to_season(v_CT, season(i)) ,month_to_season(v_id, season(i)))
   ;;;
-   PRE_diff@_FillValue = 10^9
-   u_diff@_FillValue = 10^9
-   v_diff@_FillValue = 10^9
-    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
+  PRE_diff@_FillValue = 10^9
+  u_diff@_FillValue = 10^9
+  v_diff@_FillValue = 10^9
+  ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
 
 
-    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+  u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+  v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
     
-;;;
+;;;OLR
+   f3 = addfile(fils3, "r")
+   f4 = addfile(fils4(i), "r")
+
+   OLR_ct = f3->FLUT(timeind,:,:)
+
+   OLR_indian = f4->FLUT(timeind,:,:)
+
+   OLR_CT_clm = dim_avg_n_Wrap(month_to_season(OLR_CT, season(i)), 0)
+   OLR_indian_clm = dim_avg_n_Wrap(month_to_season(OLR_indian, season(i)), 0)
+
+   OLR_diff = OLR_CT_clm
+   OLR_diff = (/OLR_indian_clm - OLR_CT_clm/)
+   
+   prob_OLR = t_test( month_to_season(OLR_CT, season(i)) ,month_to_season(OLR_indian, season(i)))
+
 
 
 ;;;;;;
@@ -166,15 +187,15 @@ do i = 0,3
      ;;;LineArrow
     res@gsnScalarContour        = True
     ; res@gsnScalarContour        = False
-    res@gsnLeftString = season(i)+ " OLR diff("+season(i)+"_ind - CTRL)"
-    res@gsnLeftStringFontHeightF  = 0.03
+
+    res@gsnLeftString = order(i*2)+" "+ season(i)+ "Precip & 850UV diff("+season(i)+"_ind - CTRL)"
+    res@gsnLeftStringFontHeightF  = 0.02
 
     
     ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     res@vcGlyphStyle="CurlyVector"
 
     res@vcMinDistanceF           = 0.015           ; thin vectors
-    ; res@vcMinDistanceF           = 0.02           ; thin vectors
     res@vcMinMagnitudeF          =0.02
     ; res@vcMaxMagnitudeF = 7.0
     res@vcRefMagnitudeF          = 1.5
@@ -183,18 +204,14 @@ do i = 0,3
     res@vcLineArrowThicknessF=1.0
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
-    ; res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
-    ; res@vcLineArrowHeadMinSizeF = 0.006
+    res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    res@vcLineArrowHeadMinSizeF = 0.006
     res@vcVectorDrawOrder="PostDraw"
-    
-
-
-
     
     
     res@gsnRightString = ""
-    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
-    ; plot(i) = gsn_csm_contour_map(wks, PRE_diff,res)
+    plot(i*2) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    
 
   ;   resv                             = True 
   ;   resv@gsnDraw                     = False
@@ -233,10 +250,32 @@ do i = 0,3
   ;   overlay (plot(i),plot_vect)
   ; delete(resv@vcLineArrowColor)
   ; delete(resv@vcMonoLineArrowColor)
+;;;;
+
+
+;;;;draw OLR result
+ ; delete(res@cnLevelSelectionMode)
+  delete(res@cnFillPalette)
+  delete(res@cnLevels)
+  delete(res@cnFillColors)
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "MPL_bwr"
+
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  res@lbLabelStride=1
+
+  res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*10.0
+  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+  ; res@cnMinLevelValF      = -2.5       ; set min contour level
+  ; res@cnMaxLevelValF      = 2.5      ; set max contour level
+  ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
+
+  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ "OLR diff("+season(i)+"_ind - CTRL)"
+
+  plot(i*2+1) = gsn_csm_contour_map(wks, OLR_diff, res)
 
    
   ; 
-
    pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=2.0
@@ -252,7 +291,8 @@ do i = 0,3
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-    plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   plot@$str3(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
+   plot@$str3(i*2+1)$ = gsn_add_polyline(wks, plot(i*2+1), pgx_pool, pgy_pool, pgres)
 
     ; ;;;打点
     ; res_pro=True
@@ -299,7 +339,9 @@ do i = 0,3
     res_pro@cnInfoLabelOn=False
 
 
-    iplot(i) = gsn_csm_contour(wks,prob_p,res_pro)
+    iplot(i*2) = gsn_csm_contour(wks,prob_p,res_pro)
+
+    iplot(i*2+1) = gsn_csm_contour(wks,prob_OLR,res_pro)
 
      
     
@@ -310,8 +352,10 @@ do i = 0,3
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.01,opt)
-    overlay(plot(i), iplot(i))
+    iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.01,opt)
+    iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.01,opt)
+    overlay(plot(i*2), iplot(i*2))
+    overlay(plot(i*2+1), iplot(i*2+1))
     print("finish subset figure")
 end do
   print("panel")
@@ -319,7 +363,7 @@ end do
   pres@gsnPanelLabelBar = True
   pres@lbLabelFontHeightF = 0.015
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/4,2/), pres)
   print("done script")
 end
   

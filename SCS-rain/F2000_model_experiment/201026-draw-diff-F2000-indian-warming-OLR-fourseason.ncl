@@ -41,15 +41,19 @@ f1=addfiles(fils1, "r")
 do i = 0,3
    
   ; if i.ne.3  then 
-  fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r(i) +"_notest_wholeind/"+"F_2000_ind_"+season_r(i)+"_notest_wholeind.cam.h0.00"+"*")
+  ; fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r(i) +"_notest_wholeind/"+"F_2000_ind_"+season_r(i)+"_notest_wholeind.cam.h0.00"+"*")
 ; else  
-  ; fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r(i) +"_notest/"+"F_2000_ind_"+season_r(i)+"_notest.cam.h0.00"+"*")
+  fils2 = systemfunc("ls /home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r(i) +"_notest/"+"F_2000_ind_"+season_r(i)+"_notest.cam.h0.00"+"*")
 ; end if
+
   f2=addfiles(fils2, "r")
 
 
   date=cd_calendar(f1[:]->time, 1)
+  print(date)
+  exit()
   timeind=ind(date.ge.601.and.date.le.4012)
+
 
   PRECL_CT  =  f1[:]->FLUT(timeind,:,:)
 
@@ -122,15 +126,15 @@ do i = 0,3
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -5.0
+    ; res@mpMinLatF             = -5.0
+    ; res@mpMaxLatF             = 30.0
+    ; ; res@mpMinLonF             = 40.0
+    ; res@mpMinLonF             = 100.0
+    ; res@mpMaxLonF             = 170.0
+    res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
-    ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 100.0
+    res@mpMinLonF             = 30.0
     res@mpMaxLonF             = 170.0
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
-    ; res@mpMinLonF             = 0.0
-    ; res@mpMaxLonF             = 360.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
     res@mpFillOn = False

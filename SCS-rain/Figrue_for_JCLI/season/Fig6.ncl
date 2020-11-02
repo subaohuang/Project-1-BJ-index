@@ -36,36 +36,9 @@ begin
 return prob
 end
 undef("remove_enso_signal")
-function remove_enso_signal(data)
+function remove_enso_signal(nino3_4,  data)
   begin  
-  ; ;;;读入HadiSST海温数据
-      diri="/home/yangsong3/data-observation/linshh/data/sst/"
-      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-      f1=addfile(fils1, "r")
-      date:=cd_calendar(f1->time, 1)
-
-      timeind:=ind(date.le.201512.and.date.ge.197901)
-
-      sst =  lonFlip(f1->sst(timeind,:,:))
-   
-      ssta=(/rmMonAnnCycTLL(sst)/)
-      copy_VarCoords(sst, ssta)
-
-      ssta_de = ssta
-      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
-      printVarSummary(ssta_index)
-
-      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-      printVarSummary(nino3_4)
-
-      
-      ; nino3_4_new = nino3_4                ;;;;前期ENSO
-      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
-      ; nino3_4_new(34) =ssta_index(35*12-1) 
-   
-      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
-  ;;;;;
+   ;;;;;
       ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
       data_de  = data
       data_rc = regCoef_n(nino3_4,data_de, 0, 0)
@@ -97,7 +70,7 @@ begin
 
     yearnum = endyear - startyear +1
   ;;
-  order  = (/"(a)","(b)","(c)","(d)"/)
+  order  = (/"(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)"/)
  
 
 ;;;读入HadiSST海温数据
@@ -118,6 +91,21 @@ begin
     ;;;
     delete(date)
     delete(timeind)
+
+    ssta_de = ssta
+    ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ssta_in = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+    printVarSummary(ssta_in)
+
+    nino3_4 = month_to_season(ssta_in, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+    printVarSummary(nino3_4)
+
+
+    ; nino3_4_new = nino3_4                ;;;;前期ENSO
+    ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+    ; nino3_4_new(34) =ssta_index(35*12-1) 
+
+    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
 ;;;
 
 ;;;area mean 
@@ -140,33 +128,163 @@ begin
       printVarSummary(area)
 ;;;;
 
-
-
-
+  
 
 ;;;read GPCP precipitation data
     
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
+    ; date:=cd_calendar(f2->time, 1)
+    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    ; p=f2->precip(timeind,:,:)
+    ; printVarSummary(p)
+
+    ; p_chazhi = chazhi(p)
+  
+    ; system("/bin/rm -f gpcp_pre_chazhi_1979-2015.nc")
+    ; ncout1 = addfile("gpcp_pre_chazhi_1979-2015.nc", "c")
+    ; ncout1->p_chazhi = p_chazhi
+
+
+
+    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/gpcp_pre_chazhi_1979-2015.nc", "r")   
     date:=cd_calendar(f2->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    p=f2->precip(timeind,:,:)
-    printVarSummary(p)
     
+    p_chazhi = f2->p_chazhi(timeind,:,:)
 
-    p_chazhi = chazhi(p)
     printVarSummary(p_chazhi)
  
     p_chazhi=(/rmMonAnnCycTLL(p_chazhi)/)
 ;;;; 
 
-;;;;
-    wks   = gsn_open_wks("pdf", "GPCP回归到印度洋SST的回归系数")
-  
-    plot=new(4,graphic)
 
-    str = (/"1","2","3","4"/)
+;;;read era data
+    ; path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
+    ; var_name = (/"uwnd","vwnd","wwnd"/)
+    ; filein = path_wind + var_name +".mon.mean.nc"
+
+    ; ;;;region 
+    ; lat1 = -90
+    ; lat2 = 90
+    ; lon1 = 0
+    ; lon2 = 360
+    ; ;;;
+
+
+    ; f1 = addfile(filein(0),"r")
+
+    ; date :=cd_calendar(f1->time, 1)
+
+    ; timeind :=ind(date.ge.197901.and.date.le.201512)
+
+    ; u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
+
+    ; f2 = addfile(filein(1),"r")
+    ; v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
+
+    ; u!1 = "lat"
+    ; u!2 = "lon"
+
+    ; v!1 = "lat"
+    ; v!2 = "lon"
+    
+    ; printVarSummary(u)
+
+    ; f3 = addfile(filein(2),"r")
+
+    ; date := cd_calendar(f3->time, 1)
+
+    ; timeind:=ind(date.ge.197901.and.date.le.201512)
+
+    ; w = short2flt(f3->w(timeind,{500},{lat1:lat2},{lon1:lon2}))
+    ; w = (/w*-100.0/)
+
+    ; w!1 = "lat"
+    ; w!2 = "lon"
+
+    ; u_chazhi = chazhi(u)
+    ; printVarSummary(u_chazhi)
+    ; u_chazhi=(/rmMonAnnCycTLL(u_chazhi)/)
+
+    ; ; system("/bin/rm -f era_u_chazhi_1979-2015.nc")
+    ; ; ncout1 = addfile("era_u_chazhi_1979-2015.nc", "c")
+    ; ; ncout1->u_chazhi = u_chazhi
+
+    ; v_chazhi = chazhi(v)
+    ; printVarSummary(v_chazhi)
+    ; v_chazhi=(/rmMonAnnCycTLL(v_chazhi)/)
+
+    ; ; system("/bin/rm -f era_v_chazhi_1979-2015.nc")
+    ; ; ncout1 = addfile("era_v_chazhi_1979-2015.nc", "c")
+    ; ; ncout1->v_chazhi = v_chazhi
+
+    ; w_chazhi = chazhi(w)
+    ; printVarSummary(w_chazhi)
+    ; w_chazhi=(/rmMonAnnCycTLL(w_chazhi)/)
+
+;      system("/bin/rm -f era_w_chazhi_1979-2015.nc")
+;     ncout1 = addfile("era_w_chazhi_1979-2015.nc", "c")
+;     ncout1->w_chazhi = w_chazhi
+; ;;;;
+
+    ; print("=====finish read data==========")
+
+    f1=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_u_chazhi_1979-2015.nc", "r")   
+    date:=cd_calendar(f1->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    
+    u_chazhi = f1->u_chazhi(timeind,:,:)
+
+    printVarSummary(u_chazhi)
  
-    iplot = new(4,graphic)
+    u_chazhi=(/rmMonAnnCycTLL(u_chazhi)/)
+
+    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_v_chazhi_1979-2015.nc", "r")   
+    date:=cd_calendar(f2->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    
+    v_chazhi = f2->v_chazhi(timeind,:,:)
+
+    printVarSummary(v_chazhi)
+ 
+    v_chazhi=(/rmMonAnnCycTLL(v_chazhi)/)
+
+
+    f3=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_w_chazhi_1979-2015.nc", "r")   
+    date:=cd_calendar(f3->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    
+    w_chazhi = f3->w_chazhi(timeind,:,:)
+
+    printVarSummary(w_chazhi)
+ 
+    w_chazhi=(/rmMonAnnCycTLL(w_chazhi)/)
+;;;;;
+
+
+    f6 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/olr_chazhi_1979-2015.nc", "r")
+    ;;;region
+    lat1 = -90
+    lat2 = 90
+    lon1 = 0
+    lon2 = 360
+
+    date:=cd_calendar(f6->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    olr_chazhi = f6->olr_chazhi
+
+;;;;;
+
+
+;;;;
+    wks   = gsn_open_wks("pdf", "GPCP&olr回归到印度洋SST的回归系数")
+  
+    plot=new(8,graphic)
+    plot1 = plot
+
+    str = ispan(1,8,1)+ ""
+ 
+    iplot = new(8,graphic)
 
     season =  (/"MAM","JJA","SON","DJF"/)
 ;;;;;
@@ -174,99 +292,119 @@ begin
 
 
 do i =0,3
-  ; ;;;region
-  ;  lat1 = -5
-  ;  lat2 = 45
-  ;  lon1 = 90
-  ;  lon2 = 160
-  ; ;;;
+
   ;;;region
-   lat1 = -60
-   lat2 = 60
-   lon1 = 0
-   lon2 = 360
+   lat1 = -30
+   lat2 = 30
+   lon1 = 30
+   lon2 = 180
   ;;;
 
  
   ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season(i))
   printVarSummary(ssta_annual)
 
+
+  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) , 0, 0)
+  ssta_index_rc  =ssta_index_rc*yearnum
+   
+
   ;;;;remove_enso_signal 
-  ssta_annual = (/remove_enso_signal(ssta_annual)/)
+  ssta_annual = (/remove_enso_signal(nino3_4, ssta_annual)/)
   ;;;;
 
-
-  ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
-
-
-  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) , 0, 0)
-  ssta_index_rc  =ssta_index_rc*yearnum
-
   ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
-
-  ;;;sst 倾向值
-
-  dsst = center_finite_diff_n(ssta, 1, False, 0, 0) 
-  copy_VarCoords(ssta, dsst)
-  dsst_annual =  month_to_season(dsst(:,{lat1:lat2},{lon1:lon2}), season(i))
-  dsst_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),dsst_annual,False,True,0)/)
-
-
-  ; dsst_annual = center_finite_diff_n(ssta_annual, 1, False, 0, 0) 
-  copy_VarCoords(ssta_annual, dsst_annual)
-
+ 
+ 
+  ;;;;;要分析的变量
   p_annual = month_to_season(p_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
 
   ; ;;;;remove_enso_signal 
-  ;   p_annual = (/remove_enso_signal(p_annual)/)
-  ; ;;;;
-
-
-  p_annual_rc = regCoef_n(ispan(1,dimsizes(p_annual&time),1), p_annual, 0, 0)
-  p_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),p_annual,False,True,0)/)
-
-   
+  ; p_annual = (/remove_enso_signal(nino3_4, p_annual)/)
  
-  print("*******开始计算相关系数*****************")
-   p_index = dim_avg_n_Wrap(p_annual(:,{0:15},{125:160}), (/1,2/))
-  
-   ;;;
-   ;;get region mean as index     
-   ; lat1 = 0
-   ; lat2 = 15
-   ; lon1 = 110
-   ; lon2 = 155
+  ; ;;;;;;;;
 
-   ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) 
+
+ 
+  ;;;;;要分析的变量
+  u_annual = month_to_season(u_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
+  ; ;;;;remove_enso_signal 
+  ; u_annual = (/remove_enso_signal(nino3_4, u_annual)/)
+  ; ;;;;
   
 
-   ;;;normalized 
-   
-   ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
+
+  ;;;;;要分析的变量
+  v_annual = month_to_season(v_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
+
+  ; ;;;;remove_enso_signal 
+  ; v_annual = (/remove_enso_signal(nino3_4, v_annual)/)
+  ; ;;;;
+  
+  
+  ;;;;;要分析的变量
+  w_annual = month_to_season(w_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
+
+
+
+  ;;;;;要分析的变量
+  olr_annual = month_to_season(olr_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
+
+    
+
+
+  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) 
+
+
+
   
 
-print("*******开始计算相关系数*****************")
-;;;calculate correlation coef
 
-    ;;;correlation with sst
+  ;;;correlation with sst
     r_sst_p := regCoef_n(ssta_index, p_annual, 0, 0)
-    ;;;;
-
-      
     copy_VarCoords(ssta_annual(0,:,:), r_sst_p)
 
-;;;
-
-
-;;;;回归一致性 
     r_sst_p = (/r_sst_p*ssta_index_rc/)
-    print(""+season(i)+"="+ssta_index_rc)
-    ; print(ssta_index_rc)
+   ;;;;;
+   
+    ;;;correlation with sst
+    r_sst_olr := regCoef_n(ssta_index, olr_annual, 0, 0)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_olr)
 
-;;;;
- 
+    r_sst_olr = (/r_sst_olr*ssta_index_rc/)
     ;;;;;
-;;;;
+
+    ; ;;;normalized before regression 
+    ; ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
+    ; ;;;;
+
+    ;;;correlation with sst
+    r_sst_u := regCoef_n(ssta_index, u_annual, 0, 0)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_u)
+
+    r_sst_u = (/r_sst_u*ssta_index_rc/)
+    ;;;;;
+
+
+    ;;;correlation with sst
+    r_sst_v := regCoef_n(ssta_index, v_annual, 0, 0)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_v)
+
+    r_sst_v = (/r_sst_v*ssta_index_rc/)
+    ;;;;;
+
+
+    ;;;correlation with sst
+    r_sst_w := regCoef_n(ssta_index, w_annual, 0, 0)
+    copy_VarCoords(ssta_annual(0,:,:), r_sst_w)
+
+    r_sst_w = (/r_sst_w*ssta_index_rc/)
+    ;;;;;
+   
+   
+
+
+
 
     print("*******显著性检验*****************")
 
@@ -276,9 +414,42 @@ print("*******开始计算相关系数*****************")
     printVarSummary(prob_p1)
 
     prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
+    ;;;;
+
+    
+    ;;;t test 
+    prob_p2= rc_test(r_sst_u)
+
+    printVarSummary(prob_p2)
+
+    prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
+    ;;;;
 
 
-  ;;;;
+    ;;;t test 
+    prob_p3= rc_test(r_sst_v)
+
+    printVarSummary(prob_p3)
+
+    prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
+    ;;;;
+
+     ;;;t test 
+    prob_p4= rc_test(r_sst_olr)
+
+    printVarSummary(prob_p4)
+
+    prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+    ;;;;
+     
+
+
+    
+
+    ; r_sst_u = where(r_sst_u.le.0.2.or.r_sst_v.le.0.2, r_sst_u, r_sst_u@_FillValue)
+
+
+
 
 
   print("*********开始画图********")
@@ -298,18 +469,30 @@ print("*******开始计算相关系数*****************")
   res@gsnAddCyclic = False
 
   res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
-  res@lbLabelStride=2
-  res@lbOrientation="Vertical"
+  if i.eq.3 then
+  res@lbLabelBarOn= True
+  else
+  res@lbLabelBarOn= False
+  end if
+  res@pmLabelBarOrthogonalPosF = 0.2
+
+  res@lbLabelStride=1
+  res@lbOrientation="horizontal"
   res@mpLimitMode           = "LatLon"
   ; res@mpMinLatF             = lat1
   ; res@mpMaxLatF             = lat2
   ; res@mpMinLonF             = lon1
   ; res@mpMaxLonF             = lon2
-  res@mpMinLatF             = -5
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             = 100
+  ; res@mpMaxLonF             = 170
+   
+  res@mpMinLatF             = -30
   res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
+  res@mpMinLonF             = 30
   res@mpMaxLonF             = 170
+  
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -321,59 +504,145 @@ print("*******开始计算相关系数*****************")
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
 
-  res@tmXBLabelFontHeightF=0.025
-  res@tmYLLabelFontHeightF=0.025
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
 
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; ; res@cnMinLevelValF       =   -1.0
-  ; ; res@cnMaxLevelValF       =   1.0
-  ; ; res@cnLevelSpacingF      =  0.1
-  ; res@cnMinLevelValF       =   -0.5
-  ; res@cnMaxLevelValF       =   0.5
-  ; res@cnLevelSpacingF      =  0.05
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=1.0
+  res@tmYLMajorThicknessF=1.0
+
+  ; res@tmXBValues = (/100,120,140,160/) 
+  ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+
+
+
+  res@gsnScalarContour        = True
+  res@mpFillOn = False
+
 
   res@cnFillPalette = "precip_diff_12lev"
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
-  res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)/2.0
+  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)/2.0
+  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8,1.0/)/2.0
+  ; res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)/2.0
+
+  res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+
   ; gsn_define_colormap(wks, "precip_diff_12lev")
-  res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
+  ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
   ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
+  res@lbLabelStride=1
 
 
-  res@gsnLeftStringFontHeightF = 0.025
+  res@cnExplicitLabelBarLabelsOn = True
+  ; res@lbLabelStrings =  res@cnLevels
+  res@vcExplicitLabelBarLabelsOn = True
+  res@stExplicitLabelBarLabelsOn = True
+  res@lbLabelFontHeightF = 0.016
+  res@lbAutoManage = False
+
+  
+  ; res@cnFillPalette = "BlRe"
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+
+  ; res@cnMinLevelValF       =   -0.5
+  ; res@cnMaxLevelValF       =   0.5
+  ; res@cnLevelSpacingF      =  0.1
+
+  res@vcGlyphStyle="CurlyVector"
+  res@vcMonoLineArrowColor = True
+  res@vcLineArrowColor = "black"
+  res@vcMinDistanceF           = 0.025           ; thin vectors
+
+  res@vcRefLengthF             = 0.1    ; define length of v
+  res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  res@vcVectorDrawOrder="PostDraw"
+  
+  ; resv@vcMonoLineArrowColor = True
+  ; resv@vcLineArrowColor = "blue"
+  res@vcLineArrowThicknessF=1.2
+  ; res@vcLineArrowHeadMaxSizeF=0.01
+  ; res@vcLineArrowHeadMinSizeF=0.01
+  res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  res@vcLineArrowHeadMinSizeF = 0.006
+
+  res@vcRefMagnitudeF          = 0.3*10
+  ; res@vcMinMagnitudeF          =.3
+
+
+  res@gsnLeftStringFontHeightF = 0.02
  
-  res@gsnLeftString = order(i)+" "+ season(i)+ " linear congruency of Precip trend with TIOST"
-  plot(i) = gsn_csm_contour_map(wks, r_sst_p, res)
+  res@gsnLeftString = order(i*2)+" "+ season(i)+ " linear congruency of Precip & 850UV trend with TIOST"
 
- 
-  ;;;添加赤道直线
-    pgx=ispan(30,390,10)
-    pgy=new(dimsizes(pgx),typeof(pgx))
-    pgy=0
 
-    pgres=True
-    pgres@gsLineColor="black"
-    pgres@gsLineThicknessF=1.0
-    pgres@gsLineDashPattern=1
+
+  plot(i*2) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_p, res)
+
+  
+  ; delete(res@cnLevelSelectionMode)
+  delete(res@cnFillPalette)
+  delete(res@cnLevels)
+  delete(res@cnFillColors)
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "MPL_bwr"
+
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@lbLabelStride=1
+
+  res@cnLevels := (/-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0/)*10
+
+  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+  ; res@cnMinLevelValF      = -2.5       ; set min contour level
+  ; res@cnMaxLevelValF      = 2.5      ; set max contour level
+  ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
+
+  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " linear congruency of OLR trend with TIOST"
+
+  plot(i*2+1) = gsn_csm_contour_map(wks, r_sst_olr, res)
+
+  ; plot(i) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_w, res)
   
 
-   ; plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   ; plot1@$str(i)$ = gsn_add_polyline(wks1, plot1(i), pgx, pgy, pgres)
+   ; ;;;画气候态的等值线
+   ;  res@gsnRightString=""
+   ;  res@gsnLeftString=""
+   ;  res@cnLevelSelectionMode = "ExplicitLevels"
 
+   ;  ; res@cnLevelSelectionMode = "AutomaticLevels"
+   ;  res@cnLinesOn=True
+   ;  res@cnLevels := fspan(-0.6,0.2,13)
+   ;  res@cnLineLabelsOn=True
+   ;  res@cnLineLabelBackgroundColor="White"
+   ;  res@cnLineLabelInterval = 1
+   ;  res@cnLineThicknessF = 2.
+   ;  res@cnFillOn = False
+   ;  res@gsnContourNegLineDashPattern=1
+   ;  res@gsnContourZeroLineThicknessF=1.0
+   ;  res@gsnLeftString  = ""
+   ;  res@gsnRightString =""
+   ;  res@cnInfoLabelOn = False    
 
+   ;  plot1(i) = gsn_csm_contour(wks, r_sst_w, res)
+   ;  ;;;  
+   ;  overlay(plot(i), plot1(i))
+    
+ 
 
   ;;;添加indo-pacific warm pool 
     ; ;;添加区域
    ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
-   
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=1.0
+    pgres@gsLineDashPattern=1
+
+    pgres@gsLineThicknessF=2.0
+    pgres@gsLineDashPattern=0
+    str3=unique_string("dum3")
+    str4=unique_string("dum4")
+ 
    ;;;画box
    lat1 = 0
    lat2 = 15
@@ -385,7 +654,8 @@ print("*******开始计算相关系数*****************")
    ;;;
 
    
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+   plot@$str(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
+   plot@$str(i*2+1)$ = gsn_add_polyline(wks, plot(i*2+1), pgx_pool, pgy_pool, pgres)
    
 
 
@@ -405,7 +675,9 @@ print("*******开始计算相关系数*****************")
     res_pro@cnInfoLabelOn=False
 
 
-    iplot(i) = gsn_csm_contour(wks,prob_p1,res_pro)
+    iplot(i*2) = gsn_csm_contour(wks,prob_p1,res_pro)
+
+    iplot(i*2+1) = gsn_csm_contour(wks,prob_p4,res_pro)
    
      
     
@@ -417,13 +689,15 @@ print("*******开始计算相关系数*****************")
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
 
-     iplot(i) = gsn_contour_shade(iplot(i) , 0,0.1,opt)
+    iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.1,opt)
+    iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.1,opt)
    
 
 
     ;;;  
     
-      overlay(plot(i), iplot(i))
+      overlay(plot(i*2), iplot(i*2))
+      overlay(plot(i*2+1), iplot(i*2+1))
    
       delete(lat1)
       delete(lat2)
@@ -432,10 +706,11 @@ print("*******开始计算相关系数*****************")
 end do
 
   pres = True
-  pres@gsnPanelLabelBar  = True
-  pres@lbLabelFontHeightF = 0.015
+  pres@gsnMaximize = True
+  
+  pres@gsnPanelBottom = 0.05
 
-  gsn_panel(wks, plot, (/2,2/), pres)
+  gsn_panel(wks, plot, (/4,2/), pres)
   
  
  print("done")

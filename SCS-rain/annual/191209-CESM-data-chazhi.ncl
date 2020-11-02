@@ -35,6 +35,7 @@ undef("cesm_hybird2pre")
     lat = f1->lat
     lon = f1->lon  
     time = f1->time
+  
     
   
     ; time = (/time - 1.0/) ;;;注意cesm得到的时候，time_bnd的第一位，所以读出来有问题
