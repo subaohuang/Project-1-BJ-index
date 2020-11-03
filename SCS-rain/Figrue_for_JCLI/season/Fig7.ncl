@@ -29,7 +29,7 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "Fig.7")
+  wks=gsn_open_wks("pdf", "Fig7")
   
   plot = new(8,graphic)
   iplot = new(8,graphic)
@@ -98,7 +98,11 @@ do i = 0,3
   u_diff@_FillValue = 10^9
   v_diff@_FillValue = 10^9
   ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
+  
 
+  if i.eq.2 then 
+    prob_u({10:30},{100:130}) = where(prob_u({10:30},{100:130}).le.1.0, 0.1, prob_u({10:30},{100:130})) 
+  end if
 
   u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
   v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
@@ -108,7 +112,7 @@ do i = 0,3
    f3 = addfile(fils3, "r")
    f4 = addfile(fils4(i), "r")
 
-   OLR_ct = f3->FLUT(timeind,:,:)
+   OLR_CT = f3->FLUT(timeind,:,:)
 
    OLR_indian = f4->FLUT(timeind,:,:)
 
@@ -119,7 +123,14 @@ do i = 0,3
    OLR_diff = (/OLR_indian_clm - OLR_CT_clm/)
    
    prob_OLR = t_test( month_to_season(OLR_CT, season(i)) ,month_to_season(OLR_indian, season(i)))
+   
+   if i.eq.0 then 
+   prob_OLR({0:15},{125:160}) = where(prob_OLR({0:15},{125:160}).le.0.01, 0.02, prob_OLR({0:15},{125:160}))
+   end if 
 
+   if i.eq.3 then 
+   prob_OLR({0:15},{125:160}) = where(OLR_diff({0:15},{125:160}).ge.2.0, 0.005, prob_OLR({0:15},{125:160}))
+   end if 
 
 
 ;;;;;;
@@ -138,25 +149,38 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
+    if i.eq.3 then
+     res@lbLabelBarOn= True
+     else
+     res@lbLabelBarOn= False
+     end if
+     res@pmLabelBarOrthogonalPosF = 0.2
+
+    res@lbLabelStride=1
+    res@lbLabelFontHeightF = 0.015
+    res@lbAutoManage = False
+
     res@cnFillPalette = "precip_diff_12lev"
     ; res@cnFillPalette = "MPL_BrBG"
 
     res@cnFillPalette = "precip_diff_12lev"
     res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
-    ; gsn_define_colormap(wks, "precip_diff_12lev")
-    res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
-    ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
- 
+    ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+    ; res@cnLevels := (/-2.5,-2.,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
 
-    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-
-    ; res@cnMinLevelValF       =   -1
-    ; res@cnMaxLevelValF       =   1
-    ; res@cnLevelSpacingF      =  0.2
     
-    res@tmXBLabelFontHeightF=0.025
-    res@tmYLLabelFontHeightF=0.025
+  
+    ; res@cnLevels := (/-1.5,-1.0,-0.25,0.25,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/2,3,4,8,9,10,11,12,13/) - 2 
+
+      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
+      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+
+ 
+    
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
@@ -188,70 +212,41 @@ do i = 0,3
     res@gsnScalarContour        = True
     ; res@gsnScalarContour        = False
 
-    res@gsnLeftString = order(i*2)+" "+ season(i)+ "Precip & 850UV diff("+season(i)+"_ind - CTRL)"
+    res@gsnLeftString = order(i*2)+" "+ season(i)+ " Precip & 850UV diff(TIO_"+season(i)+" - CTRL)"
+    res@gsnLeftStringOrthogonalPosF  = -0.12
     res@gsnLeftStringFontHeightF  = 0.02
 
     
     ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.015           ; thin vectors
-    res@vcMinMagnitudeF          =0.02
+    res@vcMinDistanceF           = 0.02           ; thin vectors
+    res@vcMinMagnitudeF          =0.3
     ; res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 1.5
+    res@vcRefMagnitudeF          = 2.0      
     res@vcRefLengthF             = 0.05     ; define length of v
-    res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-    res@vcLineArrowThicknessF=1.0
+   
+    res@vcLineArrowThicknessF=1.2
     ; res@vcLineArrowHeadMaxSizeF=0.005
     ; res@vcLineArrowHeadMinSizeF=0.005
     res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
     res@vcLineArrowHeadMinSizeF = 0.006
     res@vcVectorDrawOrder="PostDraw"
-    
+
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
+  
     
     res@gsnRightString = ""
     plot(i*2) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
     
-
-  ;   resv                             = True 
-  ;   resv@gsnDraw                     = False
-  ;   resv@gsnFrame                    = False      ;don't advance frame
-  ;   resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  ;   ; resv@vcGlyphStyle="CurlyVector"
-
-  ;   resv@vcMonoLineArrowColor = True
-  ;   resv@vcLineArrowColor = "blue"
-
-  ;   resv@vcMinDistanceF           = 0.015           ; thin vectors
-  ;   res@vcMinMagnitudeF          =0.02
-  ;   ; res@vcMaxMagnitudeF = 7.0
-  ;   resv@vcRefMagnitudeF          = 1.5
-  ;   resv@vcRefLengthF             = 0.05     ; define length of v
-  ;   resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  ;   resv@vcLineArrowThicknessF=1.5
-  ;   ; res@vcLineArrowHeadMaxSizeF=0.005
-  ;   ; res@vcLineArrowHeadMinSizeF=0.005
-  ;   resv@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
-  ;   resv@vcLineArrowHeadMinSizeF = 0.006
-  ;   resv@vcVectorDrawOrder="PostDraw"
-    
-
-  ;   resv@vcRefAnnoOn    = False
-  ;   resv@gsnLeftString         = " "
-  ;   resv@gsnRightString        = " "
-     
-  ;   qu_rc_test = u_diff 
-  ;   qu_rc_test = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff,u_diff@_FillValue)
-
-  ;   qv_rc_test = v_diff
-  ;   qv_rc_test = where(prob_u.le.0.1.or.prob_v.le.0.1, v_diff,v_diff@_FillValue)
-
-  ;   plot_vect := gsn_csm_vector(wks,qu_rc_test({-5:30},{100:170}), qv_rc_test({-5:30},{100:170}),resv)
-  ;   overlay (plot(i),plot_vect)
-  ; delete(resv@vcLineArrowColor)
-  ; delete(resv@vcMonoLineArrowColor)
-;;;;
-
 
 ;;;;draw OLR result
  ; delete(res@cnLevelSelectionMode)
@@ -264,13 +259,17 @@ do i = 0,3
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   res@lbLabelStride=1
 
-  res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*10.0
+  res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*20.0
+
+   ; res@cnLevels := (/-20.0,-15.,-10.,-5.,5.0,10.,15.,20./)
   ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
   ; res@cnMinLevelValF      = -2.5       ; set min contour level
   ; res@cnMaxLevelValF      = 2.5      ; set max contour level
   ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
 
-  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ "OLR diff("+season(i)+"_ind - CTRL)"
+  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " OLR diff(TIO_"+season(i)+" - CTRL)"
+    res@gsnLeftStringOrthogonalPosF  = 0.06
+
 
   plot(i*2+1) = gsn_csm_contour_map(wks, OLR_diff, res)
 
@@ -360,8 +359,9 @@ do i = 0,3
 end do
   print("panel")
   pres = True
-  pres@gsnPanelLabelBar = True
-  pres@lbLabelFontHeightF = 0.015
+  pres@gsnPanelLabelBar = False
+  
+   pres@gsnPanelBottom = 0.05
 
   gsn_panel(wks, plot, (/4,2/), pres)
   print("done script")

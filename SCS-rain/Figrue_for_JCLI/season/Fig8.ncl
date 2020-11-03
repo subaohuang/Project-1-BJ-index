@@ -200,9 +200,20 @@ do i = 0,3
     res@vcLineArrowHeadMaxSizeF=0.005
     res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
+
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
     
-    res@gsnLeftString = order(i*2)+" "+ season(i)+ " Sf & 850UV diff(TIO_"+season(i)+" - CTRL)"
+    res@gsnLeftString = order(i*2)+" "+ season(i)+ " 850hPa SF & UV diff(TIO_"+season(i)+" - CTRL)"
     res@gsnLeftStringFontHeightF  = 0.02
+    res@gsnLeftStringOrthogonalPosF  = -0.12
     
 
     

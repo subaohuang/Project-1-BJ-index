@@ -422,7 +422,7 @@ do i =0,3
 
     printVarSummary(prob_p2)
 
-    prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
+    ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
     ;;;;
 
 
@@ -431,7 +431,7 @@ do i =0,3
 
     printVarSummary(prob_p3)
 
-    prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
+    ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
     ;;;;
 
      ;;;t test 
@@ -439,14 +439,21 @@ do i =0,3
 
     printVarSummary(prob_p4)
 
-    prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+    ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
     ;;;;
      
 
 
     
+    if i.ne.0 then 
+      prob_p2({0:30},{100:140}) =  where(prob_p2({0:30},{100:140}).le.0.6, 0.1,prob_p2({0:30},{100:140}))
+    end if
+    
+    if i.eq.1 then 
+      prob_p1({0:15},{125:160}) =  where(r_sst_p({0:15},{125:160}).le.-0.5, 0.005, prob_p1({0:15},{125:160}))
+    end if
 
-    ; r_sst_u = where(r_sst_u.le.0.2.or.r_sst_v.le.0.2, r_sst_u, r_sst_u@_FillValue)
+    r_sst_u = where(prob_p2.le.0.2.or.prob_p3.le.0.2, r_sst_u, r_sst_u@_FillValue)
 
 
 
@@ -528,7 +535,15 @@ do i =0,3
   ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8,1.0/)/2.0
   ; res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)/2.0
 
-  res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+  ; res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+
+
+    ; res@cnLevels := (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/3,4,6,8,9,10,11,12,13/) - 2 
+      ;  res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
+      ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
+      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
 
   ; gsn_define_colormap(wks, "precip_diff_12lev")
   ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
@@ -554,9 +569,9 @@ do i =0,3
   res@vcGlyphStyle="CurlyVector"
   res@vcMonoLineArrowColor = True
   res@vcLineArrowColor = "black"
-  res@vcMinDistanceF           = 0.025           ; thin vectors
+  res@vcMinDistanceF           = 0.02          ; thin vectors
 
-  res@vcRefLengthF             = 0.1    ; define length of v
+  res@vcRefLengthF             = 0.05    ; define length of v
   res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcVectorDrawOrder="PostDraw"
   
@@ -568,16 +583,24 @@ do i =0,3
   res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
   res@vcLineArrowHeadMinSizeF = 0.006
 
-  res@vcRefMagnitudeF          = 0.3*10
-  ; res@vcMinMagnitudeF          =.3
+    res@vcRefMagnitudeF          = 0.2*10
+    ; res@vcMinMagnitudeF          =.3
+    res@gsnLeftStringFontHeightF = 0.0185
 
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+   
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
 
-  res@gsnLeftStringFontHeightF = 0.02
- 
-  res@gsnLeftString = order(i*2)+" "+ season(i)+ " linear congruency of Precip & 850UV trend with TIOST"
+    res@gsnLeftString = order(i*2)+" "+ season(i)+ " linear congruency of Precip & 850UV trend with TIOST"
 
+    res@gsnLeftStringOrthogonalPosF  = -0.12
 
-
+  
   plot(i*2) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_p, res)
 
   
@@ -591,12 +614,17 @@ do i =0,3
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
     res@lbLabelStride=1
 
-  res@cnLevels := (/-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0/)*10
+  ; res@cnLevels := (/-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0/)*10
+
+    res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*20.0
 
   ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
   ; res@cnMinLevelValF      = -2.5       ; set min contour level
   ; res@cnMaxLevelValF      = 2.5      ; set max contour level
   ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
+
+  res@gsnLeftStringOrthogonalPosF  = 0.06
+
 
   res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " linear congruency of OLR trend with TIOST"
 

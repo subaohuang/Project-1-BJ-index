@@ -54,6 +54,8 @@ begin
    
     
     season = (/"MAM","JJA","SON","DJF"/)
+    order  = (/"(a)","(b)","(c)","(d)"/)
+
     wks=gsn_open_wks("pdf", "diff-olr-altantic-year-fourseason-0280.pdf")
 
     plot = new(4,graphic)
@@ -84,86 +86,60 @@ begin
     res@gsnFrame=False
     res@gsnAddCyclic=True
 
-
-    res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=False
     res@cnFillOn = True 
     res@cnLinesOn =False
-    res@cnLineLabelsOn=False
-    ; res@cnFillMode  = 
-    ; res@cnRasterSmoothingOn=True
     res@trGridType = "TriangularMesh"
+    res@cnLineLabelsOn = False
 
     ; res@cnFillPalette = "BlueDarkRed18"
      res@cnFillPalette ="CBR_coldhot"
 
-    res@tmXBLabelFontHeightF=0.02
-    res@tmYLLabelFontHeightF=0.02
+    res@tmXBLabelFontHeightF=0.025
+    res@tmYLLabelFontHeightF=0.025
     res@tmXBMajorThicknessF=1.0
     res@tmYLMajorThicknessF=1.0
     res@tmBorderThicknessF=1.0
-    res@gsnLeftStringFontHeightF = 0.02
+    res@gsnLeftStringFontHeightF = 0.025
 
 
     res@gsnRightString = ""
-    res@gsnLeftString = season(i) + " :OLR SEN - CTRL"
+    res@gsnLeftString = order(i)+" "+ season(i)+ " OLR diff(AT - CPL_CTRL)"
 
 
+    
+    ; res@cnFillPalette = "MPL_bwr"
+    res@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res@cnFillPalette= "BlRe"
 
-
-
-    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; ; res@cnMinLevelValF       =   -0.5
-    ; ; res@cnMaxLevelValF       =   0.5
-    ; ; res@cnLevelSpacingF      =  0.1
-
-    ; res@cnMinLevelValF       =   -8.0
-    ; res@cnMaxLevelValF       =   8.0
-    ; res@cnLevelSpacingF      =  1.0
-
-
-    ; res@cnFillPalette = "precip_diff_12lev"
     res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)*10
-    ; res@cnLevels = (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
-    ; ; gsn_define_colormap(wks, "precip_diff_12lev")
-    ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
-    ; ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
+    res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)*10.0
+    ; res@cnLevels := (/-20.,-15.,-10.,-5.,5.,10.,15.,20./)
 
 
-    ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
+
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
 
-    ; res@mpMinLatF             = -60.0
-    ; res@mpMaxLatF             = 60.0
-    ; res@mpMinLonF             = 0.0
-    ; res@mpMaxLonF             = 360.0
-    ; res@mpCenterLonF = 180.0
-
-    res@mpMinLatF             = -10.0
+    res@mpMinLatF             = -5.0
     res@mpMaxLatF             = 30.0
     ; res@mpMaxLatF             = 50.0
     res@mpMinLonF             = 100.0
     res@mpMaxLonF             = 170.0
 
 
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
 
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
-
-
-
-    ; res@mpShapeMode = "FreeAspect"
-    ; res@vpWidthF = 0.7
-    ; res@vpHeightF = 0.3
-
-
 
     res@gsnRightString = ""
 
@@ -215,17 +191,20 @@ begin
     res_pro@cnInfoLabelOn=False
 
     res_pro@gsnCenterString = ""
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-
-
     iplot(i)=gsn_csm_contour(wks,prob_pre_indian,res_pro)
-
     overlay(plot(i), iplot(i))
+
+
+
+
+
+
+
 end do 
     pres = True
     pres@gsnPanelLabelBar = True
+     pres@lbLabelStride=1
+    pres@lbLabelFontHeightF = 0.015
     
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
