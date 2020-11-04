@@ -89,7 +89,7 @@ begin
    
 
    ;;;;
-   f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+   f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
    date:=cd_calendar(f6->time, 1)
    timeind :=ind(date.ge.startmon.and.date.le.endmon)
    olr = short2flt(f6->olr(timeind,{lat1:lat2},{lon1:lon2}))
@@ -392,12 +392,13 @@ do i = 0,3
     res3@cnMinLevelValF        = -20.0        ; set min contour level
     res3@cnMaxLevelValF        = 20.0          ; set max contour level
     res3@cnLevelSpacingF       = 5.0          ; set contour interval
-    res3@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res3@cnFillPalette = "BlueWhiteOrangeRed"
+    res3@cnFillPalette = "BlueRed"
     res3@cnLevelSelectionMode = "ExplicitLevels"
 
     ; gsn_define_colormap(wks2, "BlueWhiteOrangeRed")
-    res3@cnLevels = (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
-    res3@cnFillColors = (/2,5,30,40,-1,146,177,200,251/) 
+    res3@cnLevels = (/-20.0,-15.0,-10.0,-5.0,0.0,5.0,10.0,15.0,20.0/)
+    ; res3@cnFillColors = (/2,5,30,40,-1,146,177,200,251/) 
     
     res3@gsnLeftString  = add(i)+" "+season(i)+" OLR trend"
     res3@gsnLeftStringFontHeightF = 0.03

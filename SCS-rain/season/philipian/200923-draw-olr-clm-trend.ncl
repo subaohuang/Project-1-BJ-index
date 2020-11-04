@@ -12,7 +12,7 @@ begin
    ;;;;
 
 
-   f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+   f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
    date:=cd_calendar(f6->time, 1)
    timeind :=ind(date.ge.startmon.and.date.le.endmon)
    olr = short2flt(f6->olr(timeind,{lat1:lat2},{lon1:lon2}))
@@ -20,7 +20,7 @@ begin
 
  
 
-    wks = gsn_open_wks("pdf", "OLR-trend")
+    wks = gsn_open_wks("pdf", "OLR-clm")
 
 
 
@@ -46,7 +46,11 @@ do i = 0,3
   
   ; res@cnFillPalette ="CBR_coldhot"
   ; res@cnFillPalette = "cmp_b2r"
-  res@cnFillPalette = "BlueWhiteOrangeRed"
+
+  color = read_colormap_file("MPL_PuBu")
+  res@cnFillPalette = color(::-1,:)
+
+
 
   res@cnFillOn=True
   res@cnLinesOn= False
@@ -54,10 +58,10 @@ do i = 0,3
   ; res@cnMinLevelValF       =   -180.0
   ; res@cnMaxLevelValF       =   180.0
   ; res@cnLevelSpacingF      =  30.0
-  ;res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -1
-  ; res@cnMaxLevelValF       =   1
-  ; res@cnLevelSpacingF      =  .1
+  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res@cnMinLevelValF       =   190.0
+  res@cnMaxLevelValF       =   260.0
+  res@cnLevelSpacingF      =  10.0
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
   res@lbLabelStride=2
@@ -92,11 +96,12 @@ do i = 0,3
   res@gsnScalarContour        = True
 
 
-  res@gsnLeftString  = season(i)+"-Divergence trend"
-  plot(i) = gsn_csm_contour(wks, olr_clm, res)
+  res@gsnLeftString  = season(i)+"OLR CLM"
+  plot(i) = gsn_csm_contour_map(wks, olr_clm, res)
 end do 
 
 pres = True
+pres@gsnPanelLabelBar = True
 
 gsn_panel(wks, plot, (/2,2/), pres)
 
