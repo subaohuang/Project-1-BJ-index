@@ -117,10 +117,10 @@ begin
     ; ssta_mam = 0.0
 
 
-    ; ssta_mam = (/ssta_mam + sst_mam_clm/)
-    ; ssta_jja = (/ssta_jja + sst_jja_clm/)
-    ; ssta_son = (/ssta_son + sst_son_clm/)
-    ; ssta_djf = (/ssta_djf + sst_djf_clm/)
+    ssta_mam = (/ssta_mam + sst_mam_clm/)
+    ssta_jja = (/ssta_jja + sst_jja_clm/)
+    ssta_son = (/ssta_son + sst_son_clm/)
+    ssta_djf = (/ssta_djf + sst_djf_clm/)
 
     ssta_mam = (/ sst_mam_clm/)
     ssta_jja = (/ sst_jja_clm/)
@@ -214,7 +214,7 @@ begin
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   26.0
   res@cnMaxLevelValF       =   30.0
-  res@cnLevelSpacingF      =  0.25
+  res@cnLevelSpacingF      =  0.5
 
 
   res@cnInfoLabelOn = False
@@ -241,7 +241,8 @@ begin
   res2@cnLevelSelectionMode = "ExplicitLevels"
   res2@cnFillOn = False
   res2@cnLinesOn = True
-  res2@cnLevels = fspan(26.0, 30.0, 17)
+  ; res2@cnLevels = fspan(26.0, 30.0, 17)
+  res2@cnLevels = fspan(26.0, 30.0, 9)
   res2@cnLineLabelStrings =   res2@cnLevels  + ""
   res2@cnLineLabelDensityF = 1.3
 
@@ -342,9 +343,9 @@ begin
      iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
      iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
     ;  
-    do i=0,3
-     overlay(plot(i), iplot(i))
-    end do
+    ; do i=0,3
+    ;  overlay(plot(i), iplot(i))
+    ; end do
 
 pres = True
 pres@gsnPanelLabelBar  = True
