@@ -75,6 +75,7 @@ printVarSummary(sst)
     sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:15},{125:160}), 0)   
     olr_clm = dim_avg_n_Wrap(olr(:,{0:15},{125:160}), 0)
 
+
     sst_clm_one = ndtooned(sst_clm)
     olr_clm_one = ndtooned(olr_clm)
 
@@ -93,9 +94,32 @@ printVarSummary(sst)
 
    sst_chazhi = (/runave_n_Wrap(sst_chazhi, 3, 0, 0)/)
    olr = (/runave_n_Wrap(olr, 3, 0, 0)/)
+
+   ; dim = dimsizes(sst_chazhi)
+   
+   ; sst_chazhi_june = sst_chazhi(11:dim(0)-1:12,:,:)
+   ; sst_chazhi_july = sst_chazhi(0:dim(0)-1:12,:,:)
+   ; sst_chazhi_aug = sst_chazhi(1:dim(0)-1:12,:,:)
+
+   ; sst_chazhi_jj =  array_append_record(sst_chazhi_june,sst_chazhi_july,0)
+   ; sst_chazhi_jja = array_append_record(sst_chazhi_jj , sst_chazhi_aug,0)
+
+
+   ;  olr_june = olr(11:dim(0)-1:12,:,:)
+   ;  olr_july = olr(0:dim(0)-1:12,:,:)
+   ;  olr_aug = olr(1:dim(0)-1:12,:,:)
+
+   ;  olr_jj =  array_append_record(olr_june,olr_july,0)
+   ;  olr_jja = array_append_record(olr_jj , olr_aug,0)
     
-   sst_one = ndtooned(sst_chazhi(:,{0:15},{125:160}))
-   olr_one = ndtooned(olr(:,{0:15},{125:160}))
+   ;  sst_one = ndtooned(sst_chazhi_jja(:,{0:15},{125:160}))
+   ;  olr_one = ndtooned(olr_jja(:,{0:15},{125:160}))
+
+    sst_one = ndtooned(sst_chazhi(:,{0:20},{125:160}))
+    olr_one = ndtooned(olr(:,{0:20},{125:160}))
+
+    ; sst_one = ndtooned(sst_chazhi(:,{-5:30},{100:170}))
+    ; olr_one = ndtooned(olr(:,{-5:30},{100:170}))   
 
     jj   =  dim_pqsort_n(sst_one,mono,0)
 
@@ -104,27 +128,65 @@ printVarSummary(sst)
 
     n = 3
     c2 = lspoly(xx2, yy2, 1,n)    ; all weights are set to one 
- 
+
     Y2 = c2(0) + c2(1)*xx2 + c2(2)*xx2^2 
-;;;
+    ;;;
 
 
-;;;;bin 
+;;;bin 
    bin_num =  (30.75-26.5)/0.25
 
    bin  = fspan(26.5, 30.75, toint(bin_num) +1)
    olr_bin = new(toint(bin_num),float)
 
 do i = 0,bin_num-1
-   
    in := ind(sst_one.ge.bin(i).and.sst_one.lt.(bin(i)+0.25))
-  
+
    olr_bin(i) = dim_avg(olr_one(in))
 end do 
 
+dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
+
+rc1 = regline(fspan(26.75,28.75,9), dolr_dsst(0:8))
+print(rc1@yintercept)
+
+rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(8:14))
+
+print(rc2@yintercept)
+print (rc1+"*x"+"+" +rc1@yintercept)
+print (rc2+"*x"+"+" +rc2@yintercept)
 
 
- 
+
+
+;    bin_num =  (30.75-26.75)/0.25
+
+;    bin  = fspan(26.75, 30.75, toint(bin_num) +1)
+;    olr_bin = new(toint(bin_num),float)
+
+; do i = 0,bin_num-1
+   
+;    in := ind(sst_one.ge.bin(i).and.sst_one.lt.(bin(i)+0.25))
+  
+;    olr_bin(i) = dim_avg(olr_one(in))
+; end do 
+; dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
+
+; rc1 = regline(fspan(28.0,28.75,4), dolr_dsst(4:7))
+; print(rc1@yintercept)
+
+; rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(7:13))
+
+; print(rc2@yintercept)
+; print (rc1+"*x"+"+" +rc1@yintercept)
+; print (rc2+"*x"+"+" +rc2@yintercept)
+; rc1 = regline(fspan(28.0,30.25,10), dolr_dsst(4:13))
+; print(rc1@yintercept)
+; print (rc1+"*x"+"+" +rc1@yintercept)
+
+
+
+ ; exit()
 ;;;;draw plot 
     wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata")
 
@@ -187,7 +249,7 @@ end do
     res@vpHeightF=0.5
     res@vpWidthF=0.6
     
-    res@tiMainString="SST and OLR (from Monthly data)"
+    res@tiMainString="SST and OLR"
 
     res@tiYAxisString="~F22~OLR [W/m^2]"
     res@tiYAxisFontHeightF=0.012
@@ -196,34 +258,47 @@ end do
     res@tiXAxisFontHeightF=0.012
     plot = new(2, graphic)
     
-   plot(0) =gsn_csm_xy(wks, xx, (/yy,Y1/), res)
+
+    plot(0) =gsn_csm_xy(wks, xx2, (/yy2/), res)
 
 
-   plot(1) =gsn_csm_xy(wks, xx2, (/yy2/), res)
-
-    
-  plres=True
-  plres@gsLineThicknessF=3.0
-  plres@gsLineColor = "red"
-  plres@gsLineDashPattern=0
+    plres=True
+    plres@gsLineThicknessF=3.0
+    plres@gsLineColor = "red"
+    plres@gsLineDashPattern=0
 
     printVarSummary(bin)
     printVarSummary(olr_bin)
-    plot_line=gsn_add_polyline(wks, plot(1), bin(1:), olr_bin, plres)
-  
-  mkres = True
-  mkres@gsMarkerColor = "blue"
-  mkres@gsMarkerIndex = 1
-  mkres@gsMarkerSizeF = 0.02
+    plot_line=gsn_add_polyline(wks, plot(0), bin(1:), olr_bin, plres)
 
-     plot_mk=gsn_add_polymarker(wks, plot(1), bin(1:), olr_bin, mkres)
-    ; plot_line=gsn_add_polyline(wks, plot(1), xou, you, plres)
+    mkres = True
+    mkres@gsMarkerColor = "blue"
+    mkres@gsMarkerIndex = 1
+    mkres@gsMarkerSizeF = 0.02
+
+    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:), olr_bin, mkres)
 
 
-    ; 90~S~o~N~E
+    res@tmYLValues    := fspan(30,-30,13)
+    res@tmYLMinorValues := fspan(30,-30,13)
+    res@tmYLLabels    := fspan(30,-30,13)
+    res@trYMaxF=30.0
+    res@trYMinF=-30.0
+    res@xyMarkerColor ="black"
+    res@xyMarkLineModes   := (/"Lines"/)
+    res@xyMonoLineThickness = True
+    res@xyLineThicknessF=3.0
+    res@xyDashPatterns=0
 
-    draw(plot(1))
-    frame(wks)
+    res@tiMainString="d(OLR)/d(sst)"
+    res@tiYAxisString="~F22~Chage rate [W/m^2/~S~o~N~C]"
+    res@gsnYRefLine = 0.0
+    res@gsnYRefLineThicknessF = 1.0
+    plot(1) =gsn_csm_xy(wks, bin(1:), (/dolr_dsst/), res)
+
+
+ pres  = True
+ gsn_panel(wks, plot, (/1,2/), pres)
 
  end 
 

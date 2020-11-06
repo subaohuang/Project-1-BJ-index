@@ -32,6 +32,9 @@ do i=0,3
   
   diabatic_heat_change = (/diabatic_heat_change*86400/)
   diabatic_heat_clm = (/diabatic_heat_clm*86400/)
+  if i.eq.0 then
+  print("*****diabatic-heating=****"+dim_avg(diabatic_heat_change({20000:85000}) - diabatic_heat_clm({20000:85000})))
+  end if
 ;;;
 
 ;;read deep convection data
@@ -43,6 +46,10 @@ do i=0,3
   
   deepcon_heat_change = (/deepcon_heat_change*86400/)
   deepcon_heat_clm = (/deepcon_heat_clm*86400/)
+ 
+ if i.eq.0 then
+  print("*****deepcon-heating=****"+dim_avg(deepcon_heat_change({20000:85000}) -deepcon_heat_clm({20000:85000})))
+end if
 ;;;
 
 ;;;read Q1 monthly data from linshuheng
@@ -54,7 +61,7 @@ do i=0,3
 
   q1 = f3->Q_time(timeind,:,:,:)
 
-  printVarSummary(q1)
+  ; printVarSummary(q1)
 
   ; q1_annual = month_to_annual(q1, 1)
   q1_annual = month_to_season(q1, season(i))
@@ -88,8 +95,11 @@ do i=0,3
       q1_annual_rc_area = wgt_areaave_Wrap(q1_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
       q1_change = q1_clim_area
       q1_change = (/q1_clim_area+q1_annual_rc_area/)
+if i.eq.0 then
+ print("*****Q1-heating=****"+dim_avg(q1_annual_rc_area({200:850})))
+end if
   ;;;
-  
+  exit()
 
   q1_clim_area = q1_clim_area
   q1_change = q1_change

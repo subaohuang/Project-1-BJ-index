@@ -461,7 +461,7 @@ print("=====finish read data==========")
  ;==============================================================
 ; Mission 3. calculate OLR
 ; ==============================================================
-    f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+    f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
     ;;;region
     lat1 = -5
     lat2 = 45
@@ -479,6 +479,11 @@ print("=====finish read data==========")
     olr_rc = regCoef_n(ispan(1, yearnum, 1), olr_annual, 0, 0)
     copy_VarCoords(olr_annual(1,:,:),olr_rc)
     olr_rc = (/olr_rc*yearnum/)
+    
+    print(avg(olr_rc({0:15},{125:160})))
+    exit()
+
+
     prob_olr_rc = rc_test(olr_rc)
     ;;;; draw olr 
     res3=True

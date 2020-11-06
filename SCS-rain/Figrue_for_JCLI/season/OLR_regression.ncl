@@ -162,7 +162,7 @@ begin
 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "OLR回归到印度洋SST的回归系数")
+    wks   = gsn_open_wks("pdf", "OLR回归到WEP的SST的回归系数")
   
     plot=new(4,graphic)
     plot1 = plot
@@ -197,7 +197,8 @@ do i =0,3
   ssta_annual_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), ssta_annual, 0, 0)
 
 
-  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) , 0, 0)
+  ; ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) , 0, 0)
+  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{0:15},{125:160}), area({0:15}), 1.0, 0) , 0, 0)
   ssta_index_rc  =ssta_index_rc*yearnum
 
   ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
@@ -206,15 +207,15 @@ do i =0,3
   ;;;;;要分析的变量
   olr_annual = month_to_season(olr_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
 
-  ; ;;;;remove_enso_signal 
-  ; olr_annual = (/remove_enso_signal(nino3_4, olr_annual)/)
+  ;;;;remove_enso_signal 
+  olr_annual = (/remove_enso_signal(nino3_4, olr_annual)/)
  
-  ; ;;;;;;;;
+  ;;;;;;;;
 
 
  
 
-  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) 
+  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{0:15},{125:160}), area({0:15}), 1.0, 0) 
 
 
   ;;;normalized before regression 
@@ -228,7 +229,10 @@ do i =0,3
     r_sst_p := regCoef_n(ssta_index, olr_annual, 0, 0)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_p)
 
-    r_sst_p = (/r_sst_p*ssta_index_rc/)
+
+    print(ssta_index_rc)
+
+    ; r_sst_p = (/r_sst_p*ssta_index_rc/)
    ;;;;;
    
 
@@ -275,10 +279,16 @@ do i =0,3
   ; res@mpMaxLatF             = lat2
   ; res@mpMinLonF             = lon1
   ; res@mpMaxLonF             = lon2
-  res@mpMinLatF             = -5
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             = 100
+  ; res@mpMaxLonF             = 170
+
+  res@mpMinLatF             = -30
   res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
-  res@mpMaxLonF             = 170
+  res@mpMinLonF             = 30
+  res@mpMaxLonF             = 290
+
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -307,6 +317,13 @@ do i =0,3
   res@cnMinLevelValF      = -2.5       ; set min contour level
   res@cnMaxLevelValF      = 2.5      ; set max contour level
   res@cnLevelSpacingF     = 0.5       ; set contour spacing
+  
+
+
+  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+  ; res@cnMinLevelValF      = -1.0       ; set min contour level
+  ; res@cnMaxLevelValF      = 1.0      ; set max contour level
+  ; res@cnLevelSpacingF     = 0.1       ; set contour spacing
 
 
   ; res@cnFillPalette = "precip_diff_12lev"
