@@ -117,8 +117,8 @@ printVarSummary(sst)
    ;  sst_one = ndtooned(sst_chazhi_jja(:,{0:15},{125:160}))
    ;  olr_one = ndtooned(olr_jja(:,{0:15},{125:160}))
 
-    sst_one = ndtooned(sst_chazhi(:,{0:20},{125:160}))
-    olr_one = ndtooned(olr(:,{0:20},{125:160}))
+    sst_one = ndtooned(sst_chazhi(:,{0:25},{100:125}))
+    olr_one = ndtooned(olr(:,{0:25},{100:125}))
 
     ; sst_one = ndtooned(sst_chazhi(:,{-5:30},{100:170}))
     ; olr_one = ndtooned(olr(:,{-5:30},{100:170}))   
@@ -136,9 +136,9 @@ printVarSummary(sst)
 
 
 ;;;bin 
-   bin_num =  (30.75-26.5)/0.25
+   bin_num =  (30.75-25.5)/0.25
 
-   bin  = fspan(26.5, 30.75, toint(bin_num) +1)
+   bin  = fspan(25.5, 30.75, toint(bin_num) +1)
    olr_bin = new(toint(bin_num),float)
 
 do i = 0,bin_num-1
@@ -149,10 +149,10 @@ end do
 
 dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
 
-rc1 = regline(fspan(26.75,28.75,9), dolr_dsst(0:8))
+rc1 = regline(fspan(25.75,28.5,12), dolr_dsst(0:11))
 print(rc1@yintercept)
 
-rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(8:14))
+rc2 = regline(fspan(28.5,30.25,toint((30.25-28.5)/0.25)+1), dolr_dsst(11:18))
 
 print(rc2@yintercept)
 print (rc1+"*x"+"+" +rc1@yintercept)
@@ -190,7 +190,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
 
  ; exit()
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata")
+    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata-SCS")
 
 
     res                   = True                     ; plot mods desired
@@ -226,9 +226,9 @@ print (rc2+"*x"+"+" +rc2@yintercept)
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
     res@trXMaxF=31.0
-    res@trXMinF=26.0
-    res@tmXBValues    = fspan(26.0,31.0,11)
-    res@tmXBLabels    = fspan(26.0,31.0,11)
+    res@trXMinF=25.0
+    res@tmXBValues    = fspan(25.0,31.0,13)
+    res@tmXBLabels    = fspan(25.0,31.0,13)
 
 
     res@tmXMajorGrid                = True          ; implement x grid 

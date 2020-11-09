@@ -137,7 +137,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-15")
+    wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -344,5 +344,10 @@ pres@lbOrientation = "Horizontal"
 pres@lbLabelFontHeightF = 0.02
 ; pres@lbLabelStride = 2
 gsn_panel(wks, plot, (/2,2/), pres)
+
+; wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
+  ; wks = gsn_open_wks(pltType, pltName)
+
+   system("convert -geometry 1800x1800 -density 600x600 -trim global季节平均SST的趋势-79-15.png  test.png")     
 
 end

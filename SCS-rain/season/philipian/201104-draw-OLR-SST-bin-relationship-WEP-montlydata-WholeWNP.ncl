@@ -47,6 +47,10 @@ printVarSummary(sst)
 ;;;;
 
 
+
+
+
+
 ;;;;chazhi 
    print("**********start interp************")
     xi = sst&lon
@@ -117,8 +121,8 @@ printVarSummary(sst)
    ;  sst_one = ndtooned(sst_chazhi_jja(:,{0:15},{125:160}))
    ;  olr_one = ndtooned(olr_jja(:,{0:15},{125:160}))
 
-    sst_one = ndtooned(sst_chazhi(:,{0:20},{125:160}))
-    olr_one = ndtooned(olr(:,{0:20},{125:160}))
+    sst_one = ndtooned(sst_chazhi(:,{0:30},{100:170}))
+    olr_one = ndtooned(olr(:,{0:30},{100:170}))
 
     ; sst_one = ndtooned(sst_chazhi(:,{-5:30},{100:170}))
     ; olr_one = ndtooned(olr(:,{-5:30},{100:170}))   
@@ -136,9 +140,9 @@ printVarSummary(sst)
 
 
 ;;;bin 
-   bin_num =  (30.75-26.5)/0.25
+   bin_num =  (30.75-25.5)/0.25
 
-   bin  = fspan(26.5, 30.75, toint(bin_num) +1)
+   bin  = fspan(25.5, 30.75, toint(bin_num) +1)
    olr_bin = new(toint(bin_num),float)
 
 do i = 0,bin_num-1
@@ -149,17 +153,24 @@ end do
 
 dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
 
-rc1 = regline(fspan(26.75,28.75,9), dolr_dsst(0:8))
+
+bin_select = bin(1:)
+in1 = ind(bin_select.eq.27.0)
+in2 = ind(bin_select.eq.29.0)
+in3 = ind(bin_select.eq.30.25)
+
+
+rc1 = regline(fspan(27.0,29.0,toint((29.0-27.0)/0.25+1)), dolr_dsst(in1:in2))
 print(rc1@yintercept)
 
-rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(8:14))
+rc2 = regline(fspan(29.0,30.25,toint((30.25-29.0)/0.25)+1), dolr_dsst(in2:in3))
 
 print(rc2@yintercept)
 print (rc1+"*x"+"+" +rc1@yintercept)
 print (rc2+"*x"+"+" +rc2@yintercept)
 
 
-
+exit()
 
 ;    bin_num =  (30.75-26.75)/0.25
 
@@ -190,7 +201,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
 
  ; exit()
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata")
+    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata-WHOLEWNP")
 
 
     res                   = True                     ; plot mods desired
@@ -226,9 +237,9 @@ print (rc2+"*x"+"+" +rc2@yintercept)
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
     res@trXMaxF=31.0
-    res@trXMinF=26.0
-    res@tmXBValues    = fspan(26.0,31.0,11)
-    res@tmXBLabels    = fspan(26.0,31.0,11)
+    res@trXMinF=25.0
+    res@tmXBValues    = fspan(25.0,31.0,13)
+    res@tmXBLabels    = fspan(25.0,31.0,13)
 
 
     res@tmXMajorGrid                = True          ; implement x grid 

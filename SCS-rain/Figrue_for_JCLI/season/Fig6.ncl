@@ -277,7 +277,7 @@ begin
 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "GPCP&olr回归到印度洋SST的回归系数")
+    wks   = gsn_open_wks("png", "GPCP&olr回归到印度洋SST的回归系数")
   
     plot=new(8,graphic)
     plot1 = plot
@@ -586,6 +586,7 @@ do i =0,3
     res@vcRefMagnitudeF          = 0.2*10
     ; res@vcMinMagnitudeF          =.3
     res@gsnLeftStringFontHeightF = 0.0185
+    ; res@gsnLeftStringFontHeightF = 0.02
 
     res@vcRefAnnoString1On = True
     res@vcRefAnnoString1 = "2 m/s"
@@ -740,6 +741,8 @@ end do
 
   gsn_panel(wks, plot, (/4,2/), pres)
   
+system("convert -geometry 1800x1800 -density 600x600 -trim  GPCP&olr回归到印度洋SST的回归系数.png  GPCP&olr回归到印度洋SST的回归系数_high.png")     
+
  
  print("done")
 
