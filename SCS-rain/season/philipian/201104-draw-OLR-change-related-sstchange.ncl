@@ -187,6 +187,11 @@ begin
     olr_rela_son = (/eot_cdf(sst_son_clm,ssta_son)/)
     olr_rela_djf = (/eot_cdf(sst_djf_clm,ssta_djf)/)
 
+
+    print(avg(olr_rela_mam({0:15},{125:160})))
+
+    exit()
+
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
     wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-function2-WEP-26.75")
@@ -270,6 +275,7 @@ begin
   
 
   res@gsnLeftString="(a) MAM OLR change related to SST change"
+  res@gsnRightString = ""
 
 
   ; res@mpShapeMode = "FreeAspect"

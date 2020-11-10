@@ -121,7 +121,13 @@ begin
 
     prob_son = rc_test(ssta_son)
     prob_djf = rc_test(ssta_djf)
+ 
 
+   print(avg(ssta_mam({0:15},{125:160})))
+   print(avg(ssta_jja({0:15},{125:160})))
+   print(avg(ssta_son({0:15},{125:160})))
+   print(avg(ssta_djf({0:15},{125:160})))
+   exit()
 
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
