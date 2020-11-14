@@ -29,7 +29,7 @@ begin
   ;;
 
 ;;;
-    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_250hpa*"+".nc")
+    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_850hpa*"+".nc")
     f3 = addfiles(fils3, "r")
 
     date=cd_calendar(f3[:]->time, 1)
@@ -51,7 +51,8 @@ begin
     do i = 0,dimsizes(timeind)/12-1
       div(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,{lat1:lat2},{lon1:lon2}))
     end do
-    div = (/div*10^6/)
+    div = (/div*10^5/)
+    div = (/div*-1/)
     div_mam_clm = dim_avg_n_Wrap(month_to_season(div, "MAM"), 0)
     div_jja_clm = dim_avg_n_Wrap(month_to_season(div, "JJA"), 0)
     div_son_clm = dim_avg_n_Wrap(month_to_season(div, "SON"), 0)
@@ -61,6 +62,7 @@ begin
 
 
     diva=(/rmMonAnnCycTLL(div)/)
+
     copy_VarCoords(div, diva)
     
 
@@ -72,7 +74,7 @@ begin
     ;;;;
 
   ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "西太200hpa季节平均div的气候态-79-15")
+    wks   = gsn_open_wks("pdf", "西太850hpa季节平均div的气候态-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -90,10 +92,10 @@ begin
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
   res@cnFillOn=True
-  res@cnLinesOn=False
+  res@cnLinesOn=True
 
-  res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
+  res@cnLineLabelsOn=True
+  res@lbLabelBarOn = False
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
@@ -132,9 +134,9 @@ begin
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levelW
-  res@cnMinLevelValF       =   -3.0
-  res@cnMaxLevelValF       =   3.0
-  res@cnLevelSpacingF      =  0.5
+  res@cnMinLevelValF       =   -0.3
+  res@cnMaxLevelValF       =   .3
+  res@cnLevelSpacingF      =  0.1
   ; res@cnFillPalette = "NCV_jaisnd"
   ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels

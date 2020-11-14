@@ -160,6 +160,8 @@ div = (/div*10^5/)
    
    olr_bin = new(bin_num-1,float)
 
+
+
 do i = 0,bin_num-2
 
    in := ind(div_one.ge.bin(i).and.div_one.lt.(bin(i)+0.1))

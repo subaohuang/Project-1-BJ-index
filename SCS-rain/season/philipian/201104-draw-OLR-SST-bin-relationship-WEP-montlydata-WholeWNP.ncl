@@ -28,8 +28,11 @@ lat2 =  30
 lon1 =  100
 lon2 = 180
 
-startmon = 198201
-endmon = 201912
+; startmon = 198201
+; endmon = 201912
+
+startmon = 197901
+endmon = 201512
 
 
 f1 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
@@ -39,22 +42,35 @@ olr = short2flt(f1->olr(timeind,{lat1:lat2},{lon1:lon2})) ;;;2.5 ×2.5 grid
 
 printVarSummary(olr)
 
-f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
-date:=cd_calendar(f2->time, 1)
-timeind :=ind(date.ge.startmon.and.date.le.endmon)
-sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
-printVarSummary(sst)
-;;;;
+; f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
+; date:=cd_calendar(f2->time, 1)
+; timeind :=ind(date.ge.startmon.and.date.le.endmon)
+; sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
+; printVarSummary(sst)
+; ;;;;
 
 
+  f2 = addfile("/home/yangsong3/data-observation/linshh/data/sst/HadISST_sst.nc", "r")
+  date:=cd_calendar(f2->time, 1)
 
+  timeind:=ind(date.le.201512.and.date.ge.197901)
+
+  sst_r =  lonFlip(f2->sst(timeind,:,:))
+  
+  sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
+
+  printVarSummary(sst)
 
 
 
 ;;;;chazhi 
    print("**********start interp************")
-    xi = sst&lon
-    yi = sst&lat
+    ; xi = sst&lon
+    ; yi = sst&lat
+
+    xi = sst&longitude
+    yi = sst&latitude
+
 
     xo = olr&lon
     yo = olr&lat
@@ -170,7 +186,7 @@ print (rc1+"*x"+"+" +rc1@yintercept)
 print (rc2+"*x"+"+" +rc2@yintercept)
 
 
-exit()
+
 
 ;    bin_num =  (30.75-26.75)/0.25
 
@@ -201,7 +217,7 @@ exit()
 
  ; exit()
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata-WHOLEWNP")
+    wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata-WHOLEWNP-HADISSTDATA")
 
 
     res                   = True                     ; plot mods desired

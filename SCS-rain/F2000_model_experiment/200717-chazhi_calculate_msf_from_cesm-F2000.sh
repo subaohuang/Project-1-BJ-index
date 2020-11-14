@@ -17,9 +17,9 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_WNP_spring/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/FC5_WEP_summer/
 STEP=3
-modelname=F_2000_WNP_spring
+modelname=FC5_WEP_summer
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 

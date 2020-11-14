@@ -88,7 +88,7 @@ function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (26.75~28.7
     lat1 = -5
     lat2 = 30
     lon1 = 100
-    lon2 = 125
+    lon2 = 120
     
     eot_mam_cdf({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).lt.25.25, 0.0, eot_mam_cdf({lat1:lat2},{lon1:lon2}))
     eot_mam_cdf({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).ge.25.25.and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.28.5, -(5.32061/2.0)*sst_mam_clm({lat1:lat2},{lon1:lon2})^2 + 136.234*sst_mam_clm({lat1:lat2},{lon1:lon2}) , eot_mam_cdf({lat1:lat2},{lon1:lon2}))
@@ -105,7 +105,7 @@ function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (26.75~28.7
     ;;;;WEP region 125-170 -5-20
     lat1 = -5
     lat2 = 20
-    lon1 = 125
+    lon1 = 120
     lon2 = 170
 
 
@@ -124,7 +124,7 @@ function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (26.75~28.7
      ;;;;Wnp region 100-170 20-30
     lat1 = 20
     lat2 = 30
-    lon1 = 125
+    lon1 = 120
     lon2 = 170
      
 
