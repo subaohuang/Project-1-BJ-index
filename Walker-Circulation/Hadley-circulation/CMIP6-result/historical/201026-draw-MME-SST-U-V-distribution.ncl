@@ -59,7 +59,7 @@ rc_sst_mme = dim_avg_n_Wrap(rc_sst_all, 0)
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
     res@cnMinLevelValF       =   0.0
     res@cnMaxLevelValF       =   1.0
-    res@cnLevelSpacingF      =  0.1
+    res@cnLevelSpacingF      =  0.05
     ; res@cnFillPalette = "NCV_jaisnd"
     ; res@cnFillPalette = "sunshine_9lev"
     
@@ -71,8 +71,8 @@ rc_sst_mme = dim_avg_n_Wrap(rc_sst_all, 0)
 
     res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 110.0
-    res@mpMaxLonF             = 300.0
+    res@mpMinLonF             = 0.0
+    res@mpMaxLonF             = 360.0
    
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2
 
@@ -81,9 +81,9 @@ rc_sst_mme = dim_avg_n_Wrap(rc_sst_all, 0)
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
     
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.3
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.7
+    ; res@vpHeightF = 0.3
     ;;
 
 

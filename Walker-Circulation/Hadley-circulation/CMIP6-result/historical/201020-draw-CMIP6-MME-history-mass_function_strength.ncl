@@ -41,7 +41,7 @@ pi=get_pi("double")
 dfi=(pi*10)/180
 
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
-wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的时间序列")
+
 
 
 
@@ -99,7 +99,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
 
     vep_annual = dim_avg_n_Wrap(vep_all_annual, 1)
 
-    ; vep_annual = (/dim_standardize_n(vep_annual, 1, 0)/)
+    vep_annual = (/dim_standardize_n(vep_annual, 1, 0)/)
   
 ;;;;;;
 
@@ -128,12 +128,17 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
 
     sstg_annual = (/dim_standardize_n(sstg_annual, 1, 0)/)
 
-    
+
 ;;;
 
 
 ;;;计算相关系数
-   corr = escorc_n(vep_annual, msf_mean_annual_vermean, 0, 0)
+   corr1 = escorc_n(vep_annual, msf_mean_annual_vermean, 0, 0)
+   corr2 = escorc_n(vep_annual, sstg_annual, 0, 0)
+   
+   print("corr1="+corr1)
+   print("corr2="+corr2)
+
 ;;;
 
 
@@ -152,6 +157,8 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
     y_vep = rc_vep*x + rc_vep@yintercept
 
     rc_sstg = regCoef_n(x,sstg_annual,0,0)
+
+    y_sstg = rc_sstg*x + rc_sstg@yintercept
 ;;;;
 
 
@@ -184,30 +191,37 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
     print( "SSTGtrend="+sprintf("%4.3f",rc_sstg*10))
     print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
     print( "解释trend="+sprintf("%4.3f",rc_realte_sstg*10))
-    exit()
+
 
 ;;;;
+    wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的时间序列")
     res  = True
     res@gsnDraw = False
     res@gsnFrame = False
     res@vpHeightF = 0.3
     res@vpWidthF = 0.7
     ; res@tiYAxisString = "Intensity"
-    res@tiMainString  = "Time series of HC intensity&CEW index"   ; title'
-    res@tiMainFontHeightF = 0.02
+    res@tiMainString  = "Time series of HC intensity,CEW index and Meridional SST gradients"   ; title'
+    res@tiMainFontHeightF = 0.01
     res@trXMinF = 1900
     res@trXMaxF = 2014
 
 
 
-    res@xyLineColors      = (/"red","blue","red","blue"/)  ; line colors
-    res@xyLineThicknesses = (/2.0,2.0,1.0,1.0/)        ; line thicknesses
-    res@xyDashPatterns    = (/0.0,0.0,1.0,1.0/)        ; line patterns
-
-
-
-    plot = gsn_csm_xy(wks, x, (/msf_mean_annual_vermean,vep_annual,y_msf,y_vep/) , res)
+    res@xyLineColors      = (/"black","blue","red","black","blue","red"/)  ; line colors
+    res@xyLineThicknesses = (/2.0,2.0,2.0,1.0,1.0,1.0/)        ; line thicknesses
+    res@xyDashPatterns    = (/0.0,0.0,0.0,1.0,1.0,1.0/)        ; line patterns
+    
+    ; resL = res
+    ; resL@xyLineColors      := (/"red","red"/)  ; line colors
+    ; resL@xyLineThicknesses := (/2.0,1.0/)        ; line thicknesses
+    ; resL@xyDashPatterns    := (/0.0,1.0/)        ; line patterns
+    
+    
+    plot = gsn_csm_xy(wks, x, (/msf_mean_annual_vermean,vep_annual,sstg_annual, y_msf,y_vep,y_sstg/), res)
     ;;;  
+
+    
 
     ;;添加legend 
     gres = True
@@ -217,26 +231,27 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的
 
     lineres = True
     ; lineres@lgLineColors = (/"black"，/) ; line colors
-    lineres@lgLineColors       = (/"Blue","red"/) ; colors chosen
+    lineres@lgLineColors       = (/"black","Blue","red"/) ; colors chosen
     lineres@lgLineThicknesses = 4.0                       ; line thicknesses
     lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
     textres = True
 
-    textres@lgLabels = (/"HC intensity","CEW index"/)
-    textres@lgLabelFontHeightF = 0.008
+    textres@lgLabels = (/"HC intensity","CEW index","Meridional SST gradients"/)
+    textres@lgLabelFontHeights = (/0.01,0.01,0.01/)
     ; textres@lgLabelOpacity = (/0/) 
 
     mid = simple_legend(wks,plot,gres,lineres,textres)   
 
 
-    ;;;;添加相关系数
+    ;;添加相关系数
 
     resxy = True
 
-    resxy@txFontHeightF = 0.02
+    resxy@txFontHeightF = 0.01
 
-    txid = gsn_add_text(wks,plot,"Corr =" +sprintf("%3.2f",corr), 2000.0, 2.4 ,resxy)
+    txid = gsn_add_text(wks,plot,"Corr(CEW,HC)=" +sprintf("%3.2f",corr1), 2000.0, 2.4 ,resxy)
+    txi2 = gsn_add_text(wks,plot,"Corr(CEW,SSTG)=" +sprintf("%3.2f",corr2), 2000.0, 2.0 ,resxy)
     
     draw(plot)
     frame(wks)

@@ -41,7 +41,7 @@ pi=get_pi("double")
 dfi=(pi*10)/180
 
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
-wks = gsn_open_wks("pdf", "MME的CMIP6模式-180-270哈德来环流的趋势")
+wks = gsn_open_wks("pdf", "MME的CMIP6模式-全球平均的哈德来环流的趋势")
 
 
 
@@ -49,7 +49,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-180-270哈德来环流的趋势")
    
     yearstart = 190001
     yearend = 201412
-    fils1 :=  (/"/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/msf_mme_history_r1i1p1f1_185001-201412.nc"/)
+    fils1 :=  (/"/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/mme/msf_mme_history_r1i1p1f1_185001-201412.nc"/)
 
     f1 := addfile(fils1, "r")
     
@@ -65,7 +65,8 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-180-270哈德来环流的趋势")
 
   
     ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
-    msf_mean = dim_avg_n_Wrap(msf(:,:,:,{180:270}), (/3/))
+    ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,{180:270}), (/3/))
+    msf_mean = dim_avg_n_Wrap(msf(:,:,:,:), (/3/))
 
 
 
@@ -103,9 +104,14 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-180-270哈德来环流的趋势")
    
     res@cnLinesOn=False
     res@cnLevelSelectionMode ="ManualLevels"
-    res@cnMinLevelValF = -1.0
-    res@cnMaxLevelValF = 1.0
-    res@cnLevelSpacingF = 0.25
+    ; res@cnMinLevelValF = -1.0
+    ; res@cnMaxLevelValF = 1.0
+    ; res@cnLevelSpacingF = 0.25
+
+    res@cnMinLevelValF = -0.5
+    res@cnMaxLevelValF = 0.5
+    res@cnLevelSpacingF = 0.1
+
 
     res@lbLabelBarOn =True
     res@cnLineLabelsOn = False
