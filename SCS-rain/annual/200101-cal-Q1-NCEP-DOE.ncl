@@ -10,7 +10,7 @@ begin
  lat=f1->lat
  level=f1->level
  date=cd_calendar(time, 1)
- timeind=ind(date.ge.197901.and.date.le.201312)
+ timeind=ind(date.ge.197901.and.date.le.201612)
  levind=ind(level.ge.0.and.level.le.1000)
 
  w_r=f1->omega(timeind,levind,:,:)
@@ -79,7 +79,7 @@ ntime=dimsizes(Q_time_new&time)
 ;****************************************************************************
 ;随时间变化的量
     diro="/home/ys17-19/lsh/Project/SCS-rain/"
-    filo1="Q_time_ncep2.nc"
+    filo1="Q_time_ncep_doe.nc"
     system("/bin/rm -f "+diro + filo1+"")
     fout=addfile(diro + filo1,"c")
     setfileoption(fout,"DefineMode",True)

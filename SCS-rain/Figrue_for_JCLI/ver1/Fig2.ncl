@@ -13,7 +13,7 @@ begin
  
   plot1 = new(4,graphic)
   plot2 = new(4,graphic)
-  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2015-philipian-season")                  ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2010-philipian-season")                  ; send graphics to PNG file
 
   order  = (/"(a)","(b)","(c)","(d)"/)
 
@@ -57,7 +57,7 @@ end if
   f3 = addfile(fils, "r")
   date = cd_calendar(f3->time, 1)
 
-  timeind = ind(date.le.201512.and.date.ge.197901)
+  timeind = ind(date.le.201012.and.date.ge.197901)
 
   q1 = f3->Q_time(timeind,:,:,:)
 
@@ -75,14 +75,14 @@ end if
   dim = dimsizes(q1_annual)
 
   q1_annual_rc = (/regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)/)
-  
-    ; q1_annual_mk=trend_manken(q1_annual, False, 0)
-    ; q1_annual_rc = q1_annual_mk(1,:,:,:)
-    copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
+
+  ; q1_annual_mk=trend_manken(q1_annual, False, 0)
+  ; q1_annual_rc = q1_annual_mk(1,:,:,:)
+  copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
 
 
-    q1_annual_rc = (/q1_annual_rc*dim(0)/)
-    q1_clm = dim_avg_n_Wrap(q1_annual, 0)
+  q1_annual_rc = (/q1_annual_rc*dim(0)/)
+  q1_clm = dim_avg_n_Wrap(q1_annual, 0)
 
 
   ;;;区域平均
@@ -98,9 +98,10 @@ end if
 if i.eq.0 then
  print("*****Q1-heating=****"+dim_avg(q1_annual_rc_area({200:850})))
 end if
-  ;;;
-  exit()
 
+
+  ;;;
+  
   q1_clim_area = q1_clim_area
   q1_change = q1_change
   ;;;
