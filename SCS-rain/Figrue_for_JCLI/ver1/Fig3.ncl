@@ -45,8 +45,7 @@ begin
 
     str = ispan(1,4,1)+""
 
-    wks   = gsn_open_wks("pdf", "fig3.pdf")
-
+   
     ;;;time span
     startmon =197901
     endmon = 201512
@@ -85,12 +84,84 @@ begin
 
     delete(p_pi)
     ;;;
+;;;;;
+;==============================================================
+; Mission read  wind data
+; ==============================================================
+  ;;;read era data
+  path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
+  var_name = (/"uwnd","vwnd","shum/shum.total"/)
+  filein = path_wind + var_name +".mon.mean.nc"
 
+  ;;;region 
+    lat1 = -10
+    lat2 = 50
+    lon1 = 60
+    lon2 = 180
+  ;;;
+
+
+    f1 = addfile(filein(0),"r")
+
+    date :=cd_calendar(f1->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    ; timeind :=ind(date.ge.197901.and.date.le.201512)
+
+    yearnum = 37
+
+    u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
+
+    f1 = addfile(filein(1),"r")
+    v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
+
+
+    f3 = addfile(filein(2),"r")
+    date :=cd_calendar(f3->time, 1)
+    ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    timeind :=ind(date.ge.197901.and.date.le.201512)
+    q = short2flt(f3->q(timeind,:,{lat1:lat2},{lon1:lon2}))        
+    ;;;
+print("=====finish read data==========")
+;;;;
+
+;;;calculate wind trend 
+    u_annual = month_to_season(u(:,{850},:,:), "MAM")
+    v_annual = month_to_season(v(:,{850},:,:), "MAM")
+
+    u_rc  = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), u_rc)
+    u_rc = (/u_rc*yearnum/)
+    
+    v_rc  = regCoef_n(ispan(1, yearnum, 1),v_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), v_rc)
+    v_rc = (/v_rc*yearnum/)
+
+    prob_u = rc_test(u_rc)
+    prob_v = rc_test(v_rc)
+
+    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    ; v_rc = where(prob_u.le.01.or.prob_v.le.0.1, v_rc, v_rc@_FillValue)
+    u_rc_test = u_rc
+    v_rc_test = v_rc
+    u_rc_test = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+
+    printVarSummary(u_rc)
+
+    delete(u_annual)
+    delete(v_annual)
+
+;;;   
+
+
+
+
+;;;;
+    wks   = gsn_open_wks("pdf", "fig3.pdf")
        
     res=True
     res@gsnFrame=False
     res@gsnDraw=False
-    res@gsn_add_cyclic  = False
+    res@gsnAddCyclic  = False
 
     res@cnFillPalette="NCV_blu_red"
     res@cnFillOn=True
@@ -107,6 +178,9 @@ begin
     res@mpMaxLonF             = 170
     res@lbOrientation="horizontal"
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+    res@mpFillOn = False
+ 
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -129,17 +203,89 @@ begin
     ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
     ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
 
-      res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
     res@cnFillColors= (/5,6,7,8,10,11,12,13,14/) - 2
 
 
     res@lbLabelFontHeightF = 0.02
     res@lbAutoManage = False
 
-    res@gsnLeftString="(a) MAM Precip trend " 
+    res@gsnLeftString="(a) MAM Precip& 850UV trend " 
+    res@gsnLeftStringOrthogonalPosF  = -0.12
 
 
-    plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
+
+
+   
+    res@gsnScalarContour        = True
+
+    ;;;;;;;LineArrow
+    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcMinDistanceF           = 0.025           ; thin vectors
+    
+    ; res@vcRefAnnoJust = "TopLeft"
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+    res@vcRefAnnoOrthogonalPosF = -1.2
+    res@vcRefMagnitudeF          = 2.0
+    res@vcMinMagnitudeF          =0.2
+    res@vcRefLengthF             = 0.05     ; define length of v
+    res@vcLineArrowThicknessF=1.5
+    ; res@vcLineArrowHeadMaxSizeF=0.008
+    ; res@vcLineArrowHeadMinSizeF=0.008
+    ; res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    ; res@vcLineArrowHeadMinSizeF = 0.006
+    res@vcLineArrowHeadMaxSizeF = 0.018           ;change the vector line arrows
+    res@vcLineArrowHeadMinSizeF = 0.012
+    
+
+
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
+    plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,rc_mam ,res)
+
+    ; plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
+    
+
+    ;;叠加矢量图
+     ;;;;;;;LineArrow
+    resv = True
+    resv@gsnDraw = False
+    resv@gsnFrame = False
+    resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    ; res@vcGlyphStyle="CurlyVector"
+
+    resv@vcMinDistanceF           = 0.025           ; thin vectors
+    ; res@vcMinMagnitudeF          =0.04
+    resv@vcRefMagnitudeF          = 4.0
+    resv@vcRefLengthF             = 0.1     ; define length of v
+    resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    resv@vcLineArrowThicknessF=1.5
+    ; res@vcLineArrowHeadMaxSizeF=0.008
+    ; res@vcLineArrowHeadMinSizeF=0.008
+    resv@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    resv@vcLineArrowHeadMinSizeF = 0.006
+    resv@vcVectorDrawOrder="PostDraw"
+
+    resv@vcMonoLineArrowColor = True
+    ; resv@vcLineArrowColor = "green"
+    resv@vcLineArrowColor = "blue"
+    resv@vcLineArrowThicknessF=1.5
+
+    resv@vcRefAnnoOn    = False
+    resv@gsnLeftString         = " "
+    resv@gsnRightString        = " "
+
+
+    plot_vect := gsn_csm_vector(wks,u_rc_test({-5:30},{100:170}),v_rc_test({-5:30},{100:170}),resv)
+    ; overlay (plot(0),plot_vect)
 
 
     pgres=True
@@ -186,43 +332,6 @@ begin
     overlay(plot(0), iplot(0))
 
 
-;==============================================================
-; Mission 2. plot  wind stress 
-; ==============================================================
-  ;;;read era data
-  path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-  var_name = (/"uwnd","vwnd","shum/shum.total"/)
-  filein = path_wind + var_name +".mon.mean.nc"
-
-  ;;;region 
-    lat1 = -10
-    lat2 = 50
-    lon1 = 60
-    lon2 = 180
-  ;;;
-
-
-    f1 = addfile(filein(0),"r")
-
-    date :=cd_calendar(f1->time, 1)
-    ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    timeind :=ind(date.ge.197901.and.date.le.201512)
-
-    yearnum = 37
-
-    u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
-
-    f1 = addfile(filein(1),"r")
-    v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
-
-
-    f3 = addfile(filein(2),"r")
-    date :=cd_calendar(f3->time, 1)
-    ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    timeind :=ind(date.ge.197901.and.date.le.201512)
-    q = short2flt(f3->q(timeind,:,{lat1:lat2},{lon1:lon2}))        
-    ;;;
-print("=====finish read data==========")
 
 ;==============================================================
 ; Mission 1. calculate Q
@@ -315,7 +424,8 @@ print("=====finish read data==========")
     qu_rc_test = qu_rc
     qv_rc_test = qv_rc
     qu_rc_test = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
-
+    
+    qu_rc = where(prob_qu.le.0.2.or.prob_qv.le.0.2, qu_rc,qu_rc@_FillValue)
 
 ;==============================================================
 ; Mission 6. draw plot
@@ -371,25 +481,38 @@ print("=====finish read data==========")
   res2@mpFillOn = False
   res2@gsnScalarContour        = True
   ;;;;;;;LineArrow
-  ; res2@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  res2@vcGlyphStyle="CurlyVector"
+  res2@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res2@vcGlyphStyle="CurlyVector"
   res2@vcMonoLineArrowColor = True
   res2@vcLineArrowColor = "black"
   res2@vcMinDistanceF           = 0.025           ; thin vectors
 
-  res2@vcRefLengthF             = 0.08     ; define length of v
+  res2@vcRefLengthF             = 0.1     ; define length of v
   res2@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res2@vcVectorDrawOrder="PostDraw"
 
   res2@vcLineArrowThicknessF=1.5
   ; res2@vcLineArrowHeadMaxSizeF=0.01
   ; res2@vcLineArrowHeadMinSizeF=0.01
-  res2@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
-  res2@vcLineArrowHeadMinSizeF = 0.006
+  ; res2@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  ; res2@vcLineArrowHeadMinSizeF = 0.006
+  res2@vcLineArrowHeadMaxSizeF = 0.018           ;change the vector line arrows
+  res2@vcLineArrowHeadMinSizeF = 0.012
 
   res2@vcRefMagnitudeF          = 1000.0
   ; res2@vcMinMagnitudeF          =100.0
-  res2@gsnLeftString = "(b) MAM Integrated Moisture Flux Trend"
+  res2@gsnLeftString = "(b) MAM CVIMF Trend"
+  res2@gsnLeftStringOrthogonalPosF  = -0.12
+
+
+  res2@vcRefAnnoString1On = True
+  res2@vcRefAnnoString1 = "1000 kg*m/s"
+  res2@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+  res2@vcRefAnnoParallelPosF = 1.02
+  res2@vcRefAnnoFontHeightF = 0.013
+
+  res2@vcRefAnnoBackgroundColor = "Transparent"
+  res2@vcRefAnnoPerimOn = False
   
   plot(1)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res2)
 
@@ -397,10 +520,10 @@ print("=====finish read data==========")
   resv                             = True 
   resv@gsnDraw                     = False
   resv@gsnFrame                    = False      ;don't advance frame
-  ; resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  res@vcGlyphStyle="CurlyVector"
+  resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res@vcGlyphStyle="CurlyVector"
 
-  resv@vcMinDistanceF           = 0.025           ; thin vectors
+  resv@vcMinDistanceF           = 0.02           ; thin vectors
 
   resv@vcRefLengthF             = 0.08     ; define length of v
   resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
@@ -422,7 +545,7 @@ print("=====finish read data==========")
 
 
   plot_vect = gsn_csm_vector(wks,qu_rc_test({-5:30},{100:170}),qv_rc_test({-5:30},{100:170}),resv)
-  overlay (plot(1),plot_vect)
+  ; overlay(plot(1),plot_vect)
 
 
   plot@$str(1)$ = gsn_add_polyline(wks, plot(1), pgx_pool, pgy_pool, pgres)
@@ -480,8 +603,7 @@ print("=====finish read data==========")
     copy_VarCoords(olr_annual(1,:,:),olr_rc)
     olr_rc = (/olr_rc*yearnum/)
     
-    print(avg(olr_rc({0:15},{125:160})))
-    exit()
+  
 
 
     prob_olr_rc = rc_test(olr_rc)

@@ -24,7 +24,7 @@ begin
 season_r = (/"spring","summer"/)
 season = (/"MAM","JJA"/)
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_WEP_spring/"+"FC5_WEP_spring.cam.h1.0101-4012_OLR_heatflux.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/"+"FC5_CTRL.cam.h1.0101-4012_OLR_heatflux.nc" 
   fils2 = "/home/ys17-19/lsh/CESM-data/F/FC5_WEP_" + season_r +"/"+"FC5_WEP_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-FC5-WEP-Warimg-fourseaon")
@@ -88,9 +88,9 @@ do i = 0,1
     res@cnFillPalette = "BlueWhiteOrangeRed"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -10
-    res@cnMaxLevelValF       =   10
-    res@cnLevelSpacingF      =  1
+    res@cnMinLevelValF       =   -14
+    res@cnMaxLevelValF       =   14
+    res@cnLevelSpacingF      =  2
     
 
     res@tmXTOn=False

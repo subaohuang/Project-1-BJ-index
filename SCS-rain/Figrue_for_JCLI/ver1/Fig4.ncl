@@ -79,9 +79,51 @@ begin
     p_pi = p
 
     delete(p)
+
+ ;;;;;
+;==============================================================
+; Mission read  wind data
+; ==============================================================
+  ;;;read era data
+  path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
+  var_name = (/"uwnd","vwnd"/)
+  filein = path_wind + var_name +".mon.mean.nc"
+
+  ;;;region 
+    lat1 = -10
+    lat2 = 50
+    lon1 = 60
+    lon2 = 180
+  ;;;
+
+
+    f1 = addfile(filein(0),"r")
+
+    date :=cd_calendar(f1->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    ; timeind :=ind(date.ge.197901.and.date.le.201512)
+
+    yearnum = 37
+
+    u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
+
+    f1 = addfile(filein(1),"r")
+    v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
+ 
+    ;;;
+print("=====finish read data==========")
+;;;;
+
+
  
    do i=0,2
+
     p_annual = month_to_season(p_pi, season(i))
+
+    if season(i).eq."DJF" then 
+     p_annual(0:yearnum-2,:,:) = p_annual(1:yearnum-1,:,:)
+     p_annual(yearnum-1,:,:) = p_pi(yearnum*12-1,:,:)
+    end if
 
     
     rc_mam  := regCoef_n(ispan(1, yearnum, 1), p_annual, 0, 0)
@@ -91,12 +133,63 @@ begin
     prob_mam=rc_test(rc_mam)
     copy_VarCoords(p_pi(1,:,:), prob_mam)
     ;;;
+   
+   ;;;calculate wind trend 
+    u_annual = month_to_season(u(:,{850},:,:), season(i))
+    v_annual = month_to_season(v(:,{850},:,:), season(i))
+
+    ; if season(i).eq."DJF" then 
+    ;  u_annual(0:yearnum-2,:,:) = u_annual(1:yearnum-1,:,:)
+    ;  u_annual(yearnum-1,:,:) = u(yearnum*12-1,{850},:,:)
+    ; end if
+
+    ; if season(i).eq."DJF" then 
+    ;  v_annual(0:yearnum-2,:,:) = v_annual(1:yearnum-1,:,:)
+    ;  v_annual(yearnum-1,:,:) = v(yearnum*12-1,{850},:,:)
+    ; end if
+
+    u_rc  = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), u_rc)
+    u_rc = (/u_rc*yearnum/)
+    
+    v_rc  = regCoef_n(ispan(1, yearnum, 1),v_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), v_rc)
+    v_rc = (/v_rc*yearnum/)
+
+    prob_u = rc_test(u_rc)
+    prob_v = rc_test(v_rc)
+    
+
+    ; prob_u
+    if season(i).eq."JJA" then
+    prob_u({10:20},{100:120}) = where(prob_u({10:20},{100:120}).le.0.4, 0.15, prob_u@_FillValue)   
+    u_rc = where(prob_u.le.0.15.or.prob_v.le.0.15, u_rc, u_rc@_FillValue) 
+    else
+    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    end if
+
+
+
+
+    ; v_rc = where(prob_u.le.01.or.prob_v.le.0.1, v_rc, v_rc@_FillValue)
+    u_rc_test = u_rc
+    v_rc_test = v_rc
+
+
+    u_rc_test = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+
+    printVarSummary(u_rc)
+
+    delete(u_annual)
+    delete(v_annual)   
+
+
 
 
     res=True
     res@gsnFrame=False
     res@gsnDraw=False
-    res@gsn_add_cyclic  = False
+    res@gsnAddCyclic = False
 
     res@cnFillPalette="NCV_blu_red"
     res@cnFillOn=True
@@ -120,6 +213,8 @@ begin
     res@mpMaxLonF             = 170
     res@lbOrientation="horizontal"
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+    res@mpFillOn = False
 
     res@tmXTOn=False
     res@tmYROn=False
@@ -149,11 +244,49 @@ begin
 
 
     res@lbLabelFontHeightF = 0.02
+    res@gsnLeftStringOrthogonalPosF  = -0.12
+
     res@lbAutoManage = False
 
     res@gsnLeftString=order(i*3)+" "+season(i)+" Precip trend " 
 
-    plot(i*3) = gsn_csm_contour_map(wks, rc_mam, res)
+
+    res@gsnScalarContour        = True
+
+    ;;;;;;;LineArrow
+    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcMinDistanceF           = 0.022          ; thin vectors
+    
+    ; res@vcRefAnnoJust = "TopLeft"
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+    res@vcRefAnnoOrthogonalPosF = -1.2
+    res@vcRefMagnitudeF          = 1.6
+    res@vcMinMagnitudeF          = 0.16
+    res@vcRefLengthF             = 0.06     ; define length of v
+    res@vcLineArrowThicknessF=1.0
+    ; res@vcLineArrowHeadMaxSizeF=0.008
+    ; res@vcLineArrowHeadMinSizeF=0.008
+    ; res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    ; res@vcLineArrowHeadMinSizeF = 0.006
+    res@vcLineArrowHeadMaxSizeF = 0.018           ;change the vector line arrows
+    res@vcLineArrowHeadMinSizeF = 0.012
+    
+
+
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
+    plot(i*3) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,rc_mam ,res)
+
+    ; plot(i*3) = gsn_csm_contour_map(wks, rc_mam, res)
+
 
 
     pgres=True
@@ -204,7 +337,7 @@ end do
  ;==============================================================
 ; Mission 3. calculate OLR
 ; ==============================================================
-    f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201701.nc", "r")
+    f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
     ;;;region
     lat1 = -5
     lat2 = 45
