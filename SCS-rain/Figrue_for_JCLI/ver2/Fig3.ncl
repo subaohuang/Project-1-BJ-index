@@ -73,7 +73,6 @@ begin
     delete(p)
 
     p_annual = month_to_season(p_pi, "MAM")
-    p_clm = dim_avg_n_Wrap(p_annual, 0)
 
     
     rc_mam  = regCoef_n(ispan(1, yearnum, 1), p_annual, 0, 0)
@@ -84,12 +83,6 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_mam)
 
     delete(p_pi)
-    
-    print(avg(rc_mam({0:15},{125:160}))/avg(p_clm({0:15},{125:160})))
-    exit()
-
-
-
     ;;;
 ;;;;;
 ;==============================================================
