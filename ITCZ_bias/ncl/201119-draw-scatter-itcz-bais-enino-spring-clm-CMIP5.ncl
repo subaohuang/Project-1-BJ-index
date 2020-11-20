@@ -1,26 +1,31 @@
 begin 
 
-read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
-print(read_name)
-model_name = read_name 
+    read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
+    print(read_name)
+    model_name = read_name 
 
-enino_intensity = asciiread("enino_intensity_30model", -1,"float")
+    enino_intensity = asciiread("enino_intensity_30model", -1,"float")
 
-; dbitcz = asciiread("dbitcz_30model", -1,"float")
+    ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-dbitcz = asciiread("north_eastern_pacific_baise_30model", -1,"float")
-; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
+    dbitcz = asciiread("north_eastern_pacific_baise_30model", -1,"float")
+    ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
-dim_model = dimsizes(enino_intensity)
-;;;polyline 
+     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
+
+    dim_model = dimsizes(enino_intensity)
+    ;;;polyline 
 
 
-  rc = regline(dbitcz,enino_intensity)
-  line = rc*dbitcz + rc@yintercept
-  
+    rc = regline(dbitcz,enino_intensity)
+    line = rc*dbitcz + rc@yintercept
+
+    r = escorc(dbitcz, enino_intensity)
+
+
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias-梯度指数和冬季Enino强度的关系")
+   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季Enino强度的关系.pdf")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -33,21 +38,29 @@ dim_model = dimsizes(enino_intensity)
     res@xyMarkers         =  16                      ; choose type of marker  
     res@xyMarkerSizeF     = 0.0001      ; Marker size (default 0.01)
 
-    res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
+     res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
     res@tmYLLabelsOn=True
-    ; res@trYMaxF=0.3
-    ; res@trYMinF=-0.3
-    ; res@tmYLValues    = fspan(-0.3,0.3,7)
-    ; res@tmYLLabels    = fspan(-0.3,0.3,7)
+    res@trYMaxF = 3.5
+    res@trYMinF = 0.0
+    res@tmYLValues    = ispan(0,35,5)*0.1
+    res@tmYLLabels    = ispan(0,35,5)*0.1
     
     res@tmXTOn=False
     res@tmYROn=False
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
-    ; res@trXMaxF=0.4
-    ; res@trXMinF=-0.4
-    ; res@tmXBValues    = fspan(-0.4,0.4,9)
-    ; res@tmXBLabels    = fspan(-0.4,0.4,9)
+    ; res@trXMaxF =  4.0
+    ; res@trXMinF = -2.0
+    ; res@tmXBValues    = ispan(-2,4,1) 
+    ; res@tmXBLabels    = ispan(-2,4,1) 
+   
+    res@trXMaxF =  2.0
+    res@trXMinF = -4.0
+    res@tmXBValues    = ispan(-4,2,1) 
+    res@tmXBLabels    = ispan(-4,2,1) 
+
+
+
 
     res@tmXMajorGrid                = True          ; implement x grid 
     res@tmXMajorGridThicknessF      = 1.0           ; 2.0 is default
@@ -105,13 +118,13 @@ dim_model = dimsizes(enino_intensity)
 
     txid = gsn_add_text(wks,plot,labels,dbitcz,enino_intensity+0.08,txres)
 
-    ; polyline=True
-    ; polyline@gsLineColor="black"
-    ; polyline@gsLineThicknessF=2.0
+    polyline=True
+    polyline@gsLineColor="black"
+    polyline@gsLineThicknessF=1.0
 
-    ; plotline1=gsn_add_polyline(wks, plot, x1, res@tmYLValues, polyline)
+    plotline1=gsn_add_polyline(wks, plot, x1, res@tmYLValues, polyline)
 
-    ; plotline2=gsn_add_polyline(wks, plot, res@tmXBValues,y1, polyline)
+    plotline2=gsn_add_polyline(wks, plot, res@tmXBValues,y1, polyline)
 
     Polymarker=True
     Polymarker@gsMarkerColor="black"
@@ -146,43 +159,43 @@ dim_model = dimsizes(enino_intensity)
 
 
 
-        ; ;;;添加x轴下标
+        ;;;添加x轴下标
+        txres2@txFontColor="black"
+        txres2@txJust="CenterCenter"
+        gsn_text_ndc (wks,"dryer",0.2,0.26,txres2)
+        gsn_text_ndc (wks,"wetter",0.7,0.26,txres2)
+
+        ; txres2@txFontHeightF = 0.015
         ; txres2@txFontColor="black"
         ; txres2@txJust="CenterCenter"
-        ; gsn_text_ndc (wks,"weakening",0.2,0.26,txres2)
-        ; gsn_text_ndc (wks,"strengthening",0.7,0.26,txres2)
-
-    ;     txres2@txFontHeightF = 0.015
-    ;     txres2@txFontColor="black"
-    ;     txres2@txJust="CenterCenter"
-    ;     txres2@txAngleF="90"
-    ;     gsn_text_ndc (wks,"weakening",0.08,0.40,txres2)
-    ;     gsn_text_ndc (wks,"strengthening",0.08,0.80,txres2)
+        ; txres2@txAngleF="90"
+        ; gsn_text_ndc (wks,"weaker",0.08,0.40,txres2)
+        ; gsn_text_ndc (wks,"stronger",0.08,0.80,txres2)
 
 
-    ;     ;;;
+        ;;;
                                         
-    ;     txres2@txFontColor="black"
-    ;     txres2@txAngleF="0"
-    ;     plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),-4, 0.37, txres2)
+        txres2@txFontColor="black"
+        txres2@txAngleF="0"
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),-1, 2.2, txres2)
 
 
 
-    ;     ;;legend 
-    ;     gres = True
-    ;     gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
-    ;                         ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
-    ;     gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+        ; ;;legend 
+        ; gres = True
+        ; gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+        ;                     ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+        ; gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
 
-    ;     lineres = True
-    ;     lineres@lgLineColors = (/"black"/) ; line colors
-    ;     lineres@lgLineThicknesses = 3.0                       ; line thicknesses
-    ;     lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+        ; lineres = True
+        ; lineres@lgLineColors = (/"black"/) ; line colors
+        ; lineres@lgLineThicknesses = 3.0                       ; line thicknesses
+        ; lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
-    ;     textres = True
-    ;     textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
+        ; textres = True
+        ; textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
 
-    ;     plot = simple_legend(wks,plot,gres,lineres,textres)   
+        ; plot = simple_legend(wks,plot,gres,lineres,textres)   
 
     draw(plot)
     frame(wks)

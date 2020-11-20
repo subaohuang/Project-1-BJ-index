@@ -14,9 +14,11 @@ dbitcz = asciiread("ninoyear_spring_north_eastern_pacific_bais_30model", -1,"flo
 dim_model = dimsizes(enino_intensity)
 ;;;polyline 
 
+r = escorc(dbitcz, enino_intensity)
 
-  rc = regline(dbitcz,enino_intensity)
-  line = rc*dbitcz + rc@yintercept
+
+rc = regline(dbitcz,enino_intensity)
+line = rc*dbitcz + rc@yintercept
   
   
 ;;;draw plot 
@@ -35,19 +37,19 @@ dim_model = dimsizes(enino_intensity)
 
     res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
     res@tmYLLabelsOn=True
-    ; res@trYMaxF=0.3
-    ; res@trYMinF=-0.3
-    ; res@tmYLValues    = fspan(-0.3,0.3,7)
-    ; res@tmYLLabels    = fspan(-0.3,0.3,7)
+    res@trYMaxF=1.5
+    res@trYMinF=-1.5
+    res@tmYLValues    = ispan(-15,15,5)*0.1
+    res@tmYLLabels    = ispan(-15,15,5)*0.1
     
     res@tmXTOn=False
     res@tmYROn=False
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
-    ; res@trXMaxF=0.4
-    ; res@trXMinF=-0.4
-    ; res@tmXBValues    = fspan(-0.4,0.4,9)
-    ; res@tmXBLabels    = fspan(-0.4,0.4,9)
+    res@trXMaxF=4.0
+    res@trXMinF=-4.0
+    res@tmXBValues    = fspan(-0.4,0.4,9) *10.0
+    res@tmXBLabels    = fspan(-0.4,0.4,9) *10.0
 
     res@tmXMajorGrid                = True          ; implement x grid 
     res@tmXMajorGridThicknessF      = 1.0           ; 2.0 is default
@@ -105,13 +107,14 @@ dim_model = dimsizes(enino_intensity)
 
     txid = gsn_add_text(wks,plot,labels,dbitcz,enino_intensity+0.08,txres)
 
-    ; polyline=True
-    ; polyline@gsLineColor="black"
-    ; polyline@gsLineThicknessF=2.0
+    polyline=True
+    polyline@gsLineColor="black"
+    polyline@gsLineThicknessF=1.0
+    polyline@gsLineDashPattern = 0.0
 
-    ; plotline1=gsn_add_polyline(wks, plot, x1, res@tmYLValues, polyline)
+    plotline1=gsn_add_polyline(wks, plot, x1, res@tmYLValues, polyline)
 
-    ; plotline2=gsn_add_polyline(wks, plot, res@tmXBValues,y1, polyline)
+    plotline2=gsn_add_polyline(wks, plot, res@tmXBValues,y1, polyline)
 
     Polymarker=True
     Polymarker@gsMarkerColor="black"
@@ -146,43 +149,44 @@ dim_model = dimsizes(enino_intensity)
 
 
 
-        ; ;;;添加x轴下标
-        ; txres2@txFontColor="black"
-        ; txres2@txJust="CenterCenter"
-        ; gsn_text_ndc (wks,"weakening",0.2,0.26,txres2)
-        ; gsn_text_ndc (wks,"strengthening",0.7,0.26,txres2)
+        ;;;添加x轴下标
+        txres2@txFontColor="black"
+        txres2@txJust="CenterCenter"
+        gsn_text_ndc (wks,"dryer",0.2,0.26,txres2)
+        gsn_text_ndc (wks,"wetter",0.7,0.26,txres2)
 
-    ;     txres2@txFontHeightF = 0.015
-    ;     txres2@txFontColor="black"
-    ;     txres2@txJust="CenterCenter"
-    ;     txres2@txAngleF="90"
-    ;     gsn_text_ndc (wks,"weakening",0.08,0.40,txres2)
-    ;     gsn_text_ndc (wks,"strengthening",0.08,0.80,txres2)
+        txres2@txFontHeightF = 0.015
+        txres2@txFontColor="black"
+        txres2@txJust="CenterCenter"
+        txres2@txAngleF="90"
+        gsn_text_ndc (wks,"weakening",0.08,0.40,txres2)
+        gsn_text_ndc (wks,"strengthening",0.08,0.80,txres2)
 
 
-    ;     ;;;
+        ;;;
                                         
-    ;     txres2@txFontColor="black"
-    ;     txres2@txAngleF="0"
-    ;     plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),-4, 0.37, txres2)
+        txres2@txFontColor="black"
+        txres2@txAngleF="0"
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),2.5, 1.3, txres2)
 
+        
+        R2  = r^2
+        ;;legend 
+        gres = True
+        gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                            ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+        gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
 
+        lineres = True
+        lineres@lgLineColors = (/"black"/) ; line colors
+        lineres@lgLineThicknesses = 3.0                       ; line thicknesses
+        lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
-    ;     ;;legend 
-    ;     gres = True
-    ;     gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
-    ;                         ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
-    ;     gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+        textres = True
+        textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
+        ; textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
 
-    ;     lineres = True
-    ;     lineres@lgLineColors = (/"black"/) ; line colors
-    ;     lineres@lgLineThicknesses = 3.0                       ; line thicknesses
-    ;     lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
-
-    ;     textres = True
-    ;     textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
-
-    ;     plot = simple_legend(wks,plot,gres,lineres,textres)   
+        ; plot = simple_legend(wks,plot,gres,lineres,textres)   
 
     draw(plot)
     frame(wks)

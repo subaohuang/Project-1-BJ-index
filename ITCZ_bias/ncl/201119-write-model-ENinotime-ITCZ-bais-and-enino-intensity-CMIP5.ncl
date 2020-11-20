@@ -26,8 +26,8 @@ begin
     yearstart = 197901
     yearend = 200412
 
-    dbitcz = new(dim_model,float)
-    enino_intensity = new(dim_model,float)
+    dbitcz_nino_yearspring = new(dim_model,float)
+    enino_intensity_diff = new(dim_model,float)
 
 ;;;
 
@@ -37,6 +37,8 @@ begin
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.197901.and.date.le.200412)
     p=f1->precip(timeind,:,:)
+
+    p = (/rmMonAnnCycTLL(p)/)
    
     delete(p&time)
     p&time=date(timeind)
@@ -85,7 +87,7 @@ printVarSummary(obs_nino34)
 
       obs_p_ninoyear  = dim_avg_n_Wrap(p_annual(ind_obs_nino,:,:) , 0)
     
-      obs_nino_intensity =  obs_nino34(ind_obs_nino)
+      obs_nino_intensity =  avg(obs_nino34(ind_obs_nino))
 ;;;
       
 ;;;
@@ -111,6 +113,8 @@ do k = 0,dim_model-1
     timeind:=ind(date.le.yearend.and.date.ge.yearstart)
     delete(date)     
     pr = lonFlip(f1->pr(timeind,:,:))
+
+    pr = (/rmMonAnnCycTLL(pr)/)
 
 
     pr = (/dtrend_msg_n(ispan(1,dimsizes(pr&time),1),pr,False,True,0)/)
@@ -166,8 +170,7 @@ do k = 0,dim_model-1
 
     nino_intensity = avg(tos_nino)
     ;;;;
-    ; enino_intensity(k) = nino_intensity
-
+    enino_intensity_diff(k) = (/nino_intensity -obs_nino_intensity/)
     model_p_ninoyear = dim_avg_n_Wrap(pr_annual(yearind,:,:) ,0)
 
 
@@ -175,83 +178,16 @@ do k = 0,dim_model-1
     
     diff_p = (/model_p_ninoyear - obs_p_ninoyear/)
 
-;;;;;;
-    res=True
-    res@gsnDraw=False
-    res@gsnFrame=False
-    res@gsnAddCyclic=True
+    ;;;0 -20 150-
+    siindex = avg(diff_p({0:10},{210:280}))
+    ;;
+    dbitcz_nino_yearspring(k) = siindex 
 
-
-    res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
-    res@cnFillOn = True 
-    res@cnLinesOn = False
-
-    res@tmXBMode="Explicit"
-    res@tmYLMode="Explicit"
-
-    res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
-    res@tmYLLabelFontHeightF      = 0.025
-
-    res@gsnContourNegLineDashPattern = 1
-    res@gsnContourPosLineDashPattern = 0
-    res@gsnContourZeroLineThicknessF = 2.0
-
-
-
-    res@cnLineColor = "black"
-    res@cnLineLabelInterval = 2
-    res@cnLineLabelsOn=False
-
-    res@cnFillPalette = "precip_diff_12lev"
-    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-    ; res@cnFillPalette = "BlueDarkRed18"
-
-
-
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -3.0
-    res@cnMaxLevelValF       =   3.0
-    res@cnLevelSpacingF      =  0.5
-    ; res@cnFillPalette = "NCV_jaisnd"
-    ; res@cnFillPalette = "sunshine_9lev"
-    
-
-    res@tmXTOn=False
-    res@tmYROn=False
-
-    res@mpLimitMode           = "LatLon"
-
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 120.0
-    res@mpMaxLonF             = 360.0
-   
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2
-
-
-    res@mpFillOn = True
-    res@mpGeophysicalLineColor      = "Grey18"
-    res@mpGeophysicalLineThicknessF = 1.5
-    
-
-    res@gsnRightString = ""
-    res@gsnLeftString = model
-    res@gsnLeftStringFontHeightF = 0.02
-    plot(k) = gsn_csm_contour_map(wks, diff_p,res)
-
- print("********************************finish calculate"+" "+model+"************************************")
 end do
 
-    pres = True
-    pres@gsnMaximize = True
-    pres@gsnPanelLabelBar = True
-    pres@pmLabelBarHeightF = 0.05
-    pres@pmLabelBarWidthF  = 0.6
-    pres@pmLabelBarOrthogonalPosF = -0.02
-    ; pres@lbOrientation = "Vertical"
-    pres@lbLabelFontHeightF = 0.01
-    gsn_panel(wks, plot, (/6,5/), pres)
-end 
+     ; asciiwrite("enino_intensity_diff_30model", enino_intensity_diff)
+     asciiwrite("Anomaly-ninoyear_spring_north_eastern_pacific_bais_30model", dbitcz_nino_yearspring)
+ 
+end  
 
 
