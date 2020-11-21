@@ -13,9 +13,9 @@ end
 begin
 ;读入数据
 
-read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
-print(read_name)
-model_name = read_name 
+model_name = (/"CAMS-CSM1-0","CanESM5","CESM2","CESM2-WACCM","CNRM-CM6-1","CNRM-ESM2-1"\
+   , "E3SM-1-0", "EC-Earth3","EC-Earth3-Veg","FGOALS-f3-L",  "FGOALS-g3", \
+    "GISS-E2-1-G",  "GISS-E2-1-G-CC","HadGEM3-GC31-LL","IPSL-CM6A-LR","MPI-ESM1-2-HR","NESM3","SAM0-UNICON","UKESM1-0-LL"/)
 
 dim_model = dimsizes(model_name)
 
@@ -23,7 +23,7 @@ plot = new(dim_model,graphic)
 iplot= plot
 plot1 = plot
 
-wks = gsn_open_wks("pdf", "30个CMIP5模式降水偏差分布")
+wks = gsn_open_wks("pdf", "CMIP6模式降水偏差分布")
 
 
 ;;;读入GPCP的数据,计算其春季气候态
@@ -140,7 +140,7 @@ do k = 0,dim_model-1
 
     res@gsnRightString = ""
     res@gsnLeftString = model
-    res@gsnLeftStringFontHeightF = 0.02
+    res@gsnLeftStringFontHeightF = 0.03
     plot(k) = gsn_csm_contour_map(wks, diff,res)
 
  print("********************************finish calculate"+" "+model+"************************************")

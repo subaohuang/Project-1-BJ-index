@@ -1,28 +1,31 @@
 begin 
 
-read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
-print(read_name)
-model_name = read_name 
+    read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
+    print(read_name)
+    model_name = read_name 
 
-enino_intensity = asciiread("enino_intensity_diff_30model", -1,"float")
+    enino_intensity = asciiread("diff-Nino(250-280)_enino_intensity_30model", -1,"float")
 
-; dbitcz = asciiread("dbitcz_30model", -1,"float")
+    ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-dbitcz = asciiread("ninoyear_spring_north_eastern_pacific_bais_30model", -1,"float")
-; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
+    dbitcz = asciiread("north_eastern_pacific_baise_30model", -1,"float")
+    ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
-dim_model = dimsizes(enino_intensity)
-;;;polyline 
+     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-r = escorc(dbitcz, enino_intensity)
+    dim_model = dimsizes(enino_intensity)
+    ;;;polyline 
 
 
-rc = regline(dbitcz,enino_intensity)
-line = rc*dbitcz + rc@yintercept
-  
+    rc = regline(dbitcz,enino_intensity)
+    line = rc*dbitcz + rc@yintercept
+
+    r = escorc(dbitcz, enino_intensity)
+
+
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋厄尔尼诺发展年春季ITCZbias-和冬季Enino强度bias的关系")
+   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季250-280定义的Enino强度与观测的偏差的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -37,19 +40,27 @@ line = rc*dbitcz + rc@yintercept
 
     res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
     res@tmYLLabelsOn=True
-    res@trYMaxF=1.5
-    res@trYMinF=-1.5
-    res@tmYLValues    = ispan(-15,15,5)*0.1
-    res@tmYLLabels    = ispan(-15,15,5)*0.1
+    res@trYMaxF = 2.0
+    res@trYMinF = -1.0
+    res@tmYLValues    = ispan(-10,20,5)*0.1
+    res@tmYLLabels    = ispan(-10,20,5)*0.1
     
     res@tmXTOn=False
     res@tmYROn=False
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
-    res@trXMaxF=4.0
-    res@trXMinF=-4.0
-    res@tmXBValues    = fspan(-0.4,0.4,9) *10.0
-    res@tmXBLabels    = fspan(-0.4,0.4,9) *10.0
+    ; res@trXMaxF =  4.0
+    ; res@trXMinF = -2.0
+    ; res@tmXBValues    = ispan(-2,4,1) 
+    ; res@tmXBLabels    = ispan(-2,4,1) 
+   
+    res@trXMaxF =  2.0
+    res@trXMinF = -4.0
+    res@tmXBValues    = ispan(-4,2,1) 
+    res@tmXBLabels    = ispan(-4,2,1) 
+
+
+
 
     res@tmXMajorGrid                = True          ; implement x grid 
     res@tmXMajorGridThicknessF      = 1.0           ; 2.0 is default
@@ -73,12 +84,12 @@ line = rc*dbitcz + rc@yintercept
     res@vpWidthF=0.6
     
     ; res@tiMainString=" Spring Double ITCZ Bias and DJF Enino Intensity"
-    res@tiMainString=" diff in Spring Eastern Pacific ITCZ  and DJF Enino Intensity "
+    res@tiMainString=" Spring Eastern Pacific ITCZ Bias and DJF Enino Intensity bias"
     res@tiMainFontHeightF = 0.015
-    res@tiYAxisString="~F22~ Enino Intensity Bias [k]"
+    res@tiYAxisString="~F22~ Enino Intensity bias[k]"
     res@tiYAxisFontHeightF=0.012
     
-    res@tiXAxisString="~F22~ Enino develop spring ITCZ Bias [mm/day]  "
+    res@tiXAxisString="~F22~ ITCZ Bias [mm/day]  "
 
     res@tiXAxisFontHeightF=0.012
     
@@ -105,12 +116,11 @@ line = rc*dbitcz + rc@yintercept
     x1=conform(res@tmYLValues,0,0)
     y1=conform(res@tmXBValues,0,0)
 
-    txid = gsn_add_text(wks,plot,labels,dbitcz,enino_intensity+0.08,txres)
+    txid = gsn_add_text(wks,plot,labels,dbitcz-0.02,enino_intensity+0.1,txres)
 
     polyline=True
     polyline@gsLineColor="black"
     polyline@gsLineThicknessF=1.0
-    polyline@gsLineDashPattern = 0.0
 
     plotline1=gsn_add_polyline(wks, plot, x1, res@tmYLValues, polyline)
 
@@ -155,22 +165,22 @@ line = rc*dbitcz + rc@yintercept
         gsn_text_ndc (wks,"dryer",0.2,0.26,txres2)
         gsn_text_ndc (wks,"wetter",0.7,0.26,txres2)
 
-        txres2@txFontHeightF = 0.015
-        txres2@txFontColor="black"
-        txres2@txJust="CenterCenter"
-        txres2@txAngleF="90"
-        gsn_text_ndc (wks,"weakening",0.08,0.40,txres2)
-        gsn_text_ndc (wks,"strengthening",0.08,0.80,txres2)
+        ; txres2@txFontHeightF = 0.015
+        ; txres2@txFontColor="black"
+        ; txres2@txJust="CenterCenter"
+        ; txres2@txAngleF="90"
+        ; gsn_text_ndc (wks,"weaker",0.08,0.40,txres2)
+        ; gsn_text_ndc (wks,"stronger",0.08,0.80,txres2)
 
 
         ;;;
                                         
         txres2@txFontColor="black"
         txres2@txAngleF="0"
-        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),2.5, 1.3, txres2)
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),1, 1.85, txres2)
 
-        
-        R2  = r^2
+
+
         ;;legend 
         gres = True
         gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
@@ -183,10 +193,9 @@ line = rc*dbitcz + rc@yintercept
         lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
         textres = True
-        textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
-        ; textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
+        textres@lgLabels = "Slope="+sprintf("%4.2f",rc)
 
-        ; plot = simple_legend(wks,plot,gres,lineres,textres)   
+        plot = simple_legend(wks,plot,gres,lineres,textres)   
 
     draw(plot)
     frame(wks)

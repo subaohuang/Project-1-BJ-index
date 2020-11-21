@@ -4,7 +4,7 @@ begin
     print(read_name)
     model_name = read_name 
 
-    enino_intensity = asciiread("enino_intensity_30model", -1,"float")
+    enino_intensity = asciiread("diff-Nino(210-280)_enino_intensity_30model", -1,"float")
 
     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
@@ -25,7 +25,7 @@ begin
 
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季Enino强度的关系.pdf")
+   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季210-280定义的Enino强度与观测的偏差的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -116,7 +116,7 @@ begin
     x1=conform(res@tmYLValues,0,0)
     y1=conform(res@tmXBValues,0,0)
 
-    txid = gsn_add_text(wks,plot,labels,dbitcz,enino_intensity+0.08,txres)
+    txid = gsn_add_text(wks,plot,labels,dbitcz-0.01,enino_intensity+0.09,txres)
 
     polyline=True
     polyline@gsLineColor="black"
@@ -177,25 +177,25 @@ begin
                                         
         txres2@txFontColor="black"
         txres2@txAngleF="0"
-        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),-1, 2.2, txres2)
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),1, 3.35, txres2)
 
 
 
-        ; ;;legend 
-        ; gres = True
-        ; gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
-        ;                     ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
-        ; gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+        ;;legend 
+        gres = True
+        gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+                            ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+        gres@XPosPercent = 5    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
 
-        ; lineres = True
-        ; lineres@lgLineColors = (/"black"/) ; line colors
-        ; lineres@lgLineThicknesses = 3.0                       ; line thicknesses
-        ; lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+        lineres = True
+        lineres@lgLineColors = (/"black"/) ; line colors
+        lineres@lgLineThicknesses = 3.0                       ; line thicknesses
+        lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
-        ; textres = True
-        ; textres@lgLabels = "regression"+"("+"R~S~2~N~="+sprintf("%4.2f",R2)+")"
+        textres = True
+        textres@lgLabels = "Slope="+sprintf("%4.2f",rc)
 
-        ; plot = simple_legend(wks,plot,gres,lineres,textres)   
+        plot = simple_legend(wks,plot,gres,lineres,textres)   
 
     draw(plot)
     frame(wks)

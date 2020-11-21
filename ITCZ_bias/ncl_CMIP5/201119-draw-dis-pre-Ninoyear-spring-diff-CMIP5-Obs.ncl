@@ -67,7 +67,8 @@ begin
       
       ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
 
-      ssta_index = dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
+      ; ssta_index = dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
+      ssta_index = dim_avg_n_Wrap(ssta(:,{5:-5},{210:270}), (/1,2/))
       printVarSummary(ssta_index)
 
       obs_nino34_r = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
@@ -77,17 +78,25 @@ begin
       
       obs_nino34_std = dim_stddev_n_Wrap(obs_nino34, 0)
 
-      ind_obs_nino = ind(obs_nino34.ge.obs_nino34_std)
+      ely=(/1980,1983,1987,1988,1992,1995,1998,2003/) - 1
+      
+      ; obs_nino34_std = dim_stddev_n_Wrap(obs_nino34, 0)
+      ; ind_obs_nino = ind(obs_nino34.ge.obs_nino34_std)
+
+      ind_obs_nino = ely - 1979
+
+      obs_nino_intensity = avg(obs_nino34(ind_obs_nino))
+    
+
 
 ;;;;;
 
 ;;;select enino year spring preciptaion and nino intensity
-printVarSummary(p_annual)
-printVarSummary(obs_nino34)
+    printVarSummary(p_annual)
+    printVarSummary(obs_nino34)
 
       obs_p_ninoyear  = dim_avg_n_Wrap(p_annual(ind_obs_nino,:,:) , 0)
-    
-      obs_nino_intensity =  obs_nino34(ind_obs_nino)
+
 ;;;
       
 ;;;
@@ -159,11 +168,12 @@ do k = 0,dim_model-1
     
 
 
-    nino3_4 = dim_avg_n_Wrap(tos_djf(:,{-5:5},{190:240}), (/1,2/))
+    ; nino3_4 = dim_avg_n_Wrap(tos_djf(:,{-5:5},{190:240}), (/1,2/))
+    nino3_4 = dim_avg_n_Wrap(tos_djf(:,{-5:5},{210:270}), (/1,2/))
 
     nino3_4_std = dim_stddev_n_Wrap(nino3_4, 0)
 
-    yearind := ind(nino3_4.ge.nino3_4_std)
+    yearind := ind(nino3_4.ge.0.8*nino3_4_std)
 
     tos_nino := nino3_4(yearind)
 
@@ -213,9 +223,9 @@ do k = 0,dim_model-1
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -3
-    res@cnMaxLevelValF       =   3
-    res@cnLevelSpacingF      =  0.5
+    res@cnMinLevelValF       =   -1
+    res@cnMaxLevelValF       =   1
+    res@cnLevelSpacingF      =  0.1
     ; res@cnFillPalette = "NCV_jaisnd"
     ; res@cnFillPalette = "sunshine_9lev"
     
@@ -240,7 +250,7 @@ do k = 0,dim_model-1
 
     res@gsnRightString = ""
     res@gsnLeftString = model
-    res@gsnLeftStringFontHeightF = 0.02
+    res@gsnLeftStringFontHeightF = 0.03
     plot(k) = gsn_csm_contour_map(wks, diff_p,res)
 
  print("********************************finish calculate"+" "+model+"************************************")
