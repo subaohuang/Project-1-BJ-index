@@ -4,7 +4,7 @@ begin
     print(read_name)
     model_name = read_name 
 
-    enino_intensity = asciiread("diff-Nino(250-280)_enino_intensity_30model", -1,"float")
+    enino_intensity = asciiread("diff-Nino(210-280)_enino_intensity_30model", -1,"float")
 
     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
@@ -25,7 +25,7 @@ begin
 
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季250-280定义的Enino强度与观测的偏差的关系")
+   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季210-280定义的Enino强度与观测的偏差的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -38,12 +38,12 @@ begin
     res@xyMarkers         =  16                      ; choose type of marker  
     res@xyMarkerSizeF     = 0.0001      ; Marker size (default 0.01)
 
-    res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
+     res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
     res@tmYLLabelsOn=True
-    res@trYMaxF = 2.0
-    res@trYMinF = -1.0
-    res@tmYLValues    = ispan(-10,20,5)*0.1
-    res@tmYLLabels    = ispan(-10,20,5)*0.1
+    res@trYMaxF = 3.5
+    res@trYMinF = 0.0
+    res@tmYLValues    = ispan(0,35,5)*0.1
+    res@tmYLLabels    = ispan(0,35,5)*0.1
     
     res@tmXTOn=False
     res@tmYROn=False
@@ -84,9 +84,9 @@ begin
     res@vpWidthF=0.6
     
     ; res@tiMainString=" Spring Double ITCZ Bias and DJF Enino Intensity"
-    res@tiMainString=" Spring Eastern Pacific ITCZ Bias and DJF Enino Intensity bias"
+    res@tiMainString=" Spring Eastern Pacific ITCZ Bias and DJF Enino Intensity"
     res@tiMainFontHeightF = 0.015
-    res@tiYAxisString="~F22~ Enino Intensity bias[k]"
+    res@tiYAxisString="~F22~ Enino Intensity [k]"
     res@tiYAxisFontHeightF=0.012
     
     res@tiXAxisString="~F22~ ITCZ Bias [mm/day]  "
@@ -116,7 +116,7 @@ begin
     x1=conform(res@tmYLValues,0,0)
     y1=conform(res@tmXBValues,0,0)
 
-    txid = gsn_add_text(wks,plot,labels,dbitcz-0.02,enino_intensity+0.1,txres)
+    txid = gsn_add_text(wks,plot,labels,dbitcz-0.01,enino_intensity+0.09,txres)
 
     polyline=True
     polyline@gsLineColor="black"
@@ -177,7 +177,7 @@ begin
                                         
         txres2@txFontColor="black"
         txres2@txAngleF="0"
-        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),1, 1.85, txres2)
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),1, 3.35, txres2)
 
 
 
