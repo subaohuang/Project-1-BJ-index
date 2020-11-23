@@ -60,7 +60,9 @@ begin
     ;;
 
 
-    f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    ; f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    f1=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+
     date=cd_calendar(f1->time, 1)
     timeind=ind(date.ge.197901.and.date.le.201512)
     p=f1->precip(timeind,:,:)
@@ -86,7 +88,7 @@ begin
     delete(p_pi)
     
     print(avg(rc_mam({0:15},{125:160}))/avg(p_clm({0:15},{125:160})))
-    exit()
+
 
 
 
@@ -312,30 +314,59 @@ print("=====finish read data==========")
 
 
     ;;;打点
+    ; res_pro=True
+    ; res_pro@gsnDraw=False
+    ; res_pro@gsnFrame=False
+    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    ; res_pro@cnLinesOn=False
+    ; res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    ; res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    ; res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    ; res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
+
+    ; res_pro@cnLineLabelsOn=False
+    ; res_pro@tmYRMode = "Automatic"
+    ; res_pro@cnInfoLabelOn=False
+
+    ; iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
+
+    ; opt                      = True
+    ; opt@gsnShadeFillType     = "pattern"
+    ; ; opt@gsnShadeMid     = 6         ; stipple
+    ; opt@gsnShadeMid     = 17         ; stipple
+    ; ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; ; opt@gsnShadeHigh   = "green"
+    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+    ; iplot(0) = gsn_contour_shade(iplot(0) , 0,0.1,opt)
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
+    res_pro@cnFillOn = True
 
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+
+
+    res_pro@cnLinesOn=False
+
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillColor = False
+
+  
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
 
-    iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
+    iplot=gsn_csm_contour(wks,prob_mam,res_pro)
 
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    ; opt@gsnShadeMid     = 6         ; stipple
-    opt@gsnShadeMid     = 17         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-    iplot(0) = gsn_contour_shade(iplot(0) , 0,0.1,opt)
+    ; overlay(plot(i*3) , iplot(i*3) )
     overlay(plot(0), iplot(0))
 
 
@@ -687,7 +718,7 @@ print("=====finish read data==========")
     plot@$str(2)$ = gsn_add_polyline(wks, plot(2), pgx_pool, pgy_pool, pgres)
 
   ;;;打点
-    res_pro2@cnFillColors = (/"Transparent","Black","Transparent"/)
+    res_pro2@cnFillColors = (/"Transparent","White","Transparent"/)
 
     iplot(2)=gsn_csm_contour(wks,prob_olr_rc,res_pro2)
 
