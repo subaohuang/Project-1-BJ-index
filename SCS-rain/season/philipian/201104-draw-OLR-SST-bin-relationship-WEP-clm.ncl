@@ -72,8 +72,8 @@ printVarSummary(sst)
 
 
 ;;;;Climatology bin
-    sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:15},{125:160}), 0)   
-    olr_clm = dim_avg_n_Wrap(olr(:,{0:15},{125:160}), 0)
+    sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:20},{125:160}), 0)   
+    olr_clm = dim_avg_n_Wrap(olr(:,{0:20},{125:160}), 0)
 
     sst_clm_one = ndtooned(sst_clm)
     olr_clm_one = ndtooned(olr_clm)
@@ -161,9 +161,9 @@ end do
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
     res@trXMaxF=30.0
-    res@trXMinF=28.0
-    res@tmXBValues    = fspan(28.0,30.0,9)
-    res@tmXBLabels    = fspan(28.0,30.0,9)
+    res@trXMinF=26.0
+    res@tmXBValues    = fspan(26.0,30.0,9)
+    res@tmXBLabels    = fspan(26.0,30.0,9)
 
 
     res@tmXMajorGrid                = True          ; implement x grid 
@@ -194,17 +194,17 @@ end do
     res@tiXAxisFontHeightF=0.012
     plot = new(2, graphic)
     
-   plot(0) =gsn_csm_xy(wks, xx, (/yy,Y1/), res)
+   plot(0) =gsn_csm_xy(wks, xx, (/yy/), res)
 
 
   ;  plot(1) =gsn_csm_xy(wks, xx2, (/yy2,Y2/), res)
 
     
-  ; plres=True
-  ; plres@gsLineThicknessF=2.0
-  ; plres@gsLineColor = "blue"
-  ; plres@gsLineDashPattern=1
-  ; plres@xyMarkLineMode = "Markers"
+  plres=True
+  plres@gsLineThicknessF=2.0
+  plres@gsLineColor = "blue"
+  plres@gsLineDashPattern=1
+  plres@xyMarkLineMode = "Markers"
     printVarSummary(bin)
     printVarSummary(olr_bin)
     plot_line=gsn_add_polyline(wks, plot(0), bin(1:) - 0.25/2.0, olr_bin, plres)

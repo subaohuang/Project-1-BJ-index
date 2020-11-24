@@ -52,7 +52,7 @@ begin
 
     str = ispan(1,9,1)+""
 
-    wks   = gsn_open_wks("pdf", "fig4-2015.pdf")
+    wks   = gsn_open_wks("pdf", "fig4-2015-925hpa.pdf")
 
     ;;;time span
     startmon =197901
@@ -106,10 +106,10 @@ begin
 
     yearnum = 37
 
-    u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{925},{lat1:lat2},{lon1:lon2}))
 
     f1 = addfile(filein(1),"r")
-    v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f1->v(timeind,{925},{lat1:lat2},{lon1:lon2}))
  
     ;;;
 print("=====finish read data==========")
@@ -136,8 +136,8 @@ print("=====finish read data==========")
     ;;;
    
    ;;;calculate wind trend 
-    u_annual = month_to_season(u(:,{850},:,:), season(i))
-    v_annual = month_to_season(v(:,{850},:,:), season(i))
+    u_annual = month_to_season(u(:,:,:), season(i))
+    v_annual = month_to_season(v(:,:,:), season(i))
 
     ; if season(i).eq."DJF" then 
     ;  u_annual(0:yearnum-2,:,:) = u_annual(1:yearnum-1,:,:)
