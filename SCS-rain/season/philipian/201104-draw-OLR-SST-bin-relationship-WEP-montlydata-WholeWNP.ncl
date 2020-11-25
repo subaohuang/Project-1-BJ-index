@@ -137,8 +137,8 @@ printVarSummary(olr)
    ;  sst_one = ndtooned(sst_chazhi_jja(:,{0:15},{125:160}))
    ;  olr_one = ndtooned(olr_jja(:,{0:15},{125:160}))
 
-    sst_one = ndtooned(sst_chazhi(:,{0:30},{100:170}))
-    olr_one = ndtooned(olr(:,{0:30},{100:170}))
+    sst_one = ndtooned(sst_chazhi(:,{0:20},{100:170}))
+    olr_one = ndtooned(olr(:,{0:20},{100:170}))
 
     ; sst_one = ndtooned(sst_chazhi(:,{-5:30},{100:170}))
     ; olr_one = ndtooned(olr(:,{-5:30},{100:170}))   

@@ -21,8 +21,8 @@ return prob_p
 end 
 
 begin
-season_r = (/"spring","summer"/)
-season = (/"MAM","JJA"/)
+season_r = (/"spring","summer","autumn","winter"/)
+season = (/"MAM","JJA","SON","DJF"/)
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/"+"FC5_CTRL.cam.h1.0101-4012_OLR_heatflux.nc" 
   fils2 = "/home/ys17-19/lsh/CESM-data/F/FC5_WEP_" + season_r +"/"+"FC5_WEP_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
@@ -34,7 +34,7 @@ season = (/"MAM","JJA"/)
   str3 = ispan(1,4,1) + ""
 
 
-do i = 0,1
+do i = 0,3
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
 
@@ -177,7 +177,7 @@ end do
   pres = True
   pres@gsnPanelLabelBar = True
 
-  gsn_panel(wks, (/plot(0),plot(1)/), (/2,1/), pres)
+  gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")
 end
   
