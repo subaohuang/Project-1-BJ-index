@@ -79,39 +79,39 @@ function cal_season_trend(data,season)
 end 
 
 
-function eot(sst_mam_clm)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.2828*x+-758.963(28.75~30.25)                                     
+function eot(sst_mam_clm)          ;;;; -14.0275*x+950.176  (26.75~28.75) 25.2828*x+-1116.15(28.75~30.25)                                     
  begin 
   eot_mam = sst_mam_clm
   eot_mam = 0.0
   eot_mam =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam)
-  eot_mam =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -14.0275*sst_mam_clm + 375.845 , eot_mam)
-  eot_mam =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  25.2828*sst_mam_clm -758.963, eot_mam)
+  eot_mam =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -14.0275*sst_mam_clm + 950.176 , eot_mam)
+  eot_mam =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  25.2828*sst_mam_clm -1116.15, eot_mam)
   return eot_mam
  end 
 
 
-function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.2828*x+-758.963(28.75~30.25)                                     
+function eot_cdf(sst_mam_clm,ssta)          ;;;;  -34.2889*x+950.176 (27.75~28.75) 37.4677*x+-1116.15(28.75~29.75)                                     
  begin 
   eot_mam_cdf = sst_mam_clm
   eot_mam_cdf = 0.0
-  eot_mam_cdf =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -(14.0275/2.0)*sst_mam_clm^2 + 375.845*sst_mam_clm , eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*sst_mam_clm^2 -758.963*sst_mam_clm, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75, -(34.2889/2.0)*sst_mam_clm^2 + 950.176*sst_mam_clm , eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*sst_mam_clm^2 -1116.15*sst_mam_clm, eot_mam_cdf)
 
   eot_mam_cdf2 = sst_mam_clm
 
-  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -(14.0275/2.0)*(sst_mam_clm+ssta)^2 + 375.845*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta), eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75, -(34.2889/2.0)*(sst_mam_clm+ssta)^2 + 950.176*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta), eot_mam_cdf2)
   
-  eot_mam_cdf2 =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).le.28.75, -(14.0275/2.0)*(sst_mam_clm+ssta)^2 + 375.845*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).gt.28.75, -(14.0275/2.0)*(28.75)^2 + 375.845*(28.75) + \
-   (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta) - ((25.2828/2.0)*(28.75)^2 -758.963*(28.75)) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).le.28.75, -(34.2889/2.0)*(sst_mam_clm+ssta)^2 + 950.176*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).gt.28.75, -(34.2889/2.0)*(28.75)^2 + 950.176*(28.75) + \
+   (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta) - ((37.4677/2.0)*(28.75)^2 -1116.15*(28.75)) , eot_mam_cdf2)
 
 
 
-  eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta), eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta), eot_mam_cdf2)
     
   eot_mam_cdf_final = eot_mam_cdf
   eot_mam_cdf_final = (/eot_mam_cdf2 - eot_mam_cdf/)
@@ -202,7 +202,7 @@ begin
   
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-function2-WEP-26.75-优化算法")
+    wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-clmdata-WNP")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -214,8 +214,8 @@ begin
   
  
    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlueDarkRed18"
-   res@cnFillPalette = "BlRe"
+   res@cnFillPalette = "BlueDarkRed18"
+   ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -274,7 +274,6 @@ begin
   ; res@cnLevelSpacingF      =  5.0
   ; res@cnFillPalette = "NCV_jaisnd"
   res@cnFillPalette= "BlueWhiteOrangeRed"
-  ; res@cnFillPalette= "BlRe"
   ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)

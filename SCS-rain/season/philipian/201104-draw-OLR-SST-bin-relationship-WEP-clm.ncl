@@ -72,8 +72,8 @@ printVarSummary(sst)
 
 
 ;;;;Climatology bin
-    sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:20},{125:160}), 0)   
-    olr_clm = dim_avg_n_Wrap(olr(:,{0:20},{125:160}), 0)
+    sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:10},{125:160}), 0)   
+    olr_clm = dim_avg_n_Wrap(olr(:,{0:10},{125:160}), 0)
 
     sst_clm_one = ndtooned(sst_clm)
     olr_clm_one = ndtooned(olr_clm)
@@ -114,7 +114,7 @@ printVarSummary(sst)
 
    bin  = fspan(28.0, 29.75, 8)
    olr_bin = new(toint(bin_num),float)
-
+   
 do i = 0,bin_num-1
    in := ind(sst_clm_one.ge.bin(i).and.sst_clm_one.lt.(bin(i)+0.25))
    olr_bin(i) = dim_avg(olr_clm_one(in))
@@ -194,20 +194,29 @@ end do
     res@tiXAxisFontHeightF=0.012
     plot = new(2, graphic)
     
-   plot(0) =gsn_csm_xy(wks, xx, (/yy/), res)
+   plot(0) =gsn_csm_xy(wks, sst_clm_one, (/olr_clm_one/), res)
 
 
   ;  plot(1) =gsn_csm_xy(wks, xx2, (/yy2,Y2/), res)
 
     
-  plres=True
-  plres@gsLineThicknessF=2.0
-  plres@gsLineColor = "blue"
-  plres@gsLineDashPattern=1
-  plres@xyMarkLineMode = "Markers"
+    plres=True
+    plres@gsLineThicknessF=2.0
+    plres@gsLineColor = "blue"
+    plres@gsLineDashPattern=0
+    plres@xyMarkLineMode = "line"
+
+
     printVarSummary(bin)
     printVarSummary(olr_bin)
-    plot_line=gsn_add_polyline(wks, plot(0), bin(1:) - 0.25/2.0, olr_bin, plres)
+    plot_line=gsn_add_polyline(wks, plot(0), bin(1:) , olr_bin, plres)
+
+    mkres = True
+    mkres@gsMarkerColor = "red"
+    mkres@gsMarkerIndex = 1
+    mkres@gsMarkerSizeF = 0.02
+
+    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:), olr_bin, mkres)
 
 
     ; 90~S~o~N~E

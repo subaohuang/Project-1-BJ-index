@@ -94,16 +94,28 @@ function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (27.0~29.25
  begin 
   eot_mam_cdf = sst_mam_clm
   eot_mam_cdf = 0.0
-  eot_mam_cdf =  where(sst_mam_clm.lt.27.0, 0.0, eot_mam_cdf)
+
+
+  eot_mam_cdf =  where(sst_mam_clm.lt.27.0, 0.0, eot_mam_cdf)   
+
   eot_mam_cdf =  where(sst_mam_clm.ge.27.0.and.sst_mam_clm.le.29, (-13.6375/2.0)*sst_mam_clm^2 + 369.215*sst_mam_clm , eot_mam_cdf)
   eot_mam_cdf =  where(sst_mam_clm.gt.29.and.sst_mam_clm.le.30.25,  (20.9251/2.0)*sst_mam_clm^2 -628.491*sst_mam_clm, eot_mam_cdf)
 
   eot_mam_cdf2 = sst_mam_clm
 
   eot_mam_cdf2 =  where(sst_mam_clm.lt.27.0, 0.0, eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.0.and.sst_mam_clm.le.29, (-13.6375/2.0)*(sst_mam_clm+ssta)^2 +  369.215*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.gt.29.and.sst_mam_clm.le.30.25,  (20.9251/2.0)*(sst_mam_clm+ssta)^2  -628.491*(sst_mam_clm+ssta), eot_mam_cdf2)
+
+
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.0.and.sst_mam_clm.le.29.and.(sst_mam_clm+ssta).le.29.0, (-13.6375/2.0)*(sst_mam_clm+ssta)^2 +  369.215*(sst_mam_clm+ssta) , eot_mam_cdf2)
   
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.0.and.sst_mam_clm.le.29.and.(sst_mam_clm+ssta).gt.29.0, (-13.6375/2.0)*(29.0)^2 +  369.215*(29.0) + \
+   (20.9251/2.0)*(sst_mam_clm+ssta)^2  -628.491*(sst_mam_clm+ssta) - ((20.9251/2.0)*(29.0)^2  -628.491*(29.0)), eot_mam_cdf2)
+
+
+
+  eot_mam_cdf2 =  where(sst_mam_clm.gt.29.and.sst_mam_clm.le.30.25,  (20.9251/2.0)*(sst_mam_clm+ssta)^2  -628.491*(sst_mam_clm+ssta), eot_mam_cdf2)
+
+
   eot_mam_cdf_final = eot_mam_cdf
   eot_mam_cdf_final = (/eot_mam_cdf2 - eot_mam_cdf/)
 
@@ -137,12 +149,15 @@ begin
     copy_VarCoords(sst, ssta)
     
 
+
    ;;;;cal season trend 
     ssta_mam = cal_season_trend(ssta,"MAM")
     ssta_jja = cal_season_trend(ssta,"JJA")
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
    ;;;;
+
+
 
     sst_plus_mam  = sst_mam_clm 
     sst_plus_jja = sst_jja_clm
@@ -189,7 +204,7 @@ begin
 
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-function2-whole-WNP")
+    wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-function2-whole-WNP-优化算法")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
