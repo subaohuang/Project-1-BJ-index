@@ -71,6 +71,9 @@ printVarSummary(olr)
     xi = sst&longitude
     yi = sst&latitude
 
+    ;   xi = sst&lon
+    ; yi = sst&lat
+
 
     xo = olr&lon
     yo = olr&lat
@@ -96,7 +99,32 @@ printVarSummary(olr)
 ;;;;Climatology bin
     sst_clm = dim_avg_n_Wrap(sst_chazhi(:,{0:20},{125:170}), 0)   
     olr_clm = dim_avg_n_Wrap(olr(:,{0:20},{125:170}), 0)
+    
 
+
+    ; sst_clm_MAM = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"MAM"), 0)   
+    ; olr_clm_MAM = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"MAM"), 0)
+
+    ; sst_clm_JJA = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"JJA"), 0)   
+    ; olr_clm_JJA = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"JJA"), 0)
+    
+    ; sst_clm_SON = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"SON"), 0)   
+    ; olr_clm_SON = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"SON"), 0)
+
+    ; sst_clm_DJF = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"DJF"), 0)   
+    ; olr_clm_DJF = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"DJF"), 0)
+
+    ; sst_mam_jja = array_append_record(sst_clm_MAM,sst_clm_JJA,0)
+    ; sst_son_djf  = array_append_record(sst_clm_SON,sst_clm_DJF,0)
+    
+    ; sst_clm = array_append_record(sst_mam_jja,sst_son_djf,0)
+
+    ; olr_mam_jja = array_append_record(olr_clm_MAM,olr_clm_JJA,0)
+    ; olr_son_djf  = array_append_record(olr_clm_SON,olr_clm_DJF,0)
+    
+    ; olr_clm = array_append_record(olr_mam_jja,olr_son_djf,0)
+    
+  
 
     sst_clm_one = ndtooned(sst_clm)
     olr_clm_one = ndtooned(olr_clm)
@@ -156,10 +184,10 @@ printVarSummary(olr)
 
 
 ;;;bin 
-   bin_num =  (29.75-27.0)/0.25
-
-   bin  = fspan(27.0, 29.75, toint(bin_num) +1)
+   bin_num =  (30.0-27.5)/0.25
+   bin  = fspan(27.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
    olr_bin = new(toint(bin_num),float)
+   printMinMax(sst_clm_one, 1)
 
 do i = 0,bin_num-1
    in := ind(sst_clm_one.ge.bin(i).and.sst_clm_one.lt.(bin(i)+0.25))
@@ -167,23 +195,23 @@ do i = 0,bin_num-1
    olr_bin(i) = dim_avg(olr_clm_one(in))
 end do 
 
-dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
+dolr_dsst = center_finite_diff(olr_bin, bin(1:) -0.125, False, 0)
 
 
-bin_select = bin(1:)
-in1 = ind(bin_select.eq.27.75)
-in2 = ind(bin_select.eq.28.75)
-in3 = ind(bin_select.eq.29.75)
+; bin_select = bin(1:)
+; in1 = ind(bin_select.eq.27.75)
+; in2 = ind(bin_select.eq.28.75)
+; in3 = ind(bin_select.eq.29.75)
 
 
-rc1 = regline(fspan(27.75,28.75,toint((28.75-27.75)/0.25+1)), dolr_dsst(in1:in2))
-print(rc1@yintercept)
+; rc1 = regline(fspan(27.75,28.75,toint((28.75-27.75)/0.25+1)), dolr_dsst(in1:in2))
+; print(rc1@yintercept)
 
-rc2 = regline(fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), dolr_dsst(in2:in3))
+; rc2 = regline(fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), dolr_dsst(in2:in3))
 
-print(rc2@yintercept)
-print (rc1+"*x"+"+" +rc1@yintercept)
-print (rc2+"*x"+"+" +rc2@yintercept)
+; print(rc2@yintercept)
+; print (rc1+"*x"+"+" +rc1@yintercept)
+; print (rc2+"*x"+"+" +rc2@yintercept)
 
 
 
@@ -217,7 +245,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
 
  ; exit()
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "SST-OLR-relation-clmdata-WHOLEWNP-HADISSTDATA")
+    wks=gsn_open_wks("pdf", "SST-OLR-relation-clmdata-TWNP-HADISSTDATA")
 
 
     res                   = True                     ; plot mods desired
@@ -228,14 +256,16 @@ print (rc2+"*x"+"+" +rc2@yintercept)
     res@xyLineColor     = (/"red"/)          ; change line color
     res@xyMonoLineColor = True
 
-    res@xyMarkerColor ="gray30"
+    ; res@xyMarkerColor ="gray30"
+    res@xyMarkerColor ="black"
+
     res@xyMarkLineModes   = (/"Markers","Lines"/)
     res@xyMonoLineThickness = True
     res@xyLineThicknessF=3.0
     res@xyDashPatterns=1
     ; res@xyExplicitLegendLabels = (/"", "mon_change", "Linear trend"/) 
     res@xyMarkers         =  16                      ; choose type of marker  
-    res@xyMarkerSizeF     = 0.001     ; Marker size (default 0.01)
+    res@xyMarkerSizeF     = 0.005     ; Marker size (default 0.01)
    
     res@trYReverse =  True
     res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
@@ -299,6 +329,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
     printVarSummary(bin)
     printVarSummary(olr_bin)
     plot_line=gsn_add_polyline(wks, plot(0), bin(1:) - 0.25/2, olr_bin, plres)
+    ; plot_line=gsn_add_polyline(wks, plot(0), bin(1:) , olr_bin, plres)
 
     mkres = True
     mkres@gsMarkerColor = "blue"
@@ -306,6 +337,8 @@ print (rc2+"*x"+"+" +rc2@yintercept)
     mkres@gsMarkerSizeF = 0.02
 
     plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:) - 0.25/2, olr_bin, mkres)
+    ; plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:) , olr_bin, mkres)
+
 
 
     res@tmYLValues    := fspan(30,-40,15)
@@ -323,7 +356,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
     res@tiYAxisString="~F22~Chage rate [W/m^2/~S~o~N~C]"
     res@gsnYRefLine = 0.0
     res@gsnYRefLineThicknessF = 1.0
-    plot(1) =gsn_csm_xy(wks, bin(1:), (/dolr_dsst/), res)
+    plot(1) =gsn_csm_xy(wks, bin(1:) - 0.25/2, (/dolr_dsst/), res)
 
 
  pres  = True

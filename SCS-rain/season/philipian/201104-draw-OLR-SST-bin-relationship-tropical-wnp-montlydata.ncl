@@ -28,8 +28,12 @@ lat2 =  30
 lon1 =  100
 lon2 = 180
 
-startmon = 198201
-endmon = 201912
+; startmon = 198201
+; endmon = 201912
+
+startmon = 197901
+endmon = 201512
+
 
 
 f1 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
@@ -39,18 +43,34 @@ olr = short2flt(f1->olr(timeind,{lat1:lat2},{lon1:lon2})) ;;;2.5 ×2.5 grid
 
 printVarSummary(olr)
 
-f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
-date:=cd_calendar(f2->time, 1)
-timeind :=ind(date.ge.startmon.and.date.le.endmon)
-sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
-printVarSummary(sst)
+; f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
+; date:=cd_calendar(f2->time, 1)
+; timeind :=ind(date.ge.startmon.and.date.le.endmon)
+; sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
+; printVarSummary(sst)
 ;;;;
+
+
+  f2 = addfile("/home/yangsong3/data-observation/linshh/data/sst/HadISST_sst.nc", "r")
+  date:=cd_calendar(f2->time, 1)
+
+  timeind:=ind(date.le.201512.and.date.ge.197901)
+
+  sst_r =  lonFlip(f2->sst(timeind,:,:))
+  
+  sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
+
+  printVarSummary(sst)
+
 
 
 ;;;;chazhi 
    print("**********start interp************")
-    xi = sst&lon
-    yi = sst&lat
+    ; xi = sst&lon
+    ; yi = sst&lat
+
+       xi = sst&longitude
+    yi = sst&latitude
 
     xo = olr&lon
     yo = olr&lat
@@ -136,10 +156,11 @@ printVarSummary(sst)
 
 
 ;;;bin 
-   bin_num =  (30.75-26.5)/0.25
+   bin_num =  (30.5-26.5)/0.25   ;;;;bin的个数，也是中间数
 
-   bin  = fspan(26.5, 30.75, toint(bin_num) +1)
-   olr_bin = new(toint(bin_num),float)
+   bin  = fspan(26.5-0.125, 30.5-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
+    olr_bin = new(toint(bin_num),float)
+printMinMax(sst_one, 1)
 
 do i = 0,bin_num-1
    in := ind(sst_one.ge.bin(i).and.sst_one.lt.(bin(i)+0.25))
@@ -147,16 +168,16 @@ do i = 0,bin_num-1
    olr_bin(i) = dim_avg(olr_one(in))
 end do 
 
-dolr_dsst = center_finite_diff(olr_bin, bin(1:), False, 0)
+dolr_dsst = center_finite_diff(olr_bin, bin(1:) - 0.125, False, 0)
 
-rc1 = regline(fspan(26.75,28.75,9), dolr_dsst(0:8))
-print(rc1@yintercept)
+; rc1 = regline(fspan(26.5,28.75,9), dolr_dsst(0:8))
+; print(rc1@yintercept)
 
-rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(8:14))
+; rc2 = regline(fspan(28.75,30.25,toint((30.25-28.75)/0.25)+1), dolr_dsst(8:14))
 
-print(rc2@yintercept)
-print (rc1+"*x"+"+" +rc1@yintercept)
-print (rc2+"*x"+"+" +rc2@yintercept)
+; print(rc2@yintercept)
+; print (rc1+"*x"+"+" +rc1@yintercept)
+; print (rc2+"*x"+"+" +rc2@yintercept)
 
 
 
@@ -188,7 +209,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
 
 
 
- ; exit()
+
 ;;;;draw plot 
     wks=gsn_open_wks("pdf", "SST-OLR-relation-monlydata")
 
@@ -271,14 +292,14 @@ print (rc2+"*x"+"+" +rc2@yintercept)
 
     printVarSummary(bin)
     printVarSummary(olr_bin)
-    plot_line=gsn_add_polyline(wks, plot(0), bin(1:), olr_bin, plres)
+    plot_line=gsn_add_polyline(wks, plot(0), bin(1:) - 0.125, olr_bin, plres)
 
     mkres = True
     mkres@gsMarkerColor = "blue"
     mkres@gsMarkerIndex = 1
     mkres@gsMarkerSizeF = 0.02
 
-    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:), olr_bin, mkres)
+    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:) - 0.125, olr_bin, mkres)
 
 
     res@tmYLValues    := fspan(30,-30,13)
@@ -296,7 +317,7 @@ print (rc2+"*x"+"+" +rc2@yintercept)
     res@tiYAxisString="~F22~Chage rate [W/m^2/~S~o~N~C]"
     res@gsnYRefLine = 0.0
     res@gsnYRefLineThicknessF = 1.0
-    plot(1) =gsn_csm_xy(wks, bin(1:), (/dolr_dsst/), res)
+    plot(1) =gsn_csm_xy(wks, bin(1:) -0.125, (/dolr_dsst/), res)
 
 
  pres  = True

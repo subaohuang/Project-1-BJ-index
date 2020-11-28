@@ -92,27 +92,37 @@ function eot(sst_mam_clm)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.282
 
 function eot_cdf(sst_mam_clm,ssta)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.2828*x+-758.963(28.75~30.25)                                     
  begin 
+  a = -11.8416
+  b = 314.172
+  c = 25.4392
+  d = -763.319
+
+  range = (/26.5,28.75,30.00/)
+  
+
+
   eot_mam_cdf = sst_mam_clm
   eot_mam_cdf = 0.0
-  eot_mam_cdf =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -(14.0275/2.0)*sst_mam_clm^2 + 375.845*sst_mam_clm , eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*sst_mam_clm^2 -758.963*sst_mam_clm, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1), (a/2.0)*sst_mam_clm^2 + b*sst_mam_clm , eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*sst_mam_clm^2 +d*sst_mam_clm, eot_mam_cdf)
 
   eot_mam_cdf2 = sst_mam_clm
+  eot_mam_cdf2 = 0.0
 
-  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -(14.0275/2.0)*(sst_mam_clm+ssta)^2 + 375.845*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta), eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1), (a/2.0)*(sst_mam_clm+ssta)^2 + b*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*(sst_mam_clm+ssta)^2 + d*(sst_mam_clm+ssta), eot_mam_cdf2)
   
-  eot_mam_cdf2 =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).le.28.75, -(14.0275/2.0)*(sst_mam_clm+ssta)^2 + 375.845*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).gt.28.75, -(14.0275/2.0)*(28.75)^2 + 375.845*(28.75) + \
-   (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta) - ((25.2828/2.0)*(28.75)^2 -758.963*(28.75)) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1).and.(sst_mam_clm+ssta).le.range(1), (a/2.0)*(sst_mam_clm+ssta)^2 + b*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1).and.(sst_mam_clm+ssta).gt.range(1), (a/2.0)*(range(1))^2 + b*(range(1)) + \
+   (c/2.0)*(sst_mam_clm+ssta)^2 +d*(sst_mam_clm+ssta) - ((c/2.0)*(range(1))^2 + d*(range(1))) , eot_mam_cdf2)
 
 
 
-  eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  (25.2828/2.0)*(sst_mam_clm+ssta)^2 -758.963*(sst_mam_clm+ssta), eot_mam_cdf2)
-    
+  eot_mam_cdf2 =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*(sst_mam_clm+ssta)^2 +d*(sst_mam_clm+ssta), eot_mam_cdf2)
+  
   eot_mam_cdf_final = eot_mam_cdf
   eot_mam_cdf_final = (/eot_mam_cdf2 - eot_mam_cdf/)
 

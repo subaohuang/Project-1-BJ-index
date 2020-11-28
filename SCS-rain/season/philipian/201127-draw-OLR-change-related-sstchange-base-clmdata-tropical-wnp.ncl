@@ -79,40 +79,44 @@ function cal_season_trend(data,season)
 end 
 
 
-function eot(sst_mam_clm)          ;;;; -14.0275*x+950.176  (26.75~28.75) 25.2828*x+-1116.15(28.75~30.25)                                     
- begin 
-  eot_mam = sst_mam_clm
-  eot_mam = 0.0
-  eot_mam =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam)
-  eot_mam =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -14.0275*sst_mam_clm + 950.176 , eot_mam)
-  eot_mam =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  25.2828*sst_mam_clm -1116.15, eot_mam)
-  return eot_mam
- end 
 
 
-function eot_cdf(sst_mam_clm,ssta)          ;;;;  -34.2889*x+950.176 (27.75~28.75) 37.4677*x+-1116.15(28.75~29.75)                                     
+function eot_cdf(sst_mam_clm,ssta)          ;;;;  -11.433*x+313.905 (27.5~28.75) -2.27547*x+45.109(28.75~30.25)                                     
  begin 
+  a = -39.0749
+  b = 1082.63
+  c = 37.4193
+  d = -1109.24
+  ; a = -39.0749
+  ; b = 1082.63
+  ; c = 45.9902
+  ; d = -1357.79
+  range = (/27.5,28.75,29.75/)
+  
+
+
   eot_mam_cdf = sst_mam_clm
   eot_mam_cdf = 0.0
-  eot_mam_cdf =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75, -(34.2889/2.0)*sst_mam_clm^2 + 950.176*sst_mam_clm , eot_mam_cdf)
-  eot_mam_cdf =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*sst_mam_clm^2 -1116.15*sst_mam_clm, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1), (a/2.0)*sst_mam_clm^2 + b*sst_mam_clm , eot_mam_cdf)
+  eot_mam_cdf =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*sst_mam_clm^2 +d*sst_mam_clm, eot_mam_cdf)
 
   eot_mam_cdf2 = sst_mam_clm
+  eot_mam_cdf2 = 0.0
 
-  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75, -(34.2889/2.0)*(sst_mam_clm+ssta)^2 + 950.176*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta), eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1), (a/2.0)*(sst_mam_clm+ssta)^2 + b*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  ; eot_mam_cdf2 =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*(sst_mam_clm+ssta)^2 + d*(sst_mam_clm+ssta), eot_mam_cdf2)
   
-  eot_mam_cdf2 =  where(sst_mam_clm.lt.27.75, 0.0, eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).le.28.75, -(34.2889/2.0)*(sst_mam_clm+ssta)^2 + 950.176*(sst_mam_clm+ssta) , eot_mam_cdf2)
-  eot_mam_cdf2 =  where(sst_mam_clm.ge.27.75.and.sst_mam_clm.le.28.75.and.(sst_mam_clm+ssta).gt.28.75, -(34.2889/2.0)*(28.75)^2 + 950.176*(28.75) + \
-   (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta) - ((37.4677/2.0)*(28.75)^2 -1116.15*(28.75)) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.lt.range(0), 0.0, eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1).and.(sst_mam_clm+ssta).le.range(1), (a/2.0)*(sst_mam_clm+ssta)^2 + b*(sst_mam_clm+ssta) , eot_mam_cdf2)
+  eot_mam_cdf2 =  where(sst_mam_clm.ge.range(0).and.sst_mam_clm.le.range(1).and.(sst_mam_clm+ssta).gt.range(1), (a/2.0)*(range(1))^2 + b*(range(1)) + \
+   (c/2.0)*(sst_mam_clm+ssta)^2 +d*(sst_mam_clm+ssta) - ((c/2.0)*(range(1))^2 + d*(range(1))) , eot_mam_cdf2)
 
 
 
-  eot_mam_cdf2 =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.29.75,  (37.4677/2.0)*(sst_mam_clm+ssta)^2 -1116.15*(sst_mam_clm+ssta), eot_mam_cdf2)
-    
+  eot_mam_cdf2 =  where(sst_mam_clm.gt.range(1).and.sst_mam_clm.le.range(2),  (c/2.0)*(sst_mam_clm+ssta)^2 +d*(sst_mam_clm+ssta), eot_mam_cdf2)
+  
   eot_mam_cdf_final = eot_mam_cdf
   eot_mam_cdf_final = (/eot_mam_cdf2 - eot_mam_cdf/)
 
@@ -214,7 +218,7 @@ begin
   
  
    ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlueDarkRed18"
+   ; res@cnFillPalette = "BlueDarkRed18"
    ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
@@ -273,7 +277,8 @@ begin
   ; res@cnMaxLevelValF       =   20.0
   ; res@cnLevelSpacingF      =  5.0
   ; res@cnFillPalette = "NCV_jaisnd"
-  res@cnFillPalette= "BlueWhiteOrangeRed"
+  ; res@cnFillPalette= "BlueWhiteOrangeRed"
+  res@cnFillPalette = "BlueRed"
   ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
