@@ -277,8 +277,11 @@ begin
   ; res@cnMaxLevelValF       =   20.0
   ; res@cnLevelSpacingF      =  5.0
   ; res@cnFillPalette = "NCV_jaisnd"
-  ; res@cnFillPalette= "BlueWhiteOrangeRed"
-  res@cnFillPalette = "BlueRed"
+  res@cnFillPalette= "BlueWhiteOrangeRed"
+  ; res@cnFillPalette  = "BlRe"
+  ; res@cnLevelSelectionMode = "ExplicitLevels"
+  ; res@cnLevels := (/-12.0,-10,-8.0,-6.0,-4.0,-2.0,-1.0,1.0,2.0,4.0,6.0,8.0,10.0,12.0/)
+  ; res@cnFillPalette = "BlueRed"
   ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
@@ -319,7 +322,7 @@ begin
   res2@cnLevelSelectionMode = "ExplicitLevels"
   res2@cnFillOn = False
   res2@cnLinesOn = True
-  res2@cnLevels = fspan(26.0, 30.0, 9)
+  res2@cnLevels := fspan(26.0, 30.0, 9)
   res2@cnLineLabelStrings =   res2@cnLevels  + ""
   res2@cnLineLabelDensityF = 1.3
 

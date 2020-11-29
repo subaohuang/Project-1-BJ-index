@@ -438,10 +438,10 @@ end do
     res3@cnMaxLevelValF        := 20.0          ; set max contour level
     res3@cnLevelSpacingF       := 5.0          ; set contour interval
     res3@cnFillPalette = "BlueWhiteOrangeRed"
-    res3@cnLevelSelectionMode = "ExplicitLevels"
+    ; res3@cnLevelSelectionMode = "ExplicitLevels"
 
-    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
-    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
+    ; ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    ; res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
     res3@lbLabelStrings = res3@cnLevels
     res3@lbLabelFontHeightF = 0.02
     res3@lbAutoManage = False

@@ -692,6 +692,8 @@ print("=====finish read data==========")
     res3@cnMaxLevelValF        := 20.0          ; set max contour level
     res3@cnLevelSpacingF       := 5.0          ; set contour interval
     res3@cnFillPalette = "BlueWhiteOrangeRed"
+    
+
     res3@cnLevelSelectionMode = "ExplicitLevels"
 
     ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")

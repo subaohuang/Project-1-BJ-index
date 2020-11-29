@@ -26,6 +26,8 @@ olr = short2flt(f1->olr(timeind,{lat1:lat2},{lon1:lon2})) ;;;2.5 ×2.5 grid
 
 printVarSummary(olr)
 
+olr = (/dtrend_msg_n(ispan(1,dimsizes(olr&time),1),olr,False,True,0)/)
+
 ; f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
 ; date:=cd_calendar(f2->time, 1)
 ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
@@ -42,6 +44,9 @@ timeind:=ind(date.le.201512.and.date.ge.197901)
 sst_r =  lonFlip(f2->sst(timeind,:,:))
 
 sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
+
+sst = (/dtrend_msg_n(ispan(1,dimsizes(sst&time),1),sst,False,True,0)/)
+
 
 printVarSummary(sst)
 
@@ -148,10 +153,11 @@ end do
     y1 = rc1*fspan(26.5,28.75,9) + rc1@yintercept
     y2 = rc2*fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) + rc2@yintercept
 
-
+printMinMax(sst_clm_one, 1)
 ;;;bin 
    bin_num :=  (30.0-27.5)/0.25   ;;;bin中间的数，也是bin的个数
    bin_clm  = fspan(27.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; bin左边的数字，比bin的数目多一个 
+    
    olr_bin_clm = new(toint(bin_num),float)
    printMinMax(sst_clm_one, 1)
 
@@ -163,14 +169,15 @@ end do
 
   dolr_dsst_clm = center_finite_diff(olr_bin_clm, bin_clm(1:) -0.125, False, 0)
   
+  
 
 printVarSummary(dolr_dsst_clm)
 
 
     rc3 = regline(fspan(27.5,28.75,toint((28.75-27.5)/0.25)+1), dolr_dsst_clm(0:5))
     print(rc1@yintercept)
-
-    rc4 = regline(fspan(28.75,29.5,toint((29.75-28.75)/0.25)+1), dolr_dsst_clm(5:9))
+    dolr_dsst_clm(5)  = -30.0
+    rc4 = regline(fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), dolr_dsst_clm(5:9))
 
     print(rc3@yintercept)
     print (rc3+"*x"+"+" +rc3@yintercept)
