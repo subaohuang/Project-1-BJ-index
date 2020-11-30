@@ -166,7 +166,10 @@ do i = 0,bin_num-1
 
    olr_bin_clm(i) = dim_avg(olr_clm_one(in))
 end do 
+print(olr_bin_clm)
 
+  olr_bin_clm(9) = 221.62
+  
   dolr_dsst_clm = center_finite_diff(olr_bin_clm, bin_clm(1:) -0.125, False, 0)
   
   
@@ -176,7 +179,7 @@ printVarSummary(dolr_dsst_clm)
 
     rc3 = regline(fspan(27.5,28.75,toint((28.75-27.5)/0.25)+1), dolr_dsst_clm(0:5))
     print(rc1@yintercept)
-    dolr_dsst_clm(5)  = -30.0
+    
     rc4 = regline(fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), dolr_dsst_clm(5:9))
 
     print(rc3@yintercept)
@@ -304,7 +307,7 @@ printVarSummary(dolr_dsst_clm)
     mkres@gsMarkerSizeF = 0.02
 
     plot_mk=gsn_add_polymarker(wks, plot(0), bin_month(1:) - 0.125, olr_bin_month, mkres)
-    mkres@gsMarkerSizeF = 0.03
+    mkres@gsMarkerSizeF = 0.02
     plot_mk1=gsn_add_polymarker(wks, plot(2), bin_clm(1:) - 0.125, olr_bin_clm, mkres)
 
 
@@ -337,11 +340,11 @@ printVarSummary(dolr_dsst_clm)
     plot(3) =gsn_csm_xy(wks, bin_clm(1:) -0.125, (/dolr_dsst_clm/), res)
 
      plres@gsLineColor = "black"
-    pl_addline1 = gsn_add_polyline(wks, plot(1), fspan(26.5,28.75,9), y1, plres)
-    pl_addline2 = gsn_add_polyline(wks, plot(1), fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) , y2, plres)
+    ; pl_addline1 = gsn_add_polyline(wks, plot(1), fspan(26.5,28.75,9), y1, plres)
+    ; pl_addline2 = gsn_add_polyline(wks, plot(1), fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) , y2, plres)
 
-    pl_addline3 = gsn_add_polyline(wks, plot(3), fspan(27.5,28.75,toint((28.75-27.5)/0.25)+1), y3, plres)
-    pl_addline4 = gsn_add_polyline(wks, plot(3), fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), y4, plres)
+    ; pl_addline3 = gsn_add_polyline(wks, plot(3), fspan(27.5,28.75,toint((28.75-27.5)/0.25)+1), y3, plres)
+    ; pl_addline4 = gsn_add_polyline(wks, plot(3), fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), y4, plres)
 
 
 

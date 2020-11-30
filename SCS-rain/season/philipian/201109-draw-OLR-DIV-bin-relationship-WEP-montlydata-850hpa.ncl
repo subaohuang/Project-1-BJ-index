@@ -41,7 +41,7 @@ printVarSummary(olr)
 
 
 
-fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_850hpa*"+".nc")
+fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_*"+".nc")
 f3 = addfiles(fils3, "r")
 
 date:=cd_calendar(f3[:]->time, 1)
@@ -51,14 +51,18 @@ lat = f3[1]->latitude
 lon = f3[1]->longitude
 
 
-div_r = new((/dimsizes(time),dimsizes(lat),dimsizes(lon)/),float)
+div_r = new((/dimsizes(time),7, dimsizes(lat),dimsizes(lon)/),float)
   
 
 do i = 0,dimsizes(timeind)/12-1
-  div_r(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,:,:))
+
+  div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},:,:))
+  
 end do
 ;
-div = div_r(:,{-10:30},{100:180})
+
+
+div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
 
 div = (/div*10^5/)
 div = (/-1*div/)
@@ -99,15 +103,6 @@ div = (/-1*div/)
     div_clm_one = ndtooned(div_clm)
     olr_clm_one = ndtooned(olr_clm)
 
-    mono = 1                            ; ascending=1 , descending=-1
-    ii   =  dim_pqsort_n(div_clm_one,mono,0)
-    xx   = div_clm_one(ii)                        ; ascending order 
-    yy  = olr_clm_one(ii)
- 
-    n = 4
-    c1 = lspoly(xx, yy, 1,n)    ; all weights are set to one 
- 
-    Y1 = c1(0) + c1(1)*xx + c1(2)*xx^2 + c1(3)*xx^3 
 ;;;
 
 ;;;;Monthly bin
@@ -141,67 +136,61 @@ div = (/-1*div/)
     ; div_one = ndtooned(div_chazhi(:,{-5:30},{100:170}))
     ; olr_one = ndtooned(olr(:,{-5:30},{100:170}))   
 
-    jj   =  dim_pqsort_n(div_one,mono,0)
 
-    xx2 = div_one(jj)
-    yy2 = olr_one(jj)
+;;bin 
+   bin = fspan(-0.5 -0.05, 0.6-0.05, 12)  ;;; 0.1 最左边的数字
 
-    n = 3
-    c2 = lspoly(xx2, yy2, 1,n)    ; all weights are set to one 
-
-    Y2 = c2(0) + c2(1)*xx2 + c2(2)*xx2^2 
-    ;;;
-
-
-;;;bin 
-   ; bin_num =  (0.7- (-0.6))/0.1
-   ; bin  = ispan(-3, 3, 1)*0.05
-   bin = fspan(-0.3, 0.3, 13)
-
-
-
-   bin_num = dimsizes(bin)
+   bin_num = dimsizes(bin) -1
    
-   olr_bin = new(bin_num-1,float)
-
- 
-
-
-do i = 0,bin_num-2
+   olr_bin = new(bin_num,float)
+do i = 0,bin_num-1
    in := ind(div_one.ge.bin(i).and.div_one.lt.(bin(i)+0.1))
 
    olr_bin(i) = dim_avg(olr_one(in))
-  
 end do 
+dolr_ddiv = center_finite_diff(olr_bin, bin(1:) - 0.05, False, 0)
+; printMinMax(div_clm_one, 1)
+
+;     bin = fspan(0.0 -0.05, 0.30-0.05, 4)  ;;; 0.1 最左边的数字
+
+;     bin_num = dimsizes(bin) -1
+
+;     olr_bin = new(bin_num,float)
+
+; do i = 0,bin_num-1
+;    in := ind(div_clm_one.ge.bin(i).and.div_clm_one.lt.(bin(i)+0.1))
+
+;    olr_bin(i) = dim_avg(olr_clm_one(in))
+; end do
+
+; dolr_ddiv = center_finite_diff(olr_bin, bin(1:) - 0.05, False, 0)
+; ; dolr_ddiv = center_finite_diff(olr_bin, bin(0:toint(bin_num)-1), False, 0)
+
+; bin_select = bin(1:)
 
 
-dolr_ddiv = center_finite_diff(olr_bin, bin(1:), False, 0)
-; dolr_ddiv = center_finite_diff(olr_bin, bin(0:toint(bin_num)-1), False, 0)
-
-bin_select = bin(1:)
-
-
-in1 = ind(bin_select.eq.-0.2)
-in2 = ind(bin_select.eq.0.0)
-in3 = ind(bin_select.eq.0.2)
+; in1 = ind(bin_select.eq.-0.2)
+; in2 = ind(bin_select.eq.0.0)
+; in3 = ind(bin_select.eq.0.2)
 
 
 
 
-rc1 = regline(fspan(-.2,0.0,5), dolr_ddiv(in1:in2))
-print(rc1@yintercept)
+; rc1 = regline(fspan(-.2,0.0,5), dolr_ddiv(in1:in2))
+; print(rc1@yintercept)
 
-rc2 = regline(fspan(0.0,0.2,5), dolr_ddiv(in2:in3))
+; rc2 = regline(fspan(0.0,0.2,5), dolr_ddiv(in2:in3))
 
-print(rc2@yintercept)
-print (rc1+"*x"+"+" +rc1@yintercept)
-print (rc2+"*x"+"+" +rc2@yintercept)
+; print(rc2@yintercept)
+; print (rc1+"*x"+"+" +rc1@yintercept)
+; print (rc2+"*x"+"+" +rc2@yintercept)
 
 
 
 
 
 dolr_ddiv  = (/dolr_ddiv/10.0/)
+
 
 
 
@@ -234,7 +223,8 @@ dolr_ddiv  = (/dolr_ddiv/10.0/)
 
  ; exit()
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "div-OLR-relation-monlydata-850hpa")
+    ; wks=gsn_open_wks("pdf", "div-OLR-relation-monlydata-850hpa")
+    wks=gsn_open_wks("pdf", "div-OLR-relation-clmdata-low-level(850-1000)")
 
 
     res                   = True                     ; plot mods desired
@@ -305,7 +295,7 @@ dolr_ddiv  = (/dolr_ddiv/10.0/)
     plot = new(2, graphic)
     
 
-    plot(0) =gsn_csm_xy(wks, xx2, (/yy2/), res)
+    plot(0) =gsn_csm_xy(wks, div_one, (/olr_one/), res)
 
 
     plres=True
@@ -315,14 +305,14 @@ dolr_ddiv  = (/dolr_ddiv/10.0/)
 
     printVarSummary(bin)
     printVarSummary(olr_bin)
-    plot_line=gsn_add_polyline(wks, plot(0), bin(1:), olr_bin, plres)
+    plot_line=gsn_add_polyline(wks, plot(0), bin(1:) - 0.05, olr_bin, plres)
 
     mkres = True
     mkres@gsMarkerColor = "blue"
     mkres@gsMarkerIndex = 1
     mkres@gsMarkerSizeF = 0.02
 
-    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:), olr_bin, mkres)
+    plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:) -0.05, olr_bin, mkres)
 
 
     res@tmYLValues    := fspan(4,-24,8)

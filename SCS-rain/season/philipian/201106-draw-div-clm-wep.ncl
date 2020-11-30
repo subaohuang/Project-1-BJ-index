@@ -29,7 +29,7 @@ begin
   ;;
 
 ;;;
-    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_850hpa*"+".nc")
+    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_250hpa*"+".nc")
     f3 = addfiles(fils3, "r")
 
     date=cd_calendar(f3[:]->time, 1)
@@ -51,8 +51,8 @@ begin
     do i = 0,dimsizes(timeind)/12-1
       div(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,{lat1:lat2},{lon1:lon2}))
     end do
-    div = (/div*10^5/)
-    div = (/div*-1/)
+    div = (/div*10^6/)
+    ; div = (/div*-1/)
     div_mam_clm = dim_avg_n_Wrap(month_to_season(div, "MAM"), 0)
     div_jja_clm = dim_avg_n_Wrap(month_to_season(div, "JJA"), 0)
     div_son_clm = dim_avg_n_Wrap(month_to_season(div, "SON"), 0)
@@ -74,7 +74,7 @@ begin
     ;;;;
 
   ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "西太850hpa季节平均div的气候态-79-15")
+    wks   = gsn_open_wks("pdf", "西太200hpa季节平均div的气候态-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -133,14 +133,14 @@ begin
   res@gsnLeftStringFontHeightF = 0.03
 
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levelW
-  res@cnMinLevelValF       =   -0.3
-  res@cnMaxLevelValF       =   .3
-  res@cnLevelSpacingF      =  0.1
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levelW
+  ; res@cnMinLevelValF       =   -0.3
+  ; res@cnMaxLevelValF       =   .3
+  ; res@cnLevelSpacingF      =  0.1
   ; res@cnFillPalette = "NCV_jaisnd"
   ; res@cnFillPalette = "sunshine_9lev"
-  ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  res@cnLevels = (/-2.5,-1.5,-0.5,0.5,1.5,2.5/)
   ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
 
   res@cnInfoLabelOn = False
