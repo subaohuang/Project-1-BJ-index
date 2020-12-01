@@ -52,11 +52,11 @@ begin
 
     str = ispan(1,9,1)+""
 
-    wks   = gsn_open_wks("pdf", "fig4-2015-925hpa.pdf")
+    wks   = gsn_open_wks("pdf", "fig4-79-99.pdf")
 
     ;;;time span
     startmon =197901
-    endmon = 201512
+    endmon = 199912
 
     startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 4 )
@@ -71,7 +71,7 @@ begin
     ; f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
     f1=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201512)
+    timeind=ind(date.ge.startmon.and.date.le.endmon)
     p=f1->precip(timeind,:,:)
    
     delete(p&time)
@@ -104,12 +104,13 @@ begin
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
     ; timeind :=ind(date.ge.197901.and.date.le.201512)
 
-    yearnum = 37
+    ; yearnum = 37
+     ; yearnum  =  endyear -  startyear
 
-    u = short2flt(f1->u(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
 
     f1 = addfile(filein(1),"r")
-    v = short2flt(f1->v(timeind,{925},{lat1:lat2},{lon1:lon2}))
+    v = short2flt(f1->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
  
     ;;;
 print("=====finish read data==========")
@@ -516,7 +517,7 @@ end do
 
     date := cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.ge.197901.and.date.le.201512)
+    timeind:=ind(date.ge.startmon .and.date.le.endmon)
 
     w = short2flt(f1->w(timeind,:,{lat1:lat2},{lon1:lon2}))
     w = (/w*-1/)
@@ -529,7 +530,7 @@ do i = 0,2
 
     wgt_w = w_annual(:,{500},:,:)
 
-    yearnum = 37
+    ; yearnum = 37
     wgt_w_rc := regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
     copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
 

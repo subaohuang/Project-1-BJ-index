@@ -127,9 +127,9 @@ yo = olr&lat
 
 
 ;;;bin month
-    bin_num =  (30.5-26.5)/0.25   ;;;;bin的个数，也是中间数
+    bin_num =  (30.5-25.0)/0.25   ;;;;bin的个数，也是中间数
 
-    bin_month  = fspan(26.5-0.125, 30.5-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
+    bin_month  = fspan(25.0-0.125, 30.5-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
     olr_bin_month = new(toint(bin_num),float)
     printMinMax(sst_one, 1)
 
@@ -141,17 +141,17 @@ end do
 
    dolr_dsst = center_finite_diff(olr_bin_month, bin_month(1:) - 0.125, False, 0)
 
-    rc1 = regline(fspan(26.5,28.75,9), dolr_dsst(0:8))
-    print(rc1@yintercept)
+    ; rc1 = regline(fspan(24.5,28.75,9), dolr_dsst(0:8))
+    ; print(rc1@yintercept)
 
-    rc2 = regline(fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1), dolr_dsst(8:13))
+    ; rc2 = regline(fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1), dolr_dsst(8:13))
 
-    print(rc2@yintercept)
-    print (rc1+"*x"+"+" +rc1@yintercept)
-    print (rc2+"*x"+"+" +rc2@yintercept)
+    ; print(rc2@yintercept)
+    ; print (rc1+"*x"+"+" +rc1@yintercept)
+    ; print (rc2+"*x"+"+" +rc2@yintercept)
 
-    y1 = rc1*fspan(26.5,28.75,9) + rc1@yintercept
-    y2 = rc2*fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) + rc2@yintercept
+    ; y1 = rc1*fspan(26.5,28.75,9) + rc1@yintercept
+    ; y2 = rc2*fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) + rc2@yintercept
 
 printMinMax(sst_clm_one, 1)
 ;;;bin 
@@ -178,11 +178,11 @@ printVarSummary(dolr_dsst_clm)
 
 
     rc3 = regline(fspan(27.5,28.75,toint((28.75-27.5)/0.25)+1), dolr_dsst_clm(0:5))
-    print(rc1@yintercept)
+ 
     
     rc4 = regline(fspan(28.75,29.75,toint((29.75-28.75)/0.25)+1), dolr_dsst_clm(5:9))
 
-    print(rc3@yintercept)
+ 
     print (rc3+"*x"+"+" +rc3@yintercept)
     print (rc4+"*x"+"+" +rc4@yintercept)
 
@@ -228,9 +228,9 @@ printVarSummary(dolr_dsst_clm)
  
     res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
     res@trXMaxF=31.0
-    res@trXMinF=26.0
-    res@tmXBValues    = fspan(26.0,31.0,11)
-    res@tmXBLabels    = fspan(26.0,31.0,11)
+    res@trXMinF=24.0
+    res@tmXBValues    = fspan(24.0,31.0,8)
+    res@tmXBLabels    = fspan(24.0,31.0,8)
 
 
     res@tmXMajorGrid                = True          ; implement x grid 
@@ -274,10 +274,10 @@ printVarSummary(dolr_dsst_clm)
     
   
    
-    res@trXMaxF = 31.0
-    res@trXMinF = 26.0
-    res@tmXBValues    := fspan(26.0,31.0,11)
-    res@tmXBLabels    := fspan(26.0,31.0,11)
+    res@trXMaxF = 30.0
+    res@trXMinF = 27.0
+    res@tmXBValues    := fspan(27.0,30.0,7)
+    res@tmXBLabels    := fspan(27.0,30.0,7)
 
 
     res@tiMainString="(c) ~F25~mean OLR in each SST bin "
@@ -287,10 +287,6 @@ printVarSummary(dolr_dsst_clm)
 
     
 
-    res@trXMaxF = 31.0
-    res@trXMinF = 26.0
-    res@tmXBValues    := fspan(26.0,31.0,11)
-    res@tmXBLabels    := fspan(26.0,31.0,11)
 
 
     plres=True
@@ -310,6 +306,11 @@ printVarSummary(dolr_dsst_clm)
     mkres@gsMarkerSizeF = 0.02
     plot_mk1=gsn_add_polymarker(wks, plot(2), bin_clm(1:) - 0.125, olr_bin_clm, mkres)
 
+
+    res@trXMaxF = 31.0
+    res@trXMinF = 24.0
+    res@tmXBValues    := fspan(24.0,31.0,8)
+    res@tmXBLabels    := fspan(24.0,31.0,8)
 
 
     res@tmYLValues    := fspan(30,-30,13)
@@ -336,6 +337,12 @@ printVarSummary(dolr_dsst_clm)
     res@trYMaxF :=30.0
     res@trYMinF :=-40.0
 
+
+    res@trXMaxF = 30.0
+    res@trXMinF = 27.0
+    res@tmXBValues    := fspan(27.0,30.0,7)
+    res@tmXBLabels    := fspan(27.0,30.0,7)
+
     res@tiMainString="(d) ~F34~6~F25~(OLR)/~F34~6~F25~(SST) from (c)"
     plot(3) =gsn_csm_xy(wks, bin_clm(1:) -0.125, (/dolr_dsst_clm/), res)
 
@@ -354,10 +361,11 @@ printVarSummary(dolr_dsst_clm)
 ;;;添加text 
    
    txres = True
-   txres@txFontHeightF = 0.018
+   txres@txFontHeightF = 0.02
+   txres@txJust = "topleft"
 
-   teplot = gsn_add_text(wks, plot(0), "~F22~from monthly data" , 27.0, 185, txres)
-   teplot1 = gsn_add_text(wks, plot(2), "~F22~from climatological data" , 27.3, 215, txres)
+   teplot = gsn_add_text(wks, plot(0), "~F25~from monthly data" , 24.4, 185, txres)
+   teplot1 = gsn_add_text(wks, plot(2), "~F25~from climatological data" , 27.1, 215, txres)
 
 
 
