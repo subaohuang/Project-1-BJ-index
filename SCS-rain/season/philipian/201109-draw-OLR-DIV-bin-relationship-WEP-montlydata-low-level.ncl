@@ -138,7 +138,9 @@ div = (/-1*div/)
 
 
 ;;bin 
-   bin = fspan(-0.5 -0.05, 0.6-0.05, 12)  ;;; 0.1 最左边的数字
+   ; bin = ispan(-0.3 -0.05, 0.65-0.05, 12)  ;;; 0.1 最左边的数字
+   
+   bin = ispan(-30-5, 70-5, 10)*0.01  ;;; 0.1 最左边的数
 
    bin_num = dimsizes(bin) -1
    
@@ -149,47 +151,36 @@ do i = 0,bin_num-1
    olr_bin(i) = dim_avg(olr_one(in))
 end do 
 dolr_ddiv = center_finite_diff(olr_bin, bin(1:) - 0.05, False, 0)
-; printMinMax(div_clm_one, 1)
-
-;     bin = fspan(0.0 -0.05, 0.30-0.05, 4)  ;;; 0.1 最左边的数字
-
-;     bin_num = dimsizes(bin) -1
-
-;     olr_bin = new(bin_num,float)
-
-; do i = 0,bin_num-1
-;    in := ind(div_clm_one.ge.bin(i).and.div_clm_one.lt.(bin(i)+0.1))
-
-;    olr_bin(i) = dim_avg(olr_clm_one(in))
-; end do
-
-; dolr_ddiv = center_finite_diff(olr_bin, bin(1:) - 0.05, False, 0)
-; ; dolr_ddiv = center_finite_diff(olr_bin, bin(0:toint(bin_num)-1), False, 0)
-
-; bin_select = bin(1:)
-
-
-; in1 = ind(bin_select.eq.-0.2)
-; in2 = ind(bin_select.eq.0.0)
-; in3 = ind(bin_select.eq.0.2)
 
 
 
 
-; rc1 = regline(fspan(-.2,0.0,5), dolr_ddiv(in1:in2))
-; print(rc1@yintercept)
+bin_select = fspan(-0.3,0.6, 10)
 
-; rc2 = regline(fspan(0.0,0.2,5), dolr_ddiv(in2:in3))
+in1 = ind(bin_select.eq.-0.2)
+in2 = ind(bin_select.eq.0.0)
+in3 = ind(bin_select.eq.0.4)
 
-; print(rc2@yintercept)
-; print (rc1+"*x"+"+" +rc1@yintercept)
-; print (rc2+"*x"+"+" +rc2@yintercept)
+print(in1)
+print(in2)
+print(in3)
 
 
 
 
+rc1 = regline(fspan(-.2,0.0,in2-in1+1), dolr_ddiv(in1:in2))
+print(fspan(-.2,0.0,5))
+
+rc2 = regline(fspan(0.0,0.4,in3-in2+1), dolr_ddiv(in2:in3))
+print(fspan(0.0,0.4,in3-in2+1))
+print (rc1+"*x"+"+" +rc1@yintercept)
+print (rc2+"*x"+"+" +rc2@yintercept)
+
+exit()
 
 dolr_ddiv  = (/dolr_ddiv/10.0/)
+
+
 
 
 
@@ -315,11 +306,11 @@ dolr_ddiv  = (/dolr_ddiv/10.0/)
     plot_mk=gsn_add_polymarker(wks, plot(0), bin(1:) -0.05, olr_bin, mkres)
 
 
-    res@tmYLValues    := fspan(4,-24,8)
-    res@tmYLMinorValues := fspan(4,-24,15)
-    res@tmYLLabels    := fspan(4,-24,8)
-    res@trYMaxF=4.0
-    res@trYMinF=-24.0
+    res@tmYLValues    := fspan(8,-20,8)
+    res@tmYLMinorValues := fspan(8,-20,15)
+    res@tmYLLabels    := fspan(8,-20,8)
+    res@trYMaxF=8.0
+    res@trYMinF=-20.0
 
 
 
@@ -333,7 +324,7 @@ dolr_ddiv  = (/dolr_ddiv/10.0/)
     res@tiYAxisString="~F22~Chage rate [W/m^2/~S~o~N~C]"
     res@gsnYRefLine = 0.0
     res@gsnYRefLineThicknessF = 1.0
-    plot(1) =gsn_csm_xy(wks, bin(1:), (/dolr_ddiv/), res)
+    plot(1) =gsn_csm_xy(wks, bin(1:) - 0.05, (/dolr_ddiv/), res)
 
 
  pres  = True

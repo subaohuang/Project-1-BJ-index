@@ -88,8 +88,8 @@ do i = 0,1
     res@cnFillPalette = "BlueWhiteOrangeRed"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -14
-    res@cnMaxLevelValF       =   14
+    res@cnMinLevelValF       =   -8
+    res@cnMaxLevelValF       =   8
     res@cnLevelSpacingF      =  2
     
 

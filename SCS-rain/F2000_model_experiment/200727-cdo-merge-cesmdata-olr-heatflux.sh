@@ -17,11 +17,11 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addind_wep_spring/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addind_wep_summer/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addallocean_tropical/
 
 STEP=3
-modelname=F_2000_addind_wep_spring
+modelname=F_2000_addind_wep_summer
 variable=FLUT,FSNS,FLNS,LHFLX,SHFLX,U10
 
 

@@ -206,6 +206,13 @@ begin
     olr_rela_son = (/eot_cdf(sst_son_clm,ssta_son)/)
     olr_rela_djf = (/eot_cdf(sst_djf_clm,ssta_djf)/)
 
+  ; out = addfile("olr_change_related_2_SST.nc","c")
+  ; out->olr_rela_mam  = olr_rela_mam
+  ; out->olr_rela_jja  = olr_rela_jja
+  ; out->olr_rela_son  = olr_rela_son
+  ; out->olr_rela_djf  = olr_rela_djf
+  ; exit()
+
 
     print(avg(olr_rela_mam({0:15},{125:160})))
 
