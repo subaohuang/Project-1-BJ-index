@@ -191,10 +191,10 @@ print("**********start interp************")
    ; bin_div = ispan(-30-5, 50-5, 5)*0.01  ;;; 0.1 最左边的
    ; bin_num := dimsizes(bin_div) -1
 
-   bin_num :=  (0.65+0.25)/0.05   ;;;;bin的个数，也是中间数
+   bin_num :=  (0.65+0.3)/0.05   ;;;;bin的个数，也是中间数
     
-   bin_div  = fspan(-0.25-0.025, 0.65-0.025, toint(bin_num) +1)  ;;;bin最左边的数字
-  
+   bin_div  = fspan(-0.3-0.025, 0.65-0.025, toint(bin_num) +1)  ;;;bin最左边的数字
+
    olr_bin_div = new(toint(bin_num),float)
 
    std_olr_div = olr_bin_div
@@ -205,11 +205,12 @@ print("**********start interp************")
         olr_bin_div(i) = dim_avg(olr_one(in))
         std_olr_div(i) = dim_stddev(olr_one(in))
  end do 
-
+olr_bin_div(0) = 265.0
   dolr_ddiv = center_finite_diff(olr_bin_div, bin_div(1:) - 0.025, False, 0)
 ;;;;
 
- dolr_ddiv = (/dolr_ddiv/10.0/)
+
+    dolr_ddiv = (/dolr_ddiv/10.0/)
 
 
     mnmx1 = new((/2,dimsizes(olr_bin_div)/),float)
@@ -236,6 +237,9 @@ print("**********start interp************")
    ddiv_dsst = center_finite_diff(div_bin_sst, bin_sst(1:) - 0.125, False, 0)
    ddiv_dsst  = (/ddiv_dsst*10.0/)
 ;;;;
+
+    l = div_bin_sst(ind((bin_sst(1:)-0.125).eq.29.0))
+
   
     mnmx2 = new((/2,dimsizes(olr_bin_sst)/),float)
 
@@ -309,7 +313,8 @@ print("**********start interp************")
     res@tiXAxisString="~F25~SST [~S~o~N~C]"
     res@tiXAxisFontHeightF=0.02
     
-     res@xyCurveDrawOrder = "PreDraw"
+    res@xyCurveDrawOrder = "PreDraw"
+  
 
     plot(0) =gsn_csm_xy(wks, sst_one, (/olr_one/), res)
     
@@ -318,6 +323,10 @@ print("**********start interp************")
     res@gsnXYFillColors = "blue"
     res@xyLineColor     = -1                           ; We don't want the line, so make it transparent.
     res@gsnXYFillOpacities=0.1
+    res@gsnXRefLine = (/28.0,29.0/)
+ 
+
+    ; res@gsnYRefLine = 240.0
 
     plot_std1= gsn_csm_xy(wks, bin_sst(1:) - 0.125,mnmx(0:1,:),res)       ; create line plot
 
@@ -330,11 +339,17 @@ print("**********start interp************")
     res@tmXBLabels    := ispan(-6,8,2)*0.1
 
 
-    res@tiMainString="(c) ~F25~OLR and Conv "
-    res@tiYAxisString="~F25~Conv [W/m~S~2~N~]"
+    res@tiMainString="(b) ~F25~OLR and Conv "
+    res@tiYAxisString="~F25~OLR [W/m~S~2~N~]"
+    res@tiXAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
+
+    delete(res@gsnXRefLine)
+    ; delete(res@gsnYRefLine)
 
     plot(2) =gsn_csm_xy(wks, div_one, (/olr_one/), res)
+    res@gsnXRefLine = (/0.0,l/)
 
+    ; res@gsnYRefLine = 240.0
     plot_std2= gsn_csm_xy(wks, bin_div(1:) - 0.025,mnmx1(0:1,:),res)       ; create line plot
 
     overlay(plot(2), plot_std2)
@@ -350,11 +365,18 @@ print("**********start interp************")
     res@tmYLValues    := ispan(-5,5,1)*0.1
     res@tmYLLabels    := ispan(-5,5,1)*0.1
     
-    res@tiMainString="(e) ~F25~Conv and SST "
+    res@tiMainString="(c) ~F25~Conv and SST "
+    res@tiXAxisString="~F25~SST [~S~o~N~C]"
+    res@tiYAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
     res@trYReverse =  False
-
+   
+    delete(res@gsnXRefLine)
+    ; delete(res@gsnYRefLine)
     plot(4) =gsn_csm_xy(wks, sst_one, (/div_one/), res)
 
+    res@gsnYRefLine = 0.0
+    res@gsnXRefLine = (/28.0,29.0/)
+ 
 
     plot_std3= gsn_csm_xy(wks, bin_sst(1:) - 0.125,mnmx2(0:1,:),res)       ; create line plot
 
@@ -362,7 +384,8 @@ print("**********start interp************")
     
     delete( res@gsnXYFillColors)
     delete(res@xyLineColor)    
-    delete(res@gsnXYFillOpacities)
+    delete(res@gsnXRefLine)
+
 
 ;;;
 
@@ -397,10 +420,10 @@ print("**********start interp************")
     res@tmXBLabels    := fspan(24.0,31.0,8)
 
 
-    res@tmYLValues    := fspan(30,-30,13)
-    res@tmYLMinorValues := fspan(30,-30,13)
-    res@tmYLLabels    := fspan(30,-30,13)
-    res@trYMaxF=30.0
+    res@tmYLValues    := fspan(20,-30,11)
+    res@tmYLMinorValues := fspan(20,-30,11)
+    res@tmYLLabels    := fspan(20,-30,11)
+    res@trYMaxF=20.0
     res@trYMinF=-30.0
 
 
@@ -410,16 +433,20 @@ print("**********start interp************")
     res@xyLineThicknessF=3.0
     res@xyDashPatterns=0
 
-    res@tiMainString="(c) ~F34~6~F25~(OLR)/~F34~6~F25~(SST) from (a)"
+    res@tiMainString="(d) ~F34~6~F25~(OLR)/~F34~6~F25~(SST) from (a)"
     res@tiYAxisString="~F25~Chage rate [W/m~S~2~N~/~S~o~N~C]"
-    res@gsnYRefLine = 0.0
+ 
     res@gsnYRefLineThicknessF = 1.0
+    
+    res@gsnYRefLine = 0.0
+
+    res@gsnXRefLine = (/28.0/) ;;;这里会报错，只能画一条，很奇怪
 
     res@trYReverse =  True
     plot(1) =gsn_csm_xy(wks, bin_sst(1:) -0.125, (/dolr_dsst/), res)
-
-   
-
+    Lineres =  True
+    plot_addref1 =gsn_add_polyline(wks,plot(1), conform(bin_sst(1:),29.0,0), res@tmYLValues, Lineres)
+    
 
     res@tmYLValues    := fspan(8,-20,8)
     res@tmYLMinorValues := fspan(8,-20,15)
@@ -432,36 +459,53 @@ print("**********start interp************")
     res@tmXBValues    := ispan(-6,8,2)*0.1
     res@tmXBLabels    := ispan(-6,8,2)*0.1
 
-    
-    res@tiMainString="(d) ~F34~6~F25~(OLR)/~F34~6~F25~(Conv)"
+    res@tiMainString="(e) ~F34~6~F25~(OLR)/~F34~6~F25~(Conv)  from (b)"
     res@tiYAxisString="~F25~Chage rate [10~S~-6~N~s~S~-1~N~/~S~o~N~C]"
+    res@tiXAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
+
+    res@gsnYRefLine = 0.0
+  
+    res@gsnXRefLine = (/0.0/)
+    
+
     plot(3) =gsn_csm_xy(wks, bin_div(1:) -0.025, (/dolr_ddiv/), res)
+    plot_addref2 =gsn_add_polyline(wks,plot(3), conform(bin_sst(1:),l,0), res@tmYLValues, Lineres)
 
     
    
-    res@tmYLValues    := fspan(-2,2,9)
+    res@tmYLValues    := fspan(-1,2,7)
     ; res@tmYLMinorValues := fspan(-2,2,9)
-    res@tmYLLabels    := fspan(-2,2,9)
+    res@tmYLLabels    := fspan(-1,2,7)
     res@trYMaxF=2.0
-    res@trYMinF=-2.0
+    res@trYMinF=-1.0
     res@trXMaxF=31.0
     res@trXMinF=24.0
     res@tmXBValues    := fspan(24.0,31.0,8)
     res@tmXBLabels    := fspan(24.0,31.0,8)
 
-    
-    res@tiMainString="~F34~6~F25~(Conv)/~F34~6~F25~(SST)"
-    res@tiYAxisString="~F25~Chage rate [10~S~-6~N~s~S~-1~N~/~S~o~N~C]"
 
-      res@trYReverse =  False
+
+    
+    res@tiMainString="(f) ~F34~6~F25~(Conv)/~F34~6~F25~(SST)  from (c)"
+    res@tiYAxisString="~F25~Chage rate [10~S~-6~N~s~S~-1~N~/~S~o~N~C]"
+    res@tiXAxisString="~F25~SST [~S~o~N~C]"
+
+    res@trYReverse =  False
+    res@gsnYRefLine = 0.0
+    res@gsnXRefLine = 28.0
+
+    res@gsnXRefLine = (/28.0/)
+
  
     plot(5) =gsn_csm_xy(wks, bin_sst(1:) - 0.125, (/ddiv_dsst/), res)
+
+    plot_addref3 =gsn_add_polyline(wks,plot(5), conform(bin_sst(1:),29.0,0), res@tmYLValues, Lineres)
 
 
 
 
  pres  = True
- gsn_panel(wks, plot, (/3,2/), pres)
+ gsn_panel(wks, (/plot(0),plot(2),plot(4),plot(1),plot(3),plot(5)/), (/2,3/), pres)
 
  end 
 
