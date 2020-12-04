@@ -79,6 +79,10 @@ endmon = 201512
     div = dim_avg_n_Wrap(div_r,1)
 
 
+    div = (/dtrend_msg_n(ispan(1,dimsizes(div&time),1),div,False,True,0)/)
+
+
+
     div = (/div*10^5/)
     div = (/-1*div/)           ;;;转化成con
 ;;;;
