@@ -56,7 +56,8 @@ begin
     ;
 
 
-    div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
+    ; div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
+    div = dim_avg_n_Wrap(div_r,1)
 
     div = (/div*10^5/)
     div = (/-1*div/)
@@ -83,7 +84,8 @@ begin
     ;;;;
 
   ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15")
+    ; wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15")
+    wks   = gsn_open_wks("pdf", "全球风场幅合季节平均div的气候态-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -94,11 +96,11 @@ begin
 
   res@gsnAddCyclic = False
 
-  
- 
-   res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlueDarkRed18"
-   ; res@cnFillPalette = "BlRe"
+
+
+  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueDarkRed18"
+  ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -110,15 +112,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -30
-  ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             =0
-  ; res@mpMaxLonF             = 360
-
-  res@mpMinLatF             = -5
+  res@mpMinLatF             = -30
   res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
-  res@mpMaxLonF             = 170
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
+
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             = 100
+  ; res@mpMaxLonF             = 170
 
 
 
@@ -138,8 +140,8 @@ begin
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
 
-  res@tmXBValues = (/100,120,140,160/) 
-  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+  ; res@tmXBValues = (/100,120,140,160/) 
+  ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
   res@gsnLeftStringFontHeightF = 0.03
 
@@ -155,7 +157,7 @@ begin
   ; ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
 
   res@cnInfoLabelOn = False
-  
+
 
   res@gsnLeftString="(a)MAM Div clm"
   ; res@gsnRightString = "10~S~-6~N~S^-1"
@@ -212,7 +214,7 @@ begin
 
 pres = True
 pres@gsnPanelLabelBar  = True
-pres@gsnMaximize = True
+; pres@gsnMaximize = True
 ; pres@lbOrientation = "Vertical"
 pres@lbOrientation = "Horizontal"
 ; pres@pmLabelBarHeightF = 0.3
