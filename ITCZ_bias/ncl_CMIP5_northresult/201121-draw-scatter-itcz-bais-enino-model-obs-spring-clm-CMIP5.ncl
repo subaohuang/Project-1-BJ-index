@@ -1,10 +1,11 @@
 begin 
 
     read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/info.txt", -1,"string")
-    print(read_name)
+    ; print(read_name)
     model_name = read_name 
 
-    enino_intensity = asciiread("diff-Nino(250-280)_enino_intensity_30model", -1,"float")
+    ; enino_intensity = asciiread("diff-Nino(250-280)_enino_intensity_30model", -1,"float")
+    enino_intensity = asciiread("diff-Nino3_enino_intensity_30model", -1,"float")
 
     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
@@ -12,6 +13,7 @@ begin
     ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
      ; dbitcz = asciiread("dbitcz_30model", -1,"float")
+
 
     dim_model = dimsizes(enino_intensity)
     ;;;polyline 
@@ -25,7 +27,7 @@ begin
 
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "南太平洋春季ITCZbias和冬季250-280定义的Enino强度与观测的偏差的关系")
+   wks = gsn_open_wks("pdf", "春季south_eastern_pacific_bais和冬季250-280定义的Enino强度与观测的偏差的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -54,11 +56,15 @@ begin
     ; res@tmXBValues    = ispan(-2,4,1) 
     ; res@tmXBLabels    = ispan(-2,4,1) 
    
-    res@trXMaxF =  2.0
-    res@trXMinF = -4.0
-    res@tmXBValues    = ispan(-4,2,1) 
-    res@tmXBLabels    = ispan(-4,2,1) 
+    ; res@trXMaxF =  2.0
+    ; res@trXMinF = -4.0
+    ; res@tmXBValues    = ispan(-4,2,1) 
+    ; res@tmXBLabels    = ispan(-4,2,1) 
 
+    res@trXMaxF =  6.0
+    res@trXMinF = 0.0
+    res@tmXBValues    = ispan(0,6,1) 
+    res@tmXBLabels    = ispan(0,6,1) 
     
 
 
@@ -179,7 +185,7 @@ begin
                                         
         txres2@txFontColor="black"
         txres2@txAngleF="0"
-        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),1, 1.85, txres2)
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),3, 1.85, txres2)
 
 
 

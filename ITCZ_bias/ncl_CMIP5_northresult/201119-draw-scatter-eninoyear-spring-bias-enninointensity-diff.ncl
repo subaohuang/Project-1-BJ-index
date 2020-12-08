@@ -4,11 +4,13 @@ read_name = asciiread("/home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi
 print(read_name)
 model_name = read_name 
 
-enino_intensity = asciiread("enino_intensity_diff_30model", -1,"float")
+; enino_intensity = asciiread("enino_intensity_diff_30model", -1,"float")
+enino_intensity = asciiread("diff-Nino3_enino_intensity_30model", -1,"float")
 
 ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-dbitcz = asciiread("ninoyear_spring_north_eastern_pacific_bais_30model", -1,"float")
+; dbitcz = asciiread("ninoyear_spring_north_eastern_pacific_bais_30model", -1,"float")
+dbitcz = asciiread("dbitcz_bais_30model", -1,"float")
 ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
 dim_model = dimsizes(enino_intensity)
@@ -19,10 +21,13 @@ r = escorc(dbitcz, enino_intensity)
 
 rc = regline(dbitcz,enino_intensity)
 line = rc*dbitcz + rc@yintercept
+
+
+
   
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋厄尔尼诺发展年春季ITCZbias-和冬季Enino强度bias的关系")
+   wks = gsn_open_wks("pdf", "doubleITCZ-bias-和冬季Enino强度bias的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False

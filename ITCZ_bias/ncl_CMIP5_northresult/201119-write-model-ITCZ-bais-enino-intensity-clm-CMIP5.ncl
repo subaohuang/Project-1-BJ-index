@@ -136,7 +136,11 @@ do k = 0,dim_model-1
     ; siindex =  avg(diff({0:10},{210:280}))
     ;;;0 -20 150-
     ; siindex =  avg(diff({0:-10},{210:280})) - avg(diff({0:10},{210:280}))
-    siindex =  avg(diff({0:-10},{210:280})) 
+    ; siindex =  avg(diff({0:-10},{210:280})) 
+    ; siindex = avg(diff({10:-10},{180:270}))
+    siindex = avg(diff({0:-30},{210:260}))
+
+
     ;;
     dbitcz(k) = siindex 
 
@@ -190,6 +194,6 @@ do k = 0,dim_model-1
 end do 
     ; asciiwrite("diff-Nino(250-280)_enino_intensity_30model", enino_intensity)
     ; asciiwrite("enino_intensity_30model", enino_intensity)
-    asciiwrite("south_eastern_pacific_bais_30model", dbitcz)
+    asciiwrite("dbitcz_bais_30model", dbitcz)
     ; exit()
 end 

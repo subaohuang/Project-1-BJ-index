@@ -8,7 +8,7 @@ begin
 
     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-    dbitcz = asciiread("north_eastern_pacific_baise_30model", -1,"float")
+    dbitcz = asciiread("dbitcz_bais_30model", -1,"float")
     ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
      ; dbitcz = asciiread("dbitcz_30model", -1,"float")
@@ -25,7 +25,7 @@ begin
 
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "东太平洋春季ITCZbias和冬季210-280定义的Enino强度与观测的偏差的关系")
+   wks = gsn_open_wks("pdf", "double-ITCZbias和冬季210-280定义的Enino强度与观测的偏差的关系")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False

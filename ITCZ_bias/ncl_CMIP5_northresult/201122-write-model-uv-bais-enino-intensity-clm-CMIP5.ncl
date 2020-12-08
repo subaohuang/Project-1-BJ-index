@@ -148,6 +148,8 @@ do k = 0,dim_model-1
     ;;
     dbitcz(k) = siindex 
 
+
+
     print("*******************start calculate"+" "+model+"**********************************************")
  
     fils2 :=  systemfunc("ls /home/ys17-19/lsh/Project/ITCZ_bias/data/CMIP5/tos_chazhi/"+model+"/tos_Omon_"+model+"_historical_r1i1p1_"+"*")
