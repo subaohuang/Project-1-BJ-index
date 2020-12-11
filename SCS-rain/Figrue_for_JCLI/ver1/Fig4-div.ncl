@@ -434,17 +434,17 @@ end do
     res3@gsnScalarContour        = True
     res3@mpFillOn =False
 
-    res3@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    res3@cnMinLevelValF        := -20.0        ; set min contour level
-    res3@cnMaxLevelValF        := 20.0          ; set max contour level
-    res3@cnLevelSpacingF       := 5.0          ; set contour interval
-    ; res3@cnFillPalette = "BlueWhiteOrangeRed"
-    res3@cnFillPalette = "BlueRed"
-    ; res3@cnLevelSelectionMode = "ExplicitLevels"
+    ; res3@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    ; res3@cnMinLevelValF        := -20.0        ; set min contour level
+    ; res3@cnMaxLevelValF        := 20.0          ; set max contour level
+    ; res3@cnLevelSpacingF       := 5.0          ; set contour interval
+    ; ; res3@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res3@cnFillPalette = "BlueRed"
+    res3@cnLevelSelectionMode = "ExplicitLevels"
 
-    ; ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
-    ; res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
-    ; res3@lbLabelStrings = res3@cnLevels
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
+    res3@lbLabelStrings = res3@cnLevels
     res3@lbLabelFontHeightF = 0.02
     res3@lbAutoManage = False
 
@@ -502,43 +502,61 @@ end do
 ; Mission 4. plot(3) 
 ; ==============================================================
 
-    path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-
-    var_name := (/"wwnd"/)
-    filein := path_wind + var_name +".mon.mean.nc"
-        
     ;;;region 
       lat1 = -5
       lat2 = 45
       lon1 = 90
       lon2 = 170
     ;;;
+    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_*"+".nc")
+    f3 = addfiles(fils3, "r")
 
-    f1 = addfile(filein(0),"r")
+    date:=cd_calendar(f3[:]->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    time = f3[:]->time(timeind)
+    lat = f3[1]->latitude
+    lon = f3[1]->longitude
 
-    date := cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.ge.startmon .and.date.le.endmon)
+    div_r = new((/dimsizes(time),7, dimsizes(lat),dimsizes(lon)/),float)
 
-    w = short2flt(f1->w(timeind,:,{lat1:lat2},{lon1:lon2}))
-    w = (/w*-1/)
 
+    do i = 0,dimsizes(timeind)/12-1
+
+       div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},:,:))
+
+    end do
+    ;
+
+
+    div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
+
+    div = (/div*10^6/)
+    div = (/-1*div/)
+   
+
+
+    w = div
 
 do i = 0,2
 
     w_annual = month_to_season(w, season(i))
 
-
-    wgt_w = w_annual(:,{500},:,:)
-
+    if season(i).eq."DJF" then 
+        w_annual(0:yearnum-2,:,:) = w_annual(1:yearnum-1,:,:)
+        w_annual(yearnum-1,:,:) = w(yearnum*12-1,:,:)
+    end if
     ; yearnum = 37
-    wgt_w_rc := regCoef_n(ispan(1,yearnum,1), wgt_w, 0, 0)
-    copy_VarCoords(wgt_w(1,:,:), wgt_w_rc)
+    wgt_w_rc := regCoef_n(ispan(1,yearnum,1), w_annual, 0, 0)
+    copy_VarCoords(w_annual(1,:,:), wgt_w_rc)
 
     prob_w = rc_test(wgt_w_rc)
-    wgt_w_rc = (/wgt_w_rc*yearnum/) *100  
+    wgt_w_rc = (/wgt_w_rc*yearnum/) 
 
-       
+
+
+
+    
     res4=True
     res4@gsnFrame=False
     res4@gsnDraw=False
@@ -585,12 +603,13 @@ do i = 0,2
     res4@cnFillPalette = "MPL_PuOr"
     ; gsn_define_colormap(wks2, "MPL_PuOr")
     
-    res4@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
+    res4@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
     res4@lbLabelStrings = res4@cnLevels
+    res4@lbLabelFontHeightF = 0.018
     ; res4@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) -4
 
     
-    res4@gsnLeftString=order(i*3+2)+" "+season(i)+" 500 hPa Omega trend "
+    res4@gsnLeftString=order(i*3+2)+" "+season(i)+" low-level wind convergence trend "
     res4@gsnLeftStringFontHeightF = 0.03
     plot(i*3+2) = gsn_csm_contour_map(wks, wgt_w_rc, res4)
 

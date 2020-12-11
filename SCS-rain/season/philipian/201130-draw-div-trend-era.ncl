@@ -102,7 +102,7 @@ do i = 0,3
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levelW
   res@cnMinLevelValF       =   -0.1
   res@cnMaxLevelValF       =   .1
-  res@cnLevelSpacingF      =  0.01
+  res@cnLevelSpacingF      =  0.02
     res@cnFillPalette = "precip_diff_12lev"
 
 

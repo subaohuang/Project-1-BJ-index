@@ -21,27 +21,27 @@ return prob_p
 end 
 
 begin
-season_r = (/"spring","summer"/)
-season = (/"MAM","JJA"/)
+season_r = (/"spring","summer","autumn","winter"/)
+season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   
   fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addind_wep_" + season_r +"/"+"F_2000_addind_wep_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-FC5-WEP-ind-Warimg-fourseaon")
+  wks=gsn_open_wks("pdf", "CESM-F2000-WEP-ind-Warimg-fourseaon")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
 
 
-do i = 0,1
+do i = 0,3
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
 
   date=cd_calendar(f1->time, 1)
 
   timeind=ind(date.ge.601.and.date.le.4012)
-  print(date(timeind))
+  ; print(date(timeind))
   PRE_CT  =  f1->FLUT(timeind,:,:)   ;;;OLR data
   
   PRE_id  =  f2->FLUT(timeind,:,:)
@@ -88,8 +88,8 @@ do i = 0,1
     res@cnFillPalette = "BlueWhiteOrangeRed"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -14
-    res@cnMaxLevelValF       =   14
+    res@cnMinLevelValF       =   -10
+    res@cnMaxLevelValF       =   10
     res@cnLevelSpacingF      =  2
     
 
@@ -177,7 +177,7 @@ end do
   pres = True
   pres@gsnPanelLabelBar = True
 
-  gsn_panel(wks, (/plot(0),plot(1)/), (/2,1/), pres)
+  gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")
 end
   

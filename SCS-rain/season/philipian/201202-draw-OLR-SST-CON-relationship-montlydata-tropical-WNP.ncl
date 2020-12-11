@@ -175,19 +175,25 @@ print("**********start interp************")
     mnmx(1,:) = olr_bin_sst + std_olr_sst
 
 
+    x = bin_sst(1:) - 0.125
 
-    ; rc1 = regline(fspan(24.5,28.75,9), dolr_dsst(0:8))
-    ; print(rc1@yintercept)
+    ind1 = ind(x.eq.26.5)
+    ind2 = ind(x.eq.28.75)
+    ind3 = ind(x.eq.30.0)
 
-    ; rc2 = regline(fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1), dolr_dsst(8:13))
+    rc1 = regline(fspan(26.5,28.75,ind2-ind1+1), dolr_dsst(ind1:ind2))
+    print(rc1@yintercept)
 
-    ; print(rc2@yintercept)
-    ; print (rc1+"*x"+"+" +rc1@yintercept)
-    ; print (rc2+"*x"+"+" +rc2@yintercept)
+    rc2 = regline(fspan(28.75,30.0,ind3-ind2+1), dolr_dsst(ind2:ind3))
 
-    ; y1 = rc1*fspan(26.5,28.75,9) + rc1@yintercept
+    print(rc2@yintercept)
+    print (rc1+"*x"+"+" +rc1@yintercept)
+    print (rc2+"*x"+"+" +rc2@yintercept)
+    exit()
+
+    ; y1 = rc1*fspan(26.5,28.75,ind2-ind1+1) + rc1@yintercept
     ; y2 = rc2*fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) + rc2@yintercept
-;;;;;;;;
+;;;;;;;
 
 
 

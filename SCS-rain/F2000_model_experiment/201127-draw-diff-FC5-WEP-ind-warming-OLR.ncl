@@ -21,8 +21,8 @@ return prob_p
 end 
 
 begin
-season_r = (/"spring","summer"/)
-season = (/"MAM","JJA"/)
+season_r = (/"spring","summer","autumn","winter"/)
+season = (/"MAM","JJA","SON","DJF"/)
   ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
   fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/"+"FC5_CTRL.cam.h1.0101-4012_OLR_heatflux.nc" 
   fils2 = "/home/ys17-19/lsh/CESM-data/F/FC5_ind_wep_" + season_r +"/"+"FC5_ind_wep_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
