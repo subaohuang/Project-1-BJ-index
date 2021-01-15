@@ -17,9 +17,9 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_summer/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_spring/
 STEP=3
-modelname=F_2000_tro_summer
+modelname=FC5_wholeind_spring
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 
