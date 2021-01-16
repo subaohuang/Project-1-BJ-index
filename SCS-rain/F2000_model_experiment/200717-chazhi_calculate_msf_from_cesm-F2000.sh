@@ -17,11 +17,14 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_spring/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_summer/
+# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/
 STEP=3
-modelname=FC5_wholeind_spring
+modelname=FC5_wholeind_summer
+# modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
+# variable=hyam
 
 
 #step1 : merge the cesm data into a whole data by using cdo
@@ -31,7 +34,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
     rm ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc
-    cdo select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012.nc
+    cdo_old select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012.nc
   fi
 
 # step2 : interpolate the data from hybird level to pressure level
