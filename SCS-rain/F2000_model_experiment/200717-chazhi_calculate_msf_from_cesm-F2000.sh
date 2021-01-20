@@ -17,10 +17,10 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_autumn/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/shanshan/F_2000/F_2000_IOBM_fivetimes/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/
 STEP=3
-modelname=FC5_wholeind_autumn
+modelname=F_2000_IOBM_fivetimes
 # modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
