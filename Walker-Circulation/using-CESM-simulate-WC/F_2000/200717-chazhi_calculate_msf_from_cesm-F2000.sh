@@ -17,10 +17,10 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/lsh_F2000_pac_sstano/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/lsh_F2000_tro_sstano/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/
 STEP=3
-modelname=lsh_F2000_pac_sstano
+modelname=lsh_F2000_tro_sstano
 # modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
@@ -47,7 +47,7 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
        /home/ys17-19/lsh/Project/SCS-rain/annual/191209-CESM-data-chazhi.ncl
     echo "finish CESM chazhi"
   fi 
-step3 calculate mass stream function
+# step3 calculate mass stream function
 
   if  [ ! -e /home/yangsong3/data-observation/linshh/data/wc-result/msf_${modelname}_0101-4012.nc ] ; then
      ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
