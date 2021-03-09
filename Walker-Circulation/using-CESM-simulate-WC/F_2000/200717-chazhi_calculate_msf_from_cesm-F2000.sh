@@ -27,15 +27,15 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 # variable=hyam
 
 
-#step1 : merge the cesm data into a whole data by using cdo
-  ## the prefix of data is usually CESM compet name ,alarm for time select
+# #step1 : merge the cesm data into a whole data by using cdo
+#   ## the prefix of data is usually CESM compet name ,alarm for time select
 
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc ] ; then
-    echo "don't exit merge file, procecing..."
-    cd $PRE_DIR_ORG
-    rm ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc
-    cdo_old select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012.nc
-  fi
+#   if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc ] ; then
+#     echo "don't exit merge file, procecing..."
+#     cd $PRE_DIR_ORG
+#     rm ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012.nc
+#     cdo_old select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0101-4012.nc
+#   fi
 
 # step2 : interpolate the data from hybird level to pressure level
   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0101-4012_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
@@ -102,6 +102,22 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 #      ./201103-cal-F2000-ur-vr.ncl
 #    echo "finish CESM rotation wind calculate"
 #   fi
+
+# step7 calculate HC mass stream function
+
+  if  [ ! -e /home/yangsong3/data-observation/linshh/data/wc-result/msf_HC_${modelname}_0101-4012.nc ] ; then
+     ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
+   echo "don't exit HC msf file, procecing..."
+   cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+   pwd
+   ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
+       filename=\"${modelname}.cam.h1.0101-4012_chazhi.nc\" \
+       outputpath='"/home/yangsong3/data-observation/linshh/data/wc-result/"' \
+       outputname=\"msf_HC_${modelname}_0101-4012.nc\" \
+     ./210309-HC-mass_stremfuction_CESM-F2000.ncl
+   echo "finish CESM HC mass_stream function"
+  fi
+
    echo "finish this script"
 #-----------------------------------------------------------
 
