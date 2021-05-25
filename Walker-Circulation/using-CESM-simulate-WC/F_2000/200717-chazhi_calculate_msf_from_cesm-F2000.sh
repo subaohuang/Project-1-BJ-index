@@ -17,10 +17,10 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
-PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/lsh_F2000_tro_sstano/
+PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/
 STEP=3
-modelname=lsh_F2000_tro_sstano
+modelname=F_2000_CTRL
 # modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
@@ -63,19 +63,18 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 #   fi
 
 
-# # # step4 calculate Local WC and HC
-#    if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_local_wk_hc_500.nc ] ; then    ####判断差值的文件是否已经存在
-#    echo "don't exit WC and HC file, procecing..."
-#    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
-#    pwd
-#    ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
-#        filename=\"${modelname}.cam.h0.0101-4012_chazhi.nc\" \
-#        outputpath=\"${PRE_DIR_ORG}\"               \
-#        outputname=\"${modelname}.cam.h0.0101-4012_local_wk_hc_500.nc\" \
-#      ./200902-local_wk_hc_cesm-F2000.ncl
-#    echo "finish CESM mass_stream function"
-#   fi
-#    echo "finish this script"
+# # step4 calculate Local WC and HC
+   if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h0.0101-4012_local_wk_hc_500.nc ] ; then    ####判断差值的文件是否已经存在
+   echo "don't exit WC and HC file, procecing..."
+   cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+   pwd
+   ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
+       filename=\"${modelname}.cam.h1.0101-4012_chazhi.nc\" \
+       outputpath=\"${PRE_DIR_ORG}\"               \
+       outputname=\"${modelname}.cam.h1.0101-4012_local_wk_hc_500.nc\" \
+     ./210525-local-wk-hc-cesm-F2000-500hpa.ncl
+   echo "finish CESM local WC-HC Calculation function"
+  fi
 # #-----------------------------------------------------------
 
 
@@ -103,20 +102,20 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT
 #    echo "finish CESM rotation wind calculate"
 #   fi
 
-# step7 calculate HC mass stream function
+# # step7 calculate HC mass stream function
 
-  if  [ ! -e /home/yangsong3/data-observation/linshh/data/wc-result/msf_HC_${modelname}_0101-4012.nc ] ; then
-     ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
-   echo "don't exit "${modelname}" HC msf file, procecing..."
-   cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
-   pwd
-   ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
-       filename=\"${modelname}.cam.h1.0101-4012_chazhi.nc\" \
-       outputpath='"/home/yangsong3/data-observation/linshh/data/wc-result/"' \
-       outputname=\"msf_HC_${modelname}_0101-4012.nc\" \
-     ./210309-HC-mass_stremfuction_CESM-F2000.ncl
-   echo "finish CESM HC mass_stream function"
-  fi
+#   if  [ ! -e /home/yangsong3/data-observation/linshh/data/wc-result/msf_HC_${modelname}_0101-4012.nc ] ; then
+#      ## 斜杠用来添加"，不然"会被默认成输出变量用的符号 
+#    echo "don't exit "${modelname}" HC msf file, procecing..."
+#    cd /home/ys17-19/lsh/Project/Walker-Circulation/using-CESM-simulate-WC/F_2000/
+#    pwd
+#    ncl -nQ inpath=\"${PRE_DIR_ORG}\"               \
+#        filename=\"${modelname}.cam.h1.0101-4012_chazhi.nc\" \
+#        outputpath='"/home/yangsong3/data-observation/linshh/data/wc-result/"' \
+#        outputname=\"msf_HC_${modelname}_0101-4012.nc\" \
+#      ./210309-HC-mass_stremfuction_CESM-F2000.ncl
+#    echo "finish CESM HC mass_stream function"
+#   fi
 
 
   # step7 calculate HC mass stream function
