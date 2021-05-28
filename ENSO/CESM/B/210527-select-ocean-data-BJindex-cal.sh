@@ -33,10 +33,12 @@ done
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 ## select : TEMP(0:300),UVEL,VVEL,WVEL,SHF,TAUX,TAUY 
-PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
+# PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
+PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_double/
 
 STEP=3
-modelname=B2000_f19g16_CP_CTRL
+# modelname=B2000_f19g16_CP_CTRL
+modelname=lsh_B2000_WNP_heating_double
 
 variable=UVEL,VVEL,WVEL,SHF,TAUX,TAUY
 # variable=U,V
