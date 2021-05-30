@@ -23,7 +23,7 @@ STEP=3
 modelname=lsh_B2000_WNP_heating_Idl
 # modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
-variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT,T
+variable=PTENDT
 # variable=U,V,PS
 
 # variable=hyam
@@ -31,19 +31,19 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT,T
 #step1 : merge the cesm data into a whole data by using cdo
   ## the prefix of data is usually CESM compet name ,alarm for time select
 
-  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc ] ; then
+  if  [ ! -e  ${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG
-    cdo_old select,name=${variable} ${modelname}.cam.h0.* ${modelname}.cam.h1.0251-0280.nc
+    cdo_old select,name=${variable} ${modelname}.cam.h0.* ${modelname}.PTENDT.cam.h1.0251-0280.nc
   fi
 
 # step2 : interpolate the data from hybird level to pressure level
-  if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
+  if [ ! -e ${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280_chazhi.nc ] ; then    ####判断差值的文件是否已经存在
     echo "don't exit chazhi file, procecing..."
     cd /home/ys17-19/lsh/Project/ENSO/CESM/B/
     pwd
-    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280.nc\" \
-         outpath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_chazhi.nc\" \
+    ncl  -nQ inpath=\"${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280.nc\" \
+         outpath=\"${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280_chazhi.nc\" \
      ./210423-CESM-data-chazhi-finalver.ncl
     echo "finish CESM chazhi"
   fi 
@@ -80,12 +80,12 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT,T
 
 
 # # # step5 calculate vp and sf
-#    if [ ! -e ${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_vp_sf.nc ] ; then    ####判断差值的文件是否已经存在
+#    if [ ! -e ${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280_vp_sf.nc ] ; then    ####判断差值的文件是否已经存在
 #    echo "don't exit vp and sf file, procecing..."
 #    cd /home/ys17-19/lsh/Project/SCS-rain/F2000_model_experiment/
 #    pwd
-#    ncl -nQ infilepath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_chazhi.nc\" \
-#        outfilepath=\"${PRE_DIR_ORG}${modelname}.cam.h1.0251-0280_vp_sf.nc\"   \
+#    ncl -nQ infilepath=\"${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280_chazhi.nc\" \
+#        outfilepath=\"${PRE_DIR_ORG}${modelname}.PTENDT.cam.h1.0251-0280_vp_sf.nc\"   \
 #      ./200909-F2000-cal-write-era-velocity-potensial-streamfuc.ncl
 #    echo "finish CESM VP and SF calculate"
 #   fi
@@ -96,9 +96,9 @@ variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT,T
 #    cd /home/ys17-19/lsh/Project/SCS-rain/F2000_model_experiment/
 #    pwd
 #    ncl -nQ inpath=\"${PRE_DIR_ORG}\"                           \
-#         filename=\"${modelname}.cam.h1.0251-0280_chazhi.nc\" \
+#         filename=\"${modelname}.PTENDT.cam.h1.0251-0280_chazhi.nc\" \
 #         outputpath=\"${PRE_DIR_ORG}\"                          \
-#        outputname=\"${modelname}.cam.h1.0251-0280_ur_vr.nc\"   \
+#        outputname=\"${modelname}.PTENDT.cam.h1.0251-0280_ur_vr.nc\"   \
 #      ./201103-cal-F2000-ur-vr.ncl
 #    echo "finish CESM rotation wind calculate"
 #   fi
