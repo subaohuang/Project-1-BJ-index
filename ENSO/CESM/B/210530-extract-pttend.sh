@@ -17,13 +17,13 @@
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IhPO/
+# PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
 PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_Idl/
-# PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_GHG/
 STEP=3
 modelname=lsh_B2000_WNP_heating_Idl
 # modelname=F_2000_ghg
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
-variable=PTENDT
+variable=DTCOND,PTENDT,PS
 # variable=U,V,PS
 
 # variable=hyam
