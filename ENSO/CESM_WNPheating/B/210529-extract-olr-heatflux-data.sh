@@ -18,11 +18,12 @@
 # Caution: DO NOT DELETE /" IN STRING!
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_IPO/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/B/B2000_alt_north_spring_fixmonth/
-PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
+# PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
+PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_Idl/
 # PRE_DIR_ORG=/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_winter/
 
 STEP=3
-modelname=B2000_f19g16_CP_CTRL
+modelname=lsh_B2000_WNP_heating_Idl
 # modelname=F_2000_tro_winter
 variable=FLUT,FSNS,FLNS,LHFLX,SHFLX
 # variable=TAUX,TAUY
