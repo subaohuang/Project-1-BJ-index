@@ -33,17 +33,21 @@ done
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
 ## select : TEMP(0:300),UVEL,VVEL,WVEL,SHF,TAUX,TAUY 
-# PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
-PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_db/
+PRE_DIR_ORG=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
+# PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_db/
 
 STEP=3
-# modelname=B2000_f19g16_CP_CTRL
-modelname=lsh_B2000_WNP_heating_db
+modelname=B2000_f19g16_CP_CTRL
+# modelname=lsh_B2000_WNP_heating_db
+
+timestart=0200
+timeend=0280
 
 variable=UVEL,VVEL,WVEL,SHF,TAUX,TAUY
 # variable=U,V
 # wantyear={0251..0280}
-
+echo ${timestart}
+exit
 #step1 : merge the cesm data :UVEL,VVEL,WVEL
 echo "step1 : merge the cesm data :UVEL,VVEL,WVEL"
 # the prefix of data is usually CESM compet name ,alarm for time select
@@ -52,13 +56,15 @@ Var_Name_total=("UVEL" "VVEL")
 cd $PRE_DIR_ORG
 for Var_name in  ${Var_Name_total[*]}
     do 
-      if  [ ! -e  ${PRE_DIR_ORG}${modelname}.$Var_name.pop.0251-0280.nc ] ; then
+      if  [ ! -e  ${PRE_DIR_ORG}${modelname}.$Var_name.pop.${timestart}-${timeend}.nc ] ; then
         echo "don't exit merge file, procecing..."
         echo $Var_name
         # rm ${PRE_DIR_ORG}${modelname}.$Var_name.pop.0251-0280.nc 
-        cdo_old select,name=$Var_name,level=$levintp ${modelname}.pop.h.{0251..0280}* ${modelname}.$Var_name.pop.0251-0280.nc
+        cdo_old select,name=$Var_name,level=$levintp ${modelname}.pop.h.{${timestart}..${timeend}}* ${modelname}.$Var_name.pop.${timestart}-${timeend}.nc
       fi
     done
+exit
+
 
 levintp=0.0,1000.0,2000.0,3000.0,4000.0,5000.0
 Var_Name_total=("WVEL")
