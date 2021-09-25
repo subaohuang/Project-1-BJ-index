@@ -46,8 +46,9 @@ timeend=0280
 variable=UVEL,VVEL,WVEL,SHF,TAUX,TAUY
 # variable=U,V
 # wantyear={0251..0280}
-echo ${timestart}
-exit
+# h=$(seq 251 280)
+# echo $h
+# exit
 #step1 : merge the cesm data :UVEL,VVEL,WVEL
 echo "step1 : merge the cesm data :UVEL,VVEL,WVEL"
 # the prefix of data is usually CESM compet name ,alarm for time select
@@ -60,7 +61,10 @@ for Var_name in  ${Var_Name_total[*]}
         echo "don't exit merge file, procecing..."
         echo $Var_name
         # rm ${PRE_DIR_ORG}${modelname}.$Var_name.pop.0251-0280.nc 
-        cdo_old select,name=$Var_name,level=$levintp ${modelname}.pop.h.{${timestart}..${timeend}}* ${modelname}.$Var_name.pop.${timestart}-${timeend}.nc
+        # cdo_old select,name=$Var_name,level=$levintp ${modelname}.pop.h.{$timestart..$timeend}* ${modelname}.$Var_name.pop.${timestart}-${timeend}.nc
+        cdo_old select,name=$Var_name,level=$levintp ${modelname}.pop.h.0$h*  ${modelname}.$Var_name.pop.${timestart}-${timeend}.nc
+
+        
       fi
     done
 exit
