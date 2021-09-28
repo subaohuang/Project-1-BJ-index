@@ -86,9 +86,9 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_mam)
 
     delete(p_pi)
-    
+    print(avg(rc_mam({0:15},{125:160})))
     print(avg(rc_mam({0:15},{125:160}))/avg(p_clm({0:15},{125:160})))
-
+exit()
 
 
 

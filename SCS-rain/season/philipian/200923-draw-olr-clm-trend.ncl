@@ -5,10 +5,10 @@ begin
 
 
    ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 170
+   lat1 = -40
+   lat2 = 40
+   lon1 = 40
+   lon2 = 280
    ;;;;
 
 
@@ -59,8 +59,8 @@ do i = 0,3
   ; res@cnMaxLevelValF       =   180.0
   ; res@cnLevelSpacingF      =  30.0
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   190.0
-  res@cnMaxLevelValF       =   260.0
+  res@cnMinLevelValF       =   210.0
+  res@cnMaxLevelValF       =   290.0
   res@cnLevelSpacingF      =  10.0
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
@@ -72,10 +72,10 @@ do i = 0,3
   ; res@mpMaxLatF             = 15
   ; res@mpMinLonF             = 125
   ; res@mpMaxLonF             = 160
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
-  res@mpMaxLonF             = 170
+  res@mpMinLatF             = lat1
+  res@mpMaxLatF             = lat2
+  res@mpMinLonF             = lon1
+  res@mpMaxLonF             = lon2
   ;  ;   lat1 = -5
    ; lat2 = 45
    ; lon1 = 90

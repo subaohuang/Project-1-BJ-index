@@ -51,7 +51,7 @@ local a, g, pi ,dfi
         lonind1 = ind_nearest_coord(0, lon,0)
         lonind2 = ind_nearest_coord(360,lon,0)
 
-        levindw1 = ind(levelw.eq.100)
+        levindw1 = ind(levelw.eq.10)
         levindw2 = ind(levelw.eq.1000)
 
         uwnd = f1->U(timeind,:,:,:)   ;;;variable must have ascending lat and lon order coordinates

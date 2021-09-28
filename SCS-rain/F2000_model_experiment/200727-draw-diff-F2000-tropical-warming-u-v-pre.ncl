@@ -23,8 +23,8 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h0.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_" + season_r +"/"+"F_2000_tro_"+season_r+".cam.h0.0101-4012_chazhi.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addtropical_" + season_r +"/"+"F_2000_tro_"+season_r+".cam.h1.0101-4012_chazhi.nc" 
   
   wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p_large_scale_pattern-tropical-foul-season")
   
@@ -44,16 +44,16 @@ do i = 0,3
   PRECC_CT  =  f1->PRECC(timeind,:,:)
 
   PRE_CT = PRECC_CT
-  ; PRE_CT = (/PRECC_CT+PRECL_CT/)
-  PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
+  PRE_CT = (/PRECC_CT+PRECL_CT/)
+  ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
   PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
 
   PRECL_id  =  f2->PRECL(timeind,:,:)
   PRECC_id  =  f2->PRECC(timeind,:,:)
 
   PRE_id = PRECC_id
-  ; PRE_id = (/PRECC_id+PRECL_id/)
-  PRE_id = (/PRECL_id/)
+  PRE_id = (/PRECC_id+PRECL_id/)
+  ; PRE_id = (/PRECL_id/)
   PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
    
   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
@@ -128,10 +128,10 @@ do i = 0,3
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -10.0
+    res@mpMinLatF             = -30.0
     res@mpMaxLatF             = 30.0
     res@mpMinLonF             = 30.0
-    res@mpMaxLonF             = 160.0
+    res@mpMaxLonF             = 170.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
     ; res@mpMinLonF             = 0.0

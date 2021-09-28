@@ -1,10 +1,10 @@
 begin
 
 	; 读取 .nc 文件
-    path         = "/cygdrive/d/18304076/"
-	tpf 		 = addfile("tp.assignment3.nc","r")
-	uf 		     = addfile("uwnd.assignment3.nc","r")
-	vf 		     = addfile("vwnd.assignment3.nc","r")
+    path         = "/home/ys17-19/lsh/Project/other/assginment3/"
+	tpf 		 = addfile("/home/ys17-19/lsh/Project/other/assginment3/tp.assignment3.nc","r")
+	uf 		     = addfile("/home/ys17-19/lsh/Project/other/assginment3/uwnd.assignment3.nc","r")
+	vf 		     = addfile("/home/ys17-19/lsh/Project/other/assginment3/vwnd.assignment3.nc","r")
 
 	
 	; ========================================================================
@@ -25,7 +25,10 @@ begin
 	; ========================================================================
 	; 提取 2018年6月27日的降水数据
 	; 单位需要由 m 转为 mm
-	tp1       = tpf->tp(time|time_ind1,level|:,lat|:,{lon|:})
+	tp1      = tpf->tp({time|time_ind1},latitude|:,{longitude|:})
+
+	printVarSummary(tp1)
+
 	tp1_sub   = tp1*1000
 	
 	
@@ -249,7 +252,7 @@ begin
 	; 添加标记
 	plotM		= gsn_add_polymarker(wks,plot,127.5,30.,resMark)
 
-	
+	overlay(plot,plotvc)
 	
 	; --------------------------------------------------------------------------
 	; 图 (b)

@@ -286,7 +286,7 @@ begin
 	
 	x2      = ispan(0,30,1) 
     y2      = rain_2
-	plotxy  = gsn_csm_xy(wks,x2,y2,resxy)
+	plotxy  = gsn_xy(wks,x2,y2,resxy)
 	
 	; =========================================================================
 	; 绘画展板

@@ -15,31 +15,31 @@ begin
 return prob
 end
 
-; function cal_season_trend(data,season)
-;   begin
-;     p_djf_r=month_to_season(data, season)
-;     dim = dimsizes(p_djf_r)
-;     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)  
-;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
-;     p_rc=(/p_rc*dim(0)/)
-;   return p_rc
-; end 
-
 function cal_season_trend(data,season)
   begin
     p_djf_r=month_to_season(data, season)
     dim = dimsizes(p_djf_r)
-    p_mk=trend_manken(p_djf_r, False, 0)
-    p_rc = p_mk(1,:,:)
+    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)  
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
     p_rc=(/p_rc*dim(0)/)
-    p_rc@prob = p_mk(0,:,:)
   return p_rc
 end 
+
+; function cal_season_trend(data,season)
+;   begin
+;     p_djf_r=month_to_season(data, season)
+;     dim = dimsizes(p_djf_r)
+;     p_mk=trend_manken(p_djf_r, False, 0)
+;     p_rc = p_mk(1,:,:)
+;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
+;     p_rc=(/p_rc*dim(0)/)
+;     p_rc@prob = p_mk(0,:,:)
+;   return p_rc
+; end 
 begin
     f2=addfile("/home/yangsong3/data-observation/ERA-interim/monthly/precipitation/ERAI-pre-1degree.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     lsp=f2->lsp(timeind,:,:)  ;;;units are m
     cp=f2->cp(timeind,:,:)   
     
@@ -53,15 +53,15 @@ begin
     rc_son = cal_season_trend(p_pi,"SON")
     rc_djf = cal_season_trend(p_pi,"DJF")
 
-    ; prob_mam=rc_test(rc_mam)
-    ; prob_jja=rc_test(rc_jja)
-    ; prob_son=rc_test(rc_son)
-    ; prob_djf=rc_test(rc_djf)
+    prob_mam=rc_test(rc_mam)
+    prob_jja=rc_test(rc_jja)
+    prob_son=rc_test(rc_son)
+    prob_djf=rc_test(rc_djf)
     
-    prob_mam = 1- rc_mam@prob
-    prob_jja = 1- rc_jja@prob
-    prob_son = 1- rc_son@prob
-    prob_djf = 1- rc_djf@prob
+    ; prob_mam = 1- rc_mam@prob
+    ; prob_jja = 1- rc_jja@prob
+    ; prob_son = 1- rc_son@prob
+    ; prob_djf = 1- rc_djf@prob
 
 
     copy_VarCoords(p_pi(1,:,:), prob_mam)
@@ -70,7 +70,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节ERA-scs-1979-2016")
+wks   = gsn_open_wks("pdf", "不同季节ERA-scs-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -90,8 +90,8 @@ wks   = gsn_open_wks("pdf", "不同季节ERA-scs-1979-2016")
   res@mpLimitMode           = "LatLon"
   
   res@mpMinLatF             = -5
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
+  res@mpMaxLatF             = 40
+  res@mpMinLonF             = 110
   res@mpMaxLonF             = 170
 
 
@@ -116,12 +116,21 @@ wks   = gsn_open_wks("pdf", "不同季节ERA-scs-1979-2016")
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.7
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.5
-  res@cnMaxLevelValF       =   2.5
-  res@cnLevelSpacingF      =  0.25
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -2.5
+  ; res@cnMaxLevelValF       =   2.5
+  ; res@cnLevelSpacingF      =  0.25
 
-  res@cnFillPalette="MPL_BrBG"
+  ; res@cnFillPalette="MPL_BrBG"
+
+   res@cnFillPalette = "precip_diff_12lev"
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+
+    res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    res@cnFillColors= (/5,6,7,8,10,11,12,13,14/) - 2
+
   res@gsnLeftString="Spring"
 
   plot = new(4,graphic)
@@ -165,7 +174,7 @@ wks   = gsn_open_wks("pdf", "不同季节ERA-scs-1979-2016")
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 

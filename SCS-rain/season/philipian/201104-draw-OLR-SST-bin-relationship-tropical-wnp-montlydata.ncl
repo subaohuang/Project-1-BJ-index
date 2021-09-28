@@ -156,9 +156,15 @@ printVarSummary(olr)
 
 
 ;;;bin 
-   bin_num =  (30.5-26.5)/0.25   ;;;;bin的个数，也是中间数
+   
+   ; sstmax = 30.0
+   ; sstmin = 28.5
+   sstmax = 30.25
+   sstmin = 26.5
 
-   bin  = fspan(26.5-0.125, 30.5-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
+   bin_num =  (sstmax- sstmin)/0.25   ;;;;bin的个数，也是中间数
+
+    bin  = fspan(sstmin-0.125, sstmax-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
     olr_bin = new(toint(bin_num),float)
 printMinMax(sst_one, 1)
 
@@ -169,6 +175,9 @@ do i = 0,bin_num-1
 end do 
 
 dolr_dsst = center_finite_diff(olr_bin, bin(1:) - 0.125, False, 0)
+
+    x = bin(1:) - 0.125
+
 
 ; rc1 = regline(fspan(26.5,28.75,9), dolr_dsst(0:8))
 ; print(rc1@yintercept)

@@ -3,14 +3,14 @@
 ;; linshuheng 2019.10.22
 ;;;*********************************************************
 begin
-  fils1 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_CTRL_0101-4012.nc"  
-  fils2 = "/home/ys17-19/lsh/data/wc-result/msf_F_2000_indian_0101-4012.nc"  
-
+    fils1 = "/home/yangsong3/data-observation/linshh/data/wc-result/msf_F_2000_CTRL_0101-4012.nc"  
+    ; fils1 = "/home/yangsong3/data-observation/linshh/data/wc-result/msf_lsh_F2000_tro_sstano_0101-4012.nc"  
+    fils2 = "/home/yangsong3/data-observation/linshh/data/wc-result/msf_lsh_F2000_all_sstano_0101-4012.nc"  
     f1=addfile(fils1, "r")
     f2=addfile(fils2, "r")
 
     date=cd_calendar(f1->time, 1)
-    timeind=ind(date.ge.601.and.date.le.4012)
+    timeind=ind(date.ge.601.and.date.le.3012)
     
 
     msf_time_ctrl=lonPivot(f1->msf_time(timeind,{1000:100},:),30)
@@ -29,7 +29,7 @@ begin
     msf_diff = (/msf_clm_addindian - msf_clm_ctrl/)
 
     ;;;;画图
-     wks = gsn_open_wks("pdf", "F_2000-msf-diff-indianwarming")
+     wks = gsn_open_wks("pdf", "F_2000-msf-allocean-5-50-50")
       res2 = True
       res2@gsnDraw=False
       res2@gsnFrame=False
@@ -50,9 +50,9 @@ begin
 
      res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-     res2@cnMinLevelValF       =   -2.0
-     res2@cnMaxLevelValF       =   2.0
-     res2@cnLevelSpacingF      =  0.5
+     res2@cnMinLevelValF       =   -1.0
+     res2@cnMaxLevelValF       =   1.0
+     res2@cnLevelSindingF      =  0.2
 
       
        

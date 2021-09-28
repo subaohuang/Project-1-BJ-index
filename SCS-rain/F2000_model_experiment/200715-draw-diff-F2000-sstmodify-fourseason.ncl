@@ -6,9 +6,9 @@
 ;**********************************************************
 begin
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031.nc"
+  fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031.nc"
   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addscs_"+season+"_notest.nc" 
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addindianwarming_"+season+"_notest_final.nc" 
+  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/modsst/sst_HadOIBl_bc_1.9x2.5_clim_c061031_addindianwarming_"+season+"_notest_final.nc" 
  
   plot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
@@ -72,7 +72,7 @@ do i = 0,3
     res@mpMaxLonF             = 170.0
     ; res@mpCenterLonF          = 180.0
 
-    res@gsnLeftString  = se(i) + " "+season(i)+ " SST warming add to Cam4 model"
+    res@gsnLeftString  = se(i) + " "+season(i)+ " SST warming add to CAM5"
   
     plot(i) =gsn_csm_contour_map(wks, sst_cpl_diff_re, res)
 end do

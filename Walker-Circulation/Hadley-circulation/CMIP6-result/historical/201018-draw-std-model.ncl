@@ -82,14 +82,14 @@ do k = 0,dim_model-1
 
         ssta_mean = dim_avg_n_Wrap(ssta(:,{-5:5},{120:280}), 1)
 
-        std1 = dim_stddev_n(ssta_mean(0:49,:), 0)
+        std1 = dim_stddev_n(ssta_mean(0:49*12-1,:), 0)
 
-        std2 = dim_stddev_n(ssta_mean(50:,:), 0)
+        std2 = dim_stddev_n(ssta_mean(59*12:,:), 0)
 
         x = ssta_mean&lon
         delete(ssta_mean)
         printVarSummary(std1)
-        exit()
+   
 ;;;;
 
 

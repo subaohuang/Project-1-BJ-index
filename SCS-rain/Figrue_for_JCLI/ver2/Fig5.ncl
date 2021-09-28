@@ -1,344 +1,548 @@
 ;;********************************************************
-;;画HadIsst的sst趋势
+;;画散点图,得到关系
 ;;
-;;lnshuheng 2020.02.17
+;;lsh 2020-11-04
 ;**********************************************************
-function  rc_test(ssta_rc)
+
+
+
 begin
-  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
-   b = tval    ; b must be same size as tval (and df)
-   b = 0.5
-   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
-   copy_VarCoords(ssta_rc, prob)
+;;;read data
+lat1 = -10
+lat2 =  30
+lon1 =  100
+lon2 = 180
 
-return prob
-end
-undef("remove_enso_signal")
-function remove_enso_signal(data)
-  begin  
-  ; ;;;读入HadiSST海温数据
-      diri="/home/yangsong3/data-observation/linshh/data/sst/"
-      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-      f1=addfile(fils1, "r")
-      date:=cd_calendar(f1->time, 1)
+; startmon = 198201
+; endmon = 201912
 
-      timeind:=ind(date.le.201512.and.date.ge.197901)
+; startmon = 199501
+; endmon = 201512
 
-      sst =  lonFlip(f1->sst(timeind,:,:))
-   
-      ssta=(/rmMonAnnCycTLL(sst)/)
-      copy_VarCoords(sst, ssta)
+ startmon = 197901
+ endmon = 201512
 
-      ssta_de = ssta
-      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
-      printVarSummary(ssta_index)
+;;;读取数据
 
-      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-      printVarSummary(nino3_4)
-
-      
-      ; nino3_4_new = nino3_4                ;;;;前期ENSO
-      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
-      ; nino3_4_new(34) =ssta_index(35*12-1) 
-   
-      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
-  ;;;;;
-      data_de = data
-      ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
-      copy_VarCoords(data(1,:,:), data_rc)
-      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
-      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
-      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
-  
-      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
-      data_new = data 
-      data_new = (/data - data_relate_enso/)
-  return data_new
-end 
-
-function cal_season_trend(data,season)
-  begin
-   
-    p_djf_r=month_to_season(data, season)
-     ; ;;;;remove_enso_signal
-     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ; ;;;;
-
-      if season.eq."DJF"
-      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
-      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
-    end if
-    dim = dimsizes(p_djf_r)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
-    copy_VarCoords(p_djf_r(1,:,:), p_rc)
-    p_rc=(/p_rc*dim(0)/)
-  return p_rc
-end 
-
-
-
-
-;;**************************************************************
-;;;main program
-;;***************************************************************
-begin
-  
-   ;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-    f1=addfile(fils1, "r")
+    f1 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
     date:=cd_calendar(f1->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    olr = short2flt(f1->olr(timeind,{lat1:lat2},{lon1:lon2})) ;;;2.5 ×2.5 grid
 
-    timeind:=ind(date.le.201612.and.date.ge.197901)
+    printVarSummary(olr)
 
-    sst  = f1->sst(timeind,:,:)
-    ssta=(/rmMonAnnCycTLL(sst)/)
-    copy_VarCoords(sst, ssta)
-    
+    olr = (/dtrend_msg_n(ispan(1,dimsizes(olr&time),1),olr,False,True,0)/)
 
-   ;;;;cal season trend 
-    ssta_mam = cal_season_trend(ssta,"MAM")
-    ssta_jja = cal_season_trend(ssta,"JJA")
-    ssta_son  = cal_season_trend(ssta,"SON")
-    ssta_djf = cal_season_trend(ssta,"DJF")
-    
-    ; ssta_jja = (/ssta_jja - ssta_mam/)
-    ; ssta_son = (/ssta_son- ssta_mam/)
-    ; ssta_djf = (/ssta_djf -ssta_mam/)
-    ; ssta_mam = 0.0
-
-    prob_mam = rc_test(ssta_mam)
-    prob_jja = rc_test(ssta_jja)
-
-    prob_son = rc_test(ssta_son)
-    prob_djf = rc_test(ssta_djf)
+    ; f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
+    ; date:=cd_calendar(f2->time, 1)
+    ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    ; sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
+    ; printVarSummary(sst)
+    ;;;;
 
 
+    f2 = addfile("/home/yangsong3/data-observation/linshh/data/sst/HadISST_sst.nc", "r")
+    date:=cd_calendar(f2->time, 1)
 
-    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
-    
-    
-    
-    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16")
-;;**************************************************************
-;画图
-;;***************************************************************
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
 
-  res=True
-  res@gsnFrame=False
-  res@gsnDraw=False
-  
-  
- 
-   res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlueDarkRed18"
-   ; res@cnFillPalette = "BlRe"
+    sst_r =  lonFlip(f2->sst(timeind,:,:))
 
-  ; res@gsnSpreadColorStart = 130
-  ; res@gsnSpreadColorEnd = 253
-  res@cnFillOn=True
-  res@cnLinesOn=False
+    sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
 
-  res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
-
-  
-  res@lbAutoManage  = False
-  res@lbOrientation="Vertical"
-  res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = -80
-  res@mpMaxLonF             = 280
-
-  res@mpCenterLonF          = 100
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             = 100
-  ; res@mpMaxLonF             = 170
-  
-
-  res@tmXBMode="Explicit"
-  ; res@tmYLMode="Explicit"
-
-  res@tmXBValues = (/-60,0,60,120,180,240/) 
-  res@tmXBLabels = (/"60W","0","60E","120E","180","120W"/) 
+    sst = (/dtrend_msg_n(ispan(1,dimsizes(sst&time),1),sst,False,True,0)/)
 
 
-
-  ; res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
-
-  res@tmXTOn=False
-  res@tmYROn=False
-  res@tmXBOn=True
-  res@tmYROn=False
-  res@tmXBMode="Explicit"
-  res@tmYLMode="Explicit"
-
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
-
-
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.6
-  res@cnMaxLevelValF       =   0.6
-  res@cnLevelSpacingF      =  0.1
-
-  ; res@cnMinLevelValF       =   -0.3
-  ; res@cnMaxLevelValF       =   0.3
-  ; res@cnLevelSpacingF      =  0.05
-   ; res@cnFillPalette = "NCV_jaisnd"
-   ; res@cnFillPalette = "sunshine_9lev"
-  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  res@cnLevels = (/-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0.1,0.2,0.3,0.4,0.5,0.6/)
-  ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
-
-  res@cnInfoLabelOn = False
-  
-
-  res@gsnLeftString="(a) MAM SST trend "
-  res@gsnLeftStringFontHeightF = 0.02
-
-  ; res@mpShapeMode = "FreeAspect"
-  ; res@vpHeightF = 0.2
-  ; res@vpWidthF = 0.7
-
-  plot=new(4,graphic)
-
-  plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
-    res@gsnLeftString="(b) JJA SST trend "
-  plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
-    res@gsnLeftString="(c) SON SST trend "
-  plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
-    res@gsnLeftString="(d) DJF SST trend "
-  plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
-
-  res2 = res
-  res2@cnLevelSelectionMode = "ExplicitLevels"
-  res2@cnFillOn = False
-  res2@cnLinesOn = True
-  delete(res2@cnLevels)
-  res2@cnLevels = (/0.6/)
-  res2@cnLineColors = "black"
-  res2@cnMonoLineColor  = True
-  res2@cnLineThicknessF = 2
-  res2@cnMonoLineThickness  = True
-  res2@gsnLeftString = ""
-  res2@cnInfoLabelOn = False
-  
-  plot1=new(4,graphic)
-
-  plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
-  plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
-  plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
-  plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
-
-  do i=0,3
-  overlay(plot(i), plot1(i))
-  end do   
-
-   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
-
-
-  ;;;添加赤道直线
-   pgx=ispan(30,390,10)
-   pgy=new(dimsizes(pgx),typeof(pgx))
-   pgy=0
+    printVarSummary(sst)
    
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
+   sst_tropical = avg(dim_avg_n_Wrap(sst_r(:,{-30:30},{0:360}),(/1,2/)))
+    print("热带平均的SST= "+sst_tropical)
 
-  str = ispan(1, 4, 1) + ""
-    plot_add = new(4,graphic)
-  do i = 0,3
-  plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   end do 
-  ;;;添加indo-pacific warm pool
-    ; ;;添加区域
-   ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
-   
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
+    fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_*"+".nc")
+    f3 = addfiles(fils3, "r")
 
-    str2 = ispan(1, 4, 1) + ""
-     plot_add2 = new(4,graphic)
-    do i = 0,3
-      plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+    date:=cd_calendar(f3[:]->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    time = f3[:]->time(timeind)
+    lat = f3[1]->latitude
+    lon = f3[1]->longitude
+
+    indlat = ind(lat.ge.-10.0.and.lat.le.30.0)
+    indlon = ind(lon.ge.100.0.and.lon.le.180.0)
+
+
+    div_r = new((/dimsizes(time),7, dimsizes(indlat),dimsizes(indlon)/),float)
+      
+
+    do i = 0,dimsizes(timeind)/12-1
+
+      div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},indlat(::-1),indlon))
+      
+    end do
+    ;
+
+    div = dim_avg_n_Wrap(div_r,1)
+
+
+    div = (/dtrend_msg_n(ispan(1,dimsizes(div&time),1),div,False,True,0)/)
+
+
+
+    div = (/div*10^5/)
+    div = (/-1*div/)           ;;;转化成con
+;;;;
+
+
+
+;;;;chazhi 
+print("**********start interp************")
+    ; xi = sst&lon
+    ; yi = sst&lat
+
+    xi = sst&longitude
+    yi = sst&latitude
+
+    xo = olr&lon
+    yo = olr&lat
+
+  
+    ;;;;chazhi SST
+    sst_chazhi = linint2_Wrap(xi, yi, sst, True, xo, yo, 0)
+
+    sst_chazhi!1= "lat"
+    sst_chazhi!2= "lon"
+
+    sst_chazhi&lat = yo
+    sst_chazhi&lon = xo
+    ;;;
+    
+
+
+    xi := div&longitude
+    yi := div&latitude
+
+    ;;;;chazhi div
+    div_chazhi = linint2_Wrap(xi, yi, div, True, xo, yo, 0)
+
+    div_chazhi!1= "lat"
+    div_chazhi!2= "lon"
+
+    div_chazhi&lat = yo
+    div_chazhi&lon = xo
+    ;;;
+
+    olr = where(ismissing(sst_chazhi), olr@_FillValue, olr)
+;;;
+
+
+
+
+
+;;;;Monthly bin
+
+    sst_chazhi = (/runave_n_Wrap(sst_chazhi, 3, 0, 0)/)
+    olr = (/runave_n_Wrap(olr, 3, 0, 0)/)
+    div_chazhi = (/runave_n_Wrap(div_chazhi, 3, 0, 0)/)
+
+
+
+    sst_one = ndtooned(sst_chazhi(:,{0:20},{125:170}))
+    olr_one = ndtooned(olr(:,{0:20},{125:170}))
+
+    div_one = ndtooned(div_chazhi(:,{0:20},{125:170}))
+;;;;;
+
+
+
+
+;;;bin month for OLR and SST
+    bin_num =  (30.75-25.0)/0.25   ;;;;bin的个数，也是中间数
+
+    bin_sst  = fspan(25.0-0.125, 30.75-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
+    olr_bin_sst = new(toint(bin_num),float)
+    printMinMax(sst_one, 1)
+    
+    std_olr_sst = olr_bin_sst
+
+
+    do i = 0,bin_num-1
+        in := ind(sst_one.ge.bin_sst(i).and.sst_one.lt.(bin_sst(i)+0.25))
+        olr_bin_sst(i) = dim_avg(olr_one(in))
+        std_olr_sst(i) = dim_stddev(olr_one(in))
     end do 
 
-   ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
+   dolr_dsst = center_finite_diff(olr_bin_sst, bin_sst(1:) - 0.125, False, 0)
 
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.05/)
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.001
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
+    mnmx = new((/2,dimsizes(olr_bin_sst)/),float)
+
+    mnmx(0,:) = olr_bin_sst - std_olr_sst
+    mnmx(1,:) = olr_bin_sst + std_olr_sst
+
+
+    x = bin_sst(1:) - 0.125
+
+    ind1 = ind(x.eq.26.5)
+    ind2 = ind(x.eq.28.75)
+    ind3 = ind(x.eq.29.75)
+
+    rc1 = regline(fspan(26.5,28.75,ind2-ind1+1), dolr_dsst(ind1:ind2))
+    print(rc1@yintercept)
+
+    rc2 = regline(fspan(28.75,29.75,ind3-ind2+1), dolr_dsst(ind2:ind3))
+
+    print(rc2@yintercept)
+    print (rc1+"*x"+"+" +rc1@yintercept)
+    print (rc2+"*x"+"+" +rc2@yintercept)
+    
+
+    ; y1 = rc1*fspan(26.5,28.75,ind2-ind1+1) + rc1@yintercept
+    ; y2 = rc2*fspan(28.75,30.0,toint((30.0-28.75)/0.25)+1) + rc2@yintercept
+;;;;;;;
+
+
+
+;;;bin month for OLR and DIV  
+   ; bin_div = ispan(-30-5, 50-5, 5)*0.01  ;;; 0.1 最左边的
+   ; bin_num := dimsizes(bin_div) -1
+
+   bin_num :=  (0.65+0.3)/0.05   ;;;;bin的个数，也是中间数
+    
+   bin_div  = fspan(-0.3-0.025, 0.65-0.025, toint(bin_num) +1)  ;;;bin最左边的数字
+
+   olr_bin_div = new(toint(bin_num),float)
+
+   std_olr_div = olr_bin_div
+
+
+ do i = 0,bin_num-1
+        in := ind(div_one.ge.bin_div(i).and.div_one.lt.(bin_div(i)+0.05))
+        olr_bin_div(i) = dim_avg(olr_one(in))
+        std_olr_div(i) = dim_stddev(olr_one(in))
+ end do 
+olr_bin_div(0) = 265.0
+  dolr_ddiv = center_finite_diff(olr_bin_div, bin_div(1:) - 0.025, False, 0)
+;;;;
+
+
+    dolr_ddiv = (/dolr_ddiv/10.0/)
+
+
+    mnmx1 = new((/2,dimsizes(olr_bin_div)/),float)
+
+    mnmx1(0,:) = olr_bin_div - std_olr_div
+    mnmx1(1,:) = olr_bin_div + std_olr_div
+   
+
+;;;bin SST and DIV
+    bin_num :=  (30.75-25.0)/0.25   ;;;;bin的个数，也是中间数
+    
+    bin_sst  = fspan(25.0-0.125, 30.75-0.125, toint(bin_num) +1)  ;;;bin最左边的数字
+    div_bin_sst = new(toint(bin_num),float)
+    printMinMax(sst_one, 1)
+
+    std_div_sst = div_bin_sst
+
+    do i = 0,bin_num-1
+        in := ind(sst_one.ge.bin_sst(i).and.sst_one.lt.(bin_sst(i)+0.25))
+        div_bin_sst(i) = dim_avg(div_one(in))
+        std_div_sst(i) = dim_stddev(div_one(in))
+    end do 
+
+   ddiv_dsst = center_finite_diff(div_bin_sst, bin_sst(1:) - 0.125, False, 0)
+   ddiv_dsst  = (/ddiv_dsst*10.0/)
+;;;;
+
+    l = div_bin_sst(ind((bin_sst(1:)-0.125).eq.29.0))
+    l2 = div_bin_sst(ind((bin_sst(1:)-0.125).eq.27.5))
+    
+    ; print(l2)
+    ; exit()
   
-     iplot = new(4,graphic)
-     iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
-     iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
-     iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
-     iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
-    ;  
-    do i=0,3
-     overlay(plot(i), iplot(i))
-    end do
+    mnmx2 = new((/2,dimsizes(olr_bin_sst)/),float)
 
-pres = True
-pres@gsnPanelLabelBar  = True
-pres@gsnMaximize = True
-pres@lbLabelStride = 1
-pres@lbOrientation = "Horizontal"
-; pres@lbOrientation = "Vertical"
-; pres@pmLabelBarHeightF = 0.15
-pres@pmLabelBarWidthF = 0.45
-pres@pmLabelBarHeightF = 0.04
-pres@pmLabelBarOrthogonalPosF = -0.008
-pres@pmLabelBarParallelPosF = 0.02
-pres@lbLabelFontHeightF = 0.01
-pres@lbAutoManage =False
+    mnmx2(0,:) = div_bin_sst - std_div_sst
+    mnmx2(1,:) = div_bin_sst + std_div_sst
 
-gsn_panel(wks, plot, (/2,2/), pres)
 
-end
+;;;;draw plot 
+    wks=gsn_open_wks("pdf", "SST-OLR-DIV-relation-tropical-wnp-monlydata-panel")
+
+    plot = new(6, graphic)
+
+
+    res                   = True                     ; plot mods desired
+    res@gsnDraw=False
+    res@gsnFrame=False
+
+    res@xyMonoLineColor = True
+    res@xyMarkerColor ="gray30"
+
+    res@xyMarkLineModes   = (/"Markers"/)
+    res@xyMarkers         =  16                      ; choose type of marker  
+    res@xyMarkerSizeF     = 0.001    ; Marker size (default 0.01)
+   
+    res@trYReverse =  True
+    res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
+    res@tmYLLabelsOn=True
+    res@trYMaxF=290.0
+    res@trYMinF=180.0
+
+    
+    res@tmYLValues    = fspan(290,180,12)
+    res@tmYLMinorValues = fspan(290,180,23)
+    res@tmYLLabels    = fspan(290,180,12)
+    
+    res@tmXTOn=False
+    res@tmYROn=False
+ 
+    res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
+    res@trXMaxF=31.0
+    res@trXMinF=24.0
+    res@tmXBValues    = fspan(24.0,31.0,8)
+    res@tmXBLabels    = fspan(24.0,31.0,8)
+
+
+    res@tmXMajorGrid                = True          ; implement x grid 
+    res@tmXMajorGridThicknessF      = 1.0           ; 2.0 is default
+    res@tmXMajorGridLineDashPattern = 2             ; select short dash lines
+  
+    res@tmYMajorGrid                = True          ; implement y grid
+    res@tmYMajorGridThicknessF      = 1.0           ; 2.0 is default
+    res@tmYMajorGridLineDashPattern = 2             ; select short dash lines
+
+    res@tmXBLabelFontHeightF=0.02
+    res@tmXBMajorLengthF=0.008        ;調整刻度的长度
+    res@tmXBMajorOutwardLengthF=0.008  ;调整刻度的长度，注意2个命令要同时使用
+    res@tmXUseBottom=False
+    res@tmXBLabelDeltaF=-0.8
+
+    res@tmYLLabelFontHeightF=0.02
+    res@vpXF=0.15
+    res@vpYF=0.9
+    res@vpHeightF=0.5
+    res@vpWidthF=0.6
+    
+    res@tiMainString="(a) ~F25~OLR and SST"
+
+    res@tiYAxisString="~F25~OLR [W/m~S~2~N~]"
+    res@tiYAxisFontHeightF=0.02
+    
+    res@tiXAxisString="~F25~SST [~S~o~N~C]"
+    res@tiXAxisFontHeightF=0.02
+    
+    res@xyCurveDrawOrder = "PreDraw"
+  
+
+    plot(0) =gsn_csm_xy(wks, sst_one, (/olr_one/), res)
+    
+    ;;;添加标准差
+    res@xyMarkLineMode   = "Lines" 
+    res@gsnXYFillColors = "blue"
+    res@xyLineColor     = -1                           ; We don't want the line, so make it transparent.
+    res@gsnXYFillOpacities=0.1
+
+    res@gsnXRefLine = (/28.0/)
+    res@gsnYRefLine = 240.0
+
+    plot_std1= gsn_csm_xy(wks, bin_sst(1:) - 0.125,mnmx(0:1,:),res)       ; create line plot
+
+    overlay(plot(0), plot_std1)
+  
+
+    res@trXMaxF= 0.8
+    res@trXMinF= -0.6
+    res@tmXBValues    := ispan(-6,8,2)*0.1
+    res@tmXBLabels    := ispan(-6,8,2)*0.1
+
+
+    res@tiMainString="(b) ~F25~OLR and Conv "
+    res@tiYAxisString="~F25~OLR [W/m~S~2~N~]"
+    res@tiXAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
+
+    delete(res@gsnXRefLine)
+    delete(res@gsnYRefLine)
+
+
+    plot(2) =gsn_csm_xy(wks, div_one, (/olr_one/), res)
+    res@gsnXRefLine = (/0.0/)
+    res@gsnYRefLine = 240.0
+    
+    plot_std2= gsn_csm_xy(wks, bin_div(1:) - 0.025,mnmx1(0:1,:),res)       ; create line plot
+
+    overlay(plot(2), plot_std2)
+
+
+    res@trXMaxF=31.0
+    res@trXMinF=24.0
+    res@tmXBValues    := fspan(24.0,31.0,8)
+    res@tmXBLabels    := fspan(24.0,31.0,8)
+    
+    res@trYMaxF=.5
+    res@trYMinF=-0.5
+    res@tmYLValues    := ispan(-5,5,1)*0.1
+    res@tmYLLabels    := ispan(-5,5,1)*0.1
+    
+    res@tiMainString="(c) ~F25~Conv and SST "
+    res@tiXAxisString="~F25~SST [~S~o~N~C]"
+    res@tiYAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
+    res@trYReverse =  False
+   
+   
+    
+    delete(res@gsnXRefLine)
+    delete(res@gsnYRefLine)
+
+    
+    plot(4) =gsn_csm_xy(wks, sst_one, (/div_one/), res)
+     
+    res@gsnYRefLine = 0.0
+    res@gsnXRefLine = (/28.0/)
+
+    plot_std3= gsn_csm_xy(wks, bin_sst(1:) - 0.125,mnmx2(0:1,:),res)       ; create line plot
+
+    overlay(plot(4), plot_std3)
+    
+    delete( res@gsnXYFillColors)
+    delete(res@xyLineColor)    
+    delete(res@gsnXRefLine)
+
+      ; delete(res@gsnXRefLine)
+    delete(res@gsnYRefLine)
+;;;
+
+
+;;;添加拟合的线
+
+    plres=True
+    plres@gsLineThicknessF=3.0
+    plres@gsLineColor = "blue"
+    plres@gsLineDashPattern=0
+
+    plot_line=gsn_add_polyline(wks, plot(0), bin_sst(1:) - 0.125, olr_bin_sst, plres)
+    plot_line1=gsn_add_polyline(wks, plot(2), bin_div(1:) - 0.025, olr_bin_div, plres)
+    plot_line2=gsn_add_polyline(wks, plot(4), bin_sst(1:) - 0.125, div_bin_sst, plres)
+
+    mkres = True
+    mkres@gsMarkerColor = "blue"
+    mkres@gsMarkerIndex = 1
+    mkres@gsMarkerSizeF = 0.02
+
+    ; plot_mk=gsn_add_polymarker(wks, plot(0), bin_sst(1:) - 0.125, olr_bin_sst, mkres)
+    ; plot_mk1=gsn_add_polymarker(wks, plot(2), bin_div(1:) - 0.025, olr_bin_div, mkres)
+    ; plot_mk2=gsn_add_polymarker(wks, plot(4), bin_sst(1:) - 0.125, div_bin_sst, mkres)
+;;;
+
+
+;;;;画偏导数的线
+
+    res@trXMaxF = 31.0
+    res@trXMinF = 24.0
+    res@tmXBValues    := fspan(24.0,31.0,8)
+    res@tmXBLabels    := fspan(24.0,31.0,8)
+
+
+    res@tmYLValues    := fspan(20,-30,11)
+    res@tmYLMinorValues := fspan(20,-30,11)
+    res@tmYLLabels    := fspan(20,-30,11)
+    res@trYMaxF=20.0
+    res@trYMinF=-30.0
+
+
+    res@xyMarkerColor ="black"
+    res@xyMarkLineModes   := (/"Lines"/)
+    res@xyMonoLineThickness = True
+    res@xyLineThicknessF=3.0
+    res@xyDashPatterns=0
+
+    res@tiMainString="(d) ~F34~6~F25~(OLR)/~F34~6~F25~(SST) from (a)"
+    res@tiYAxisString="~F25~Chage rate [W/m~S~2~N~/~S~o~N~C]"
+ 
+    res@gsnYRefLineThicknessF = 1.0
+    
+    ; res@gsnYRefLine = 0.0
+
+    res@gsnXRefLine = (/28.0/) ;;;这里会报错，只能画一条，很奇怪
+    res@trYReverse =  True
+    
+    m1 = res@tmXBValues
+    m2 = res@tmYLValues
+
+    plot(1) =gsn_csm_xy(wks, bin_sst(1:) -0.125, (/dolr_dsst/), res)
+   
+
+    res@tmYLValues    := fspan(8,-20,8)
+    res@tmYLMinorValues := fspan(8,-20,15)
+    res@tmYLLabels    := fspan(8,-20,8)
+    res@trYMaxF=8.0
+    res@trYMinF=-20.0
+
+    res@trXMaxF=0.8
+    res@trXMinF=-0.6
+    res@tmXBValues    := ispan(-6,8,2)*0.1
+    res@tmXBLabels    := ispan(-6,8,2)*0.1
+
+    res@tiMainString="(e) ~F34~6~F25~(OLR)/~F34~6~F25~(Conv)  from (b)"
+    res@tiYAxisString="~F25~Chage rate [W/m~S~2~N~/10~S~-6~N~s~S~-1~N~]"
+    res@tiXAxisString="~F25~Conv [10~S~-5~N~s~S~-1~N~]"
+
+    ; res@gsnYRefLine = 0.0
+    res@gsnXRefLine = (/0.0/)
+
+    m3 =  res@tmXBValues
+    m4 = res@tmYLValues
+
+    plot(3) =gsn_csm_xy(wks, bin_div(1:) -0.025, (/dolr_ddiv/), res)
+    ; plot_addref2 =gsn_add_polyline(wks,plot(3), conform(bin_sst(1:),l,0), res@tmYLValues, Lineres)
+    ; plot_addref2 =gsn_add_polyline(wks,plot(3), res@tmXBValues, conform(res@tmYLValues,0.0,0), Lineres)
+
+    
+   
+    res@tmYLValues    := fspan(-1,2,7)
+    ; res@tmYLMinorValues := fspan(-2,2,9)
+    res@tmYLLabels    := fspan(-1,2,7)
+    res@trYMaxF=2.0
+    res@trYMinF=-1.0
+    res@trXMaxF=31.0
+    res@trXMinF=24.0
+    res@tmXBValues    := fspan(24.0,31.0,8)
+    res@tmXBLabels    := fspan(24.0,31.0,8)
+
+
+    res@tiMainString="(f) ~F34~6~F25~(Conv)/~F34~6~F25~(SST)  from (c)"
+    res@tiYAxisString="~F25~Chage rate [10~S~-6~N~s~S~-1~N~/~S~o~N~C]"
+    res@tiXAxisString="~F25~SST [~S~o~N~C]"
+
+    res@trYReverse =  False
+    res@gsnYRefLine = 0.0
+    res@gsnXRefLine = 28.0
+
+    res@gsnXRefLine = (/28.0/)
+
+    m5 =  res@tmXBValues
+    m6 = res@tmYLValues
+    plot(5) =gsn_csm_xy(wks, bin_sst(1:) - 0.125, (/ddiv_dsst/), res)
+
+    ; plot_addref3 =gsn_add_polyline(wks,plot(5), conform(bin_sst(1:),29.0,0), res@tmYLValues, Lineres)
+    ; plot_addref3 =gsn_add_polyline(wks,plot(5), res@tmXBValues, conform(res@tmYLValues,0.0,0), Lineres)
+;;;
+
+
+;;;画参考线
+    Lineres =  True
+    Lineres@tfPolyDrawOrder = "PreDraw"
+
+    ; plot_addref1 =gsn_add_polyline(wks,plot(1), conform(bin_sst(1:),29.0,0), res@tmYLValues, Lineres)
+    plot_addref1 = gsn_add_polyline(wks,plot(1), m1, conform(m2,0.0,0), Lineres)
+    plot_addref2 = gsn_add_polyline(wks,plot(3), m3, conform(m4,0.0,0), Lineres)
+    plot_addref3 = gsn_add_polyline(wks,plot(5), m5, conform(m6,0.0,0), Lineres)
+
+
+ pres  = True
+ gsn_panel(wks, (/plot(0),plot(2),plot(4),plot(1),plot(3),plot(5)/), (/2,3/), pres)
+
+ end 
+
+
+

@@ -127,23 +127,23 @@ begin
    print(avg(ssta_jja({0:15},{125:160})))
    print(avg(ssta_son({0:15},{125:160})))
    print(avg(ssta_djf({0:15},{125:160})))
-   exit()
 
 
-    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
 
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
     ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
     ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+
+    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
     
     
     
-    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
+    ; wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -208,6 +208,7 @@ begin
   res@cnLevelSpacingF      =  0.1
   ; res@cnFillPalette = "NCV_jaisnd"
   res@cnFillPalette = "sunshine_9lev"
+  ; res@cnFillPalette = "WhiteBlueGreenYellowRed"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
   ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
@@ -272,10 +273,10 @@ begin
    
    pgres=True
    pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
+   pgres@gsLineThicknessF= 1.0
+   pgres@gsLineDashPattern= 1
 
-  str = ispan(1, 4, 1) + ""
+    str = ispan(1, 4, 1) + ""
     plot_add = new(4,graphic)
   ; do i = 0,3
   ; plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
@@ -283,14 +284,14 @@ begin
   ;;;添加indo-pacific warm pool
     ; ;;添加区域
    ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
+   pgres@gsLineThicknessF = 1.5
+   pgres@gsLineDashPattern= 1
    str3=unique_string("dum3")
    str4=unique_string("dum4")
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
@@ -354,6 +355,6 @@ gsn_panel(wks, plot, (/2,2/), pres)
 ; wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
   ; wks = gsn_open_wks(pltType, pltName)
 
-   system("convert -geometry 1800x1800 -density 600x600 -trim global季节平均SST的趋势-79-15.png  test.png")     
+   ; system("convert -geometry 1800x1800 -density 600x600 -trim global季节平均SST的趋势-79-15.png  test.png")     
 
 end

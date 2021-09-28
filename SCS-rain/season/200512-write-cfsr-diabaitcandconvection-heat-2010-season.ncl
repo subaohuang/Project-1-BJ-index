@@ -4,6 +4,38 @@
 ;;avg region over scs and philipian sea
 ;; linshuheng 2019.12.31
 ;;;*********************************************************
+function get_data(var1,month)
+begin
+    if month.ne."1" then
+    var1_annual = month_to_season(var1, month)
+    end if
+    
+    var1_annual  = month_to_annual(var1, 1)
+
+    var1_annual!0="time" 
+    dimz = dimsizes(var1_annual)
+    yr_length = dimz(0)
+
+    var1_annual_rc = regCoef_n(ispan(1,yr_length,1), var1_annual,0,0)
+    copy_VarCoords(var1_annual(1,:,:,:), var1_annual_rc)
+    var1_annual_rc = var1_annual_rc*yr_length
+
+    var1_clim = dim_avg_n_Wrap(var1_annual,0)
+    ;;;区域平均
+
+    g_latS=0.
+    g_latN=20.
+    g_lonW=125.
+    g_lonE=160.
+
+    var1_clim_area = wgt_areaave_Wrap(var1_clim(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+    var1_annual_rc_area = wgt_areaave_Wrap(var1_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+
+    y = var1_annual(:1,:,0,0)
+    y(0,:)= (/var1_clim_area/)
+    y(1,:)= y(0,:)+(/var1_annual_rc_area/)
+  return y
+end 
 ; ==============================================================
 ; Mission 1. read data
 ; ==============================================================

@@ -165,7 +165,7 @@ print("=====finish read data==========")
 
 
 ;;;;
-    wks   = gsn_open_wks("pdf", "fig3-div.pdf")
+    wks   = gsn_open_wks("pdf", "fig3-div-cmap.pdf")
        
     res=True
     res@gsnFrame=False
@@ -300,10 +300,10 @@ print("=====finish read data==========")
     pgres=True
     pgres@gsLineColor="black"
     pgres@gsLineThicknessF=2.0
-    pgres@gsLineDashPattern=0
+    pgres@gsLineDashPattern=1
     ;;;画box
     lat1 = 0
-    lat2 = 15
+    lat2 = 20
     lon1 = 125
     lon2 = 160
 
@@ -641,6 +641,7 @@ print("=====finish read data==========")
     copy_VarCoords(olr_annual(1,:,:),olr_rc)
     olr_rc = (/olr_rc*yearnum/)
     
+    print(avg(olr_rc({0:15},{125:160})))
   
 
 
@@ -697,7 +698,7 @@ print("=====finish read data==========")
     res3@cnLevelSelectionMode = "ExplicitLevels"
 
     ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
-    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
+    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,-2.5,2.5,5.0,10.0,15.0,20.0/)
     res3@lbLabelStrings = res3@cnLevels
     res3@lbLabelFontHeightF = 0.02
     res3@lbAutoManage = False

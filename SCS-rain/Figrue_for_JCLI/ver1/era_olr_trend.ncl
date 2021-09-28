@@ -102,13 +102,13 @@ end
 
    
     res3@mpLimitMode           = "LatLon"
-    res3@mpMinLatF             = -5
-    res3@mpMaxLatF             = 30
-    res3@mpMinLonF             = 100
-    res3@mpMaxLonF             = 170
+    res3@mpMinLatF             = -40
+    res3@mpMaxLatF             = 40
+    res3@mpMinLonF             = 30
+    res3@mpMaxLonF             = 290
 
-    res3@tmXBValues = (/100,120,140,160/) 
-    res3@tmXBLabels = (/100,120,140,160/) +""+"E" 
+    ; res3@tmXBValues = (/100,120,140,160/) 
+    ; res3@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
     res3@mpCenterLonF          = (res3@mpMinLonF+res3@mpMaxLonF)/2.0
 

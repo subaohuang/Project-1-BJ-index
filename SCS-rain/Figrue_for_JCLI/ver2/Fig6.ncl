@@ -1,29 +1,8 @@
 ;;********************************************************
-;;计算SST倾向以及SST值与GPCP降水的趋势
-;;其中热通量的方向都是向上为正，向下为负
-;;的相关系数场，
-;;NCEP-NCAR的精度为1.87×1.9
+;;画HadIsst的sst趋势
 ;;
-;;                                         lnshuheng 2020.02.18
+;;lnshuheng 2020.02.17
 ;**********************************************************
-function chazhi(data)
- begin
-   xi = data&lon
-   yi = data&lat
-   xo = fspan(0.5,359.5,360)
-   yo = fspan(-89.5,89.5,180)
- 
-   data_chazhi = linint2_Wrap(xi, yi, data, True, xo, yo, 0)
-  
-   data_chazhi!1 = "lat"
-   data_chazhi!2= "lon"
-   
-   data_chazhi&lat = yo
-   data_chazhi&lon = xo
-   copy_VarAtts(data, data_chazhi)
- 
-   return data_chazhi
-end 
 function  rc_test(ssta_rc)
 begin
   tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
@@ -32,15 +11,42 @@ begin
    b = 0.5
    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
    copy_VarCoords(ssta_rc, prob)
-
 return prob
 end
+
 undef("remove_enso_signal")
-function remove_enso_signal(nino3_4,  data)
+function remove_enso_signal(data)
   begin  
-   ;;;;;
+  ; ;;;读入HadiSST海温数据
+      diri="/home/yangsong3/data-observation/linshh/data/sst/"
+      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+      f1=addfile(fils1, "r")
+      date:=cd_calendar(f1->time, 1)
+
+      timeind:=ind(date.le.201512.and.date.ge.197901)
+
+      sst =  lonFlip(f1->sst(timeind,:,:))
+   
+      ssta=(/rmMonAnnCycTLL(sst)/)
+      copy_VarCoords(sst, ssta)
+
+      ssta_de = ssta
+      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+      printVarSummary(ssta_index)
+
+      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+      printVarSummary(nino3_4)
+
+      
+      ; nino3_4_new = nino3_4                ;;;;前期ENSO
+      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+      ; nino3_4_new(34) =ssta_index(35*12-1) 
+   
+      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+  ;;;;;
+      data_de = data
       ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-      data_de  = data
       data_rc = regCoef_n(nino3_4,data_de, 0, 0)
       copy_VarCoords(data(1,:,:), data_rc)
       data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
@@ -53,628 +59,404 @@ function remove_enso_signal(nino3_4,  data)
   return data_new
 end 
 
+function cal_season_trend(data,season)
+  begin
+   
+    p_djf_r=month_to_season(data, season)
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
+
+      if season.eq."DJF"
+      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+    end if
+    dim = dimsizes(p_djf_r)
+    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
+    copy_VarCoords(p_djf_r(1,:,:), p_rc)
+    p_rc=(/p_rc*dim(0)/)
+  return p_rc
+end 
+
+
+function eot(sst_mam_clm)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.2828*x+-758.963(28.75~30.25)                                     
+ begin 
+  eot_mam = sst_mam_clm
+  eot_mam = 0.0
+  eot_mam =  where(sst_mam_clm.lt.26.75, 0.0, eot_mam)
+  eot_mam =  where(sst_mam_clm.ge.26.75.and.sst_mam_clm.le.28.75, -14.0275*sst_mam_clm + 375.845 , eot_mam)
+  eot_mam =  where(sst_mam_clm.gt.28.75.and.sst_mam_clm.le.30.25,  25.2828*sst_mam_clm -758.963, eot_mam)
+  return eot_mam
+ end 
+
+
+function eot_cdf(sst_mam_clm,ssta,regionidx)          ;;;; -14.0275*x+375.845  (26.75~28.75) 25.2828*x+-758.963(28.75~30.25)                                     
+ begin 
+
+  eot_mam_cdf= sst_mam_clm
+  eot_mam_cdf = 0.0
+  
+  eot_mam_cdf2 = sst_mam_clm
+  eot_mam_cdf2= 0.0
+
+do i = 0,2 
+    region = regionidx(i)
+
+    if region.eq."twnp" then 
+    lat1 = -5
+    lat2 = 20
+    lon1 = 120
+    lon2 = 170
+    a = -14.0275
+    b = 375.845
+    c = 25.2828
+    d = -758.963
+    ;  a = -13.1
+    ; b = 349.0
+    ; c = 32.2
+    ; d = -956.4
+    range = (/26.5,28.75,29.75/)
+
+    else  if region.eq."wnp" then    ;;;;Wnp region 100-170 20-30
+    lat1 = 20
+    lat2 = 30
+    lon1 = 100
+    lon2 = 170
+    ; a = -10.1639
+    ; b = 276.726
+    ; c = 20.1925
+    ; d = -612.912
+    ; range = (/27.0,29.25,30.25/)
+    a = -14.0275
+    b = 375.845
+    c = 25.2828
+    d = -758.963
+    ;  a = -13.1
+    ; b = 349.0
+    ; c = 32.2
+    ; d = -956.4
+    range = (/26.5,28.75,29.75/)
+
+    else  if region.eq."scs" then    ;;;;Wnp region 100-170 20-30
+
+    lat1 = -5
+    lat2 = 20
+    lon1 = 100
+    lon2 = 120
+    ; a = -5.32061
+    ; b = 136.234
+    ; c = 11.5947
+    ; d = -349.058
+    ; range = (/25.25,28.5,30.25/)
+
+    ; a = -10.1639
+    ; b = 276.726
+    ; c = 20.1925
+    ; d = -612.912
+    ; range = (/27.0,29.25,30.25/)
+    a = -14.0275
+    b = 375.845
+    c = 25.2828
+    d = -758.963
+    ;  a = -13.1
+    ; b = 349.0
+    ; c = 32.2
+    ; d = -956.4
+    range = (/26.5,28.75,29.75/)
+    end if 
+    end if 
+    end if 
+    ;;;;clm SST induced OLR 
+    eot_mam_cdf({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).lt.range(0), 0.0, eot_mam_cdf({lat1:lat2},{lon1:lon2}))
+    eot_mam_cdf({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).ge.range(0).and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.range(1), (a/2.0)*sst_mam_clm({lat1:lat2},{lon1:lon2})^2 + b*sst_mam_clm({lat1:lat2},{lon1:lon2}) , eot_mam_cdf({lat1:lat2},{lon1:lon2}))
+    eot_mam_cdf({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).gt.range(1).and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.range(2),  (c/2.0)*sst_mam_clm({lat1:lat2},{lon1:lon2})^2 +d*sst_mam_clm({lat1:lat2},{lon1:lon2}), eot_mam_cdf({lat1:lat2},{lon1:lon2}))
+
+    ;;;; change sst induced OLR 
+    eot_mam_cdf2({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).lt.range(0), 0.0, eot_mam_cdf2({lat1:lat2},{lon1:lon2}))
+    eot_mam_cdf2({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).ge.range(0).and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.range(1).and.(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2})).le.range(1), (a/2.0)*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2}))^2 + \
+                                                   b*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2})) , eot_mam_cdf2({lat1:lat2},{lon1:lon2}))
+    eot_mam_cdf2({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).ge.range(0).and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.range(1).and.(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2})).gt.range(1), (a/2.0)*(range(1))^2 + b*(range(1)) + \
+     (c/2.0)*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2}))^2 +d*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2})) - ((c/2.0)*(range(1))^2 + d*(range(1))) , eot_mam_cdf2({lat1:lat2},{lon1:lon2}))
+
+    eot_mam_cdf2({lat1:lat2},{lon1:lon2}) =  where(sst_mam_clm({lat1:lat2},{lon1:lon2}).gt.range(1).and.sst_mam_clm({lat1:lat2},{lon1:lon2}).le.range(2),  (c/2.0)*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2}))^2 +d*(sst_mam_clm({lat1:lat2},{lon1:lon2})+ssta({lat1:lat2},{lon1:lon2})), eot_mam_cdf2({lat1:lat2},{lon1:lon2}))
+
+
+  delete(region)
+  delete([/lat1,lat2,lon1,lon2,a,b,c,d/])
+  end do 
+  eot_mam_cdf_final = eot_mam_cdf
+  eot_mam_cdf_final = (/eot_mam_cdf2 - eot_mam_cdf/)
+
+  return eot_mam_cdf_final
+ end 
+
 
 ;;**************************************************************
 ;;;main program
 ;;***************************************************************
 begin
- ;;;time span
-    startmon =197901
-    endmon = 201512
-
-    startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
-    endyear_r = str_split_by_length(endmon, 4 )
-
-    startyear = stringtoint(startyear_r(0))
-    endyear = stringtoint(endyear_r(0))
-
-    yearnum = endyear - startyear +1
-  ;;
-  order  = (/"(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)"/)
- 
-
-;;;读入HadiSST海温数据
+  
+   ;;;读入HadiSST海温数据
     diri="/home/yangsong3/data-observation/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
-    lat = f1->latitude
-    lon = f1->longitude
 
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
-    sst=lonFlip(f1->sst(timeind,:,:))
-    printVarSummary(sst)
+    sst  = f1->sst(timeind,{-5:30},{100:170})
+
+    sst_mam_clm = dim_avg_n_Wrap(month_to_season(sst, "MAM"), 0)
+
+
+    sst_jja_clm = dim_avg_n_Wrap(month_to_season(sst, "JJA"), 0)
+    sst_son_clm = dim_avg_n_Wrap(month_to_season(sst, "SON"), 0)
+    sst_djf_clm = dim_avg_n_Wrap(month_to_season(sst, "DJF"), 0)
 
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
-    ;;;
-    delete(date)
-    delete(timeind)
-
-    ssta_de = ssta
-    ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-    ssta_in = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
-    printVarSummary(ssta_in)
-
-    nino3_4 = month_to_season(ssta_in, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-    printVarSummary(nino3_4)
-
-
-    ; nino3_4_new = nino3_4                ;;;;前期ENSO
-    ; nino3_4_new(0:33) = (/nino3_4(1:)/)
-    ; nino3_4_new(34) =ssta_index(35*12-1) 
-
-    nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
-;;;
-
-;;;area mean 
-      rad    = 4.0*atan(1.0)/180.0
-      re     = 6371220.0
-      rr     = re*rad
-
-      dlon   = abs(lon(2)-lon(1))*rr
-      dx     = dlon*cos(lat*rad)
-      ;          
-      jlat  = dimsizes( lat )
-      dy     = new ( jlat, typeof(dx))      ; close enough
-      
-      dy(0)  = abs(lat(2)-lat(1))*rr
-      dy(1:jlat-2)  = abs(lat(2:jlat-1)-lat(0:jlat-3))*rr*0.5   
-      dy(jlat-1)    = abs(lat(jlat-1)-lat(jlat-2))*rr
-
-      area   = dx*dy                                ; cell area function of latitude only
-      copy_VarCoords(lat, area)
-      printVarSummary(area)
-;;;;
-
-  
-
-;;;read GPCP precipitation data
     
-    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
-    ; date:=cd_calendar(f2->time, 1)
-    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    ; p=f2->precip(timeind,:,:)
-    ; printVarSummary(p)
 
-    ; p_chazhi = chazhi(p)
-  
-    ; system("/bin/rm -f gpcp_pre_chazhi_1979-2015.nc")
-    ; ncout1 = addfile("gpcp_pre_chazhi_1979-2015.nc", "c")
-    ; ncout1->p_chazhi = p_chazhi
+   ;;;;cal season trend 
+    ssta_mam = cal_season_trend(ssta,"MAM")
+    ssta_jja = cal_season_trend(ssta,"JJA")
+    ssta_son  = cal_season_trend(ssta,"SON")
+    ssta_djf = cal_season_trend(ssta,"DJF")
+   ;;;;
 
+    sst_plus_mam  = sst_mam_clm 
+    sst_plus_jja = sst_jja_clm
+    sst_plus_son = sst_son_clm
+    sst_plus_djf = sst_djf_clm
 
-
-    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/gpcp_pre_chazhi_1979-2015.nc", "r")   
-    date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    
-    p_chazhi = f2->p_chazhi(timeind,:,:)
-
-    printVarSummary(p_chazhi)
- 
-    p_chazhi=(/rmMonAnnCycTLL(p_chazhi)/)
-;;;; 
-
-
-;;;read era data
-    ; path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-    ; var_name = (/"uwnd","vwnd","wwnd"/)
-    ; filein = path_wind + var_name +".mon.mean.nc"
-
-    ; ;;;region 
-    ; lat1 = -90
-    ; lat2 = 90
-    ; lon1 = 0
-    ; lon2 = 360
-    ; ;;;
-
-
-    ; f1 = addfile(filein(0),"r")
-
-    ; date :=cd_calendar(f1->time, 1)
-
-    ; timeind :=ind(date.ge.197901.and.date.le.201512)
-
-    ; u = short2flt(f1->u(timeind,{850},{lat1:lat2},{lon1:lon2}))
-
-    ; f2 = addfile(filein(1),"r")
-    ; v = short2flt(f2->v(timeind,{850},{lat1:lat2},{lon1:lon2}))
-
-    ; u!1 = "lat"
-    ; u!2 = "lon"
-
-    ; v!1 = "lat"
-    ; v!2 = "lon"
-    
-    ; printVarSummary(u)
-
-    ; f3 = addfile(filein(2),"r")
-
-    ; date := cd_calendar(f3->time, 1)
-
-    ; timeind:=ind(date.ge.197901.and.date.le.201512)
-
-    ; w = short2flt(f3->w(timeind,{500},{lat1:lat2},{lon1:lon2}))
-    ; w = (/w*-100.0/)
-
-    ; w!1 = "lat"
-    ; w!2 = "lon"
-
-    ; u_chazhi = chazhi(u)
-    ; printVarSummary(u_chazhi)
-    ; u_chazhi=(/rmMonAnnCycTLL(u_chazhi)/)
-
-    ; ; system("/bin/rm -f era_u_chazhi_1979-2015.nc")
-    ; ; ncout1 = addfile("era_u_chazhi_1979-2015.nc", "c")
-    ; ; ncout1->u_chazhi = u_chazhi
-
-    ; v_chazhi = chazhi(v)
-    ; printVarSummary(v_chazhi)
-    ; v_chazhi=(/rmMonAnnCycTLL(v_chazhi)/)
-
-    ; ; system("/bin/rm -f era_v_chazhi_1979-2015.nc")
-    ; ; ncout1 = addfile("era_v_chazhi_1979-2015.nc", "c")
-    ; ; ncout1->v_chazhi = v_chazhi
-
-    ; w_chazhi = chazhi(w)
-    ; printVarSummary(w_chazhi)
-    ; w_chazhi=(/rmMonAnnCycTLL(w_chazhi)/)
-
-;      system("/bin/rm -f era_w_chazhi_1979-2015.nc")
-;     ncout1 = addfile("era_w_chazhi_1979-2015.nc", "c")
-;     ncout1->w_chazhi = w_chazhi
-; ;;;;
-
-    ; print("=====finish read data==========")
-
-    f1=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_u_chazhi_1979-2015.nc", "r")   
-    date:=cd_calendar(f1->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    
-    u_chazhi = f1->u_chazhi(timeind,:,:)
-
-    printVarSummary(u_chazhi)
- 
-    u_chazhi=(/rmMonAnnCycTLL(u_chazhi)/)
-
-    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_v_chazhi_1979-2015.nc", "r")   
-    date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    
-    v_chazhi = f2->v_chazhi(timeind,:,:)
-
-    printVarSummary(v_chazhi)
- 
-    v_chazhi=(/rmMonAnnCycTLL(v_chazhi)/)
-
-
-    f3=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_w_chazhi_1979-2015.nc", "r")   
-    date:=cd_calendar(f3->time, 1)
-    timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    
-    w_chazhi = f3->w_chazhi(timeind,:,:)
-
-    printVarSummary(w_chazhi)
- 
-    w_chazhi=(/rmMonAnnCycTLL(w_chazhi)/)
-;;;;;
-
-
-    f6 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/olr_chazhi_1979-2015.nc", "r")
-    ;;;region
-    lat1 = -90
-    lat2 = 90
-    lon1 = 0
-    lon2 = 360
-
-    date:=cd_calendar(f6->time, 1)
-    timeind :=ind(date.ge.startmon.and.date.le.endmon)
-    olr_chazhi = f6->olr_chazhi
-
-;;;;;
-
-
-;;;;
-    wks   = gsn_open_wks("png", "GPCP&olr回归到印度洋SST的回归系数")
-  
-    plot=new(8,graphic)
-    plot1 = plot
-
-    str = ispan(1,8,1)+ ""
- 
-    iplot = new(8,graphic)
-
-    season =  (/"MAM","JJA","SON","DJF"/)
-;;;;;
-
-
-
-do i =0,3
-
-  ;;;region
-   lat1 = -30
-   lat2 = 30
-   lon1 = 30
-   lon2 = 180
-  ;;;
-
- 
-  ssta_annual = month_to_season(ssta(:,{lat1:lat2},{lon1:lon2}), season(i))
-  printVarSummary(ssta_annual)
-
-
-  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) , 0, 0)
-  ssta_index_rc  =ssta_index_rc*yearnum
-   
-
-  ;;;;remove_enso_signal 
-  ssta_annual = (/remove_enso_signal(nino3_4, ssta_annual)/)
-  ;;;;
-
-  ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
- 
- 
-  ;;;;;要分析的变量
-  p_annual = month_to_season(p_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-
-  ; ;;;;remove_enso_signal 
-  ; p_annual = (/remove_enso_signal(nino3_4, p_annual)/)
- 
-  ; ;;;;;;;;
-
-
- 
-  ;;;;;要分析的变量
-  u_annual = month_to_season(u_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-  ; ;;;;remove_enso_signal 
-  ; u_annual = (/remove_enso_signal(nino3_4, u_annual)/)
-  ; ;;;;
-  
-
-
-  ;;;;;要分析的变量
-  v_annual = month_to_season(v_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-
-  ; ;;;;remove_enso_signal 
-  ; v_annual = (/remove_enso_signal(nino3_4, v_annual)/)
-  ; ;;;;
-  
-  
-  ;;;;;要分析的变量
-  w_annual = month_to_season(w_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-
-
-
-  ;;;;;要分析的变量
-  olr_annual = month_to_season(olr_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-
+    sst_plus_mam = (/sst_plus_mam + ssta_mam/)
+    sst_plus_jja = (/sst_plus_jja + ssta_jja/)
+    sst_plus_son = (/sst_plus_son + ssta_son/)
+    sst_plus_djf = (/sst_plus_djf + ssta_djf/)
     
 
 
-  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) 
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
 
+    prob_mam = rc_test(ssta_mam)
+    prob_jja = rc_test(ssta_jja)
 
+    prob_son = rc_test(ssta_son)
+    prob_djf = rc_test(ssta_djf)
 
-  
-
-
-  ;;;correlation with sst
-    r_sst_p := regCoef_n(ssta_index, p_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_p)
-
-    r_sst_p = (/r_sst_p*ssta_index_rc/)
-   ;;;;;
-   
-    ;;;correlation with sst
-    r_sst_olr := regCoef_n(ssta_index, olr_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_olr)
-
-    r_sst_olr = (/r_sst_olr*ssta_index_rc/)
-    ;;;;;
-
-    ; ;;;normalized before regression 
-    ; ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
-    ; ;;;;
-
-    ;;;correlation with sst
-    r_sst_u := regCoef_n(ssta_index, u_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_u)
-
-    r_sst_u = (/r_sst_u*ssta_index_rc/)
-    ;;;;;
-
-
-    ;;;correlation with sst
-    r_sst_v := regCoef_n(ssta_index, v_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_v)
-
-    r_sst_v = (/r_sst_v*ssta_index_rc/)
-    ;;;;;
-
-
-    ;;;correlation with sst
-    r_sst_w := regCoef_n(ssta_index, w_annual, 0, 0)
-    copy_VarCoords(ssta_annual(0,:,:), r_sst_w)
-
-    r_sst_w = (/r_sst_w*ssta_index_rc/)
-    ;;;;;
-   
-   
-
-
-
-
-    print("*******显著性检验*****************")
-
-    ;;;t test 
-    prob_p1= rc_test(r_sst_p)
-
-    printVarSummary(prob_p1)
-
-    prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
-    ;;;;
+    ; eot_mam = eot(sst_mam_clm)
+    ; eot_jja = eot(sst_jja_clm)   
+    ; eot_son = eot(sst_son_clm)
+    ; eot_djf = eot(sst_djf_clm)
 
     
-    ;;;t test 
-    prob_p2= rc_test(r_sst_u)
-
-    printVarSummary(prob_p2)
-
-    ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-    ;;;;
+    olr_rela_mam  = ssta_mam
+    olr_rela_jja  = ssta_mam
+    olr_rela_son  = ssta_mam
+    olr_rela_djf  = ssta_mam
 
 
-    ;;;t test 
-    prob_p3= rc_test(r_sst_v)
+    ; olr_rela_mam = (/eot_mam*ssta_mam/)
+    ; olr_rela_jja = (/eot_jja*ssta_jja/)
+    ; olr_rela_son = (/eot_son*ssta_son/)
+    ; olr_rela_djf = (/eot_djf*ssta_djf/)
 
-    printVarSummary(prob_p3)
+    regionidx_want = (/"twnp","wnp","scs"/)
 
-    ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
-    ;;;;
-
-     ;;;t test 
-    prob_p4= rc_test(r_sst_olr)
-
-    printVarSummary(prob_p4)
-
-    ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
-    ;;;;
-     
+    olr_rela_mam = (/eot_cdf(sst_mam_clm,ssta_mam,regionidx_want)/)
+    olr_rela_jja = (/eot_cdf(sst_jja_clm,ssta_jja,regionidx_want)/)
+    olr_rela_son = (/eot_cdf(sst_son_clm,ssta_son,regionidx_want)/)
+    olr_rela_djf = (/eot_cdf(sst_djf_clm,ssta_djf,regionidx_want)/)
 
 
-    
-    if i.ne.0 then 
-      prob_p2({0:30},{100:140}) =  where(prob_p2({0:30},{100:140}).le.0.6, 0.1,prob_p2({0:30},{100:140}))
-    end if
-    
-    if i.eq.1 then 
-      prob_p1({0:15},{125:160}) =  where(r_sst_p({0:15},{125:160}).le.-0.5, 0.005, prob_p1({0:15},{125:160}))
-    end if
+    print(avg(olr_rela_mam({0:15},{125:160})))
+    print(avg(olr_rela_jja({0:15},{125:160})))
+    print(avg(olr_rela_son({0:15},{125:160})))
+    print(avg(olr_rela_djf({0:15},{125:160})))
 
-    r_sst_u = where(prob_p2.le.0.2.or.prob_p3.le.0.2, r_sst_u, r_sst_u@_FillValue)
-
-
-
+  ; out = addfile("olr_change_related_2_SST.nc","c")
+  ; out->olr_rela_mam  = olr_rela_mam
+  ; out->olr_rela_jja  = olr_rela_jja
+  ; out->olr_rela_son  = olr_rela_son
+  ; out->olr_rela_djf  = olr_rela_djf
+  ; exit()
 
 
-  print("*********开始画图********")
+    print(avg(olr_rela_mam({0:15},{125:160})))
 
+
+    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
+    wks   = gsn_open_wks("pdf", "OLR-change-related-to-SSTchange-79-15-two-region")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
 
-
-  res=True
-  res@gsnFrame=False
-  res@gsnDraw=False
-
-  ; res@cnFillPalette="MPL_BrBG"
-  res@cnFillOn=True
-  res@cnLinesOn=False
-  res@gsnAddCyclic = False
-
-  res@cnLineLabelsOn=False
-  if i.eq.3 then
-  res@lbLabelBarOn= True
-  else
-  res@lbLabelBarOn= False
-  end if
-  res@pmLabelBarOrthogonalPosF = 0.2
-
-  res@lbLabelStride=1
-  res@lbOrientation="horizontal"
-  res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = lat1
-  ; res@mpMaxLatF             = lat2
-  ; res@mpMinLonF             = lon1
-  ; res@mpMaxLonF             = lon2
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             = 100
-  ; res@mpMaxLonF             = 170
-   
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 30
-  res@mpMaxLonF             = 170
-  
+    res=True
+    res@gsnFrame=False
+    res@gsnDraw=False
+    res@gsnAddCyclic = False
 
 
-  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+    ; res@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res@cnFillPalette = "BlueDarkRed18"
+    res@cnFillPalette = "BlRe"
 
-  res@tmXTOn=False
-  res@tmYROn=False
-  res@tmXBOn=True
-  res@tmYROn=False
-  res@tmXBMode="Explicit"
-  res@tmYLMode="Explicit"
+    ; res@gsnSpreadColorStart = 130
+    ; res@gsnSpreadColorEnd = 253
+    res@cnFillOn=True
+    res@cnLinesOn=False
 
-  res@tmBorderThicknessF=1.0
+    res@cnLineLabelsOn=False
+    res@lbLabelBarOn=False
+    res@lbLabelStride=2
+    res@lbOrientation="Vertical"
+    res@mpLimitMode           = "LatLon"
+    ; res@mpMinLatF             = -30
+    ; res@mpMaxLatF             = 30
+    ; res@mpMinLonF             =0
+    ; res@mpMaxLonF             = 360
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
+    res@mpMinLatF             = -5
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = 100
+    res@mpMaxLonF             = 170
 
-  ; res@tmXBValues = (/100,120,140,160/) 
-  ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+    ; res@mpMinLatF             = 0
+    ; res@mpMaxLatF             = 15
+    ; res@mpMinLonF             = 125
+    ; res@mpMaxLonF             = 160
 
+    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
-
-
-  res@gsnScalarContour        = True
-  res@mpFillOn = False
-
-
-  res@cnFillPalette = "precip_diff_12lev"
-  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
-  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)/2.0
-  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8,1.0/)/2.0
-  ; res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)/2.0
-
-  ; res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
-
-
-    ; res@cnLevels := (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
-    ; res@cnFillColors= (/3,4,6,8,9,10,11,12,13/) - 2 
-      ;  res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
-      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
-
-  ; gsn_define_colormap(wks, "precip_diff_12lev")
-  ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
-  ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
-  res@lbLabelStride=1
+    res@tmXTOn=False
+    res@tmYROn=False
+    res@tmXBOn=True
+    res@tmYROn=False
+    res@tmXBMode="Explicit"
+    res@tmYLMode="Explicit"
 
 
-  res@cnExplicitLabelBarLabelsOn = True
-  ; res@lbLabelStrings =  res@cnLevels
-  res@vcExplicitLabelBarLabelsOn = True
-  res@stExplicitLabelBarLabelsOn = True
-  res@lbLabelFontHeightF = 0.016
-  res@lbAutoManage = False
+    res@tmXBLabelFontHeightF=0.025
+    res@tmYLLabelFontHeightF=0.025
+    res@tmXBMajorThicknessF=2.0
+    res@tmYLMajorThicknessF=2.0
+    res@tmBorderThicknessF=2.0
 
-  
-  ; res@cnFillPalette = "BlRe"
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
-  ; res@cnMinLevelValF       =   -0.5
-  ; res@cnMaxLevelValF       =   0.5
-  ; res@cnLevelSpacingF      =  0.1
+    res@tmYLValues = (/0,10,20,30/) 
+    res@tmYLLabels = (/"0","10N","20N","30N"/) 
 
-  res@vcGlyphStyle="CurlyVector"
-  res@vcMonoLineArrowColor = True
-  res@vcLineArrowColor = "black"
-  res@vcMinDistanceF           = 0.02          ; thin vectors
+    res@tmYLMinorValues = ispan(-5,30,5)
 
-  res@vcRefLengthF             = 0.05    ; define length of v
-  res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcVectorDrawOrder="PostDraw"
-  
-  ; resv@vcMonoLineArrowColor = True
-  ; resv@vcLineArrowColor = "blue"
-  res@vcLineArrowThicknessF=1.2
-  ; res@vcLineArrowHeadMaxSizeF=0.01
-  ; res@vcLineArrowHeadMinSizeF=0.01
-  res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
-  res@vcLineArrowHeadMinSizeF = 0.006
-
-    res@vcRefMagnitudeF          = 0.2*10
-    ; res@vcMinMagnitudeF          =.3
-    res@gsnLeftStringFontHeightF = 0.0185
-    ; res@gsnLeftStringFontHeightF = 0.02
-
-    res@vcRefAnnoString1On = True
-    res@vcRefAnnoString1 = "2 m/s"
-    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
-    res@vcRefAnnoParallelPosF = 1.02
-    res@vcRefAnnoFontHeightF = 0.013
-   
-    res@vcRefAnnoBackgroundColor = "Transparent"
-    res@vcRefAnnoPerimOn = False
-
-    res@gsnLeftString = order(i*2)+" "+ season(i)+ " linear congruency of Precip & 850UV trend with TIOST"
-
-    res@gsnLeftStringOrthogonalPosF  = -0.12
-
-  
-  plot(i*2) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_p, res)
-
-  
-  ; delete(res@cnLevelSelectionMode)
-  delete(res@cnFillPalette)
-  delete(res@cnLevels)
-  delete(res@cnFillColors)
-  ; res@cnFillPalette = "BlueWhiteOrangeRed"
-  res@cnFillPalette = "MPL_bwr"
-
-  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@lbLabelStride=1
-
-  ; res@cnLevels := (/-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0/)*10
-
-    res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*20.0
-
-  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-  ; res@cnMinLevelValF      = -2.5       ; set min contour level
-  ; res@cnMaxLevelValF      = 2.5      ; set max contour level
-  ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
-
-  res@gsnLeftStringOrthogonalPosF  = 0.06
+    res@gsnLeftStringFontHeightF = 0.025
 
 
-  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " linear congruency of OLR trend with TIOST"
-
-  plot(i*2+1) = gsn_csm_contour_map(wks, r_sst_olr, res)
-
-  ; plot(i) = gsn_csm_vector_scalar_map(wks,r_sst_u,r_sst_v , r_sst_w, res)
-  
-
-   ; ;;;画气候态的等值线
-   ;  res@gsnRightString=""
-   ;  res@gsnLeftString=""
-   ;  res@cnLevelSelectionMode = "ExplicitLevels"
-
-   ;  ; res@cnLevelSelectionMode = "AutomaticLevels"
-   ;  res@cnLinesOn=True
-   ;  res@cnLevels := fspan(-0.6,0.2,13)
-   ;  res@cnLineLabelsOn=True
-   ;  res@cnLineLabelBackgroundColor="White"
-   ;  res@cnLineLabelInterval = 1
-   ;  res@cnLineThicknessF = 2.
-   ;  res@cnFillOn = False
-   ;  res@gsnContourNegLineDashPattern=1
-   ;  res@gsnContourZeroLineThicknessF=1.0
-   ;  res@gsnLeftString  = ""
-   ;  res@gsnRightString =""
-   ;  res@cnInfoLabelOn = False    
-
-   ;  plot1(i) = gsn_csm_contour(wks, r_sst_w, res)
-   ;  ;;;  
-   ;  overlay(plot(i), plot1(i))
-    
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -12.0
+  ; res@cnMaxLevelValF       =   12.0
+  ; res@cnLevelSpacingF      =  2.0
+    res@cnLevelSelectionMode = "ExplicitLevels"
+    res@cnFillPalette= "BlueWhiteOrangeRed"
+    res@cnLevels := (/-12.0,-10.0,-8.0,-6.0,-4.0,-2.0,2.0,4.0,6.0,8.0,10.0,12.0/)
  
 
-  ;;;添加indo-pacific warm pool 
+
+    res@cnInfoLabelOn = False
+
+
+    res@gsnLeftString="(a)  MAM SST warming-induced OLR change"
+    res@gsnRightString = ""
+
+
+  ; res@mpShapeMode = "FreeAspect"
+  ; res@vpHeightF = 0.2
+  ; res@vpWidthF = 0.7
+
+   plot=new(4,graphic)
+
+
+  ; plot(0) = gsn_csm_contour_map(wks, olr_rela_mam({-0.5:15.5},{124.5:160.5}), res)
+  ; res@gsnLeftString="(b) JJA OLR change related to SST change"
+  ; plot(1) = gsn_csm_contour_map(wks, olr_rela_jja({-0.5:15.5},{124.5:160.5}), res)
+  ; res@gsnLeftString="(c) SON OLR change related to SST change"
+  ; plot(2) = gsn_csm_contour_map(wks, olr_rela_son({-0.5:15.5},{124.5:160.5}), res)
+  ; res@gsnLeftString="(d) DJF OLR change related to SST change"
+  ; plot(3) = gsn_csm_contour_map(wks, olr_rela_djf({-0.5:15.5},{124.5:160.5}), res)
+
+ plot(0) = gsn_csm_contour_map(wks, olr_rela_mam, res)
+  res@gsnLeftString="(b) JJA SST warming-induced OLR change"
+  plot(1) = gsn_csm_contour_map(wks, olr_rela_jja, res)
+  res@gsnLeftString="(c) SON SST warming-induced OLR change"
+  plot(2) = gsn_csm_contour_map(wks, olr_rela_son, res)
+  res@gsnLeftString="(d) DJF SST warming-induced OLR change"
+  plot(3) = gsn_csm_contour_map(wks, olr_rela_djf, res)
+
+
+  res2 = res
+  res2@cnLevelSelectionMode = "ExplicitLevels"
+  res2@cnFillOn = False
+  res2@cnLinesOn = True
+  res2@cnLevels := fspan(26.0, 30.0, 9)
+  res2@cnLineLabelStrings =   res2@cnLevels  + ""
+  res2@cnLineLabelDensityF = 1.3
+
+
+  res2@cnLineColors = "black"
+  res2@cnMonoLineColor  = True
+  res2@cnLineThicknessF = 2
+  res2@cnMonoLineThickness  = True
+  res2@gsnLeftString = ""
+  res2@cnInfoLabelOn = False
+  res2@cnLineLabelsOn = True
+  res2@cnLineLabelInterval = 1
+  res2@cnLineLabelBackgroundColor = "White"
+  
+  plot1=new(4,graphic)
+
+  plot1(0) = gsn_csm_contour(wks, sst_mam_clm, res2)
+  plot1(1) = gsn_csm_contour(wks, sst_jja_clm, res2)
+  plot1(2) = gsn_csm_contour(wks, sst_son_clm, res2)
+  plot1(3) = gsn_csm_contour(wks, sst_djf_clm, res2)
+
+  do i=0,3
+  overlay(plot(i), plot1(i))
+  end do   
+
+   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
+
+
+  ;;;添加赤道直线
+   pgx=ispan(30,390,10)
+   pgy=new(dimsizes(pgx),typeof(pgx))
+   pgy=0
+   
+   pgres=True
+   pgres@gsLineColor="black"
+   pgres@gsLineThicknessF=1.0
+   pgres@gsLineDashPattern=1
+
+  str = ispan(1, 4, 1) + ""
+    plot_add = new(4,graphic)
+  ; do i = 0,3
+  ; plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+  ;  end do 
+  ;;;添加indo-pacific warm pool
     ; ;;添加区域
    ;;warm pool
-    pgres=True
-    pgres@gsLineColor="black"
-    pgres@gsLineThicknessF=1.0
-    pgres@gsLineDashPattern=1
-
-    pgres@gsLineThicknessF=2.0
-    pgres@gsLineDashPattern=0
-    str3=unique_string("dum3")
-    str4=unique_string("dum4")
- 
+   pgres@gsLineThicknessF = 2.0
+   pgres@gsLineDashPattern= 1
+   pgres@gsLineColor = "black"
+   str3=unique_string("dum3")
+   str4=unique_string("dum4")
+   
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
@@ -682,68 +464,62 @@ do i =0,3
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
 
-   
-   plot@$str(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
-   plot@$str(i*2+1)$ = gsn_add_polyline(wks, plot(i*2+1), pgx_pool, pgy_pool, pgres)
-   
+    str2 = ispan(1, 4, 1) + ""
+     plot_add2 = new(4,graphic)
+    do i = 0,3
+      plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+    end do 
 
-
-    ;;;打点
+   ;;;打点
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
+    res_pro@cnFillOn = True
 
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    res_pro@cnFillDotSizeF = 0.001
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+    ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-
-
-    iplot(i*2) = gsn_csm_contour(wks,prob_p1,res_pro)
-
-    iplot(i*2+1) = gsn_csm_contour(wks,prob_p4,res_pro)
-   
-     
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 17        ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-    iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.1,opt)
-    iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.1,opt)
-   
-
-
-    ;;;  
-    
-      overlay(plot(i*2), iplot(i*2))
-      overlay(plot(i*2+1), iplot(i*2+1))
-   
-      delete(lat1)
-      delete(lat2)
-      delete(lon1)
-      delete(lon2)
-end do
-
-  pres = True
-  pres@gsnMaximize = True
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
   
-  pres@gsnPanelBottom = 0.05
+     iplot = new(4,graphic)
+     iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
+     iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
+     iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
+     iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
+    ;  
+    do i=0,3
+     overlay(plot(i), iplot(i))
+    end do
 
-  gsn_panel(wks, plot, (/4,2/), pres)
-  
-system("convert -geometry 1800x1800 -density 600x600 -trim  GPCP&olr回归到印度洋SST的回归系数.png  GPCP&olr回归到印度洋SST的回归系数_high.png")     
+pres = True
+pres@gsnPanelLabelBar  = True
+pres@gsnMaximize = False
+; pres@lbOrientation = "Vertical"
+pres@lbOrientation = "Horizontal"
+; pres@pmLabelBarHeightF = 0.3
+pres@lbLabelStrings =  (/-12.0,-10.0,-8.0,-6.0,-4.0,-2.0,2.0,4.0,6.0,8.0,10.0,12.0/)
 
- 
- print("done")
+pres@lbLabelFontHeightF = 0.015
+pres@lbAutoManage = False
+pres@lbLabelAutoStride =False
+pres@lbLabelStride = 1
+; pres@lbLabelStride = 2
+gsn_panel(wks, plot, (/2,2/), pres)
 
 end

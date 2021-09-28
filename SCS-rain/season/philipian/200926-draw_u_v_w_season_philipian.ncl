@@ -23,18 +23,18 @@ begin
     var_name = (/"uwnd","vwnd","wwnd"/)
     filein = path_wind + var_name +".mon.mean.nc"
         
-    ; ;;;region 
-    ;   lat1 = -10
-    ;   lat2 = 90
-    ;   lon1 = 0
-    ;   lon2 = 360
-    ; ;;;
+    ;;;region 
+      lat1 = -30
+      lat2 = 30
+      lon1 = 0
+      lon2 = 360
+    ;;;
     
-   ;;;region
-   lat1 = -5
-   lat2 = 45
-   lon1 = 90
-   lon2 = 170
+   ; ;;;region
+   ; lat1 = -5
+   ; lat2 = 45
+   ; lon1 = 90
+   ; lon2 = 170
 
 
     ;;;time span
@@ -90,7 +90,7 @@ begin
 
 
     str = "" + ispan(1,4,1) + ""
-    wks = gsn_open_wks("pdf", "u,v,omega趋势-scs-16")
+    wks = gsn_open_wks("pdf", "u,v,omega趋势-scs-global")
 
 
 
@@ -141,7 +141,7 @@ do i = 0,3
   res=True
   res@gsnFrame=False
   res@gsnDraw=False
-  res@gsnAddCyclic = False
+  ; res@gsnAddCyclic = False
   
  
   ; res@cnFillPalette = "BlueWhiteOrangeRed"
@@ -154,11 +154,17 @@ do i = 0,3
   res@gsnContourNegLineDashPattern = 14
   res@gsnContourPosLineDashPattern = 0
 
-  res@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
+  ; res@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
   gsn_define_colormap(wks, "MPL_PuOr")
 
-  res@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
-  res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
+
+  res@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+  res@cnMinLevelValF        := -2.0        ; set min contour level
+  res@cnMaxLevelValF        := 2.0          ; set max contour level
+  res@cnLevelSpacingF       := 0.5          ; set contour interval
+
+  ; res@cnLevels = (/-0.02,-0.015,-0.01,-0.005,0.005,0.01,0.015,0.02/)*100
+  ; res@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) 
 
 
   res@cnLineLabelsOn=False
@@ -167,20 +173,17 @@ do i = 0,3
   res@lbOrientation="Vertical"
   res@lbLabelStride = 2 
   res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = 0
-  ; res@mpMaxLatF             = 15
-  ; res@mpMinLonF             = 125
-  ; res@mpMaxLonF             = 160
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
-  res@mpMaxLonF             = 170
-  ;  ;   lat1 = -5
-   ; lat2 = 45
-   ; lon1 = 90
-   ; lon2 = 160
 
 
+  lat1 = -5
+  lat2 = 30
+  lon1 = 100
+  lon2 = 170
+
+  res@mpMinLatF             = lat1
+  res@mpMaxLatF             = lat2
+  res@mpMinLonF             = lon1
+  res@mpMaxLonF             = lon2
 
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -190,14 +193,12 @@ do i = 0,3
   res@tmXBOn=True
   res@tmYROn=False
 
-  res@tmXBLabelFontHeightF=0.025
-  res@tmYLLabelFontHeightF=0.025
+  res@tmXBLabelFontHeightF=0.01
+  res@tmYLLabelFontHeightF=0.01
   res@tmXBMajorThicknessF=1.0
   res@tmYLMajorThicknessF=1.0
   res@tmBorderThicknessF=1.0
 
-  res@tmXBValues = (/100,120,140,160/) 
-  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
   
   res@gsnScalarContour        = True
@@ -225,19 +226,23 @@ do i = 0,3
   res@mpFillColor = "White"
   res@mpFillDrawOrder = "PostDraw"
 
+  ; res@mpShapeMode = "FreeAspect"
+
+  ; res@vpHeightF = 0.3
+  ; res@vpWidthF = 0.7
+
 
   ; res@mpShapeMode="FreeAspect"
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.8
 
   res@gsnLeftString  = se(i)+" " + season(i)+" U,V at 850hPa trend"
-  res@gsnLeftStringFontHeightF = 0.02
-  res@gsnLeftStringOrthogonalPosF = -.15
+  res@gsnLeftStringFontHeightF = 0.01
+  ; res@gsnLeftStringOrthogonalPosF = -.15
   ; plot(i) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,slp_rc ,res)
-  plot(i) = gsn_csm_vector_map(wks,u_rc,v_rc,res)
 
-
-
+  plot(i) = gsn_csm_contour_map(wks,slp_rc ,res)
+  ; plot(i) = gsn_csm_vector_map(wks,u_rc,v_rc,res)
 
   ;;;;;;;LineArrow
   resv = True
@@ -268,8 +273,8 @@ do i = 0,3
   resv@gsnRightString        = " "
   
 
-  plot_vect := gsn_csm_vector(wks,u_rc_test({-5:30},{100:170}),v_rc_test({-5:30},{100:170}),resv)
-  overlay (plot(i),plot_vect)
+  plot_vect := gsn_csm_vector(wks,u_rc_test,v_rc_test,resv)
+  ; overlay (plot(i),plot_vect)
 
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   ; res@cnMinLevelValF       =   -2.0
@@ -285,7 +290,7 @@ do i = 0,3
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
@@ -328,8 +333,8 @@ do i = 0,3
 
 end do 
     pres = True
-    pres@gsnMaximize = True
-    pres@gsnPanelLabelBar  = False
+    ; pres@gsnMaximize = True
+    pres@gsnPanelLabelBar  = True
     pres@lbLabelStride = 2
     pres@lbLabelFontHeightF = 0.015
   

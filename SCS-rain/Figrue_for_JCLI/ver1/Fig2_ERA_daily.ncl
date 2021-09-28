@@ -8,12 +8,15 @@
 begin
 
   season = (/"MAM","JJA","SON","DJF"/)
-  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-philipian.nc"
-  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-philipian.nc"
+  ; file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-philipian.nc"
+  ; file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-philipian.nc"
+  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-TWNP.nc"
+  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-TWNP.nc"
  
   plot1 = new(4,graphic)
   plot2 = new(4,graphic)
-  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-ERA-2010-philipian-season")                  ; send graphics to PNG file
+  ; wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-ERA-2010-philipian-season")                  ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-ERA-2015-TWNP-season")                  ; send graphics to PNG file
 
   order  = (/"(a)","(b)","(c)","(d)"/)
 
@@ -58,7 +61,7 @@ end if
   f3 = addfiles(fils, "r")
   date = cd_calendar(f3[:]->time, 1)
 
-  timeind = ind(date.le.201012.and.date.ge.197901)
+  timeind = ind(date.le.201512.and.date.ge.197901)
 
   q1 = f3[:]->q1(timeind,:,:,:)
 
@@ -90,8 +93,8 @@ end if
 
   ;;;区域平均
       g_latS=0.
-      g_latN=15.
-      g_lonW=110.
+      g_latN=20.
+      g_lonW=125.
       g_lonE=160.
 
       q1_clim_area = wgt_areaave_Wrap(q1_clm(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)

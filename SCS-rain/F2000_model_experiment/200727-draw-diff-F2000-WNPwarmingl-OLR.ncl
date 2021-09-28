@@ -24,9 +24,9 @@ begin
 season_r = (/"spring","summer"/)
 season = (/"MAM","JJA"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_WEP_" + season_r +"/"+"F_2000_WEP_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_WNP_" + season_r +"/"+"F_2000_WNP_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-F2000-WEP-Warimg-fourseaon")
+  wks=gsn_open_wks("pdf", "CESM-F2000-WNP-Warimg-fourseaon")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
@@ -36,8 +36,9 @@ season = (/"MAM","JJA"/)
 do i = 0,1
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
-
-  date=cd_calendar(f1->time, 1)
+  time = f1->time
+  time = (/time-1/)
+  date=cd_calendar(time, 1)
 
   timeind=ind(date.ge.601.and.date.le.4012)
   print(date(timeind))

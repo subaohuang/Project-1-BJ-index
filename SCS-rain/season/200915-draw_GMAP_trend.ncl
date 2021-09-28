@@ -98,9 +98,9 @@ wks   = gsn_open_wks("pdf", "不同季节CMAP降水的趋势-scs-1979-2015")
 
   res@mpLimitMode           = "LatLon"
   
-  res@mpMinLatF             = -5
+  res@mpMinLatF             = -30
   res@mpMaxLatF             = 30
-  res@mpMinLonF             =100
+  res@mpMinLonF             = 0
   res@mpMaxLonF             = 170
 
 
@@ -125,13 +125,35 @@ wks   = gsn_open_wks("pdf", "不同季节CMAP降水的趋势-scs-1979-2015")
   ; res@vpHeightF=0.3
   ; res@vpWidthF=0.7
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -2.5
-  res@cnMaxLevelValF       =   2.5
-  res@cnLevelSpacingF      =  0.25
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -2.5
+  ; res@cnMaxLevelValF       =   2.5
+  ; res@cnLevelSpacingF      =  0.25
 
-  res@cnFillPalette="MPL_BrBG"
-  res@gsnLeftString="Spring"
+  ; res@cnFillPalette="MPL_BrBG"
+  ; res@gsnLeftString="Spring"
+
+   res@cnFillPalette = "precip_diff_12lev"
+  ; res@cnFillPalette = "CBR_drywet"
+  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)/2.0
+  ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8,1.0/)/2.0
+  ; res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)/2.0
+
+  ; res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+
+
+    ; res@cnLevels := (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/3,4,6,8,9,10,11,12,13/) - 2 
+      ;  res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
+  ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+  ; res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5,2.0/)
+
+    res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5/)
+
+
 
   plot = new(4,graphic)
   plot(0) = gsn_csm_contour_map(wks, rc_mam, res)

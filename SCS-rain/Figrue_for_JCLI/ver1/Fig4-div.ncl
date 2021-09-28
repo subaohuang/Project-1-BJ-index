@@ -52,7 +52,7 @@ begin
 
     str = ispan(1,9,1)+""
 
-    wks   = gsn_open_wks("pdf", "fig4-2015-test.pdf")
+    wks   = gsn_open_wks("pdf", "fig4-2015.pdf")
 
     ;;;time span
     startmon =197901
@@ -91,9 +91,9 @@ begin
   filein = path_wind + var_name +".mon.mean.nc"
 
   ;;;region 
-    lat1 = -10
+    lat1 = -30
     lat2 = 50
-    lon1 = 60
+    lon1 = 30
     lon2 = 180
   ;;;
 
@@ -132,6 +132,13 @@ print("=====finish read data==========")
     copy_VarCoords(p_annual(1,:,:), rc_mam)
     rc_mam = (/rc_mam*yearnum/)
 
+
+    region_mean = avg(rc_mam({0:15},{125:160}))
+
+
+    ; print("***********"+season(i)+"**********="+region_mean)
+
+
     prob_mam=rc_test(rc_mam)
     copy_VarCoords(p_pi(1,:,:), prob_mam)
     ;;;
@@ -150,11 +157,11 @@ print("=====finish read data==========")
     ;  v_annual(yearnum-1,:,:) = v(yearnum*12-1,{850},:,:)
     ; end if
 
-    u_rc  = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
+    u_rc  := regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
     copy_VarCoords(u_annual(1,:,:), u_rc)
     u_rc = (/u_rc*yearnum/)
     
-    v_rc  = regCoef_n(ispan(1, yearnum, 1),v_annual, 0, 0)
+    v_rc  := regCoef_n(ispan(1, yearnum, 1),v_annual, 0, 0)
     copy_VarCoords(u_annual(1,:,:), v_rc)
     v_rc = (/v_rc*yearnum/)
 
@@ -209,10 +216,17 @@ print("=====finish read data==========")
     res@lbLabelStride=1
     res@pmLabelBarOrthogonalPosF = 0.17
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -5
+    ; res@mpMinLatF             = -5
+    ; res@mpMaxLatF             = 30
+    ; res@mpMinLonF             =100
+    ; res@mpMaxLonF             = 170
+
+    res@mpMinLatF             = -30
     res@mpMaxLatF             = 30
-    res@mpMinLonF             =100
-    res@mpMaxLonF             = 170
+    res@mpMinLonF             =30
+    res@mpMaxLonF             = 180
+
+
     res@lbOrientation="horizontal"
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
@@ -294,10 +308,10 @@ print("=====finish read data==========")
     pgres=True
     pgres@gsLineColor="black"
     pgres@gsLineThicknessF=1.5
-    pgres@gsLineDashPattern=0
+    pgres@gsLineDashPattern=1
     ;;;画box
     lat1 = 0
-    lat2 = 15
+    lat2 = 20
     lon1 = 125
     lon2 = 160
 
@@ -375,7 +389,8 @@ end do
     lat2 = 45
     lon1 = 90
     lon2 = 170
-
+    
+ 
     date:=cd_calendar(f6->time, 1)
     timeind :=ind(date.ge.startmon.and.date.le.endmon)
     olr = short2flt(f6->olr(timeind,{lat1:lat2},{lon1:lon2}))
@@ -386,6 +401,10 @@ end do
     copy_VarCoords(olr_annual(1,:,:),olr_rc)
     olr_rc = (/olr_rc*yearnum/)
     prob_olr_rc = rc_test(olr_rc)
+
+    region_mean_olr = avg(olr_rc({0:15},{125:160}))
+    print("***********"+season(i)+"**********="+region_mean_olr)
+
 
 
     ;;;; draw olr 
@@ -435,15 +454,15 @@ end do
     res3@mpFillOn =False
 
     ; res3@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
-    ; res3@cnMinLevelValF        := -20.0        ; set min contour level
-    ; res3@cnMaxLevelValF        := 20.0          ; set max contour level
-    ; res3@cnLevelSpacingF       := 5.0          ; set contour interval
-    ; ; res3@cnFillPalette = "BlueWhiteOrangeRed"
+    ; res3@cnMinLevelValF        := -2.0        ; set min contour level
+    ; res3@cnMaxLevelValF        := 2.0          ; set max contour level
+    ; res3@cnLevelSpacingF       := 2.0          ; set contour interval
+    res3@cnFillPalette = "BlueWhiteOrangeRed"
     ; res3@cnFillPalette = "BlueRed"
     res3@cnLevelSelectionMode = "ExplicitLevels"
 
-    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
-    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,5.0,10.0,15.0,20.0/)
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,-2.5,2.5,5.0,10.0,15.0,20.0/)
     res3@lbLabelStrings = res3@cnLevels
     res3@lbLabelFontHeightF = 0.02
     res3@lbAutoManage = False

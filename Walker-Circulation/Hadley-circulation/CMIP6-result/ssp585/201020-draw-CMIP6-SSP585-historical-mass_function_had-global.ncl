@@ -125,8 +125,8 @@ do k = 0,dim_model-1
    ;  copy_VarCoords(msf_mean_annual(1,:,{-60:60}), prob)
    ;  prob&level@units = "hPa"
   
-    msf_diff = msf_his_mean_annual_clm
-    msf_diff = (/msf_ssp585_mean_annual_clm - msf_his_mean_annual_clm/)
+    msf_diff = msf_his_mean_annual_clm(:,{-30:30})
+    msf_diff = (/msf_ssp585_mean_annual_clm(:,{-30:30}) - msf_his_mean_annual_clm(:,{-30:30})/)
 
  prob = t_test(msf_his_mean_annual,msf_ssp585_mean_annual)
 
@@ -150,12 +150,12 @@ do k = 0,dim_model-1
     res@cnLineLabelsOn = False
     res@cnInfoLabelOn = False
 
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
+    res@tmXBMajorThicknessF=2.0
+    res@tmYLMajorThicknessF=2.0
+    res@tmBorderThicknessF=1.5
    
-    res@tmXBLabelFontHeightF=0.015
-    res@tmYLLabelFontHeightF=0.015
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
 
     res@tiYAxisString=""
     res@tmXTOn=False
@@ -163,13 +163,13 @@ do k = 0,dim_model-1
     res@tmXBMode="Explicit"
  
     res@tmXBMinorOn=True
-    res@tmXBMinorValues=ispan(-60,60,10)
+    res@tmXBMinorValues=ispan(-30,30,5)
 
   
     res@tmYRMode="Automatic"
      
-    res@vpHeightF=0.3
-    res@vpWidthF=0.7
+    res@vpHeightF=0.4
+    res@vpWidthF=0.6
 
     ;;;;
     res@gsnLeftString = model
@@ -215,10 +215,10 @@ do k = 0,dim_model-1
     res@cnLevels = ispan(-8,8,2)
     res@cnLineLabelsOn=True
     res@cnLineLabelBackgroundColor="Transparent"
-    res@cnLineThicknessF = 1.
+    res@cnLineThicknessF = 2.
     res@cnFillOn = False
     res@gsnContourNegLineDashPattern=1
-    res@gsnContourZeroLineThicknessF=1.0
+    res@gsnContourZeroLineThicknessF=2.0
 
     plot1(k) = gsn_csm_pres_hgt(wks, msf_his_mean_annual_clm, res)
   

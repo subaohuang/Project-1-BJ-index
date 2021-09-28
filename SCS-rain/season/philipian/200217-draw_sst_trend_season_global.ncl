@@ -63,14 +63,14 @@ function cal_season_trend(data,season)
   begin
    
     p_djf_r=month_to_season(data, season)
-     ;;;;remove_enso_signal
-         p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ;;;;
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
 
-    ;   if season.eq."DJF"
-    ;   p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
-    ;   p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
-    ; end if
+      if season.eq."DJF"
+      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+    end if
     dim = dimsizes(p_djf_r)
     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
@@ -92,7 +92,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.201612.and.date.ge.197901)
+    timeind:=ind(date.le.201612.and.date.ge.190001)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -105,10 +105,10 @@ begin
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
-    ssta_jja = (/ssta_jja - ssta_mam/)
-    ssta_son = (/ssta_son- ssta_mam/)
-    ssta_djf = (/ssta_djf -ssta_mam/)
-    ssta_mam = 0.0
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
 
     prob_mam = rc_test(ssta_mam)
     prob_jja = rc_test(ssta_jja)
@@ -126,7 +126,7 @@ begin
     
     
     ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-16-minus-spring-rmenso")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-00-16-minus-spring-rmenso")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -181,13 +181,13 @@ begin
   res@tmBorderThicknessF=2.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -0.6
-  ; res@cnMaxLevelValF       =   0.6
-  ; res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -2.0
+  res@cnMaxLevelValF       =   2.0
+  res@cnLevelSpacingF      =  0.2
 
-  res@cnMinLevelValF       =   -0.3
-  res@cnMaxLevelValF       =   0.3
-  res@cnLevelSpacingF      =  0.05
+  ; res@cnMinLevelValF       =   -0.3
+  ; res@cnMaxLevelValF       =   0.3
+  ; res@cnLevelSpacingF      =  0.05
    ; res@cnFillPalette = "NCV_jaisnd"
    ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels

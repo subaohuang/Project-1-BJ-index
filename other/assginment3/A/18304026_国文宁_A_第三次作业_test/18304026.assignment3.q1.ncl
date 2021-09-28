@@ -290,8 +290,8 @@ begin
     plotpanel(1)=plotxy
     gsn_panel(wks,plotpanel,(/1,2/), resPanel)
    
-	 ; draw(plotpanel)
-  ;    frame(wks)
+	 draw(plotpanel)
+     frame(wks)
     
 	; =========================================================================
 	; 去掉空白空间

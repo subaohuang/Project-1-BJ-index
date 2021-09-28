@@ -1,229 +1,960 @@
 ;;********************************************************
-;;draw different season long-term change diabatic heat and Q1 HEAT rate profile averaged over SCS and 
-;;philippines sea
-;;diabatic and convection data from CFSR
-;;q1 derived from NCEP_DOE calculate by eqution
-;;                               lnshuheng 2020.1.1 
+;;计算水汽通量算度，并且分解水汽通量散度
+;; ERA-interim:u,v，sh:specific humidity
+;; used ncl function: uv2dv_cfd,
+;;grad_latlon_cfd:lon must be in increasing order
+;;linshuheng 2019.12.24
 ;**********************************************************
+load  "/home/ys17-19/lsh/Project/other/guanshun/add_TP.ncl"
+  
+function  rc_test(ssta_rc)
 begin
+  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
+   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+   b = tval    ; b must be same size as tval (and df)
+   b = 0.5
+   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
+   copy_VarCoords(ssta_rc, prob)
 
-  season = (/"MAM","JJA","SON","DJF"/)
-  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-philipian.nc"
-  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-philipian.nc"
- 
-  plot1 = new(4,graphic)
-  plot2 = new(4,graphic)
-  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-era-2010-philipian-season")                  ; send graphics to PNG file
+return prob
+end
 
-  order  = (/"(a)","(b)","(c)","(d)"/)
+function cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
+begin
+  ;;;;Q component
+    Q_rc  = regCoef_n(ispan(1, yearnum, 1), era_divQ_delta, 0, 0)
+    copy_VarCoords(era_divQ_delta(1,:,:), Q_rc)
+    Q_rc = (/Q_rc*yearnum/)
+    
+    era_wgt_qu_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qu_delta, 0, 0)
+    copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qu_delta_rc)
+    era_wgt_qu_delta_rc = (/era_wgt_qu_delta_rc*yearnum/)
 
+    era_wgt_qv_delta_rc  = regCoef_n(ispan(1, yearnum, 1), era_wgt_qv_delta, 0, 0)
+    copy_VarCoords(era_divQ_delta(1,:,:), era_wgt_qv_delta_rc)
+    era_wgt_qv_delta_rc = (/era_wgt_qv_delta_rc*yearnum/)
+ return [/Q_rc,era_wgt_qu_delta_rc,era_wgt_qv_delta_rc/]
+ end
 
-do i=0,3
+;==============================================================
+; Mission 0. plot(0) 
 ; ==============================================================
-; Mission 1. read data
-; ==============================================================
-;;read diabatic data 
-  f1 = addfile(file1(i), "r")
+begin
+    plot = new(4,graphic)
+    iplot = plot
 
-  diabatic_heat_change = f1->diab_q(1,:)
-  diabatic_heat_clm = f1->diab_q(0,:) 
-  level = diabatic_heat_change&lev
-  level = level/100.0
-  
-  diabatic_heat_change = (/diabatic_heat_change*86400/)
-  diabatic_heat_clm = (/diabatic_heat_clm*86400/)
-  if i.eq.0 then
-  print("*****diabatic-heating=****"+dim_avg(diabatic_heat_change({20000:85000}) - diabatic_heat_clm({20000:85000})))
-  end if
-;;;
+    str = ispan(1,4,1)+""
 
-;;read deep convection data
-  f2 = addfile(file2(i), "r")
+   
+    ;;;time span
+    startmon =197901
+    endmon = 201512
 
-  deepcon_heat_change = f2->deepcon_q(1,:)
-  deepcon_heat_clm = f2->deepcon_q(0,:) 
+    startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
+    endyear_r = str_split_by_length(endmon, 4 )
+
+    startyear = stringtoint(startyear_r(0))
+    endyear = stringtoint(endyear_r(0))
+
+    yearnum = endyear - startyear +1
+    ;;
+
+
+    f1=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    ; f1=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+
+    date=cd_calendar(f1->time, 1)
+    timeind=ind(date.ge.197901.and.date.le.201512)
+    p=f1->precip(timeind,:,:)
+   
+    delete(p&time)
+    p&time=date(timeind)
   
-  
-  deepcon_heat_change = (/deepcon_heat_change*86400/)
-  deepcon_heat_clm = (/deepcon_heat_clm*86400/)
+    p_pi = p
+
+    delete(p)
+
+    p_annual = month_to_season(p_pi, "MAM")
+    p_clm = dim_avg_n_Wrap(p_annual, 0)
+
+    
+    rc_mam  = regCoef_n(ispan(1, yearnum, 1), p_annual, 0, 0)
+    copy_VarCoords(p_annual(1,:,:), rc_mam)
+    rc_mam = (/rc_mam*yearnum/)
+
+    prob_mam=rc_test(rc_mam)
+    copy_VarCoords(p_pi(1,:,:), prob_mam)
+
+    delete(p_pi)
+    ; print(avg(rc_mam({0:15},{125:160})))
  
- if i.eq.0 then
-  print("*****deepcon-heating=****"+dim_avg(deepcon_heat_change({20000:85000}) -deepcon_heat_clm({20000:85000})))
-end if
-;;;
-
-;;;read Q1 monthly data from linshuheng
-  fils = systemfunc("ls /home/ys17-19/lsh/Project/SCS-rain/annual/Q_time_era.nc")
-  f3 = addfile(fils, "r")
-  date = cd_calendar(f3->time, 1)
-
-  timeind = ind(date.le.201012.and.date.ge.197901)
-
-  q1 = f3->Q_time(timeind,:,:,:)
-
-  ; printVarSummary(q1)
-
-  ; q1_annual = month_to_annual(q1, 1)
-  q1_annual = month_to_season(q1, season(i))
-
-  if season(i).eq."DJF"
-     q1_annual(0:dimsizes(q1_annual&time)-2,:,:,:) = q1_annual(1:,:,:,:) 
-     q1_annual(dimsizes(q1_annual&time)-1,:,:,:) = q1(dimsizes(q1&time)-1,:,:,:)
-  end if 
+    ; print(avg(rc_mam({0:15},{125:160}))/avg(p_clm({0:15},{125:160})))
 
 
-  dim = dimsizes(q1_annual)
-
-  q1_annual_rc = (/regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)/)
-
-  ; q1_annual_mk=trend_manken(q1_annual, False, 0)
-  ; q1_annual_rc = q1_annual_mk(1,:,:,:)
-  copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
 
 
-  q1_annual_rc = (/q1_annual_rc*dim(0)/)
-  q1_clm = dim_avg_n_Wrap(q1_annual, 0)
+    ;;;
+;;;;;
+;==============================================================
+; Mission read  wind data
+; ==============================================================
+  ;;;read era data
+  path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
+  var_name = (/"uwnd","vwnd","shum/shum.total"/)
+  filein = path_wind + var_name +".mon.mean.nc"
 
-
-  ;;;区域平均
-      g_latS=0.
-      g_latN=15.
-      g_lonW=110.
-      g_lonE=160.
-
-      q1_clim_area = wgt_areaave_Wrap(q1_clm(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
-      q1_annual_rc_area = wgt_areaave_Wrap(q1_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
-      q1_change = q1_clim_area
-      q1_change = (/q1_clim_area+q1_annual_rc_area/)
-if i.eq.0 then
- print("*****Q1-heating=****"+dim_avg(q1_annual_rc_area({200:850})))
-end if
-
-
+  ;;;region 
+    lat1 = -10
+    lat2 = 50
+    lon1 = 60
+    lon2 = 180
   ;;;
-  
-  q1_clim_area = q1_clim_area
-  q1_change = q1_change
-  ;;;
+
+
+    f1 = addfile(filein(0),"r")
+
+    date :=cd_calendar(f1->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    ; timeind :=ind(date.ge.197901.and.date.le.201512)
+
+    yearnum = 37
+
+    u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
+
+    f1 = addfile(filein(1),"r")
+    v = short2flt(f1->v(timeind,:,{lat1:lat2},{lon1:lon2}))
+
+
+    f3 = addfile(filein(2),"r")
+    date :=cd_calendar(f3->time, 1)
+    ; timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    timeind :=ind(date.ge.197901.and.date.le.201512)
+    q = short2flt(f3->q(timeind,:,{lat1:lat2},{lon1:lon2}))        
+    ;;;
+print("=====finish read data==========")
+;;;;
+
+;;;calculate wind trend 
+    u_annual = month_to_season(u(:,{850},:,:), "MAM")
+    v_annual = month_to_season(v(:,{850},:,:), "MAM")
+
+    u_rc  = regCoef_n(ispan(1, yearnum, 1), u_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), u_rc)
+    u_rc = (/u_rc*yearnum/)
+    
+    v_rc  = regCoef_n(ispan(1, yearnum, 1),v_annual, 0, 0)
+    copy_VarCoords(u_annual(1,:,:), v_rc)
+    v_rc = (/v_rc*yearnum/)
+
+    prob_u = rc_test(u_rc)
+    prob_v = rc_test(v_rc)
+
+    u_rc = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+    ; v_rc = where(prob_u.le.01.or.prob_v.le.0.1, v_rc, v_rc@_FillValue)
+    u_rc_test = u_rc
+    v_rc_test = v_rc
+    u_rc_test = where(prob_u.le.0.1.or.prob_v.le.0.1, u_rc, u_rc@_FillValue)
+
+    printVarSummary(u_rc)
+
+    delete(u_annual)
+    delete(v_annual)
+
+;;;   
+
+
+
 
 ;;;;
-    resxy = True
-    resxy@gsnDraw = False
-    resxy@gsnFrame  =False
-    resxy@xyLineThicknessF  =  (/2.0/)          ; make second line thicker
-    resxy@xyMonoLineThickness = True
-    resxy@xyLineColors       :=  (/"blue","blue","red","red"/)          ; change line color
-    resxy@xyMarkLineModes    :=  (/"MarkLines","MarkLines","MarkLines","MarkLines"/)
-    resxy@xyDashPatterns := (/0,1,0,1/)
-    resxy@xyMonoMarker        = False
-    resxy@xyMarkers           := (/16,16,7,7/)
-    resxy@xyMarkerColors :=  (/"blue","blue","red","red"/)
+    wks   = gsn_open_wks("pdf", "fig3-div-cmap.pdf")
+       
+    res=True
+    res@gsnFrame=False
+    res@gsnDraw=False
+    res@gsnAddCyclic  = False
 
-    resxy@gsnLeftStringFontHeightF = 0.02
-    resxy@gsnLeftString = order(i)+" " +season(i) + " DPLH DIABH Q1 Profile"
+    res@cnFillPalette="NCV_blu_red"
+    res@cnFillOn=True
+    res@cnLinesOn=False
+
+    res@cnLineLabelsOn=False
+    res@lbLabelBarOn=True
+    res@lbLabelStride=1
+    res@pmLabelBarOrthogonalPosF = 0.17
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -5
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             =100
+    res@mpMaxLonF             = 170
+    res@lbOrientation="horizontal"
+    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+    res@mpFillOn = False
+ 
+
+    res@tmXTOn=False
+    res@tmYROn=False
+    res@tmXBOn=True
+    res@tmYROn=False
+
+    res@tmXBMode="Explicit"
+    res@tmYLMode="Explicit"
+
+    res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
+    res@tmYLLabelFontHeightF      = 0.025
+    res@gsnLeftStringFontHeightF = 0.03
+    res@tmYLMinorOn = True
+
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+
+    res@tmYLValues = (/0,10,20,30/) 
+    res@tmYLLabels = (/"0","10N","20N","30N"/) 
+
+    res@tmYLMinorValues = ispan(-5,30,5)
+
+    ; res@tmBorderThicknessF=1.0
+    res@cnFillPalette = "precip_diff_12lev"
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+
+    res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    res@cnFillColors= (/5,6,7,8,10,11,12,13,14/) - 2
+
+
+    res@lbLabelFontHeightF = 0.02
+    res@lbAutoManage = False
+
+    res@gsnLeftString="(a) MAM Precip& 850UV trend " 
+    res@gsnLeftStringOrthogonalPosF  = -0.12
+
+
+
+
+   
+    res@gsnScalarContour        = True
+
+    ;;;;;;;LineArrow
+    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcMinDistanceF           = 0.025           ; thin vectors
+    
+    ; res@vcRefAnnoJust = "TopLeft"
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+    res@vcRefAnnoOrthogonalPosF = -1.2
+    res@vcRefMagnitudeF          = 2.0
+    res@vcMinMagnitudeF          =0.2
+    res@vcRefLengthF             = 0.05     ; define length of v
+    res@vcLineArrowThicknessF=1.5
+    ; res@vcLineArrowHeadMaxSizeF=0.008
+    ; res@vcLineArrowHeadMinSizeF=0.008
+    ; res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    ; res@vcLineArrowHeadMinSizeF = 0.006
+    res@vcLineArrowHeadMaxSizeF = 0.018           ;change the vector line arrows
+    res@vcLineArrowHeadMinSizeF = 0.012
+    
+
+
+    res@vcRefAnnoString1On = True
+    res@vcRefAnnoString1 = "2 m/s"
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoParallelPosF = 1.02
+    res@vcRefAnnoFontHeightF = 0.013
+
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
+    plot(0) = gsn_csm_vector_scalar_map(wks,u_rc,v_rc,rc_mam ,res)
+
+    ; plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
+    
+
+    ;;叠加矢量图
+     ;;;;;;;LineArrow
+    resv = True
+    resv@gsnDraw = False
+    resv@gsnFrame = False
+    resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    ; res@vcGlyphStyle="CurlyVector"
+
+    resv@vcMinDistanceF           = 0.025           ; thin vectors
+    ; res@vcMinMagnitudeF          =0.04
+    resv@vcRefMagnitudeF          = 4.0
+    resv@vcRefLengthF             = 0.1     ; define length of v
+    resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    resv@vcLineArrowThicknessF=1.5
+    ; res@vcLineArrowHeadMaxSizeF=0.008
+    ; res@vcLineArrowHeadMinSizeF=0.008
+    resv@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+    resv@vcLineArrowHeadMinSizeF = 0.006
+    resv@vcVectorDrawOrder="PostDraw"
+
+    resv@vcMonoLineArrowColor = True
+    ; resv@vcLineArrowColor = "green"
+    resv@vcLineArrowColor = "blue"
+    resv@vcLineArrowThicknessF=1.5
+
+    resv@vcRefAnnoOn    = False
+    resv@gsnLeftString         = " "
+    resv@gsnRightString        = " "
+
+
+    plot_vect := gsn_csm_vector(wks,u_rc_test({-5:30},{100:170}),v_rc_test({-5:30},{100:170}),resv)
+    ; overlay (plot(0),plot_vect)
+
+
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=2.0
+    pgres@gsLineDashPattern=1
+    ;;;画box
+    lat1 = 0
+    lat2 = 20
+    lon1 = 125
+    lon2 = 160
+
+    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+    ;;;
+    plot@$str(0)$ = gsn_add_polyline(wks, plot(0), pgx_pool, pgy_pool, pgres)
+
+
+    ;;;打点
+    ; res_pro=True
+    ; res_pro@gsnDraw=False
+    ; res_pro@gsnFrame=False
+    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    ; res_pro@cnLinesOn=False
+    ; res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
+    ; res_pro@cnMinLevelValF      = 0.00        ; set min contour level
+    ; res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
+    ; res_pro@cnLevelSpacingF     = 0.1       ; set contour spacing
+
+    ; res_pro@cnLineLabelsOn=False
+    ; res_pro@tmYRMode = "Automatic"
+    ; res_pro@cnInfoLabelOn=False
+
+    ; iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
+
+    ; opt                      = True
+    ; opt@gsnShadeFillType     = "pattern"
+    ; ; opt@gsnShadeMid     = 6         ; stipple
+    ; opt@gsnShadeMid     = 17         ; stipple
+    ; ; opt@gsnShadeFillDotSizeF =  0.0025
+    ; ; opt@gsnShadeHigh   = "green"
+    ; opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
+    ; iplot(0) = gsn_contour_shade(iplot(0) , 0,0.1,opt)
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
+
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+
+
+    res_pro@cnLinesOn=False
+
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillColor = False
+
+  
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+
+    iplot=gsn_csm_contour(wks,prob_mam,res_pro)
+
+    ; overlay(plot(i*3) , iplot(i*3) )
+    overlay(plot(0), iplot(0))
+
+
+
+;==============================================================
+; Mission 1. calculate Q
+; ==============================================================
+    era_qu  = q
+    era_qv  = q
+    era_qu  = u*q
+  
+    era_qv  = v*q
+    era_wgt_qu = era_qu(:,0,:,:)
+    era_wgt_qv = era_qv(:,0,:,:)
+
 
   
 
-    resxy@tmXBLabelFontHeightF=0.025
-    resxy@tmYLLabelFontHeightF=0.025
-    resxy@tmXBMajorThicknessF=1.0
-    resxy@tmYLMajorThicknessF=1.0
 
-    
-    resxy@tmXBMode  =  "Explicit"
-    resxy@trXMaxF =  6.
-    resxy@trXMinF = -2.
-    resxy@tmXBValues = fspan(-2,6,5)
-    resxy@tmXBLabels = fspan(-2,6,5)
-    resxy@tmXBMinorOn = True
-    resxy@tmXBMinorValues = fspan(-2,6,17)
-    resxy@tiYAxisString = ""
+   ;;;------Cal DivQ-------
+    ;-----------Follow is the horizontal integral-----------
+    pver=era_qu&level
+    pver=pver*100
+    pver@units="Pa"
+
+    dp=dpres_plevel(pver,100000,min(pver),0)              ; caculate dp
+    dp_cfm=conform_dims(dimsizes(era_qu),dp,1)          ; confirm dp to caculate sum(var*dp)
+
+    era_wgt_qu=(/dim_sum_n(dp_cfm*era_qu,1)/)               ; sum(var*dp)
+    era_wgt_qv=(/dim_sum_n(dp_cfm*era_qv,1)/)               ; sum(var*dp)
+
+    era_wgt_qu = (/era_wgt_qu/9.8/)
+    era_wgt_qv = (/era_wgt_qv/9.8/)
+
+    g_lon   =   era_wgt_qu&longitude
+    g_lat   =   era_wgt_qu&latitude
+    g_nlat  =   dimsizes(g_lat)
+
+    DivQ = uv2dv_cfd(era_wgt_qu,era_wgt_qv,g_lat,g_lon,2)
+    ; DivQ = uv2dvF_Wrap(era_wgt_qu(:,::-1,:),era_wgt_qv(:,::-1,:)) 
+    DivQ   =   (/-DivQ*86400/) 
+    copy_VarCoords(era_wgt_qu, DivQ)
+    printVarSummary(DivQ)
+    ; print(DivQ(0,:,:))
+    print("=====finish DivQ calculate==========")
+;;;;
+;;;;
+; ;;;choose season
+   season = (/"MAM","JJA","SON","DJF"/)
+   i = 0   
+      era_divQ_bar = month_to_season(DivQ, season(i))
+      era_divQ_delta = dim_rmvmean_n_Wrap(era_divQ_bar, 0)
+
+      printVarSummary(era_divQ_delta)
+
+      ;;;得到divQ_bar的两个箭头
+      era_wgt_qu_annual = month_to_season(era_wgt_qu, season(i))
+      era_wgt_qu_delta =  dim_rmvmean_n_Wrap(era_wgt_qu_annual, 0)
+
+
+      era_wgt_qv_annual = month_to_season(era_wgt_qv, season(i))
+      era_wgt_qv_delta =  dim_rmvmean_n_Wrap(era_wgt_qv_annual, 0)
+
+      era_wgt_qu_delta = (/era_wgt_qu_delta*9.8/)
+      era_wgt_qv_delta = (/era_wgt_qv_delta*9.8/)
+      ;;;
+  ;;;;
+
    
-    ; resxy@pmLegendDisplayMode = "Always"
-    ; resxy@lgBoxLinesOn = False
-    ; resxy@xyExplicitLegendLabels  =  (/"DPLH Clm","DPLH Clm+Change","DIABH Clm","DIABH Clm+Change"/)     ;加线的标注
-    resxy@trYReverse        = True                       ; reverse Y-axis
 
-    plot1(i) = gsn_csm_xy(wks, (/deepcon_heat_clm,deepcon_heat_change, \
-                             diabatic_heat_clm,diabatic_heat_change/),level ,resxy)
+  ;;;;计算动力项和热力项
+
+     q_bar = month_to_season(q, "MAM")
+     u_bar = month_to_season(u, "MAM")
+     v_bar = month_to_season(v, "MAM") 
+
+     printVarSummary(q_bar)
+     
+     dq = grad_latlon_cfd(q_bar, g_lat, g_lon, False, False)
+
+     era_adv_q_bar = q_bar                         
+     era_adv_q_bar = u_bar*dq[1] + v_bar*dq[0]    ;;dq[o]:dq/dy，dq[1]:dq/dx
+
+     dp_cfm_new = conform_dims(dimsizes(u_bar),dp,1)          ; confirm dp to caculate sum(var*dp)
+     era_wgt_adv_q_bar=(/dim_sum_n(dp_cfm_new*era_adv_q_bar,1)/)               ; sum(var*dp)
+     era_wgt_adv_q_bar = (/era_wgt_adv_q_bar*86400/(-9.8)/)       ;;convert to day
+     copy_VarCoords(q_bar(:,1,:,:), era_wgt_adv_q_bar)
+
+  ; Calculate the MFC_convergence term
+  ;   MFC_conv   = -q*((du/dx)+(dv/dy) )      ; con(div)-vergence
+
+    duv  = uv2dv_cfd(u_bar,v_bar,g_lat,g_lon,2)       ; (1/m)(m/s) => (1/s) ; (time,level,lat,lon)
+
+    era_con_q_bar  = q_bar*duv
+    era_wgt_con_q_bar=(/dim_sum_n(dp_cfm_new*era_con_q_bar,1)/)               ; sum(var*dp)
+
+    era_wgt_con_q_bar=(/dim_sum_n(dp_cfm_new*era_con_q_bar,1)/)               ; sum(var*dp)
+    era_wgt_con_q_bar = (/era_wgt_con_q_bar*86400/(-9.8)/)       ;;convert to day
+    copy_VarCoords(q_bar(:,1,:,:), era_wgt_con_q_bar)
+   ;;;
     
+    dyn_Q_trend  = regCoef_n(ispan(1, yearnum, 1), era_wgt_con_q_bar, 0, 0)
+    copy_VarCoords(era_wgt_con_q_bar(1,:,:), dyn_Q_trend)
+    dyn_Q_trend = (/dyn_Q_trend*yearnum/)
+
+    therdyn_Q_trend  = regCoef_n(ispan(1, yearnum, 1), era_wgt_adv_q_bar, 0, 0)
+    copy_VarCoords(era_wgt_adv_q_bar(1,:,:), therdyn_Q_trend)
+    therdyn_Q_trend = (/therdyn_Q_trend*yearnum/)
+
+
+    delete(q)
+    delete(u)
+    delete(v)
+
+
+; ;==============================================================
+; ; Mission 3.  trend
+; ; ==============================================================
+    ;;;;Q component
+    Q_rc =  cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
+    yearnum = 37
+    
+    q_rc = Q_rc[0]
+    qu_rc  =  Q_rc[1]
+    qv_rc  =  Q_rc[2]
+
+    prob_q = rc_test(q_rc)
+    prob_qu = rc_test(qu_rc)
+    prob_qv = rc_test(qv_rc)
+
+    ; prob_q = 1- q_rc@prob
+    ; prob_qu = 1- qu_rc@prob
+    ; prob_qv = 1- qv_rc@prob
+
+    copy_VarCoords(q_rc, prob_q)
+    copy_VarCoords(q_rc, prob_qv)
+    copy_VarCoords(q_rc, prob_qu)
+    
+
+    qu_rc_test = qu_rc
+    qv_rc_test = qv_rc
+    qu_rc_test = where(prob_qu.le.0.1.or.prob_qv.le.0.1, qu_rc,qu_rc@_FillValue)
+    
+    qu_rc = where(prob_qu.le.0.2.or.prob_qv.le.0.2, qu_rc,qu_rc@_FillValue)
+;;;;;
+
+
+;;;;计算相对变化量
+
+    q_rc_avg = avg(dim_avg_n(q_rc({0:20},{125:160}),0))
+
+    dyn_Q_trend_avg = avg(dim_avg_n(dyn_Q_trend({0:20},{125:160}),0))
+
+    therdyn_Q_trend_avg = avg(dim_avg_n(therdyn_Q_trend({0:20},{125:160}),0))
+
+  print("q_rc_avg="+q_rc_avg)
+  print("dyn_Q_trend_avg="+dyn_Q_trend_avg)
+  print("therdyn_Q_trend_avg="+therdyn_Q_trend_avg)
+
+
+
+
+
+;==============================================================
+; Mission 6. draw plot
+; ==============================================================
+  colordata = read_colormap_file("/home/yangsong3/data-observation/linshh/data/colordata/bluewhiteorangered_11color.rgb")
+  
+  ; gsn_define_colormap(wks, colordata)
+  res2=True
+  res2@gsnFrame=False
+  res2@gsnDraw=False
+  res2@gsnAddCyclic = False
+
+  res2@cnFillPalette=colordata(::-1,:)
+
+  res2@cnFillOn=True
+  res2@cnLinesOn=False
+
+  res2@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  res2@cnMinLevelValF       =   -3.0
+  res2@cnMaxLevelValF       =   3.0
+  res2@cnLevelSpacingF      =  1.0
+  res2@cnLineLabelsOn=False
+  res2@lbLabelBarOn=True
+  res2@lbLabelStride=1
+  res2@pmLabelBarOrthogonalPosF = 0.17
+
+  res2@lbOrientation="horizontal"
+  res2@mpLimitMode           = "LatLon"
+
+  ;;;global region
+  res2@mpMinLatF             = -5
+  res2@mpMaxLatF             = 30
+  res2@mpMinLonF             = 100
+  res2@mpMaxLonF             = 170
+  
+  res2@mpCenterLonF          = (res2@mpMinLonF+res2@mpMaxLonF)/2.0
+  res2@tmXTOn=False
+  res2@tmYROn=False
+  res2@tmXBOn=True
+  res2@tmYROn=False
+
+  res2@tmXBLabelFontHeightF=0.025
+  res2@tmYLLabelFontHeightF=0.025
+  res2@tmXBMajorThicknessF=2.0
+  res2@tmYLMajorThicknessF=2.0
+  ; res2@tmBorderThicknessF=1.0
+
+  res2@gsnLeftStringFontHeightF = 0.03
+  res2@tmXBValues = (/100,120,140,160/) 
+  res2@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+  res2@tmYLValues = (/0,10,20,30/) 
+  res2@tmYLLabels = (/"0","10N","20N","30N"/) 
+
+  res2@tmYLMinorValues = ispan(-5,30,5)
+
+
+
+  res2@mpFillOn = False
+  res2@gsnScalarContour        = True
+  ;;;;;;;LineArrow
+  res2@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res2@vcGlyphStyle="CurlyVector"
+  res2@vcMonoLineArrowColor = True
+  res2@vcLineArrowColor = "black"
+  res2@vcMinDistanceF           = 0.025           ; thin vectors
+
+  res2@vcRefLengthF             = 0.1     ; define length of v
+  res2@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  res2@vcVectorDrawOrder="PostDraw"
+
+  res2@vcLineArrowThicknessF=1.5
+  ; res2@vcLineArrowHeadMaxSizeF=0.01
+  ; res2@vcLineArrowHeadMinSizeF=0.01
+  ; res2@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  ; res2@vcLineArrowHeadMinSizeF = 0.006
+  res2@vcLineArrowHeadMaxSizeF = 0.018           ;change the vector line arrows
+  res2@vcLineArrowHeadMinSizeF = 0.012
+
+  res2@vcRefMagnitudeF          = 1000.0
+  ; res2@vcMinMagnitudeF          =100.0
+  res2@gsnLeftString = "(b) MAM CVIMF Trend"
+  res2@gsnLeftStringOrthogonalPosF  = -0.12
+
+
+  res2@vcRefAnnoString1On = True
+  res2@vcRefAnnoString1 = "1000 kg*m/s"
+  res2@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
+  res2@vcRefAnnoParallelPosF = 1.02
+  res2@vcRefAnnoFontHeightF = 0.013
+
+  res2@vcRefAnnoBackgroundColor = "Transparent"
+  res2@vcRefAnnoPerimOn = False
+  
+  plot(1)=gsn_csm_vector_scalar_map(wks,qu_rc,qv_rc, q_rc, res2)
+
+
+  resv                             = True 
+  resv@gsnDraw                     = False
+  resv@gsnFrame                    = False      ;don't advance frame
+  resv@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+  ; res@vcGlyphStyle="CurlyVector"
+
+  resv@vcMinDistanceF           = 0.02           ; thin vectors
+
+  resv@vcRefLengthF             = 0.08     ; define length of v
+  resv@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+  ; resv@vcVectorDrawOrder="PostDraw"
+  resv@vcMonoLineArrowColor = True
+  resv@vcLineArrowColor = "blue"
+  resv@vcLineArrowThicknessF=1.5
+  ; resv@vcLineArrowHeadMaxSizeF=0.01
+  ; resv@vcLineArrowHeadMinSizeF=0.01
+  resv@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
+  resv@vcLineArrowHeadMinSizeF = 0.006
+
+  resv@vcRefMagnitudeF          = 1000.0
+  ; resv@vcMinMagnitudeF          =100.0
+
+  resv@vcRefAnnoOn    = False
+  resv@gsnLeftString         = " "
+  resv@gsnRightString        = " "
+
+
+  plot_vect = gsn_csm_vector(wks,qu_rc_test({-5:30},{100:170}),qv_rc_test({-5:30},{100:170}),resv)
+  ; overlay(plot(1),plot_vect)
+
+
+  plot@$str(1)$ = gsn_add_polyline(wks, plot(1), pgx_pool, pgy_pool, pgres)
+   
+
+   ;;;打点
+    res_pro2=True
+    res_pro2@gsnAddCyclic = False
+    res_pro2@gsnDraw=False
+    res_pro2@gsnFrame=False
+    res_pro2@cnFillOn = True
+
+    res_pro2@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro2@cnLevels = (/0,0.1/)
+    res_pro2@lbLabelBarOn = False
+
+
+    res_pro2@cnLinesOn=False
+
+
+    res_pro2@cnMonoFillPattern = True
+    res_pro2@cnFillPattern = 17
+    ; res_pro2@cnFillDotSizeF = 0.0045
+    res_pro2@cnFillDotSizeF = 0.002
+    res_pro2@cnMonoFillColor = False
+    res_pro2@cnFillColors = (/"Transparent","White","Transparent"/)
+  
+    res_pro2@cnLineLabelsOn=False
+    res_pro2@tmYRMode = "Automatic"
+    res_pro2@cnInfoLabelOn=False
+
+    iplot(1)=gsn_csm_contour(wks,prob_q,res_pro2)    
+    overlay(plot(1), iplot(1))
+
+
+ ;==============================================================
+; Mission 3. calculate OLR
+; ==============================================================
+    f6 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
+    ;;;region
+    lat1 = -5
+    lat2 = 45
+    lon1 = 90
+    lon2 = 170
+
+    date:=cd_calendar(f6->time, 1)
+    timeind :=ind(date.ge.startmon.and.date.le.endmon)
+    olr = short2flt(f6->olr(timeind,{lat1:lat2},{lon1:lon2}))
+
+
+    olr_annual = month_to_season(olr, season(i))
+    printVarSummary(olr_annual)
+    
+    olr_rc = regCoef_n(ispan(1, yearnum, 1), olr_annual, 0, 0)
+    copy_VarCoords(olr_annual(1,:,:),olr_rc)
+    olr_rc = (/olr_rc*yearnum/)
+    
+    print(avg(olr_rc({0:15},{125:160})))
+  
+
+
+    prob_olr_rc = rc_test(olr_rc)
+    ;;;; draw olr 
+    res3=True
+    res3@gsnFrame=False
+    res3@gsnDraw=False
+    res3@gsnAddCyclic = False
+
+    res3@cnFillOn=True
+    res3@cnLinesOn= False
+
+
+    res3@cnLineLabelsOn=False
+    res3@lbLabelBarOn=True
+    res3@lbLabelStride=1
+    res3@lbOrientation="horizontal"
+    res3@pmLabelBarOrthogonalPosF = 0.17
+
+   
+    res3@mpLimitMode           = "LatLon"
+    res3@mpMinLatF             = -5
+    res3@mpMaxLatF             = 30
+    res3@mpMinLonF             = 100
+    res3@mpMaxLonF             = 170
+
+    res3@tmXBValues = (/100,120,140,160/) 
+    res3@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+    res3@tmYLValues = (/0,10,20,30/) 
+    res3@tmYLLabels = (/"0","10N","20N","30N"/) 
+
+    res3@tmYLMinorValues = ispan(-5,30,5)
+
+    res3@mpCenterLonF          = (res3@mpMinLonF+res3@mpMaxLonF)/2.0
+
+    res3@tmXTOn=False
+    res3@tmYROn=False
+    res3@tmXBOn=True
+    res3@tmYROn=False
+
+    res3@tmXBLabelFontHeightF=0.025
+    res3@tmYLLabelFontHeightF=0.025
+    res3@tmXBMajorThicknessF=2.0
+    res3@tmYLMajorThicknessF=2.0
+    ; res3@tmBorderThicknessF=1.0
+
+    res3@gsnScalarContour        = True
+    res3@mpFillOn =False
+
+    res3@cnLevelSelectionMode  = "ManualLevels" ; set manual contour levels
+    res3@cnMinLevelValF        := -20.0        ; set min contour level
+    res3@cnMaxLevelValF        := 20.0          ; set max contour level
+    res3@cnLevelSpacingF       := 5.0          ; set contour interval
+    res3@cnFillPalette = "BlueWhiteOrangeRed"
+    
+
+    res3@cnLevelSelectionMode = "ExplicitLevels"
+
+    ; gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    res3@cnLevels := (/-20.0,-15.0,-10.0,-5.0,-2.5,2.5,5.0,10.0,15.0,20.0/)
+    res3@lbLabelStrings = res3@cnLevels
+    res3@lbLabelFontHeightF = 0.02
+    res3@lbAutoManage = False
+
+
+    ; res3@lbLabelStrings = (/-20.0,-10.0,10.0,20.0/)
+
+
+    ; res3@cnFillColors := (/2,5,30,40,3,146,177,200,251/) -4
+
+    
+    res3@gsnLeftString  ="(c) MAM OLR trend"
+    res3@gsnLeftStringFontHeightF = 0.03
+    res3@lbAutoManage = False
+
+
+    plot(2) = gsn_csm_contour_map(wks,olr_rc,res3)
+
+
+    plot@$str(2)$ = gsn_add_polyline(wks, plot(2), pgx_pool, pgy_pool, pgres)
+
+  ;;;打点
+    res_pro2@cnFillColors = (/"Transparent","White","Transparent"/)
+
+    iplot(2)=gsn_csm_contour(wks,prob_olr_rc,res_pro2)
+
+    overlay(plot(2), iplot(2))
+  ;;;;
+;==============================================================
+; Mission 4. plot(3) 
+; ==============================================================
+
+    ;;;region 
+    lat1 = -5
+    lat2 = 45
+    lon1 = 90
+    lon2 = 170
     ;;;
-    resxy@xyLineColors       :=  (/"black","black"/)          ; change line color
-    resxy@xyMarkLineModes := (/"lines","lines"/)    
-    ; resxy@xyExplicitLegendLabels := (/"Q1 Clim","Q1 Clim+Change"/)
-    resxy@xyDashPatterns := (/0,1/)
-    plot2(i) = gsn_csm_xy(wks, (/q1_clim_area,q1_change/),q1&level, resxy)
+    fils3 := systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_*"+".nc")
+    f3 := addfiles(fils3, "r")
 
-    overlay(plot1(i), plot2(i))
+    date:=cd_calendar(f3[:]->time, 1)
+    timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    time = f3[:]->time(timeind)
+    lat = f3[1]->latitude
+    lon = f3[1]->longitude
 
-end do 
+    div_r = new((/dimsizes(time), 7,dimsizes(lat),dimsizes(lon)/),float)
 
 
-pres =True
-; drawNDCGrid(wks)
-gsn_panel(wks, plot1, (/2,2/), pres)
+    do i = 0,dimsizes(timeind)/12-1
 
-print("done stript")
+       div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},:,:))
 
-  ;  ;;添加legend 
-  ;     ;--------------------------------------------------------------------------
-    ; res_lines                   = True                  ; polyline mods desired
-    ; res_lines@gsLineDashPattern = 0.                    ; solid line
-    ; res_lines@gsLineThicknessF  = 2.                    ; line thicker
+    end do
+    ;
+    div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
+
+    ; div = div_r
+
+    div = (/div*10^6/)
+    div = (/-1*div/)
+   
+    w = div
+
+
+    w_annual = month_to_season(w,"MAM")
+
+    ; yearnum = 37
+    wgt_w_rc := regCoef_n(ispan(1,yearnum,1), w_annual, 0, 0)
+    copy_VarCoords(w_annual(1,:,:), wgt_w_rc)
+
+    prob_w = rc_test(wgt_w_rc)
+    wgt_w_rc = (/wgt_w_rc*yearnum/) 
+
+    res4=True
+    res4@gsnFrame=False
+    res4@gsnDraw=False
+    res4@gsnAddCyclic = False
+  
+    res4@cnFillOn=True
+    res4@cnLinesOn=False
+
+    res4@cnLineLabelsOn=False
+    res4@lbLabelBarOn=True
+    res4@lbLabelStride=1
+    res4@lbOrientation="horizontal"
+    res4@pmLabelBarOrthogonalPosF = 0.17
+
+
+    res4@mpLimitMode           = "LatLon"
+    res4@mpMinLatF             = -5
+    res4@mpMaxLatF             = 30
+    res4@mpMinLonF             = 100
+    res4@mpMaxLonF             = 170 
+    res4@mpCenterLonF          = (res4@mpMinLonF+res4@mpMaxLonF)/2.0
+    res4@tmXTOn=False
+    res4@tmYROn=False
+    res4@tmXBOn=True
+    res4@tmYROn=False
+    res4@tmXBMode="Explicit"
+    res4@tmYLMode="Explicit"
+
+
+    res4@tmXBLabelFontHeightF=0.025
+    res4@tmYLLabelFontHeightF=0.025
+    res4@tmXBMajorThicknessF=2.0
+    res4@tmYLMajorThicknessF=2.0
+    ; res4@tmBorderThicknessF=1.0
+    res4@tmXBValues = (/100,120,140,160/) 
+    res4@tmXBLabels = (/100,120,140,160/) +""+"E" 
+    res4@tmYLValues = (/0,10,20,30/) 
+    res4@tmYLLabels = (/"0","10N","20N","30N"/) 
+
+    res4@tmYLMinorValues = ispan(-5,30,5)
+
+    res4@cnLevelSelectionMode = "ExplicitLevels"      ; set manual contour level
+    res4@cnFillPalette = "MPL_PuOr"
+    ; gsn_define_colormap(wks2, "MPL_PuOr")
+    
+     res4@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+    res4@lbLabelStrings = res4@cnLevels
+    res4@lbLabelFontHeightF = 0.018
+    ; res4@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) -4
 
     
-    ; res_text                    = True                  ; text mods desired
-    ; res_text@txFontHeightF      = 0.01                 ; change text size
-    ; res_text@txJust             = "CenterLeft"          ; text justification
-
-    ; res_lines@gsLineColor       = "black"
-
-    ; yy = (/25.,25./)
-    ; xx = (/2.5,3.0/)
-    ; text_pos = 3.1
-   
-    ; dum3 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum4 = gsn_text_ndc(wks,"Q1 Clim",text_pos,yy(0),res_text); add text
- 
-    ; res_lines@gsLineDashPattern = 1.                    ; solid line
-    ; yy = yy+50
-    ; dum31 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum41 = gsn_text_ndc(wks,"Q1 Clim+Change",text_pos,yy(0),res_text); add text
-    
-    ; res_lines@gsLineDashPattern = 0.                    ; solid line
-    ; res_lines@gsMarkerIndex     = 16
-    ; res_lines@gsMarkerSizeF     = 0.01
-    ; res_lines@gsLineColor       = "blue"
-    ; res_lines@gsMarkerColor = "blue"
-
-    ; yy = yy+50
-    ; dum5 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum6 = gsn_text_ndc(wks,"DPLH Clim",text_pos,yy(0),res_text); add text
-    ; dum55 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
-
-    ; res_lines@gsLineDashPattern = 1.
-   
-    ; yy = yy+50
-    ; dum51 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum61 = gsn_text_ndc(wks,"DPLH Clim+Change",text_pos,yy(0),res_text); add text
-    ; dum551 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
-
-   
-    ; res_lines@gsMarkerIndex     = 9
-    ; res_lines@gsLineColor       = "red"
-    ; res_lines@gsLineDashPattern = 0.
-    ; res_lines@gsMarkerColor     = "red"
-    ; res_lines@gsMarkerThicknessF   = 3.0
-    ; yy = yy+50
-    ; dum7 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum8 = gsn_text_ndc(wks,"DIABH Clim",text_pos,yy(0),res_text); add text
-    ; dum77 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
-    
-    ; res_lines@gsLineDashPattern = 1.
-    ; yy = yy+50
-    ; dum71 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
-    ; dum81 = gsn_text_ndc(wks,"DIABH Clim+Change",text_pos,yy(0),res_text); add text
-    ; dum771 = gsn_polymarker_ndc(wks,xx,yy,res_lines)       
+    res4@gsnLeftString = "(d) MAM low-level wind convergence trend "
+    res4@gsnLeftStringFontHeightF = 0.03
+    plot(3) = gsn_csm_contour_map(wks, wgt_w_rc, res4)
 
 
-end 
+    plot@$str(3)$ = gsn_add_polyline(wks, plot(3), pgx_pool, pgy_pool, pgres)
+
+
+  ;;;打点 ;;;打点
+    res_pro4=True
+    res_pro4@gsnAddCyclic = False
+    res_pro4@gsnDraw=False
+    res_pro4@gsnFrame=False
+    res_pro4@cnFillOn = True
+
+    res_pro4@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro4@cnLevels = (/0.0,0.1/)
+    res_pro4@lbLabelBarOn = False
+
+    res_pro4@cnLinesOn=False
+    ; res_pro4@cnMonoLineColor =False
+    ; res_pro4@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    res_pro4@cnMonoFillPattern = True
+    res_pro4@cnFillPattern = 17
+    res_pro4@cnFillDotSizeF = 0.001
+    res_pro4@cnMonoFillColor = False
+    res_pro4@cnFillColors = (/"Transparent","White","Transparent"/)
+    ; res_pro4@cnLevels = ispan(-6,6,1)
+    res_pro4@cnLineLabelsOn=False
+    res_pro4@tmYRMode = "Automatic"
+    res_pro4@cnInfoLabelOn=False
+
+
+
+    iplot(3)=gsn_csm_contour(wks,prob_w,res_pro4)
+
+    overlay(plot(3), iplot(3))
+  ;;;;
+
+;==============================================================
+; Mission  panel  
+; ==============================================================
+pres = True
+
+gsn_panel(wks, plot, (/2,2/), pres)
+
+
+end

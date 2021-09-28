@@ -23,13 +23,19 @@ end
 begin
 season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
+  ; fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
+  ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
+   ; fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r +"_notest_wholeind/"+"F_2000_ind_"+season_r+"_notest_wholeind.cam.h1.0101-4012_chazhi.nc" 
+  fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/FC5_CTRL.cam.h1.0101-4012_chazhi.nc"
+  fils2 = "/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_" + season_r+"/"+"FC5_wholeind_"+season_r+".cam.h1.0101-4012_chazhi.nc" 
 
-  fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
+  ; fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+  fils3 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/FC5_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
+  ; fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
+    ; fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_ind_" + season_r +"_notest_wholeind/"+"F_2000_ind_"+season_r+"_notest_wholeind.cam.h1.0101-4012_OLR_heatflux.nc" 
+  fils4 = "/home/ys17-19/lsh/CESM-data/F/FC5_wholeind_" + season_r+"/"+"FC5_wholeind_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc"
   
-  wks=gsn_open_wks("pdf", "Fig7")
+  wks=gsn_open_wks("pdf", "Fig7-FC5")
   
   plot = new(8,graphic)
   iplot = new(8,graphic)
@@ -121,6 +127,12 @@ do i = 0,3
 
    OLR_diff = OLR_CT_clm
    OLR_diff = (/OLR_indian_clm - OLR_CT_clm/)
+
+    region_mean = avg(OLR_diff({0:15},{125:160}))
+    ;;;;;
+
+    print("*********"+season(i)+"**********OLR_diff="+region_mean)
+    
    
    prob_OLR = t_test( month_to_season(OLR_CT, season(i)) ,month_to_season(OLR_indian, season(i)))
    
@@ -150,11 +162,11 @@ do i = 0,3
     res@cnRasterSmoothingOn=True
 
     if i.eq.3 then
-     res@lbLabelBarOn= True
-     else
-     res@lbLabelBarOn= False
-     end if
-     res@pmLabelBarOrthogonalPosF = 0.2
+    res@lbLabelBarOn= True
+    else
+    res@lbLabelBarOn= False
+    end if
+    res@pmLabelBarOrthogonalPosF = 0.2
 
     res@lbLabelStride=1
     res@lbLabelFontHeightF = 0.015
@@ -170,15 +182,18 @@ do i = 0,3
     ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
 
     
-  
+
     ; res@cnLevels := (/-1.5,-1.0,-0.25,0.25,1.0,1.5,2.0,2.5/)
     ; res@cnFillColors= (/2,3,4,8,9,10,11,12,13/) - 2 
 
-      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
-
- 
+    ; res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
+    ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
     
+    res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5/)
+
+
+
     res@tmXBLabelFontHeightF=0.02
     res@tmYLLabelFontHeightF=0.02
     res@tmXBMajorThicknessF=1.0
@@ -278,12 +293,12 @@ do i = 0,3
    pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
+   pgres@gsLineDashPattern= 1
  
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 

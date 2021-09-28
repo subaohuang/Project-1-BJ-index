@@ -37,8 +37,10 @@ season = (/"MAM","JJA","SON","DJF"/)
 do i = 0,3
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
-
-  date=cd_calendar(f1->time, 1)
+  
+  time = f1->time
+  time = (/time-1/)
+  date=cd_calendar(time, 1)
 
   timeind=ind(date.ge.601.and.date.le.4012)
   ; print(date(timeind))

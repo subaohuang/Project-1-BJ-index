@@ -95,7 +95,7 @@ begin
     printVarSummary(p_annual)
     printVarSummary(obs_nino34)
 
-      obs_p_ninoyear  = dim_avg_n_Wrap(p_annual(ind_obs_nino,:,:) , 0)
+    obs_p_ninoyear  = dim_avg_n_Wrap(p_annual(ind_obs_nino,:,:) , 0)
 
 ;;;
       

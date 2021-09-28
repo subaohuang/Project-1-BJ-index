@@ -214,12 +214,12 @@ begin
    ;;warm pool
    pgres = True
    pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
+   pgres@gsLineDashPattern=1
 
  
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 

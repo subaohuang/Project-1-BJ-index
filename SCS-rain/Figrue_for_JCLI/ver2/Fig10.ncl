@@ -22,8 +22,9 @@ end
 begin
 
 
-  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_OLR_heatflux.nc"
-  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_OLR_heatflux.nc"
+  ; fils1 = "/home/yangsong3/data-model/Lu_MM/CTRL/B2000_f19g16_CP_CTRL.TEMP.mon.0250-0299.nc"  
+  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
+  fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.TEMP_taux_tauy.h1.0251-0280.nc"
  
   
     f1=addfile(fils1, "r")
@@ -40,133 +41,216 @@ begin
     timeind1=ind(date1.ge.25601.and.date1.le.28012)
     timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
-  
-    PRECC_CT  =  f1->FLUT(timeind1,:,:)
 
-    PRE_CT = PRECC_CT
+    PSL_CT  =  f1->TEMP(timeind1,0,:,:)
 
   
-   
-    PRECC_id  =  f2->FLUT(timeind2,:,:)
 
-    PRE_id = PRECC_id
-
+    PSL_indian  =  f2->TEMP(timeind2,0,:,:)
+    TLAT = f2->TLAT
+    TLONG = f2->TLONG
    
+    PSL_indian!1 = "nlat"
+    PSL_indian!2 = "nlon"
+    PSL_indian@lat2d   = TLAT
+    PSL_indian@lon2d   = TLONG
+
+
+    printVarSummary(PSL_indian)
+
     
     season = (/"MAM","JJA","SON","DJF"/)
-    order  = (/"(a)","(b)","(c)","(d)"/)
-
-    wks=gsn_open_wks("pdf", "diff-olr-altantic-year-fourseason-0280.pdf")
+    wks=gsn_open_wks("pdf", "diff-Potensial-temperature-restore-altantic-year-fourseason-0280.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""
     plot1 =new(4,graphic)
     iplot = new(4,graphic)
 
+     order  = (/"(a)","(b)","(c)","(d)"/)
+    
+     plot_add = new(4,graphic)
 
   do i=0,3
 
+    PSL_CT_clm = dim_avg_n_Wrap(month_to_season(PSL_CT, season(i)), 0)
+    PSL_indian_clm = dim_avg_n_Wrap(month_to_season(PSL_indian, season(i)), 0)
+   
 
-    PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
-    PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
-
-    PRE_diff = PRE_CT_clm
-    PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
+    PSL_diff_indian = PSL_indian_clm
+    PSL_diff_indian = (/PSL_indian_clm - PSL_CT_clm/)
 
     
 
     ;;;t_test 
-     prob_pre_indian = t_test(month_to_season(PRE_CT, season(i)),month_to_season(PRE_id, season(i)))
-     copy_VarCoords(PRE_indian_clm, prob_pre_indian)
+    prob_slp_indian = t_test(PSL_indian,PSL_CT)
+   
+    prob_slp_indian!0 = "nlat"
+    prob_slp_indian!1 = "nlon"
+    prob_slp_indian@lat2d   = TLAT
+    prob_slp_indian@lon2d   = TLONG
+
     
+     
+
     
-         
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
     res@gsnAddCyclic=True
 
+
+    res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=False
     res@cnFillOn = True 
     res@cnLinesOn =False
+    res@cnLineLabelsOn=False
+    ; res@cnFillMode  = 
+    ; res@cnRasterSmoothingOn=True
     res@trGridType = "TriangularMesh"
-    res@cnLineLabelsOn = False
 
     ; res@cnFillPalette = "BlueDarkRed18"
-     res@cnFillPalette ="CBR_coldhot"
-
-    res@tmXBLabelFontHeightF=0.025
-    res@tmYLLabelFontHeightF=0.025
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
-    res@gsnLeftStringFontHeightF = 0.025
 
 
-    res@gsnRightString = ""
-    res@gsnLeftString = order(i)+" "+ season(i)+ " OLR diff(AT - CPL_CTRL)"
+    gsn_define_colormap(wks, "BlueWhiteOrangeRed")
+    ; gsn_define_colormap(wks, "ViBlGrWhYeOrRe")
+
+    ; gsn_define_colormap(wks, "BlRe")
+    ; gsn_define_colormap(wks, "BlueDarkRed18")
+ 
+ 
 
 
-    
-    ; res@cnFillPalette = "MPL_bwr"
-    res@cnFillPalette = "BlueWhiteOrangeRed"
-    ; res@cnFillPalette= "BlRe"
-
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    ; res@cnMinLevelValF       =   -0.6
+    ; res@cnMaxLevelValF       =   0.6
+    ; res@cnLevelSpacingF      =  0.1
+    ; res@cnFillPalette = "sunshine_9lev"
     res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)*10.0
-    ; res@cnLevels := (/-20.,-15.,-10.,-5.,5.,10.,15.,20./)
-
-
-
+    res@cnLevels = (/-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0.1,0.2,0.3,0.4,0.5,0.6/)
+    ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+    
+    ; res@cnFillColors = (/2,3,4,5,6,7,8,9,10,11,0,0,16,18,20,21/)
 
     res@tmXTOn=False
     res@tmYROn=False
 
-    res@mpLimitMode           = "LatLon"
+    ; res@mpLimitMode           = "LatLon"
+     
+    ; res@mpMinLatF             = -30.0
+    ; res@mpMaxLatF             = 30.0
+    ; res@mpMinLonF             = 0.0
+    ; res@mpMaxLonF             = 360.0
+    ; res@mpCenterLonF = 180.0
 
-    res@mpMinLatF             = -5.0
-    res@mpMaxLatF             = 30.0
+    ; res@mpMinLatF             = -10.0
     ; res@mpMaxLatF             = 50.0
-    res@mpMinLonF             = 100.0
-    res@mpMaxLonF             = 170.0
+    ; res@mpMinLonF             = 60.0
+    ; res@mpMaxLonF             = 160.0
+
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -30
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = -80
+    res@mpMaxLonF             = 280
+
+    res@mpCenterLonF          = 100
+    ; res@mpMinLatF             = -5
+    ; res@mpMaxLatF             = 30
+    ; res@mpMinLonF             = 100
+    ; res@mpMaxLonF             = 170
 
 
-    res@tmXBValues = (/100,120,140,160/) 
-    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+    res@tmXBMode="Explicit"
+    ; res@tmYLMode="Explicit"
 
-    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+    res@tmXBValues = (/-60,0,60,120,180,240/) 
+    res@tmXBLabels = (/"60W","0","60E","120E","180","120W"/) 
 
 
     res@mpFillOn = False
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
+    
 
+
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.7
+    ; res@vpHeightF = 0.3
+
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
+    res@tmXBMajorThicknessF=1.5
+    res@tmYLMajorThicknessF=1.5
+    res@tmBorderThicknessF=1.5
+    res@gsnLeftStringFontHeightF = 0.02
+
+    
     res@gsnRightString = ""
+    res@gsnLeftString = order(i) +" "+ season(i) + " SST diff (ATO - CTRL_CP)"
 
 
-    plot(i) = gsn_csm_contour_map(wks, PRE_diff, res)
+ 
+    plot(i) = gsn_csm_contour_map(wks, PSL_diff_indian, res)
 
+    res2 = res
+    res2@cnLevelSelectionMode = "ExplicitLevels"
+    res2@cnFillOn = False
+    res2@cnLinesOn = True
+    res2@cnLevels := (/0.5/)
+    res2@cnLineColors = "black"
+    res2@cnMonoLineColor  = True
+    res2@cnLineThicknessF = 2
+    res2@cnMonoLineThickness  = True
+    res2@gsnLeftString = ""
+    res2@cnInfoLabelOn = False
+
+  
+
+    plot1(i) = gsn_csm_contour(wks, PSL_diff_indian, res2)
+   
+   
+    ; overlay(plot(i), plot1(i))
+ 
+     
 
     ;;;画box
-    pgres=True
-    pgres@gsLineColor="black"
-    pgres@gsLineThicknessF=2.0
-    pgres@gsLineDashPattern=0
-
+   pgres=True
+   pgres@gsLineColor="black"
+   pgres@gsLineThicknessF = 2.0
+   pgres@gsLineDashPattern= 1
+   
     lat1 = 0
-    lat2 = 15
+    lat2 = 20
     lon1 = 125
     lon2 = 160
 
     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-
     ;;;
-
+    
     plot1@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres) 
 
 
-    ;;;打点
+
+    ;;;添加赤道直线
+    pgx=ispan(30,390,10)
+    pgy=new(dimsizes(pgx),typeof(pgx))
+    pgy=0
+
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=1.0
+    pgres@gsLineDashPattern=1
+
+
+
+
+    plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+
+   
+
+     ;;;打点
     res_pro=True
     res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
@@ -174,7 +258,7 @@ begin
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.05/)
+    res_pro@cnLevels = (/0,0.01/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False
@@ -183,30 +267,38 @@ begin
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
     res_pro@cnFillDotSizeF = 0.002
-
+  
     res_pro@cnMonoFillColor = False
     res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-
+   
     res_pro@gsnCenterString = ""
-    iplot(i)=gsn_csm_contour(wks,prob_pre_indian,res_pro)
-    overlay(plot(i), iplot(i))
-
-
-
-
-
-
-
-end do 
-    pres = True
-    pres@gsnPanelLabelBar = True
-     pres@lbLabelStride=1
-    pres@lbLabelFontHeightF = 0.015
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
     
+
+    iplot(i)=gsn_csm_contour(wks,prob_slp_indian,res_pro)
+    overlay(plot(i), iplot(i))
+end do
+    pres = True
+    pres@gsnPanelLabelBar  = True
+    pres@gsnMaximize = False
+    pres@lbLabelStride = 1
+    pres@lbOrientation = "Horizontal"
+    ; pres@lbOrientation = "Vertical"
+    ; pres@pmLabelBarHeightF = 0.15
+    pres@pmLabelBarWidthF = 0.45
+    pres@pmLabelBarHeightF = 0.04
+    pres@pmLabelBarOrthogonalPosF = -0.008   ;;;上下位置
+    pres@pmLabelBarParallelPosF = 0.02    ;;;左右位置 
+    pres@lbLabelFontHeightF = 0.01
+    pres@lbAutoManage =False
+
     gsn_panel(wks, plot, (/2,2/), pres)
     print("done script")
   end
   
+

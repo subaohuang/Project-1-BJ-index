@@ -63,17 +63,26 @@ begin
 
 begin
 
+;;;;;choose season 
+
+ season = "MAM"
+
+
 
   ;;;read era data
-        path_wind = "/home/yangsong3/data-observation/ERA-interim/monthly/"
-        var_name = (/"uwnd","vwnd","shum/shum.total"/)
-        filein = path_wind + var_name +".mon.mean.nc"
+   
+        path_wind = "/home/yangsong3/data-observation/NCEP_NCAR/monthly/"
+        var_name = (/"uwnd.mon.mean.nc","vwnd.mon.mean.nc","shum.mon.mean.nc"/)
+
+        filein = path_wind + var_name 
+    
+    
         
         ;;;region 
-          lat1 = -10
+          lat1 = -50
           lat2 = 50
-          lon1 = 60
-          lon2 = 180
+          lon1 = 0
+          lon2 = 360
         ;;;
 
         ; ;;;global region 
@@ -83,10 +92,9 @@ begin
         ; lon2 = 360
         ; ;;;
 
-  
         ;;;time span
-        startmon =197901
-        endmon = 201512
+        startmon =199101
+        endmon = 201912
 
         startyear_r = str_split_by_length(startmon, 4)  ;; 将时间string分解成年和月
         endyear_r = str_split_by_length(endmon, 4 )
@@ -96,24 +104,33 @@ begin
 
         yearnum = endyear - startyear +1
         ;;
+        f3 = addfile(filein(2),"r")
+        date :=cd_calendar(f3->time, 1)
+        timeind :=ind(date.ge.startmon.and.date.le.endmon)
+        q = f3->shum(timeind,:,{lat1:lat2},{lon1:lon2}) 
+        q= q/1000.0    
+
+        levwant = q&level
+
 
 
         f1 = addfile(filein(0),"r")
 
-        date=cd_calendar(f1->time, 1)
-        timeind=ind(date.ge.startmon.and.date.le.endmon)
-
-        u = short2flt(f1->u(timeind,:,{lat1:lat2},{lon1:lon2}))
-
-        f2 = addfile(filein(1),"r")
-        v = short2flt(f2->v(timeind,:,{lat1:lat2},{lon1:lon2}))
+        date:=cd_calendar(f1->time, 1)
+        timeind:=ind(date.ge.startmon.and.date.le.endmon)
+        
+        levu = f1->level
+        levind = get1Dindex(levu,levwant)
+        u = f1->uwnd(timeind,levind,{lat1:lat2},{lon1:lon2})
 
         
-        f3 = addfile(filein(2),"r")
-        date :=cd_calendar(f3->time, 1)
-        timeind :=ind(date.ge.startmon.and.date.le.endmon)
-        q = short2flt(f3->q(timeind,:,{lat1:lat2},{lon1:lon2}))        
-   ;;;
+         f2 = addfile(filein(1),"r")
+        date:=cd_calendar(f2->time, 1)
+        timeind:=ind(date.ge.startmon.and.date.le.endmon)
+
+        v = f2->vwnd(timeind,levind,{lat1:lat2},{lon1:lon2})
+
+      
    print("=====finish read data==========")
 
 

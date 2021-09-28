@@ -5,15 +5,28 @@ begin
     model_name = read_name 
 
     ; enino_intensity = asciiread("diff-Nino(250-280)_enino_intensity_30model", -1,"float")
-    enino_intensity = asciiread("diff-Nino3_enino_intensity_30model", -1,"float")
+    enino_intensity = asciiread("Nino3_bais_CMIP5", -1,"float")
 
     ; dbitcz = asciiread("dbitcz_30model", -1,"float")
 
-    dbitcz = asciiread("south_eastern_pacific_bais_30model", -1,"float")
+    ; dbitcz = asciiread("itcz_bais(4-10,190-250--3-3,190-250)_MAM_CMIP5", -1,"float")
+    
+    f1 = addfile("DJF_pre_and_enino_bias.nc", "r")
+    pre_bias = f1->pre_bias
+     
+      
+    dbitcz = dim_avg_n_Wrap(pre_bias(:,{10:15},{210:240}), (/1,2/))
+    ; dbitcz = asciiread("itcz_bais(10-15,210-240)_MAM_CMIP5", -1,"float")
+
     ; dbitcz = asciiread("north_eastern_pacific_baise_gradient_30model", -1,"float")
 
      ; dbitcz = asciiread("dbitcz_30model", -1,"float")
+    
+    ; dbitcz_pac = dim_avg_n_Wrap(pre_bias(:,{10:15},{210:240}), (/1,2/))
 
+    ; dbitcz_atl = dim_avg_n_Wrap(pre_bias(:,{10:15},{290:340}), (/1,2/))
+
+    ; corr = escorc(dbitcz_pac, dbitcz_atl)
 
     dim_model = dimsizes(enino_intensity)
     ;;;polyline 
@@ -27,7 +40,7 @@ begin
 
   
 ;;;draw plot 
-   wks = gsn_open_wks("pdf", "春季south_eastern_pacific_bais和冬季250-280定义的Enino强度与观测的偏差的关系")
+   wks = gsn_open_wks("pdf", "DJF-itcz_bais(10-15,210-240)and Nino3_bais in CMIP5")
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
     res@gsnFrame=False
@@ -56,15 +69,15 @@ begin
     ; res@tmXBValues    = ispan(-2,4,1) 
     ; res@tmXBLabels    = ispan(-2,4,1) 
    
-    ; res@trXMaxF =  2.0
-    ; res@trXMinF = -4.0
-    ; res@tmXBValues    = ispan(-4,2,1) 
-    ; res@tmXBLabels    = ispan(-4,2,1) 
-
     res@trXMaxF =  6.0
-    res@trXMinF = 0.0
-    res@tmXBValues    = ispan(0,6,1) 
-    res@tmXBLabels    = ispan(0,6,1) 
+    res@trXMinF = -2.0
+    res@tmXBValues    = ispan(-2,6,1) 
+    res@tmXBLabels    = ispan(-2,6,1) 
+
+    ; res@trXMaxF =  6.0
+    ; res@trXMinF = 0.0
+    ; res@tmXBValues    = ispan(0,6,1) 
+    ; res@tmXBLabels    = ispan(0,6,1) 
     
 
 
@@ -92,7 +105,7 @@ begin
     res@vpWidthF=0.6
     
     ; res@tiMainString=" Spring Double ITCZ Bias and DJF Enino Intensity"
-    res@tiMainString=" Spring Eastern Pacific ITCZ Bias and DJF Enino Intensity bias"
+    res@tiMainString=" DJF rainfall bias(10-15,210-240) and DJF Nino3 bias"
     res@tiMainFontHeightF = 0.015
     res@tiYAxisString="~F22~ Enino Intensity bias[k]"
     res@tiYAxisFontHeightF=0.012
@@ -136,7 +149,7 @@ begin
 
     Polymarker=True
     Polymarker@gsMarkerColor="black"
-    Polymarker@gsMarkerSizeF=10.0
+    Polymarker@gsMarkerSizeF=8.0
     Polymarker@gsMarkerIndex=16
 
     plotmark=gsn_add_polymarker(wks, plot, dbitcz, enino_intensity, Polymarker)
@@ -151,7 +164,7 @@ begin
 
         labels = ""+ispan(1,dim_model,1) + ":" +model_name + ""  
 
-        ; alfpe= (/"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","A","B","C","D"/)
+        ; alfpe= (/"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z","1","2","3","4"/)
         ; alfpe=(/"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r"/)
         ; labels = alfpe+ ":" +models
 
@@ -185,7 +198,7 @@ begin
                                         
         txres2@txFontColor="black"
         txres2@txAngleF="0"
-        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),3, 1.85, txres2)
+        plot_text3=gsn_add_text(wks, plot, "Correlation="+sprintf ("%4.2f",r),4.5, 1.85, txres2)
 
 
 

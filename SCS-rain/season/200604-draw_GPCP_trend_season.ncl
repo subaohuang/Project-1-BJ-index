@@ -23,6 +23,7 @@ function cal_season_trend(data,season)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
     end if
     p_djf_r=month_to_season(data, season)
+
     dim = dimsizes(p_djf_r)
     p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
     copy_VarCoords(p_djf_r(1,:,:), p_rc)
@@ -47,9 +48,10 @@ end
 ; end 
 
 begin
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -78,112 +80,114 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_son)
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
+
+    rc_mam_mean = avg(rc_mam({0:20},{125:160}))
+
+    mam_mean = month_to_season(p_pi, "MAM")
+
+    mam_mean_wnp = avg(mam_mean(:,{0:20},{125:160}))
+
+    print(rc_mam_mean)
+
+    print(rc_mam_mean/mam_mean_wnp)
+    ; exit()
+
+
+
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
+wks   = gsn_open_wks("pdf", "不同季节CMAP降水的趋势-1979-2015")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
       
-  res=True
-  res@gsnFrame=False
-  res@gsnDraw=False
-  res@gsnLeftStringFontHeightF=20.0
-  res@cnFillOn=True
-  res@cnLinesOn=False
+    res=True
+    res@gsnFrame=False
+    res@gsnDraw=False
+    res@gsnLeftStringFontHeightF=20.0
+    res@cnFillOn=True
+    res@cnLinesOn=False
 
-  res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
-  res@lbLabelStride=2
+    res@cnLineLabelsOn=False
+    res@lbLabelBarOn=False
+    res@lbLabelStride=2
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -5
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = 100
+    res@mpMaxLonF             = 170
+    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
-  res@mpLimitMode           = "LatLon"
-  
-  ; res@mpMinLatF             = 0
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             =100
-  ; res@mpMaxLonF             = 170
-  
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 0 
-  res@mpMaxLonF             = 360
+    res@tmXTOn=False
+    res@tmYROn=False
+    res@tmXBOn=True
+    res@tmYROn=False
 
+    res@tmXBMode="Explicit"
+    res@tmYLMode="Explicit"
 
-  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+    res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
+    res@tmYLLabelFontHeightF      = 0.025
+    res@gsnLeftStringFontHeightF = 0.03
+    res@tmYLMinorOn = True
 
-  res@tmXTOn=False
-  res@tmYROn=False
-  res@tmXBOn=True
-  res@tmYROn=False
-  res@tmXBMode="Explicit"
-  res@tmYLMode="Explicit"
-  res@lbBoxLinesOn              = True
-  res@lbBoxLineThicknessF       = 0.
+    res@lbBoxLinesOn              = True
+    res@lbBoxLineThicknessF       = 0.
 
 
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
-  res@tmBorderThicknessF=1.0
-
-  ; res@mpShapeMode="FreeAspect"
-  ; res@vpHeightF=0.3
-  ; res@vpWidthF=0.7
-
-  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -2.5
-  ; res@cnMaxLevelValF       =   2.5
-  ; res@cnLevelSpacingF      =  0.25
-  res@cnFillPalette="MPL_BrBG"
-  res@cnFillPalette = "CBR_drywet"
-  res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  res@cnLevels = (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
-  res@cnFillColors=(/0,1,2,3,4,-1,6,7,8,9,10/) 
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
 
-  res@gsnLeftString="(a)GPCP Pre Spring trend " 
+    ; res@tmXBLabelFontHeightF=0.015
+    ; res@tmYLLabelFontHeightF=0.015
+    ; res@tmXBMajorThicknessF=1.0
+    ; res@tmYLMajorThicknessF=1.0
+    ; res@tmBorderThicknessF=1.0
+
+    ; res@mpShapeMode="FreeAspect"
+    ; res@vpHeightF=0.3
+    ; res@vpWidthF=0.7
+
+    res@cnFillPalette = "precip_diff_12lev"
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+
+    res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    res@cnFillColors= (/5,6,7,8,10,11,12,13,14/) - 2
+
+
+
+
+
+  res@gsnLeftString="(a) MAM Precip trend " 
   plot = new(4,graphic)
   plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
-  res@gsnLeftString= "(b)GPCP Pre Summer trend "
+  res@gsnLeftString= "(b) JJA Precip trend "
   plot(1) = gsn_csm_contour_map(wks, rc_jja, res)
-  res@gsnLeftString="(c)GPCP Pre Autumn trend "
+  res@gsnLeftString="(c) SON Precip trend "
   plot(2) = gsn_csm_contour_map(wks, rc_son, res)
-  res@gsnLeftString="(d)GPCP Pre Winter trend "
+  res@gsnLeftString="(d) DJF Precip trend "
   plot(3) = gsn_csm_contour_map(wks, rc_djf, res)
 
 
    str1 = unique_string("dum1")  ; "unique_string" will return a unique    
  
-  ;;;添加赤道直线
-
-   pgx=ispan(30,390,10)
-   pgy=new(dimsizes(pgx),typeof(pgx))
-   pgy=0
-
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
-   
-   str = ispan(1, 4, 1) + ""
-   do i =0,3 
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-   end do 
-
-
 
   ;;;添加indo-pacific warm pool
     ; ;;添加区域
    ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=2.0
+    pgres@gsLineDashPattern=1
 
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
+   lat2 = 20
+   lon1 = 125
+   lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
@@ -196,41 +200,43 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
 
 
     ;;;打点
+
+    iplot=new(4,graphic)
+
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
+
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+
+
     res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.05       ; set contour spacing
+
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillColor = False
+
 
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
 
-    iplot=new(4,graphic)
-
-    
- 
     iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
     iplot(1) = gsn_csm_contour(wks,prob_jja,res_pro)
     iplot(2) = gsn_csm_contour(wks,prob_son,res_pro)
     iplot(3) = gsn_csm_contour(wks,prob_djf,res_pro)
 
     
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 6         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越係數
-
-   
      do i=0,3
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.05,opt)
+  
      overlay(plot(i), iplot(i))
   end do
 
@@ -238,6 +244,8 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-scs-1979-2019")
    
 pres = True
 pres@gsnPanelLabelBar  = True
+pres@lbLabelFontHeightF = 0.015
+
 gsn_panel(wks, plot, (/2,2/), pres)
 
 end

@@ -15,6 +15,7 @@ begin
     time3=f3->time
     time3:=cd_calendar(time3,-2)
 
+
 	; 2018年6月27日
 	y1=time1(:,0)
     m1=time1(:,1)
@@ -42,8 +43,10 @@ begin
     y2=time4(:,0)
     m2=time4(:,1)
     d2=time4(:,2)   
-    t1:=ind(y2.eq.2018.and.m2.eq.06.and.d2.eq.27)
-	
+    t2:=ind(y2.eq.2018.and.m2.eq.06.and.d2.eq.27)
+    print(t1)
+    print(t2)
+	exit()
 	u=f2->uwnd(time|t1,{level|700},lat|:,lon|:)
 	v=f3->vwnd(time|t1,{level|700},lat|:,lon|:)
 	

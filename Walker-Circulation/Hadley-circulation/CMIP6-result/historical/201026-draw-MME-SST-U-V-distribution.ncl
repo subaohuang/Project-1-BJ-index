@@ -32,6 +32,7 @@ rc_sst_mme = dim_avg_n_Wrap(rc_sst_all, 0)
     res=True
     res@gsnDraw=False
     res@gsnFrame=False
+    res@gsnMaximize = True
     res@gsnAddCyclic=True
 
 
@@ -52,13 +53,15 @@ rc_sst_mme = dim_avg_n_Wrap(rc_sst_all, 0)
 
     ; res@cnFillPalette = "precip_diff_12lev"
     ; res@cnFillPalette = "BlueWhiteOrangeRed"
-    res@cnFillPalette = "BlueDarkRed18"
+    ; res@cnFillPalette = "BlueDarkRed18"
+    ; res@cnFillPalette = "WhiteYellowOrangeRed"
+    res@cnFillPalette = "BlAqGrYeOrReVi200"
 
 
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
     res@cnMinLevelValF       =   0.0
-    res@cnMaxLevelValF       =   1.0
+    res@cnMaxLevelValF       =   0.7
     res@cnLevelSpacingF      =  0.05
     ; res@cnFillPalette = "NCV_jaisnd"
     ; res@cnFillPalette = "sunshine_9lev"

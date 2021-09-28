@@ -93,27 +93,24 @@ begin
     res@cnLineLabelsOn = False
 
     ; res@cnFillPalette = "BlueDarkRed18"
-     res@cnFillPalette ="CBR_coldhot"
+    res@cnFillPalette  = "temp_diff_18lev"
+     ; res@cnFillPalette ="CBR_coldhot"
+     ; res@cnFillPalette = "hotcolr_19lev"
 
     res@tmXBLabelFontHeightF=0.025
     res@tmYLLabelFontHeightF=0.025
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
+    res@tmXBMajorThicknessF=2.0
+    res@tmYLMajorThicknessF=2.0
+    res@tmBorderThicknessF=2.0
     res@gsnLeftStringFontHeightF = 0.025
 
 
     res@gsnRightString = ""
     res@gsnLeftString = order(i)+" "+ season(i)+ " OLR diff(AT - CPL_CTRL)"
 
-
-    
-    ; res@cnFillPalette = "MPL_bwr"
-    res@cnFillPalette = "BlueWhiteOrangeRed"
-    ; res@cnFillPalette= "BlRe"
-
     res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)*10.0
+    ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)*10.0
+    res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8/)*10.0
     ; res@cnLevels := (/-20.,-15.,-10.,-5.,5.,10.,15.,20./)
 
 
@@ -134,7 +131,15 @@ begin
     res@tmXBValues = (/100,120,140,160/) 
     res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
+
+    res@tmYLValues = (/0,10,20,30/) 
+    res@tmYLLabels = (/"0","10N","20N","30N"/) 
+
+    res@tmYLMinorValues = ispan(-5,30,5)
+
     res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+
 
 
     res@mpFillOn = False
@@ -150,11 +155,11 @@ begin
     ;;;画box
     pgres=True
     pgres@gsLineColor="black"
-    pgres@gsLineThicknessF=2.0
-    pgres@gsLineDashPattern=0
+    pgres@gsLineThicknessF = 2.0
+    pgres@gsLineDashPattern = 1
 
     lat1 = 0
-    lat2 = 15
+    lat2 = 20
     lon1 = 125
     lon2 = 160
 
@@ -193,12 +198,6 @@ begin
     res_pro@gsnCenterString = ""
     iplot(i)=gsn_csm_contour(wks,prob_pre_indian,res_pro)
     overlay(plot(i), iplot(i))
-
-
-
-
-
-
 
 end do 
     pres = True

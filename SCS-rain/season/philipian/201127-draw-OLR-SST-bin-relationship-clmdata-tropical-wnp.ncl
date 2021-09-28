@@ -28,11 +28,11 @@ lat2 =  30
 lon1 =  100
 lon2 = 180
 
-; startmon = 198201
-; endmon = 201912
+startmon = 198201
+endmon = 201912
 
-startmon = 197901
-endmon = 201512
+; startmon = 197901
+; endmon = 201512
 
 
 f1 = addfile("/home/yangsong3/data-observation/NOAA-OLR/olr.mon.mean.197406-201912.nc", "r")
@@ -42,24 +42,24 @@ olr = short2flt(f1->olr(timeind,{lat1:lat2},{lon1:lon2})) ;;;2.5 ×2.5 grid
 
 printVarSummary(olr)
 
-; f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
-; date:=cd_calendar(f2->time, 1)
-; timeind :=ind(date.ge.startmon.and.date.le.endmon)
-; sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
-; printVarSummary(sst)
-; ;;;;
+f2 = addfile("/home/yangsong3/data-observation/SST/NOAA_OISST/sst.mnmean.nc", "r")
+date:=cd_calendar(f2->time, 1)
+timeind :=ind(date.ge.startmon.and.date.le.endmon)
+sst = short2flt(f2->sst(timeind,{lat1:lat2+1.0},{lon1-1.0:lon2+1.0})) ;;;2.5 ×2.5 grid
+printVarSummary(sst)
+;;;;
 
 
-  f2 = addfile("/home/yangsong3/data-observation/linshh/data/sst/HadISST_sst.nc", "r")
-  date:=cd_calendar(f2->time, 1)
+  ; f2 = addfile("/home/yangsong3/data-observation/linshh/data/sst/HadISST_sst.nc", "r")
+  ; date:=cd_calendar(f2->time, 1)
 
-  timeind:=ind(date.le.201512.and.date.ge.197901)
+  ; timeind:=ind(date.le.201512.and.date.ge.197901)
 
-  sst_r =  lonFlip(f2->sst(timeind,:,:))
+  ; sst_r =  lonFlip(f2->sst(timeind,:,:))
   
-  sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
+  ; sst = sst_r(:,{lat1-1:lat2+1},{lon1-1:lon2+1})
 
-  printVarSummary(sst)
+  ; printVarSummary(sst)
 
 
 
@@ -68,11 +68,11 @@ printVarSummary(olr)
     ; xi = sst&lon
     ; yi = sst&lat
 
-    xi = sst&longitude
-    yi = sst&latitude
+    ; xi = sst&longitude
+    ; yi = sst&latitude
 
-    ;   xi = sst&lon
-    ; yi = sst&lat
+    xi = sst&lon
+    yi = sst&lat
 
 
     xo = olr&lon
@@ -102,14 +102,14 @@ printVarSummary(olr)
     
 
 
-    ; sst_clm_MAM = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"MAM"), 0)   
-    ; olr_clm_MAM = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"MAM"), 0)
+    sst_clm = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"MAM"), 0)   
+    olr_clm = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"MAM"), 0)
 
-    ; sst_clm_JJA = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"JJA"), 0)   
-    ; olr_clm_JJA = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"JJA"), 0)
+    ; sst_clm = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"JJA"), 0)   
+    ; olr_clm = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"JJA"), 0)
     
-    sst_clm = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"SON"), 0)   
-    olr_clm = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"SON"), 0)
+    ; sst_clm = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"SON"), 0)   
+    ; olr_clm = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"SON"), 0)
 
     ; sst_clm_DJF = dim_avg_n_Wrap( month_to_season(sst_chazhi(:,{0:20},{125:170}),"DJF"), 0)   
     ; olr_clm_DJF = dim_avg_n_Wrap(month_to_season(olr(:,{0:20},{125:170}),"DJF"), 0)
@@ -183,9 +183,38 @@ printVarSummary(olr)
     ;;;
 
 
-;;;bin 
-;    bin_num =  (30.0-27.5)/0.25
-;    bin  = fspan(27.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
+;;bin MAM
+   bin_num =  (30.0-27.5)/0.25
+   bin  = fspan(27.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
+   olr_bin = new(toint(bin_num),float)
+   printMinMax(sst_clm_one, 1)
+
+    do i = 0,bin_num-1
+    in := ind(sst_clm_one.ge.bin(i).and.sst_clm_one.lt.(bin(i)+0.25))
+
+    olr_bin(i) = dim_avg(olr_clm_one(in))
+    end do 
+   dolr_dsst = center_finite_diff(olr_bin, bin(1:) -0.125, False, 0)
+;;;;
+
+; ;;bin JJA
+;    bin_num =  (30.0-28.5)/0.25
+;    bin  = fspan(28.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
+;    olr_bin = new(toint(bin_num),float)
+;    printMinMax(sst_clm_one, 1)
+
+;     do i = 0,bin_num-1
+;     in := ind(sst_clm_one.ge.bin(i).and.sst_clm_one.lt.(bin(i)+0.25))
+
+;     olr_bin(i) = dim_avg(olr_clm_one(in))
+;     end do 
+;     dolr_dsst = center_finite_diff(olr_bin, bin(1:) -0.125, False, 0)
+; ;;;;
+
+
+; ;;;bin SON
+;    bin_num =  (30.0-28.5)/0.25
+;    bin  = fspan(28.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
 ;    olr_bin = new(toint(bin_num),float)
 ;    printMinMax(sst_clm_one, 1)
 
@@ -197,37 +226,18 @@ printVarSummary(olr)
 
 ; dolr_dsst = center_finite_diff(olr_bin, bin(1:) -0.125, False, 0)
 
+;     rc1 = regline(fspan(28.5,29.0,3), dolr_dsst(0:2))
+;     print(rc1@yintercept)
 
+;     rc2 = regline(fspan(29.0,29.75,toint((29.75-29.0)/0.25)+1), dolr_dsst(2:5))
 
-
-;;;bin SON
-   bin_num =  (30.0-28.5)/0.25
-   bin  = fspan(28.5-0.125, 30.0 - 0.125, toint(bin_num) +1)   ;;; 27.5左右 为一个bin
-   olr_bin = new(toint(bin_num),float)
-   printMinMax(sst_clm_one, 1)
-
-do i = 0,bin_num-1
-   in := ind(sst_clm_one.ge.bin(i).and.sst_clm_one.lt.(bin(i)+0.25))
-
-   olr_bin(i) = dim_avg(olr_clm_one(in))
-end do 
-
-dolr_dsst = center_finite_diff(olr_bin, bin(1:) -0.125, False, 0)
-
-
-
-    rc1 = regline(fspan(28.5,29.0,3), dolr_dsst(0:2))
-    print(rc1@yintercept)
-
-    rc2 = regline(fspan(29.0,29.75,toint((29.75-29.0)/0.25)+1), dolr_dsst(2:5))
-
-    print(rc2@yintercept)
-    print (rc1+"*x"+"+" +rc1@yintercept)
-    print (rc2+"*x"+"+" +rc2@yintercept)
-exit()
+;     print(rc2@yintercept)
+;     print (rc1+"*x"+"+" +rc1@yintercept)
+;     print (rc2+"*x"+"+" +rc2@yintercept)
+; exit()
     
 ;;;;draw plot 
-    wks=gsn_open_wks("pdf", "SST-OLR-relation-clmdata-TWNP-HADISSTDATA-SON")
+    wks=gsn_open_wks("pdf", "SST-OLR-relation-clmdata-TWNP-HADISSTDATA-MAM")
 
 
     res                   = True                     ; plot mods desired

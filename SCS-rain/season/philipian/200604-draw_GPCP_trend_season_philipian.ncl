@@ -48,8 +48,12 @@ end
 
 begin
     f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+
+    ; f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+
+
     date=cd_calendar(f2->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201612)
+    timeind=ind(date.ge.197901.and.date.le.201512)
     p=f2->precip(timeind,:,:)
    
     delete(p&time)
@@ -66,6 +70,11 @@ begin
     prob_jja=rc_test(rc_jja)
     prob_son=rc_test(rc_son)
     prob_djf=rc_test(rc_djf)
+
+    ; rc_mam = where(prob_mam.le.0.1, rc_mam, rc_mam@_FillValue)
+    ; rc_jja = where(prob_jja.le.0.1, rc_jja, rc_jja@_FillValue)
+    ; rc_son = where(prob_son.le.0.1, rc_son, rc_son@_FillValue)
+    ; rc_djf = where(prob_djf.le.0.1, rc_djf, rc_djf@_FillValue)
     
     ; prob_mam = 1- rc_mam@prob
     ; prob_jja = 1- rc_jja@prob
@@ -79,7 +88,7 @@ begin
     copy_VarCoords(p_pi(1,:,:), prob_djf)
 
     
-wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016")
+wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2015-global")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -101,11 +110,11 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
 
   res@mpLimitMode           = "LatLon"
   
-  res@mpMinLatF             = -5
+  res@mpMinLatF             = -30
   ; res@mpMaxLatF             = 45
   res@mpMaxLatF             = 30
-  res@mpMinLonF             =100
-  res@mpMaxLonF             = 170
+  res@mpMinLonF             =0
+  res@mpMaxLonF             = 360
 
   
 
@@ -117,13 +126,20 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   res@tmYROn=False
   res@tmXBMode="Explicit"
   res@tmYLMode="Explicit"
-  res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
-  res@tmYLLabelFontHeightF      = 0.025
-  res@gsnLeftStringFontHeightF = 0.03
+  ; res@tmXBLabelFontHeightF      = 0.01    ;font height of tick labels
+  ; res@tmYLLabelFontHeightF      = 0.01
+  ; res@gsnLeftStringFontHeightF = 0.02
+
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=2.0
+  res@tmYLMajorThicknessF=2.0
+  res@tmBorderThicknessF=2.0
+
   res@tmYLMinorOn = True
   
-  res@tmXBValues = (/100,120,140,160/) 
-  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+  ; res@tmXBValues = (/100,120,140,160/) 
+  ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
 
 
 
@@ -136,16 +152,22 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
   ; res@vpWidthF=0.7
 
   ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  ; res@cnMinLevelValF       =   -2.5
-  ; res@cnMaxLevelValF       =   2.5
-  ; res@cnLevelSpacingF      =  0.25
-  ; res@cnFillPalette="MPL_BrBG"
+  ; res@cnMinLevelValF       =   -2.0
+  ; res@cnMaxLevelValF       =   2.0
+  ; res@cnLevelSpacingF      =  0.5
+  ; ; ; res@cnFillPalette="MPL_BrBG"
   ; res@cnFillPalette = "CBR_drywet"
+  ; ; res@cnFillPalette = "precip_diff_12lev"
+  ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+  ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+  ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
   res@cnFillPalette = "precip_diff_12lev"
+  ; res@cnFillPalette = "CBR_drywet"
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
-  res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
-  
+
+    res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5/)
+
  
 
   res@gsnLeftString="(a) MAM Precip trend " 
@@ -186,12 +208,12 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
     ; ;;添加区域
    ;;warm pool
    pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
+   pgres@gsLineDashPattern=1
 
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
@@ -248,7 +270,7 @@ wks   = gsn_open_wks("pdf", "不同季节GPCP降水的趋势-phipipian-1979-2016
    
 pres = True
 pres@gsnPanelLabelBar  = True
-pres@lbLabelStrings = res@cnLevels +""
+; pres@lbLabelStrings = res@cnLevels +""
 pres@lbLabelFontHeightF = 0.01
 gsn_panel(wks, plot, (/2,2/), pres)
 

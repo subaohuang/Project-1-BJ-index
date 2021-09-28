@@ -49,21 +49,21 @@ begin
     yearnum = endyear - startyear +1
   ;;
 ;;;region
-   lat1 = -5
-   lat2 = 30
-   lon1 = 100
-   lon2 = 170
-   ; lat1 = -10
-   ; lat2 = 20
+   ; lat1 = -5
+   ; lat2 = 30
    ; lon1 = 100
-   ; lon2 = 160
+   ; lon2 = 170
+   lat1 = -40
+   lat2 = 40
+   lon1 = 0
+   lon2 = 360
 
 
 ;;;;
 
 
 ;;;读入HadiSST海温数据
-    diri="/home/ys17-19/lsh/data/sst/"
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -99,7 +99,7 @@ begin
 
   season = (/"MAM","JJA","SON","DJF"/)
 
-  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-philipian")
+  wks   = gsn_open_wks("pdf", "ATM-ocean-forcing-SST-tropical")
 
   plot = new(12,graphic)
   str = "" + ispan(1,dimsizes(plot),1)

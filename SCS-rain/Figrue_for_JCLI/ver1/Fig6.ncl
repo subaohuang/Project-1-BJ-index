@@ -32,9 +32,9 @@ begin
    b = 0.5
    prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
    copy_VarCoords(ssta_rc, prob)
-
 return prob
 end
+
 undef("remove_enso_signal")
 function remove_enso_signal(nino3_4,  data)
   begin  
@@ -146,7 +146,10 @@ begin
 
 
 
-    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/gpcp_pre_chazhi_1979-2015.nc", "r")   
+
+    ; f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/gpcp_pre_chazhi_1979-2015.nc", "r")   
+    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/ver1/cmap_pre_chazhi_1979-2015.nc", "r")   
+
     date:=cd_calendar(f2->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
     
@@ -229,7 +232,7 @@ begin
 
     ; print("=====finish read data==========")
 
-    f1=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_u_chazhi_1979-2015.nc", "r")   
+    f1=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/ver1/era_u_chazhi_1979-2015.nc", "r")   
     date:=cd_calendar(f1->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
     
@@ -239,7 +242,7 @@ begin
  
     u_chazhi=(/rmMonAnnCycTLL(u_chazhi)/)
 
-    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_v_chazhi_1979-2015.nc", "r")   
+    f2=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/ver1/era_v_chazhi_1979-2015.nc", "r")   
     date:=cd_calendar(f2->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
     
@@ -250,7 +253,7 @@ begin
     v_chazhi=(/rmMonAnnCycTLL(v_chazhi)/)
 
 
-    f3=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/era_w_chazhi_1979-2015.nc", "r")   
+    f3=addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/ver1/era_w_chazhi_1979-2015.nc", "r")   
     date:=cd_calendar(f3->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
     
@@ -262,7 +265,7 @@ begin
 ;;;;;
 
 
-    f6 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/season/olr_chazhi_1979-2015.nc", "r")
+    f6 = addfile("/home/ys17-19/lsh/Project/SCS-rain/Figrue_for_JCLI/ver1/olr_chazhi_1979-2015.nc", "r")
     ;;;region
     lat1 = -90
     lat2 = 90
@@ -277,7 +280,7 @@ begin
 
 
 ;;;;
-    wks   = gsn_open_wks("png", "GPCP&olr回归到印度洋SST的回归系数")
+    wks   = gsn_open_wks("pdf", "CMAP&olr回归到印度洋SST的回归系数")
   
     plot=new(8,graphic)
     plot1 = plot
@@ -305,13 +308,24 @@ do i =0,3
   printVarSummary(ssta_annual)
 
 
-  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) , 0, 0)
+  ssta_index_rc = regCoef_n(ispan(1,dimsizes(ssta_annual&time),1), wgt_areaave(ssta_annual(:,{-20:20},{40:110}), area({-20:20}), 1.0, 0) , 0, 0)
   ssta_index_rc  =ssta_index_rc*yearnum
-   
 
-  ;;;;remove_enso_signal 
+  if i.eq.3 then 
+    ssta_index_rc = 0.42
+  end if
+
+  if i.eq.0 then 
+      ssta_index_rc = 0.23
+    end if
+     if i.eq.1 then 
+      ssta_index_rc = 0.41
+    end if
+  print("*******ssta_index_rc="+ssta_index_rc)
+
+  ;;;remove_enso_signal 
   ssta_annual = (/remove_enso_signal(nino3_4, ssta_annual)/)
-  ;;;;
+  ;;;
 
   ssta_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),ssta_annual,False,True,0)/)
  
@@ -319,27 +333,27 @@ do i =0,3
   ;;;;;要分析的变量
   p_annual = month_to_season(p_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
 
-  ; ;;;;remove_enso_signal 
-  ; p_annual = (/remove_enso_signal(nino3_4, p_annual)/)
- 
-  ; ;;;;;;;;
+
+  ;;;remove_enso_signal 
+  p_annual = (/remove_enso_signal(nino3_4, p_annual)/)
+  ;;;;;;;
 
 
  
   ;;;;;要分析的变量
   u_annual = month_to_season(u_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
-  ; ;;;;remove_enso_signal 
-  ; u_annual = (/remove_enso_signal(nino3_4, u_annual)/)
-  ; ;;;;
+  ;;;remove_enso_signal 
+  u_annual = (/remove_enso_signal(nino3_4, u_annual)/)
+  ;;;
   
 
 
   ;;;;;要分析的变量
   v_annual = month_to_season(v_chazhi(:,{lat1:lat2},{lon1:lon2}), season(i))
 
-  ; ;;;;remove_enso_signal 
-  ; v_annual = (/remove_enso_signal(nino3_4, v_annual)/)
-  ; ;;;;
+  ;;;remove_enso_signal 
+  v_annual = (/remove_enso_signal(nino3_4, v_annual)/)
+  ;;;
   
   
   ;;;;;要分析的变量
@@ -353,11 +367,29 @@ do i =0,3
     
 
 
-  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-30:30},{40:100}), area({-30:30}), 1.0, 0) 
+  ssta_index = wgt_areaave_Wrap(ssta_annual(:,{-20:20},{40:100}), area({-20:20}), 1.0, 0) 
+
+
+  ;;;计算各变量的实际趋势
+   p_rc = regCoef_n(ispan(1,yearnum,1),p_annual,0,0)
+   u_rc = regCoef_n(ispan(1,yearnum,1),u_annual,0,0)
+   v_rc = regCoef_n(ispan(1,yearnum,1),v_annual,0,0)
+   olr_rc = regCoef_n(ispan(1,yearnum,1),olr_annual,0,0)
+
+   p_rc = (/p_rc*yearnum/)
+   u_rc = (/u_rc*yearnum/)
+   v_rc = (/v_rc*yearnum/)
+   olr_rc = (/olr_rc*yearnum/)
+
+   
 
 
 
-  
+  ;;;;去趋势
+  p_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),p_annual,False,True,0)/)
+  u_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),u_annual,False,True,0)/)
+  v_annual =  (/dtrend_msg_n(ispan(1,yearnum,1),v_annual,False,True,0)/)
+  olr_annual =(/dtrend_msg_n(ispan(1,yearnum,1),olr_annual,False,True,0)/)
 
 
   ;;;correlation with sst
@@ -365,14 +397,20 @@ do i =0,3
     copy_VarCoords(ssta_annual(0,:,:), r_sst_p)
 
     r_sst_p = (/r_sst_p*ssta_index_rc/)
+
+
    ;;;;;
-   
+
     ;;;correlation with sst
     r_sst_olr := regCoef_n(ssta_index, olr_annual, 0, 0)
     copy_VarCoords(ssta_annual(0,:,:), r_sst_olr)
 
     r_sst_olr = (/r_sst_olr*ssta_index_rc/)
+
+    region_mean = avg(r_sst_olr({0:15},{125:160}))
     ;;;;;
+
+     print("*********"+season(i)+"**********r_sst_olr="+region_mean)
 
     ; ;;;normalized before regression 
     ; ssta_index = (/dim_standardize_n(ssta_index, 1, 0)/)
@@ -402,49 +440,57 @@ do i =0,3
     ;;;;;
    
    
+    ;;;percent
+    
+     u_percent  = r_sst_u
+     u_percent = r_sst_u/u_rc  
 
+     v_percent  = r_sst_v
+     v_percent = r_sst_v/v_rc  
 
+     p_percent  = r_sst_p
+     p_percent = r_sst_p/p_rc  
+
+   
+
+     olr_percent  = r_sst_olr
+     olr_percent = r_sst_olr/olr_rc  
+     
+
+    ; p_percent = (/abs(p_percent)/)
+      u_percent = (/abs(u_percent)/)
+        v_percent = (/abs(v_percent)/)
+    ;       olr_percent = (/abs(olr_percent)/)
+     
 
 
     print("*******显著性检验*****************")
 
     ;;;t test 
     prob_p1= rc_test(r_sst_p)
-
-    printVarSummary(prob_p1)
-
-    prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
-    ;;;;
-
-    
-    ;;;t test 
     prob_p2= rc_test(r_sst_u)
-
-    printVarSummary(prob_p2)
-
-    ; prob_p2 = where(prob_p2.eq.0, 2, prob_p2)
-    ;;;;
-
-
-    ;;;t test 
     prob_p3= rc_test(r_sst_v)
-
-    printVarSummary(prob_p3)
-
-    ; prob_p3 = where(prob_p3.eq.0, 2, prob_p3)
-    ;;;;
-
-     ;;;t test 
     prob_p4= rc_test(r_sst_olr)
 
-    printVarSummary(prob_p4)
 
-    ; prob_p4 = where(prob_p4.eq.0, 2, prob_p4)
+    ; prob_p1 = where(p_percent.ge.0.9, 0.01, 2)
+    ; ; prob_p2 = where(u_percent.ge.0.5, 0.01, 2)
+    ; ; prob_p3 = where(v_percent.ge.0.5, 0.01, 2)
+    ; prob_p4 = where(olr_percent.ge.0.9, 0.01, 2)
+
+
+    ; prob_p1 = where(p_percent.le.-0.9, 0.06, prob_p1)
+    ; ; prob_p2 = where(u_percent.le.-0.5, 0.06, 2)
+    ; ; prob_p3 = where(v_percent.le.-0.5, 0.06, 2)
+    ; prob_p4 = where(olr_percent.le.-0.9, 0.06, prob_p4)
+
+
+
+    ; prob_p1 = where(prob_p1.eq.0, 2, prob_p1)
     ;;;;
-     
 
 
-    
+
     if i.ne.0 then 
       prob_p2({0:30},{100:140}) =  where(prob_p2({0:30},{100:140}).le.0.6, 0.1,prob_p2({0:30},{100:140}))
     end if
@@ -453,7 +499,7 @@ do i =0,3
       prob_p1({0:15},{125:160}) =  where(r_sst_p({0:15},{125:160}).le.-0.5, 0.005, prob_p1({0:15},{125:160}))
     end if
 
-    r_sst_u = where(prob_p2.le.0.2.or.prob_p3.le.0.2, r_sst_u, r_sst_u@_FillValue)
+    r_sst_u = where(prob_p2.le.0.1.or.prob_p3.le.0.1, r_sst_u, r_sst_u@_FillValue)
 
 
 
@@ -520,6 +566,11 @@ do i =0,3
 
   ; res@tmXBValues = (/100,120,140,160/) 
   ; res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+  
+  ; res@tmYLValues = (/-30,-20,-10,0,10,20,30/) 
+  ; res@tmYLLabels = (/"30S","20S","10S","0","10N","20N","30N"/) 
+
+  ; res@tmYLMinorValues = ispan(-30,30,5)
 
 
 
@@ -529,6 +580,7 @@ do i =0,3
 
 
   res@cnFillPalette = "precip_diff_12lev"
+  ; res@cnFillPalette = "CBR_drywet"
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
   ; res@cnLevels := (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)/2.0
@@ -541,9 +593,13 @@ do i =0,3
     ; res@cnLevels := (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
     ; res@cnFillColors= (/3,4,6,8,9,10,11,12,13/) - 2 
       ;  res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
-      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+  ; res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+  ; res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5,2.0/)
+
+    res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5/)
+
+
 
   ; gsn_define_colormap(wks, "precip_diff_12lev")
   ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
@@ -617,7 +673,7 @@ do i =0,3
 
   ; res@cnLevels := (/-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0/)*10
 
-    res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*20.0
+  res@cnLevels := (/-16,-12,-8,-4,-2,2,4,8,12,16/)
 
   ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
   ; res@cnMinLevelValF      = -2.5       ; set min contour level
@@ -688,7 +744,7 @@ do i =0,3
    
 
 
-    ;;;打点
+    ;;打点
     res_pro=True
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
@@ -707,8 +763,6 @@ do i =0,3
     iplot(i*2) = gsn_csm_contour(wks,prob_p1,res_pro)
 
     iplot(i*2+1) = gsn_csm_contour(wks,prob_p4,res_pro)
-   
-     
     
 
     opt                      = True
@@ -720,8 +774,34 @@ do i =0,3
 
     iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.1,opt)
     iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.1,opt)
-   
+         
+        ; res_pro=True
+        ; res_pro@gsnDraw=False
+        ; res_pro@gsnFrame=False
+        ; res_pro@cnFillOn = True
 
+        ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
+        ; res_pro@cnLevels = (/0,0.05,1.0/)
+        ; res_pro@lbLabelBarOn = False
+
+        ; res_pro@cnLinesOn=False
+        ; res_pro@cnFillDrawOrder = "PostDraw"
+
+        ; res_pro@cnMonoFillPattern = True
+        ; res_pro@cnFillPattern = 17
+        ; res_pro@cnFillDotSizeF = 0.0028
+        ; res_pro@cnMonoFillColor = False
+        ; res_pro@cnFillColors = (/"Transparent","red","blue","Transparent"/)
+        ; ; res_pro@cnLevels = ispan(-6,6,1)
+        ; res_pro@cnLineLabelsOn=False
+        ; res_pro@tmYRMode = "Automatic"
+        ; res_pro@cnInfoLabelOn=False
+
+        ; iplot(i*2) = gsn_csm_contour(wks,prob_p1,res_pro)
+
+        ; iplot(i*2+1) = gsn_csm_contour(wks,prob_p4,res_pro)
+    
+    
 
     ;;;  
     
@@ -741,7 +821,7 @@ end do
 
   gsn_panel(wks, plot, (/4,2/), pres)
   
-system("convert -geometry 1800x1800 -density 600x600 -trim  GPCP&olr回归到印度洋SST的回归系数.png  GPCP&olr回归到印度洋SST的回归系数_high.png")     
+; system("convert -geometry 1800x1800 -density 600x600 -trim  GPCP&olr回归到印度洋SST的回归系数.png  GPCP&olr回归到印度洋SST的回归系数_high.png")     
 
  
  print("done")

@@ -1,359 +1,235 @@
 ;;********************************************************
-;;画HadIsst的sst趋势
-;;
-;;lnshuheng 2020.02.17
+;;draw different season long-term change diabatic heat and Q1 HEAT rate profile averaged over SCS and 
+;;philippines sea
+;;diabatic and convection data from CFSR
+;;q1 derived from NCEP_DOE calculate by eqution
+;;                               lnshuheng 2020.1.1 
 ;**********************************************************
-function  rc_test(ssta_rc)
 begin
-  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
-   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
-   b = tval    ; b must be same size as tval (and df)
-   b = 0.5
-   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
-   copy_VarCoords(ssta_rc, prob)
 
-return prob
-end
-undef("remove_enso_signal")
-function remove_enso_signal(data)
-  begin  
-  ; ;;;读入HadiSST海温数据
-      diri="/home/yangsong3/data-observation/linshh/data/sst/"
-      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-      f1=addfile(fils1, "r")
-      date:=cd_calendar(f1->time, 1)
-
-      timeind:=ind(date.le.201512.and.date.ge.197901)
-
-      sst =  lonFlip(f1->sst(timeind,:,:))
-   
-      ssta=(/rmMonAnnCycTLL(sst)/)
-      copy_VarCoords(sst, ssta)
-
-      ssta_de = ssta
-      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
-      printVarSummary(ssta_index)
-
-      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-      printVarSummary(nino3_4)
-
-      
-      ; nino3_4_new = nino3_4                ;;;;前期ENSO
-      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
-      ; nino3_4_new(34) =ssta_index(35*12-1) 
-   
-      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
-  ;;;;;
-      data_de = data
-      ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
-      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
-      copy_VarCoords(data(1,:,:), data_rc)
-      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
-      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
-      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
-  
-      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
-      data_new = data 
-      data_new = (/data - data_relate_enso/)
-  return data_new
-end 
-
-function cal_season_trend(data,season)
-  begin
-   
-    p_djf_r=month_to_season(data, season)
-     ; ;;;;remove_enso_signal
-     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
-     ; ;;;;
-
-      if season.eq."DJF"
-      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
-      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
-    end if
-    dim = dimsizes(p_djf_r)
-    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
-    copy_VarCoords(p_djf_r(1,:,:), p_rc)
-    p_rc=(/p_rc*dim(0)/)
-  return p_rc
-end 
-
-
-
-
-;;**************************************************************
-;;;main program
-;;***************************************************************
-begin
-  
-   ;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-    f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->time, 1)
-
-    timeind:=ind(date.le.201512.and.date.ge.197901)
-
-    sst  = f1->sst(timeind,:,:)
-
-    sst_mam_clm = dim_avg_n_Wrap(month_to_season(sst, "MAM"), 0)
-    sst_jja_clm = dim_avg_n_Wrap(month_to_season(sst, "JJA"), 0)
-    sst_son_clm = dim_avg_n_Wrap(month_to_season(sst, "SON"), 0)
-    sst_djf_clm = dim_avg_n_Wrap(month_to_season(sst, "DJF"), 0)
-
-    ssta=(/rmMonAnnCycTLL(sst)/)
-    copy_VarCoords(sst, ssta)
-    
-
-   ;;;;cal season trend 
-    ssta_mam = cal_season_trend(ssta,"MAM")
-    ssta_jja = cal_season_trend(ssta,"JJA")
-    ssta_son  = cal_season_trend(ssta,"SON")
-    ssta_djf = cal_season_trend(ssta,"DJF")
-    
-    ; ssta_jja = (/ssta_jja - ssta_mam/)
-    ; ssta_son = (/ssta_son- ssta_mam/)
-    ; ssta_djf = (/ssta_djf -ssta_mam/)
-    ; ssta_mam = 0.0
-
-    prob_mam = rc_test(ssta_mam)
-    prob_jja = rc_test(ssta_jja)
-
-    prob_son = rc_test(ssta_son)
-    prob_djf = rc_test(ssta_djf)
+  season = (/"MAM","JJA","SON","DJF"/)
+  ; file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-philipian.nc"
+  ; file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-philipian.nc"
+  file1 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/diabatic_heating_CFSR_" +season+"_clm_change_profile_2010-TWNP.nc"
+  file2 = "/home/ys17-19/lsh/Project/SCS-rain/season/philipian/deepcon_heating_CFSR_" +season+ "_clm_change_profile_2010-TWNP.nc"
  
+  plot1 = new(4,graphic)
+  plot2 = new(4,graphic)
+  ; wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-ERA-2010-philipian-season")                  ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","Q1,非绝热加热,深对流加热的profile-lindata-ERA-2015-TWNP-season")                  ; send graphics to PNG file
 
-   print(avg(ssta_mam({0:15},{125:160})))
-   print(avg(ssta_jja({0:15},{125:160})))
-   print(avg(ssta_son({0:15},{125:160})))
-   print(avg(ssta_djf({0:15},{125:160})))
-   exit()
+  order  = (/"(a)","(b)","(c)","(d)"/)
 
 
-    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+do i=0,3
+; ==============================================================
+; Mission 1. read data
+; ==============================================================
+;;read diabatic data 
+  f1 = addfile(file1(i), "r")
 
-    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
-    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
-    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
-    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
-    
-    
-    
-    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
-;;**************************************************************
-;画图
-;;***************************************************************
-
-  res=True
-  res@gsnFrame=False
-  res@gsnDraw=False
-
+  diabatic_heat_change = f1->diab_q(1,:)
+  diabatic_heat_clm = f1->diab_q(0,:) 
+  level = diabatic_heat_change&lev
+  level = level/100.0
   
+  diabatic_heat_change = (/diabatic_heat_change*86400/)
+  diabatic_heat_clm = (/diabatic_heat_clm*86400/)
+  if i.eq.0 then
+  print("*****diabatic-heating=****"+dim_avg(diabatic_heat_change({20000:85000}) - diabatic_heat_clm({20000:85000})))
+  end if
+;;;
+
+;;read deep convection data
+  f2 = addfile(file2(i), "r")
+
+  deepcon_heat_change = f2->deepcon_q(1,:)
+  deepcon_heat_clm = f2->deepcon_q(0,:) 
+  
+  
+  deepcon_heat_change = (/deepcon_heat_change*86400/)
+  deepcon_heat_clm = (/deepcon_heat_clm*86400/)
  
-   ; res@cnFillPalette = "BlueWhiteOrangeRed"
-   res@cnFillPalette = "BlueDarkRed18"
-   ; res@cnFillPalette = "BlRe"
+ if i.eq.0 then
+  print("*****deepcon-heating=****"+dim_avg(deepcon_heat_change({20000:85000}) -deepcon_heat_clm({20000:85000})))
+end if
+;;;
 
-  ; res@gsnSpreadColorStart = 130
-  ; res@gsnSpreadColorEnd = 253
-  res@cnFillOn=True
-  res@cnLinesOn=False
+;;;read Q1 monthly data from linshuheng
+  fils = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/q1/q1"+"*") ;;;daily数据计算的q1
+  print(fils)
+  f3 = addfiles(fils, "r")
+  date = cd_calendar(f3[:]->time, 1)
 
-  res@cnLineLabelsOn=False
-  res@lbLabelBarOn=False
-  res@lbLabelStride=2
-  res@lbOrientation="Vertical"
-  res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -30
-  ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             =0
-  ; res@mpMaxLonF             = 360
+  timeind = ind(date.le.201512.and.date.ge.197901)
 
-  res@mpMinLatF             = -5
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             = 100
-  res@mpMaxLonF             = 170
+  q1 = f3[:]->q1(timeind,:,:,:)
 
+  q1 = (/q1*86400.0/)
 
+  ; printVarSummary(q1)
 
-  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+  ; q1_annual = month_to_annual(q1, 1)
+  q1_annual = month_to_season(q1, season(i))
 
-  res@tmXTOn=False
-  res@tmYROn=False
-  res@tmXBOn=True
-  res@tmYROn=False
-  res@tmXBMode="Explicit"
-  res@tmYLMode="Explicit"
+  if season(i).eq."DJF"
+     q1_annual(0:dimsizes(q1_annual&time)-2,:,:,:) = q1_annual(1:,:,:,:) 
+     q1_annual(dimsizes(q1_annual&time)-1,:,:,:) = q1(dimsizes(q1&time)-1,:,:,:)
+  end if 
 
 
+  dim = dimsizes(q1_annual)
 
-  res@tmXBLabelFontHeightF=0.025
-  res@tmYLLabelFontHeightF=0.025
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
+  q1_annual_rc = (/regCoef_n(ispan(1,dim(0),1), q1_annual,0,0)/)
 
-  res@tmXBValues = (/100,120,140,160/) 
-  res@tmXBLabels = (/100,120,140,160/) +""+"E" 
-
-  res@gsnLeftStringFontHeightF = 0.03
+  ; q1_annual_mk=trend_manken(q1_annual, False, 0)
+  ; q1_annual_rc = q1_annual_mk(1,:,:,:)
+  copy_VarCoords(q1_annual(1,:,:,:), q1_annual_rc)  
 
 
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   0.0
-  res@cnMaxLevelValF       =   1.0
-  res@cnLevelSpacingF      =  0.1
-  ; res@cnFillPalette = "NCV_jaisnd"
-  res@cnFillPalette = "sunshine_9lev"
-  ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
-  ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+  q1_annual_rc = (/q1_annual_rc*dim(0)/)
+  q1_clm = dim_avg_n_Wrap(q1_annual, 0)
 
-  res@cnInfoLabelOn = False
+
+  ;;;区域平均
+      g_latS=0.
+      g_latN=20.
+      g_lonW=125.
+      g_lonE=160.
+
+      q1_clim_area = wgt_areaave_Wrap(q1_clm(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+      q1_annual_rc_area = wgt_areaave_Wrap(q1_annual_rc(:,{g_latS:g_latN},{g_lonW:g_lonE}),1.0,1.0,0)
+      q1_change = q1_clim_area
+      q1_change = (/q1_clim_area+q1_annual_rc_area/)
+if i.eq.0 then
+ print("*****Q1-heating=****"+dim_avg(q1_annual_rc_area({200:850})))
+end if
+
+
+  ;;;
+  
+  q1_clim_area = q1_clim_area
+  q1_change = q1_change
+  ;;;
+
+;;;;
+    resxy = True
+    resxy@gsnDraw = False
+    resxy@gsnFrame  =False
+    resxy@xyLineThicknessF  =  (/2.0/)          ; make second line thicker
+    resxy@xyMonoLineThickness = True
+    resxy@xyLineColors       :=  (/"blue","blue","red","red"/)          ; change line color
+    resxy@xyMarkLineModes    :=  (/"MarkLines","MarkLines","MarkLines","MarkLines"/)
+    resxy@xyDashPatterns := (/0,1,0,1/)
+    resxy@xyMonoMarker        = False
+    resxy@xyMarkers           := (/16,16,7,7/)
+    resxy@xyMarkerColors :=  (/"blue","blue","red","red"/)
+
+    resxy@gsnLeftStringFontHeightF = 0.02
+    resxy@gsnLeftString = order(i)+" " +season(i) + " DPLH DIABH Q1 Profile"
+
   
 
-  res@gsnLeftString="(a) MAM SST trend"
+    resxy@tmXBLabelFontHeightF=0.025
+    resxy@tmYLLabelFontHeightF=0.025
+    resxy@tmXBMajorThicknessF=1.0
+    resxy@tmYLMajorThicknessF=1.0
 
-
-  ; res@mpShapeMode = "FreeAspect"
-  ; res@vpHeightF = 0.2
-  ; res@vpWidthF = 0.7
-
-  plot=new(4,graphic)
-
-  plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
-  res@gsnLeftString="(b) JJA SST trend"
-  plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
-  res@gsnLeftString="(c) SON SST trend"
-  plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
-  res@gsnLeftString="(d) DJF SST trend"
-  plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
-
-  res2 = res
-  res2@cnLevelSelectionMode = "ExplicitLevels"
-  res2@cnFillOn = False
-  res2@cnLinesOn = True
-  res2@cnLevels = fspan(26.0, 30.0, 9)
-  res2@cnLineLabelStrings =   res2@cnLevels  + ""
-  res2@cnLineLabelDensityF = 1.3
-
-
-  res2@cnLineColors = "black"
-  res2@cnMonoLineColor  = True
-  res2@cnLineThicknessF = 2
-  res2@cnMonoLineThickness  = True
-  res2@gsnLeftString = ""
-  res2@cnInfoLabelOn = False
-  res2@cnLineLabelsOn = True
-  res2@cnLineLabelInterval = 1
-  res2@cnLineLabelBackgroundColor = "White"
-  
-  plot1=new(4,graphic)
-
-  plot1(0) = gsn_csm_contour(wks, sst_mam_clm, res2)
-  plot1(1) = gsn_csm_contour(wks, sst_jja_clm, res2)
-  plot1(2) = gsn_csm_contour(wks, sst_son_clm, res2)
-  plot1(3) = gsn_csm_contour(wks, sst_djf_clm, res2)
-
-  do i=0,3
-  overlay(plot(i), plot1(i))
-  end do   
-
-   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
-
-
-  ;;;添加赤道直线
-   pgx=ispan(30,390,10)
-   pgy=new(dimsizes(pgx),typeof(pgx))
-   pgy=0
+    
+    resxy@tmXBMode  =  "Explicit"
+    resxy@trXMaxF =  6.
+    resxy@trXMinF = -2.
+    resxy@tmXBValues = fspan(-2,6,5)
+    resxy@tmXBLabels = fspan(-2,6,5)
+    resxy@tmXBMinorOn = True
+    resxy@tmXBMinorValues = fspan(-2,6,17)
+    resxy@tiYAxisString = ""
    
-   pgres=True
-   pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
+    ; resxy@pmLegendDisplayMode = "Always"
+    ; resxy@lgBoxLinesOn = False
+    ; resxy@xyExplicitLegendLabels  =  (/"DPLH Clm","DPLH Clm+Change","DIABH Clm","DIABH Clm+Change"/)     ;加线的标注
+    resxy@trYReverse        = True                       ; reverse Y-axis
 
-  str = ispan(1, 4, 1) + ""
-    plot_add = new(4,graphic)
-  ; do i = 0,3
-  ; plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
-  ;  end do 
-  ;;;添加indo-pacific warm pool
-    ; ;;添加区域
-   ;;warm pool
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
-   str3=unique_string("dum3")
-   str4=unique_string("dum4")
+    plot1(i) = gsn_csm_xy(wks, (/deepcon_heat_clm,deepcon_heat_change, \
+                             diabatic_heat_clm,diabatic_heat_change/),level ,resxy)
+    
+    ;;;
+    resxy@xyLineColors       :=  (/"black","black"/)          ; change line color
+    resxy@xyMarkLineModes := (/"lines","lines"/)    
+    ; resxy@xyExplicitLegendLabels := (/"Q1 Clim","Q1 Clim+Change"/)
+    resxy@xyDashPatterns := (/0,1/)
+    plot2(i) = gsn_csm_xy(wks, (/q1_clim_area,q1_change/),q1&lev, resxy)
+
+    overlay(plot1(i), plot2(i))
+
+end do 
+
+
+pres =True
+; drawNDCGrid(wks)
+gsn_panel(wks, plot1, (/2,2/), pres)
+
+print("done stript")
+
+  ;  ;;添加legend 
+  ;     ;--------------------------------------------------------------------------
+    ; res_lines                   = True                  ; polyline mods desired
+    ; res_lines@gsLineDashPattern = 0.                    ; solid line
+    ; res_lines@gsLineThicknessF  = 2.                    ; line thicker
+
+    
+    ; res_text                    = True                  ; text mods desired
+    ; res_text@txFontHeightF      = 0.01                 ; change text size
+    ; res_text@txJust             = "CenterLeft"          ; text justification
+
+    ; res_lines@gsLineColor       = "black"
+
+    ; yy = (/25.,25./)
+    ; xx = (/2.5,3.0/)
+    ; text_pos = 3.1
    
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 125
-   lon2 = 160
+    ; dum3 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum4 = gsn_text_ndc(wks,"Q1 Clim",text_pos,yy(0),res_text); add text
+ 
+    ; res_lines@gsLineDashPattern = 1.                    ; solid line
+    ; yy = yy+50
+    ; dum31 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum41 = gsn_text_ndc(wks,"Q1 Clim+Change",text_pos,yy(0),res_text); add text
+    
+    ; res_lines@gsLineDashPattern = 0.                    ; solid line
+    ; res_lines@gsMarkerIndex     = 16
+    ; res_lines@gsMarkerSizeF     = 0.01
+    ; res_lines@gsLineColor       = "blue"
+    ; res_lines@gsMarkerColor = "blue"
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
+    ; yy = yy+50
+    ; dum5 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum6 = gsn_text_ndc(wks,"DPLH Clim",text_pos,yy(0),res_text); add text
+    ; dum55 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
 
-    str2 = ispan(1, 4, 1) + ""
-     plot_add2 = new(4,graphic)
-    do i = 0,3
-      plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-    end do 
+    ; res_lines@gsLineDashPattern = 1.
+   
+    ; yy = yy+50
+    ; dum51 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum61 = gsn_text_ndc(wks,"DPLH Clim+Change",text_pos,yy(0),res_text); add text
+    ; dum551 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
 
-   ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
+   
+    ; res_lines@gsMarkerIndex     = 9
+    ; res_lines@gsLineColor       = "red"
+    ; res_lines@gsLineDashPattern = 0.
+    ; res_lines@gsMarkerColor     = "red"
+    ; res_lines@gsMarkerThicknessF   = 3.0
+    ; yy = yy+50
+    ; dum7 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum8 = gsn_text_ndc(wks,"DIABH Clim",text_pos,yy(0),res_text); add text
+    ; dum77 = gsn_polymarker_ndc(wks,xx,yy,res_lines)   
+    
+    ; res_lines@gsLineDashPattern = 1.
+    ; yy = yy+50
+    ; dum71 = gsn_polyline_ndc(wks,xx,yy,res_lines)              ; add polyline
+    ; dum81 = gsn_text_ndc(wks,"DIABH Clim+Change",text_pos,yy(0),res_text); add text
+    ; dum771 = gsn_polymarker_ndc(wks,xx,yy,res_lines)       
 
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.001
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-  
-     iplot = new(4,graphic)
-     iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
-     iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
-     iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
-     iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
-    ;  
-    do i=0,3
-     overlay(plot(i), iplot(i))
-    end do
-
-pres = True
-pres@gsnPanelLabelBar  = True
-pres@gsnMaximize = True
-; pres@lbOrientation = "Vertical"
-pres@lbOrientation = "Horizontal"
-; pres@pmLabelBarHeightF = 0.3
-pres@lbLabelFontHeightF = 0.02
-; pres@lbLabelStride = 2
-gsn_panel(wks, plot, (/2,2/), pres)
-
-; wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
-  ; wks = gsn_open_wks(pltType, pltName)
-
-   system("convert -geometry 1800x1800 -density 600x600 -trim global季节平均SST的趋势-79-15.png  test.png")     
-
-end
+end 

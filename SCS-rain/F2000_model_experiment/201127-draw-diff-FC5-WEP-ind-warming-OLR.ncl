@@ -27,18 +27,20 @@ season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/ys17-19/lsh/CESM-data/F/FC5_CTRL/"+"FC5_CTRL.cam.h1.0101-4012_OLR_heatflux.nc" 
   fils2 = "/home/ys17-19/lsh/CESM-data/F/FC5_ind_wep_" + season_r +"/"+"FC5_ind_wep_"+season_r+".cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "CESM-FC5-WEP-ind-Warimg-fourseaon")
+  wks=gsn_open_wks("pdf", "CESM-FC5-WEP-ind-Warimg-fourseaon-allregion")
   
   plot = new(4,graphic)
   iplot = new(4,graphic)
   str3 = ispan(1,4,1) + ""
 
 
-do i = 0,1
+do i = 0,3
   f1=addfile(fils1, "r")
   f2=addfile(fils2(i), "r")
 
-  date=cd_calendar(f1->time, 1)
+  time = f1->time
+  time = (/time - 1/)
+  date=cd_calendar(time, 1)
 
   timeind=ind(date.ge.601.and.date.le.4012)
   print(date(timeind))
@@ -88,8 +90,8 @@ do i = 0,1
     res@cnFillPalette = "BlueWhiteOrangeRed"
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -8
-    res@cnMaxLevelValF       =   8
+    res@cnMinLevelValF       =   -12
+    res@cnMaxLevelValF       =   12
     res@cnLevelSpacingF      =  2
     
 
@@ -177,7 +179,7 @@ end do
   pres = True
   pres@gsnPanelLabelBar = True
 
-  gsn_panel(wks, (/plot(0),plot(1)/), (/2,1/), pres)
+  gsn_panel(wks, plot, (/2,2/), pres)
   print("done script")
 end
   

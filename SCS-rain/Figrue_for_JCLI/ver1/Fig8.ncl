@@ -247,13 +247,13 @@ do i = 0,3
 
    pgres=True
    pgres@gsLineColor="black"
-   pgres@gsLineThicknessF=1.5
-   pgres@gsLineDashPattern=0
+   pgres@gsLineThicknessF= 2.0
+   pgres@gsLineDashPattern = 1
  
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 

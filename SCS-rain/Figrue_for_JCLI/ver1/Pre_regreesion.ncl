@@ -146,7 +146,8 @@ begin
 
 ;;;read GPCP precipitation data
     
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")   
+    f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
     p=f2->precip(timeind,:,:)

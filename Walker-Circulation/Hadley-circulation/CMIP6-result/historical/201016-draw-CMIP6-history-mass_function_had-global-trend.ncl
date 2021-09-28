@@ -42,7 +42,9 @@ dfi=(pi*10)/180
 
 diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
 
-    wks = gsn_open_wks("pdf", "30个CMIP模式东太平洋哈德来环流的趋势")
+wks = gsn_open_wks("pdf", "30个CMIP模式东太平洋平均的哈德来环流的趋势")
+
+
 do k = 0,dim_model-1
 ;;;;
 
@@ -67,6 +69,8 @@ do k = 0,dim_model-1
    
 
     msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
+    ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,{150:270}), (/3/))
+    ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,:), (/3/))
 
 
     msf_mean_annual = month_to_annual(msf_mean, 1)
@@ -77,16 +81,16 @@ do k = 0,dim_model-1
 
    ;;;计算趋势
     ; rc = msf_mean_annual(1,:,:)
-    rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-60:60}),0,0)
+    rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-30:30}),0,0)
     
-     copy_VarCoords(msf_mean_annual(1,:,{-60:60}), rc)
+     copy_VarCoords(msf_mean_annual(1,:,{-30:30}), rc)
 
      rc  = (/rc*dim(0)/)
 
 
     prob := rc_test(rc)
 
-    copy_VarCoords(msf_mean_annual(1,:,{-60:60}), prob)
+    copy_VarCoords(msf_mean_annual(1,:,{-30:30}), prob)
     prob&level@units = "hPa"
     
 
@@ -102,20 +106,24 @@ do k = 0,dim_model-1
    
     res@cnLinesOn=False
     res@cnLevelSelectionMode ="ManualLevels"
-    res@cnMinLevelValF = -1.6
-    res@cnMaxLevelValF = 1.6
+    res@cnMinLevelValF = -1.2
+    res@cnMaxLevelValF = 1.2
     res@cnLevelSpacingF = 0.2
+    ;  res@cnMinLevelValF = -0.8
+    ; res@cnMaxLevelValF = 0.8
+    ; res@cnLevelSpacingF = 0.1
 
     res@lbLabelBarOn =False
     res@cnLineLabelsOn = False
     res@cnInfoLabelOn = False
+    res@cnLineThicknessF = 2.0
 
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
+    res@tmXBMajorThicknessF=1.5
+    res@tmYLMajorThicknessF=1.5
+    res@tmBorderThicknessF=1.5
    
-    res@tmXBLabelFontHeightF=0.015
-    res@tmYLLabelFontHeightF=0.015
+    res@tmXBLabelFontHeightF=0.02
+    res@tmYLLabelFontHeightF=0.02
 
     res@tiYAxisString=""
     res@tmXTOn=False
@@ -123,7 +131,7 @@ do k = 0,dim_model-1
     res@tmXBMode="Explicit"
  
     res@tmXBMinorOn=True
-    res@tmXBMinorValues=ispan(-60,60,10)
+    res@tmXBMinorValues=ispan(-30,30,5)
 
   
     res@tmYRMode="Automatic"
@@ -175,10 +183,10 @@ do k = 0,dim_model-1
     res@cnLevels = ispan(-8,8,2)
     res@cnLineLabelsOn=True
     res@cnLineLabelBackgroundColor="Transparent"
-    res@cnLineThicknessF = 1.
+    res@cnLineThicknessF = 2.
     res@cnFillOn = False
     res@gsnContourNegLineDashPattern=1
-    res@gsnContourZeroLineThicknessF=1.0
+    res@gsnContourZeroLineThicknessF=2.2
 
     plot1(k) = gsn_csm_pres_hgt(wks, msf_mean_clm, res)
   

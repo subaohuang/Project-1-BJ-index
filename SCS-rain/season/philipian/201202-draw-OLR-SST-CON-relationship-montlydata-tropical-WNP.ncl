@@ -51,6 +51,9 @@ endmon = 201512
 
 
     printVarSummary(sst)
+   
+   sst_tropical = dim_avg_n_Wrap(sst_r(:,{-30:30},{0:360}),0)
+    print("热带平均的SST= "+sst_tropical)
 
 
     fils3 = systemfunc("ls /home/yangsong3/data-observation/ERA-interim/monthly/divergence/DIV_monthly_*"+".nc")
@@ -179,12 +182,12 @@ print("**********start interp************")
 
     ind1 = ind(x.eq.26.5)
     ind2 = ind(x.eq.28.75)
-    ind3 = ind(x.eq.30.0)
+    ind3 = ind(x.eq.29.75)
 
     rc1 = regline(fspan(26.5,28.75,ind2-ind1+1), dolr_dsst(ind1:ind2))
     print(rc1@yintercept)
 
-    rc2 = regline(fspan(28.75,30.0,ind3-ind2+1), dolr_dsst(ind2:ind3))
+    rc2 = regline(fspan(28.75,29.75,ind3-ind2+1), dolr_dsst(ind2:ind3))
 
     print(rc2@yintercept)
     print (rc1+"*x"+"+" +rc1@yintercept)

@@ -46,18 +46,23 @@ begin
     ;;;
 
       
-    div_r = new((/dimsizes(time),7, dimsizes(lat),dimsizes(lon)/),float)
+    ; div_r = new((/dimsizes(time),7, dimsizes(lat),dimsizes(lon)/),float)
+      
+    ; do i = 0,dimsizes(timeind)/12-1
+    ; div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},:,:))
+    ; end do
+    
+    div_r = new((/dimsizes(time), dimsizes(lat),dimsizes(lon)/),float)
       
     do i = 0,dimsizes(timeind)/12-1
-
-    div_r(i*12:(i+1)*12-1,:,:,:) = short2flt(f3[i]->d(:,{1000:850},:,:))
-
+    div_r(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,{850},:,:))
     end do
-    ;
-
+    
+    
 
     ; div = dim_avg_n_Wrap(div_r(:,:,{-10:30},{100:180}),1)
-    div = dim_avg_n_Wrap(div_r,1)
+    div = div_r
+    ; div = dim_avg_n_Wrap(div_r,1)
 
     div = (/div*10^5/)
     div = (/-1*div/)
@@ -84,8 +89,8 @@ begin
     ;;;;
 
   ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    ; wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15")
-    wks   = gsn_open_wks("pdf", "全球风场幅合季节平均div的气候态-79-15")
+    wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15-850")
+    ; wks   = gsn_open_wks("pdf", "全球风场幅合季节平均div的气候态-79-15")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -112,15 +117,15 @@ begin
   res@lbLabelStride=2
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -30
-  res@mpMaxLatF             = 30
-  res@mpMinLonF             =0
-  res@mpMaxLonF             = 360
-
-  ; res@mpMinLatF             = -5
+  ; res@mpMinLatF             = -30
   ; res@mpMaxLatF             = 30
-  ; res@mpMinLonF             = 100
-  ; res@mpMaxLonF             = 170
+  ; res@mpMinLonF             =0
+  ; res@mpMaxLonF             = 360
+
+  res@mpMinLatF             = -5
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = 100
+  res@mpMaxLonF             = 170
 
 
 
@@ -147,9 +152,9 @@ begin
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levelW
-  res@cnMinLevelValF       =   -0.5
-  res@cnMaxLevelValF       =   .5
-  res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -0.3
+  res@cnMaxLevelValF       =   .3
+  res@cnLevelSpacingF      =  0.05
   ; res@cnFillPalette = "NCV_jaisnd"
   ; res@cnFillPalette = "sunshine_9lev"
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels

@@ -78,16 +78,16 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-全球平均的哈德来环流的�
 
     ;;;计算趋势
     ; rc = msf_mean_annual(1,:,:)
-    rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-60:60}),0,0)
+    rc := regCoef_n(ispan(1,dim(0),1),msf_mean_annual(:,:,{-30:30}),0,0)
 
-    copy_VarCoords(msf_mean_annual(1,:,{-60:60}), rc)
+    copy_VarCoords(msf_mean_annual(1,:,{-30:30}), rc)
 
     rc  = (/rc*dim(0)/)
 
 
     prob := rc_test(rc)
 
-    copy_VarCoords(msf_mean_annual(1,:,{-60:60}), prob)
+    copy_VarCoords(msf_mean_annual(1,:,{-30:30}), prob)
     prob&level@units = "hPa"
     
 
@@ -130,7 +130,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-全球平均的哈德来环流的�
     res@tmXBMode="Explicit"
  
     res@tmXBMinorOn=True
-    res@tmXBMinorValues=ispan(-60,60,10)
+    res@tmXBMinorValues=ispan(-30,30,5)
 
   
     res@tmYRMode="Automatic"
@@ -139,8 +139,9 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-全球平均的哈德来环流的�
     res@vpWidthF=0.7
 
     ;;;;
-    res@gsnLeftString = "Linear trend of Regional Hadley Circulation"
-    res@gsnLeftStringFontHeightF = 0.015
+    res@gsnLeftString = "(a) MME Linear trend of global Hadley Circulation"
+    ; res@gsnLeftString = "(a) MME Linear trend of Regional Hadley Circulation"
+    res@gsnLeftStringFontHeightF = 0.02
     plot = gsn_csm_pres_hgt(wks,rc,res)
 
 
@@ -185,7 +186,7 @@ wks = gsn_open_wks("pdf", "MME的CMIP6模式-全球平均的哈德来环流的�
     res@cnLineThicknessF = 2.
     res@cnFillOn = False
     res@gsnContourNegLineDashPattern=1
-    res@gsnContourZeroLineThicknessF=1.0
+    res@gsnContourZeroLineThicknessF=2.0
 
     plot1 = gsn_csm_pres_hgt(wks, msf_mean_clm, res)
     ;;;  

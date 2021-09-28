@@ -64,7 +64,8 @@ diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
     printVarSummary(msf)
 
   
-    msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
+    ; msf_mean = dim_avg_n_Wrap(msf(:,:,:,{240:270}), (/3/))
+    msf_mean = dim_avg_n_Wrap(msf(:,:,:,{150:270}), (/3/))
 
     msf_mean_annual = month_to_annual(msf_mean, 1)
 
@@ -165,11 +166,11 @@ diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
 ;;;计算解释趋势
 
    
-    ; rc_msf_vep = regCoef_n(msf_mean_annual_vermean,vep_annual,0,0)
+    rc_msf_vep = regCoef_n(msf_mean_annual_vermean,vep_annual,0,0)
 
-    ; rc_realte_msf = rc_msf_vep*rc_msf
+    rc_realte_msf = rc_msf_vep*rc_msf
 
-    ; percent = rc_realte_msf/rc_vep
+    percent = rc_realte_msf/rc_vep
 
     ; print("解释百分比= "+percent)
  ;     print( "HCtrend="+sprintf("%4.3f",rc_msf*10))
@@ -179,22 +180,24 @@ diri_output="/home/yangsong3/data-observation/linshh/CMIP6-derived/msf/"
 
 
 
-    rc_sstg_vep = regCoef_n(sstg_annual,vep_annual,0,0)
+    ; rc_sstg_vep = regCoef_n(sstg_annual,vep_annual,0,0)
 
-    rc_realte_sstg = rc_sstg_vep*rc_sstg
+    ; rc_realte_sstg = rc_sstg_vep*rc_sstg
 
-    percent = rc_realte_sstg/rc_vep
+    ; percent = rc_realte_sstg/rc_vep
 
     print("解释百分比= "+percent)
 
+exit()
+    ; print( "SSTGtrend="+sprintf("%4.3f",rc_sstg*10))
+    ; print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
+    ; print( "解释trend="+sprintf("%4.3f",rc_realte_sstg*10))
 
-    print( "SSTGtrend="+sprintf("%4.3f",rc_sstg*10))
-    print( "VEPtrend="+sprintf("%4.3f",rc_vep*10))
-    print( "解释trend="+sprintf("%4.3f",rc_realte_sstg*10))
+
 
 
 ;;;;
-    wks = gsn_open_wks("pdf", "MME的CMIP6模式东太平洋哈德来环流强度的时间序列")
+    wks = gsn_open_wks("pdf", "150-90w的MME的CMIP6模式东太平洋哈德来环流强度的时间序列")
     res  = True
     res@gsnDraw = False
     res@gsnFrame = False

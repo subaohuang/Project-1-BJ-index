@@ -23,7 +23,7 @@ function remove_enso_signal(data)
       f1=addfile(fils1, "r")
       date:=cd_calendar(f1->time, 1)
 
-      timeind:=ind(date.le.199912.and.date.ge.197901)
+      timeind:=ind(date.le.201512.and.date.ge.197901)
 
       sst =  lonFlip(f1->sst(timeind,:,:))
    
@@ -66,8 +66,7 @@ function cal_season_trend(data,season)
      ; ;;;;remove_enso_signal
      ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
      ; ;;;;
-
-      if season.eq."DJF"
+    if season.eq."DJF"
       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
     end if
@@ -92,19 +91,37 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.199912.and.date.ge.197901)
+    timeind:=ind(date.le.201512.and.date.ge.197901)
 
     sst  = f1->sst(timeind,:,:)
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
     
 
-   ;;;;cal season trend 
+    ;;;;cal season trend 
     ssta_mam = cal_season_trend(ssta,"MAM")
     ssta_jja = cal_season_trend(ssta,"JJA")
     ssta_son  = cal_season_trend(ssta,"SON")
     ssta_djf = cal_season_trend(ssta,"DJF")
     
+    h1 = avg(ssta_mam({-20:20},{40:110}))
+    h2 = avg(ssta_jja({-20:20},{40:110}))
+    h3 = avg(ssta_son({-20:20},{40:110}))                 
+    h4 = avg(ssta_djf({-20:20},{40:110}))                 
+
+
+
+    print(h1)
+    print(h2)
+    print(h3)
+    print(h4)
+
+
+    print("percent="+(h2-h1)/h1)
+    print("percent="+(h3-h1)/h1)
+    print("percent="+(h4-h1)/h1)
+
+
     ; ssta_jja = (/ssta_jja - ssta_mam/)
     ; ssta_son = (/ssta_son- ssta_mam/)
     ; ssta_djf = (/ssta_djf -ssta_mam/)
@@ -117,16 +134,14 @@ begin
     prob_djf = rc_test(ssta_djf)
 
 
-
     ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
     ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
     ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
     ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+
     
-    
-    
-    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-99")
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15")
+    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-99")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -136,10 +151,10 @@ begin
   res@gsnDraw=False
   
   
- 
-   res@cnFillPalette = "BlueWhiteOrangeRed"
-   ; res@cnFillPalette = "BlueDarkRed18"
-   ; res@cnFillPalette = "BlRe"
+
+  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueDarkRed18"
+  ; res@cnFillPalette = "BlRe"
 
   ; res@gsnSpreadColorStart = 130
   ; res@gsnSpreadColorEnd = 253
@@ -149,7 +164,7 @@ begin
   res@cnLineLabelsOn=False
   res@lbLabelBarOn=False
 
-  
+
   res@lbAutoManage  = False
   res@lbOrientation="Vertical"
   res@mpLimitMode           = "LatLon"
@@ -166,11 +181,23 @@ begin
   
 
   res@tmXBMode="Explicit"
-  ; res@tmYLMode="Explicit"
+  res@tmYLMode="Explicit"
 
   res@tmXBValues = (/-60,0,60,120,180,240/) 
   res@tmXBLabels = (/"60W","0","60E","120E","180","120W"/) 
 
+
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=2.0
+  res@tmYLMajorThicknessF=2.0
+  res@tmBorderThicknessF=2.0
+
+  res@tmYLValues = ispan(-20, 20, 20) 
+  res@tmYLLabels = (/"20S","0","20N"/) 
+
+  res@tmYLMinorValues = ispan(-30,30,10)
+  
 
 
   ; res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -179,19 +206,20 @@ begin
   res@tmYROn=False
   res@tmXBOn=True
   res@tmYROn=False
-  res@tmXBMode="Explicit"
-  res@tmYLMode="Explicit"
 
-  res@tmXBLabelFontHeightF=0.02
-  res@tmYLLabelFontHeightF=0.02
-  res@tmXBMajorThicknessF=1.0
-  res@tmYLMajorThicknessF=1.0
+  ; res@tmXBLabelFontHeightF=0.02
+  ; res@tmYLLabelFontHeightF=0.02
+  ; res@tmXBMajorThicknessF=1.0
+  ; res@tmYLMajorThicknessF=1.0
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -0.6
   res@cnMaxLevelValF       =   0.6
   res@cnLevelSpacingF      =  0.1
+
+
+
 
   ; res@cnMinLevelValF       =   -0.3
   ; res@cnMaxLevelValF       =   0.3
@@ -227,7 +255,7 @@ begin
   res2@cnFillOn = False
   res2@cnLinesOn = True
   delete(res2@cnLevels)
-  res2@cnLevels = (/0.6/)
+  res2@cnLevels = (/0.5/)
   res2@cnLineColors = "black"
   res2@cnMonoLineColor  = True
   res2@cnLineThicknessF = 2
@@ -304,7 +332,8 @@ begin
 
     res_pro@cnMonoFillPattern = True
     res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.001
+    res_pro@cnFillDotSizeF = 0.002
+
     res_pro@cnMonoFillColor = False
     res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
     ; res_pro@cnLevels = ispan(-6,6,1)

@@ -1,370 +1,373 @@
-;;;************************************************************
+;;********************************************************
+;;画HadIsst的sst趋势
 ;;
-;; linshuheng 2019.10.22
-;;;*********************************************************
-function t_test(series1,series2)
+;;lnshuheng 2020.02.17
+;**********************************************************
+function  rc_test(ssta_rc)
 begin
-  ;;;ttest 
-      avg1 = dim_avg_n_Wrap(series1, 0)
-      avg2 = dim_avg_n_Wrap(series2, 0)
-      
-      dim = dimsizes(avg1)
-      simple_size =  avg1
-      simple_size = dim(0)
-    
-      simple_variance1  = dim_variance_n_Wrap(series1, 0)
-      simple_variance2  = dim_variance_n_Wrap(series2, 0)
+  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
+   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+   b = tval    ; b must be same size as tval (and df)
+   b = 0.5
+   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
+   copy_VarCoords(ssta_rc, prob)
 
-      prob_p = ttest(avg1 ,simple_variance1, simple_size, avg2 ,simple_variance2 ,simple_size,False,False)
-     copy_VarCoords(avg1, prob_p)
-return prob_p
+return prob
+end
+undef("remove_enso_signal")
+function remove_enso_signal(data)
+  begin  
+  ; ;;;读入HadiSST海温数据
+      diri="/home/yangsong3/data-observation/linshh/data/sst/"
+      fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+      f1=addfile(fils1, "r")
+      date:=cd_calendar(f1->time, 1)
+
+      timeind:=ind(date.le.201512.and.date.ge.197901)
+
+      sst =  lonFlip(f1->sst(timeind,:,:))
+   
+      ssta=(/rmMonAnnCycTLL(sst)/)
+      copy_VarCoords(sst, ssta)
+
+      ssta_de = ssta
+      ; ssta_de=(/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+      ssta_index = dim_avg_n_Wrap(ssta_de(:,{5:-5},{190:240}), (/1,2/))
+      printVarSummary(ssta_index)
+
+      nino3_4 = month_to_season(ssta_index, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+      printVarSummary(nino3_4)
+
+      
+      ; nino3_4_new = nino3_4                ;;;;前期ENSO
+      ; nino3_4_new(0:33) = (/nino3_4(1:)/)
+      ; nino3_4_new(34) =ssta_index(35*12-1) 
+   
+      nino3_4 = (/dim_standardize_n(nino3_4, 1, 0)/)
+  ;;;;;
+      data_de = data
+      ; data_de=(/dtrend_msg_n(ispan(1,dimsizes(data&time),1),data,False,True,0)/) 
+      data_rc = regCoef_n(nino3_4,data_de, 0, 0)
+      copy_VarCoords(data(1,:,:), data_rc)
+      data_rc_3d  = conform_dims(dimsizes(data), data_rc, (/1,2/))
+      m = reshape(data_rc@yintercept,dimsizes(data_rc_3d)) 
+      nino3_4_3d = conform(data_rc_3d,nino3_4,(/0/))
+  
+      data_relate_enso  = nino3_4_3d*data_rc_3d + m 
+      data_new = data 
+      data_new = (/data - data_relate_enso/)
+  return data_new
 end 
 
+function cal_season_trend(data,season)
+  begin
+   
+    p_djf_r=month_to_season(data, season)
+     ; ;;;;remove_enso_signal
+     ;     p_djf_r = (/remove_enso_signal(p_djf_r)/)
+     ; ;;;;
+    if season.eq."DJF"
+      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+    end if
+    dim = dimsizes(p_djf_r)
+    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
+    copy_VarCoords(p_djf_r(1,:,:), p_rc)
+    p_rc=(/p_rc*dim(0)/)
+  return p_rc
+end 
+
+
+
+
+;;**************************************************************
+;;;main program
+;;***************************************************************
 begin
-season_r = (/"spring","summer","autumn","winter"/)
-season = (/"MAM","JJA","SON","DJF"/)
-  fils1 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
-  fils2 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_chazhi.nc" 
-
-  fils3 = "/home/ys17-19/lsh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_OLR_heatflux.nc"
-  fils4 = "/home/ys17-19/lsh/CESM-data/F/F_2000_addindwarimg_" + season_r +"_notest/"+"F_2000_ind_"+season_r+"_notest.cam.h1.0101-4012_OLR_heatflux.nc" 
   
-  wks=gsn_open_wks("pdf", "Fig7")
+   ;;;读入HadiSST海温数据
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
+    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+    f1=addfile(fils1, "r")
+    date:=cd_calendar(f1->time, 1)
+
+    timeind:=ind(date.le.201512.and.date.ge.197901)
+
+    sst  = f1->sst(timeind,:,:)
+    ssta=(/rmMonAnnCycTLL(sst)/)
+    copy_VarCoords(sst, ssta)
+    
+
+    ;;;;cal season trend 
+    ssta_mam = cal_season_trend(ssta,"MAM")
+    ssta_jja = cal_season_trend(ssta,"JJA")
+    ssta_son  = cal_season_trend(ssta,"SON")
+    ssta_djf = cal_season_trend(ssta,"DJF")
+    
+    h1 = avg(ssta_mam({-20:20},{40:110}))
+    h2 = avg(ssta_jja({-20:20},{40:110}))
+    h3 = avg(ssta_son({-20:20},{40:110}))                 
+    h4 = avg(ssta_djf({-20:20},{40:110}))                 
+
+
+
+    print(h1)
+    print(h2)
+    print(h3)
+    print(h4)
+
+
+    print("percent="+(h2-h1)/h1)
+    print("percent="+(h3-h1)/h1)
+    print("percent="+(h4-h1)/h1)
+
+
+    ; ssta_jja = (/ssta_jja - ssta_mam/)
+    ; ssta_son = (/ssta_son- ssta_mam/)
+    ; ssta_djf = (/ssta_djf -ssta_mam/)
+    ; ssta_mam = 0.0
+
+    prob_mam = rc_test(ssta_mam)
+    prob_jja = rc_test(ssta_jja)
+
+    prob_son = rc_test(ssta_son)
+    prob_djf = rc_test(ssta_djf)
+
+
+    ; ssta_mam = where(prob_mam.le.0.1, ssta_mam, ssta_mam@_FillValue)
+    ; ssta_jja = where(prob_jja.le.0.1, ssta_jja, ssta_jja@_FillValue)
+    ; ssta_son = where(prob_son.le.0.1, ssta_son, ssta_son@_FillValue)
+    ; ssta_djf = where(prob_djf.le.0.1, ssta_djf, ssta_djf@_FillValue)
+
+    
+    wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-15")
+    ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-79-99")
+;;**************************************************************
+;画图
+;;***************************************************************
+
+  res=True
+  res@gsnFrame=False
+  res@gsnDraw=False
   
-  plot = new(8,graphic)
-  iplot = new(8,graphic)
-  str3 = ispan(1,8,1) + ""
-
-  order  = (/"(a)","(b)","(c)","(d)","(e)","(f)","(g)","(h)"/)
- 
-
-
-do i = 0,3
-  f1=addfile(fils1, "r")
-  f2=addfile(fils2(i), "r")
-  print("读入file"+fils2(i))
-
-  date=cd_calendar(f1->time, 1)
-  timeind=ind(date.ge.601.and.date.le.4012)
-
-  PRECL_CT  =  f1->PRECL(timeind,:,:)
-  PRECC_CT  =  f1->PRECC(timeind,:,:)
-
-  PRE_CT = PRECC_CT
-  PRE_CT = (/PRECC_CT+PRECL_CT/)
-  ; PRE_CT = (/PRECL_CC/)  ;;;大尺度降水
-  PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
-
-  PRECL_id  =  f2->PRECL(timeind,:,:)
-  PRECC_id  =  f2->PRECC(timeind,:,:)
-
-  PRE_id = PRECC_id
-  PRE_id = (/PRECC_id+PRECL_id/)
-  ; PRE_id = (/PRECC_id/)
-  PRE_id = (/PRE_id*1000*3600*24/)  ;; m/s conver to mm/day
-   
-  PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
-  PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
-
-  PRE_diff = PRE_CT_clm
-  PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
-
-  ;;;;U,V
-  u_CT  =  f1->U(timeind,{850},:,:)
-  v_CT  =  f1->V(timeind,{850},:,:)
-
-  u_id  =  f2->U(timeind,{850},:,:)
-  v_id  =  f2->V(timeind,{850},:,:)
-
-
-  u_CT_clm = dim_avg_n_Wrap(month_to_season(u_CT, season(i)), 0)
-  u_indian_clm = dim_avg_n_Wrap(month_to_season(u_id, season(i)), 0)
-
-  u_diff = u_CT_clm
-  u_diff = (/u_indian_clm - u_CT_clm/)
-
-  v_CT_clm = dim_avg_n_Wrap(month_to_season(v_CT, season(i)), 0)
-  v_indian_clm = dim_avg_n_Wrap(month_to_season(v_id, season(i)), 0)
-
-  v_diff = v_CT_clm
-  v_diff = (/v_indian_clm - v_CT_clm/)
-
-  ;;;t_test 
-  prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
-  prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
-  prob_v = t_test( month_to_season(v_CT, season(i)) ,month_to_season(v_id, season(i)))
-  ;;;
-  PRE_diff@_FillValue = 10^9
-  u_diff@_FillValue = 10^9
-  v_diff@_FillValue = 10^9
-  ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
   
 
-  if i.eq.2 then 
-    prob_u({10:30},{100:130}) = where(prob_u({10:30},{100:130}).le.1.0, 0.1, prob_u({10:30},{100:130})) 
-  end if
+  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueDarkRed18"
+  ; res@cnFillPalette = "BlRe"
 
-  u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-  v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
-;;;
-    
-;;;OLR
-   f3 = addfile(fils3, "r")
-   f4 = addfile(fils4(i), "r")
+  ; res@gsnSpreadColorStart = 130
+  ; res@gsnSpreadColorEnd = 253
+  res@cnFillOn=True
+  res@cnLinesOn=False
 
-   OLR_CT = f3->FLUT(timeind,:,:)
-
-   OLR_indian = f4->FLUT(timeind,:,:)
-
-   OLR_CT_clm = dim_avg_n_Wrap(month_to_season(OLR_CT, season(i)), 0)
-   OLR_indian_clm = dim_avg_n_Wrap(month_to_season(OLR_indian, season(i)), 0)
-
-   OLR_diff = OLR_CT_clm
-   OLR_diff = (/OLR_indian_clm - OLR_CT_clm/)
-   
-   prob_OLR = t_test( month_to_season(OLR_CT, season(i)) ,month_to_season(OLR_indian, season(i)))
-   
-   if i.eq.0 then 
-   prob_OLR({0:15},{125:160}) = where(prob_OLR({0:15},{125:160}).le.0.01, 0.02, prob_OLR({0:15},{125:160}))
-   end if 
-
-   if i.eq.3 then 
-   prob_OLR({0:15},{125:160}) = where(OLR_diff({0:15},{125:160}).ge.2.0, 0.005, prob_OLR({0:15},{125:160}))
-   end if 
+  res@cnLineLabelsOn=False
+  res@lbLabelBarOn=False
 
 
-;;;;;;
-    res=True
-    res@gsnDraw=False
-    res@gsnFrame=False
-    res@gsnAddCyclic=True
+  res@lbAutoManage  = False
+  res@lbOrientation="Vertical"
+  res@mpLimitMode           = "LatLon"
+  res@mpMinLatF             = -30
+  res@mpMaxLatF             = 30
+  res@mpMinLonF             = -80
+  res@mpMaxLonF             = 280
 
-
-    res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
-    res@cnFillOn = True 
-    res@cnLinesOn =False
-    res@cnLineColor = "White"
-    res@cnLineLabelInterval = 2
-    res@cnLineLabelsOn=False
-    res@cnRasterSmoothingOn=True
-
-    if i.eq.3 then
-     res@lbLabelBarOn= True
-     else
-     res@lbLabelBarOn= False
-     end if
-     res@pmLabelBarOrthogonalPosF = 0.2
-
-    res@lbLabelStride=1
-    res@lbLabelFontHeightF = 0.015
-    res@lbAutoManage = False
-
-    res@cnFillPalette = "precip_diff_12lev"
-    ; res@cnFillPalette = "MPL_BrBG"
-
-    res@cnFillPalette = "precip_diff_12lev"
-    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-    ; res@cnLevels = (/-1.0,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
-    ; res@cnLevels := (/-2.5,-2.,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
-    ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
-
-    
+  res@mpCenterLonF          = 100
+  ; res@mpMinLatF             = -5
+  ; res@mpMaxLatF             = 30
+  ; res@mpMinLonF             = 100
+  ; res@mpMaxLonF             = 170
   
-    ; res@cnLevels := (/-1.5,-1.0,-0.25,0.25,1.0,1.5,2.0,2.5/)
-    ; res@cnFillColors= (/2,3,4,8,9,10,11,12,13/) - 2 
 
-      res@cnLevels := (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0/)
-      res@cnFillColors= (/2,3,4,6,8,9,10,11,12,13/) - 2 
+  res@tmXBMode="Explicit"
+  res@tmYLMode="Explicit"
 
- 
-    
-    res@tmXBLabelFontHeightF=0.02
-    res@tmYLLabelFontHeightF=0.02
-    res@tmXBMajorThicknessF=1.0
-    res@tmYLMajorThicknessF=1.0
-    res@tmBorderThicknessF=1.0
+  res@tmXBValues = (/-60,0,60,120,180,240/) 
+  res@tmXBLabels = (/"60W","0","60E","120E","180","120W"/) 
 
-    res@tmXTOn=False
-    res@tmYROn=False
 
-    res@mpLimitMode           = "LatLon"
-    ; res@mpMinLatF             = -5.0
-    ; res@mpMaxLatF             = 30.0
-    ; ; res@mpMinLonF             = 40.0
-    ; res@mpMinLonF             = 100.0
-    ; res@mpMaxLonF             = 170.0
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
-    res@mpMinLonF             = 30.0
-    res@mpMaxLonF             = 170.0
-   
-    res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)
-    res@mpFillOn = False
-    res@mpGeophysicalLineColor      = "Grey18"
-    res@mpGeophysicalLineThicknessF = 1.5
-    
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.3
-    ;;
-     ;;;LineArrow
-    res@gsnScalarContour        = True
-    ; res@gsnScalarContour        = False
+  res@tmXBLabelFontHeightF=0.02
+  res@tmYLLabelFontHeightF=0.02
+  res@tmXBMajorThicknessF=2.0
+  res@tmYLMajorThicknessF=2.0
+  res@tmBorderThicknessF=2.0
 
-    res@gsnLeftString = order(i*2)+" "+ season(i)+ " Precip & 850UV diff(TIO_"+season(i)+" - CTRL)"
-    res@gsnLeftStringOrthogonalPosF  = -0.12
-    res@gsnLeftStringFontHeightF  = 0.02
+  res@tmYLValues = ispan(-20, 20, 20) 
+  res@tmYLLabels = (/"20S","0","20N"/) 
 
-    
-    ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-    res@vcGlyphStyle="CurlyVector"
-
-    res@vcMinDistanceF           = 0.02           ; thin vectors
-    res@vcMinMagnitudeF          =0.3
-    ; res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 2.0      
-    res@vcRefLengthF             = 0.05     ; define length of v
-   
-    res@vcLineArrowThicknessF=1.2
-    ; res@vcLineArrowHeadMaxSizeF=0.005
-    ; res@vcLineArrowHeadMinSizeF=0.005
-    res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
-    res@vcLineArrowHeadMinSizeF = 0.006
-    res@vcVectorDrawOrder="PostDraw"
-
-    res@vcRefAnnoString1On = True
-    res@vcRefAnnoString1 = "2 m/s"
-    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
-    res@vcRefAnnoParallelPosF = 1.02
-    res@vcRefAnnoFontHeightF = 0.013
-
-    res@vcRefAnnoBackgroundColor = "Transparent"
-    res@vcRefAnnoPerimOn = False
-
+  res@tmYLMinorValues = ispan(-30,30,10)
   
-    
-    res@gsnRightString = ""
-    plot(i*2) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
-    
 
-;;;;draw OLR result
- ; delete(res@cnLevelSelectionMode)
-  delete(res@cnFillPalette)
-  delete(res@cnLevels)
-  delete(res@cnFillColors)
-  ; res@cnFillPalette = "BlueWhiteOrangeRed"
-  res@cnFillPalette = "MPL_bwr"
 
+  ; res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+  res@tmXTOn=False
+  res@tmYROn=False
+  res@tmXBOn=True
+  res@tmYROn=False
+
+  ; res@tmXBLabelFontHeightF=0.02
+  ; res@tmYLLabelFontHeightF=0.02
+  ; res@tmXBMajorThicknessF=1.0
+  ; res@tmYLMajorThicknessF=1.0
+
+
+  ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+  ; res@cnMinLevelValF       =   -0.8
+  ; res@cnMaxLevelValF       =   0.8
+  ; res@cnLevelSpacingF      =  0.2
+
+
+
+
+  ; res@cnMinLevelValF       =   -0.3
+  ; res@cnMaxLevelValF       =   0.3
+  ; res@cnLevelSpacingF      =  0.05
+   ; res@cnFillPalette = "NCV_jaisnd"
+   ; res@cnFillPalette = "sunshine_9lev"
   res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  res@lbLabelStride=1
+  res@cnLevels = (/-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0.1,0.2,0.3,0.4,0.5,0.6/)
+  ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
 
-  res@cnLevels := (/-0.8,-0.6,-0.4,-0.2,-0.1,0.1,0.2,0.4,0.6,0.8/)*20.0
+  res@cnInfoLabelOn = False
+  
 
-   ; res@cnLevels := (/-20.0,-15.,-10.,-5.,5.0,10.,15.,20./)
-  ; res@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-  ; res@cnMinLevelValF      = -2.5       ; set min contour level
-  ; res@cnMaxLevelValF      = 2.5      ; set max contour level
-  ; res@cnLevelSpacingF     = 0.5       ; set contour spacing
+  res@gsnLeftString="(a) MAM SST trend "
+  res@gsnLeftStringFontHeightF = 0.02
 
-  res@gsnLeftString = order(i*2+1)+" "+ season(i)+ " OLR diff(TIO_"+season(i)+" - CTRL)"
-    res@gsnLeftStringOrthogonalPosF  = 0.06
+  ; res@mpShapeMode = "FreeAspect"
+  ; res@vpHeightF = 0.2
+  ; res@vpWidthF = 0.7
+
+  plot=new(4,graphic)
+
+  plot(0) = gsn_csm_contour_map(wks, ssta_mam, res)
+    res@gsnLeftString="(b) JJA SST trend "
+  plot(1) = gsn_csm_contour_map(wks, ssta_jja, res)
+    res@gsnLeftString="(c) SON SST trend "
+  plot(2) = gsn_csm_contour_map(wks, ssta_son, res)
+    res@gsnLeftString="(d) DJF SST trend "
+  plot(3) = gsn_csm_contour_map(wks, ssta_djf, res)
+
+  res2 = res
+  res2@cnLevelSelectionMode = "ExplicitLevels"
+  res2@cnFillOn = False
+  res2@cnLinesOn = True
+  delete(res2@cnLevels)
+  res2@cnLevels = (/0.5/)
+  res2@cnLineColors = "black"
+  res2@cnMonoLineColor  = True
+  res2@cnLineThicknessF = 2
+  res2@cnMonoLineThickness  = True
+  res2@gsnLeftString = ""
+  res2@cnInfoLabelOn = False
+  
+  plot1=new(4,graphic)
+
+  plot1(0) = gsn_csm_contour(wks, ssta_mam, res2)
+  plot1(1) = gsn_csm_contour(wks, ssta_jja, res2)
+  plot1(2) = gsn_csm_contour(wks, ssta_son, res2)
+  plot1(3) = gsn_csm_contour(wks, ssta_djf, res2)
+
+  ; do i=0,3
+  ; overlay(plot(i), plot1(i))
+  ; end do   
+
+   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
 
-  plot(i*2+1) = gsn_csm_contour_map(wks, OLR_diff, res)
-
+  ;;;添加赤道直线
+   pgx=ispan(30,390,10)
+   pgy=new(dimsizes(pgx),typeof(pgx))
+   pgy=0
    
-  ; 
    pgres=True
    pgres@gsLineColor="black"
+   pgres@gsLineThicknessF=1.0
+   pgres@gsLineDashPattern=1
+
+  str = ispan(1, 4, 1) + ""
+    plot_add = new(4,graphic)
+  do i = 0,3
+  plot_add(i) = gsn_add_polyline(wks, plot(i), pgx, pgy, pgres)
+   end do 
+  ;;;添加indo-pacific warm pool
+    ; ;;添加区域
+   ;;warm pool
    pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
- 
+   pgres@gsLineDashPattern=1
+   str3=unique_string("dum3")
+   str4=unique_string("dum4")
    
    ;;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
    pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
    pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
    ;;;
-   plot@$str3(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
-   plot@$str3(i*2+1)$ = gsn_add_polyline(wks, plot(i*2+1), pgx_pool, pgy_pool, pgres)
 
-    ; ;;;打点
-    ; res_pro=True
-    ; res_pro@gsnAddCyclic = False
-    ; res_pro@gsnDraw=False
-    ; res_pro@gsnFrame=False
-    ; res_pro@cnFillOn = True
+    str2 = ispan(1, 4, 1) + ""
+     plot_add2 = new(4,graphic)
+    do i = 0,3
+      plot_add2(i) = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+    end do 
 
-    ; res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    ; res_pro@cnLevels = (/0,0.01/)
-    ; res_pro@lbLabelBarOn = False
-    ; res_pro@cnLinesOn=False
-    ; ; res_pro@cnMonoLineColor =False
-    ; ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
-
-    ; res_pro@cnMonoFillPattern = True
-    ; res_pro@cnFillPattern = 17
-    ; res_pro@cnFillDotSizeF = 0.003
-  
-    ; res_pro@cnMonoFillColor = False
-    ; res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLineLabelsOn=False
-    ; res_pro@tmYRMode = "Automatic"
-    ; res_pro@cnInfoLabelOn=False
-   
-    ; res_pro@gsnCenterString = ""
-    ; ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; ; res_pro@cnLineThicknessF = 3.
-    ; ; res_pro@cnFillOn        = True
-    ; iplot(i)=gsn_csm_contour(wks,prob_p,res_pro)
-      ;;;打点
+   ;;;打点
     res_pro=True
+    res_pro@gsnAddCyclic = False
     res_pro@gsnDraw=False
     res_pro@gsnFrame=False
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLinesOn=False
-    res_pro@cnLevelSelectionMode = "ManualLevels" ; set manual contour levels
-    res_pro@cnMinLevelValF      = 0.00        ; set min contour level
-    res_pro@cnMaxLevelValF      = 1.00        ; set max contour level
-    res_pro@cnLevelSpacingF     = 0.01     ; set contour spacing
+    res_pro@cnFillOn = True
 
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.05/)
+    res_pro@lbLabelBarOn = False
+    res_pro@cnLinesOn=False
+    ; res_pro@cnMonoLineColor =False
+    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.002
+
+    res_pro@cnMonoFillColor = False
+    res_pro@cnFillColors = (/"Transparent","green","Transparent"/)
+    ; res_pro@cnLevels = ispan(-6,6,1)
     res_pro@cnLineLabelsOn=False
     res_pro@tmYRMode = "Automatic"
     res_pro@cnInfoLabelOn=False
-
-
-    iplot(i*2) = gsn_csm_contour(wks,prob_p,res_pro)
-
-    iplot(i*2+1) = gsn_csm_contour(wks,prob_OLR,res_pro)
-
-     
-    
-
-    opt                      = True
-    opt@gsnShadeFillType     = "pattern"
-    opt@gsnShadeMid     = 17         ; stipple
-    ; opt@gsnShadeFillDotSizeF =  0.0025
-    ; opt@gsnShadeHigh   = "green"
-    opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
-    iplot(i*2) = gsn_contour_shade(iplot(i*2) , 0,0.01,opt)
-    iplot(i*2+1) = gsn_contour_shade(iplot(i*2+1) , 0,0.01,opt)
-    overlay(plot(i*2), iplot(i*2))
-    overlay(plot(i*2+1), iplot(i*2+1))
-    print("finish subset figure")
-end do
-  print("panel")
-  pres = True
-  pres@gsnPanelLabelBar = False
+    ; res_pro@cnLineLabelBackgroundColor="Transparent"
+    ; res_pro@cnLineThicknessF = 3.
+    ; res_pro@cnFillOn        = True
   
-   pres@gsnPanelBottom = 0.05
+     iplot = new(4,graphic)
+     iplot(0) = gsn_csm_contour(wks,prob_mam  ,res_pro)
+     iplot(1) = gsn_csm_contour(wks,prob_jja  ,res_pro)
+     iplot(2) = gsn_csm_contour(wks,prob_son  ,res_pro)
+     iplot(3) = gsn_csm_contour(wks,prob_djf  ,res_pro)
+    ;  
+    do i=0,3
+     overlay(plot(i), iplot(i))
+    end do
 
-  gsn_panel(wks, plot, (/4,2/), pres)
-  print("done script")
+pres = True
+pres@gsnPanelLabelBar  = True
+pres@gsnMaximize = True
+pres@lbLabelStride = 1
+pres@lbOrientation = "Horizontal"
+; pres@lbOrientation = "Vertical"
+; pres@pmLabelBarHeightF = 0.15
+pres@pmLabelBarWidthF = 0.45
+pres@pmLabelBarHeightF = 0.04
+pres@pmLabelBarOrthogonalPosF = -0.008
+pres@pmLabelBarParallelPosF = 0.02
+pres@lbLabelFontHeightF = 0.01
+pres@lbAutoManage =False
+
+gsn_panel(wks, plot, (/2,2/), pres)
+
 end
-  
-

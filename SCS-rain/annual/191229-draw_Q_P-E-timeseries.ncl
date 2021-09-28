@@ -18,13 +18,34 @@ begin
 return prob
 end
 begin
+
+;;;read pre data
+
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+
+    ; date:=cd_calendar(f2->time, 1)
+    ; timeind:=ind(date.ge.197901.and.date.le.201812)
+    ; p=f2->precip(timeind,:,:)
+  
+
+    diri="/home/yangsong3/data-observation/linshh/data/sst/"
+    fils2=systemfunc("ls "+diri+"HadISST_sst.nc")
+
+    f2=addfile(fils2, "r")
+    date:=cd_calendar(f2->time, 1)
+
+    timeind:=ind(date.le.201812.and.date.ge.195801)
+
+    time = f2->time(timeind)
+    
+;;;
    ;;read  eva data 
-    fils = systemfunc("ls /home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_"+"*"+".nc")
+    fils = systemfunc("ls /home/yangsong3/data-observation/OAflux/monthly/evaporation/evapr_oaflux_[1979..2018]"+"*"+".nc")
 
     f1 = addfiles(fils, "r")
-    date = cd_calendar(f1[:]->time, 1)
-    timeind=ind(date.ge.197901.and.date.le.201312)
-    evp_r =short2flt(f1[:]->evapr(timeind,:,:))
+
+    ; date = cd_calendar(f1[:]->time, 1)
+    evp_r =short2flt(f1[:]->evapr)
     evp_r@missing_value = -9.96921e+36
     evp_r@_FillValue =   -9.96921e+36
     evp_r&lat@units = "degrees_north"
@@ -35,8 +56,7 @@ begin
     copy_VarMeta(evp_r, evp)
     delete(evp_r)
    
-    printVarSummary(evp)
-    
+  
     
     ;;;处理数据
         ;;; 水平插值 lat:-88.75：88.75 ； lon:1.25 2.5×2.5度
@@ -48,12 +68,23 @@ begin
 
         delete(evp_new&LAT)
         delete(evp_new&LON)
+        delete(evp_new&time)
+
+        evp_new!0 = "time"
+        evp_new&time = time
         evp_new!1 = "lat"
         evp_new!2 = "lon"
         evp_new&lat = yo
         evp_new&lon = xo
+      
+        evp_new@units = "mm/day"
         printVarSummary(evp_new)
         ;;;
+    out = addfile("evaporation-oaflux.nc", "c")
+    
+    out->evapr = evp_new
+
+exit()
 
         ; ;;116.25存在插值后缺侧的现象，现在插值下
         ; m =  linmsg(u_av_1({100:120}),0)
@@ -63,18 +94,7 @@ begin
         ; ;;;
 ;;;;
 
-;;;read pre data
 
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
-    date:=cd_calendar(f2->time, 1)
-    timeind:=ind(date.ge.197901.and.date.le.201312)
-    p=f2->precip(timeind,:,:)
-   
-    delete(p&time)
-    p&time=date(timeind)
-    printVarSummary(p)
-    
-;;;
 
 ;;;时间序列
     evp_new = (/rmMonAnnCycTLL(evp_new)/)
