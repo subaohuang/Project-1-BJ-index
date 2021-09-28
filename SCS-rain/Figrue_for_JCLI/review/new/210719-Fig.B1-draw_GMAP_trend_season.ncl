@@ -1,0 +1,251 @@
+;;********************************************************
+;;画GPCP的降水趋势
+;;
+;;lnshuheng 2019.12.24
+;**********************************************************
+function  rc_test(ssta_rc)
+begin
+  tval = onedtond(ssta_rc@tval , dimsizes(ssta_rc))
+   df   = onedtond(ssta_rc@nptxy, dimsizes(ssta_rc)) - 2
+   b = tval    ; b must be same size as tval (and df)
+   b = 0.5
+   prob = betainc(df/(df+tval^2),df/2.0,b)    ; prob(nlat,nlon)
+   copy_VarCoords(ssta_rc, prob)
+
+return prob
+end
+
+function cal_season_trend(data,season)
+  begin
+  p_djf_r=month_to_season(data, season)
+   if season.eq."DJF"
+      p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+      p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+    end if
+    p_djf_r=month_to_season(data, season)
+
+    dim = dimsizes(p_djf_r)
+    p_rc=regCoef_n(ispan(1, dim(0), 1), p_djf_r, 0, 0)
+    copy_VarCoords(p_djf_r(1,:,:), p_rc)
+    p_rc=(/p_rc*dim(0)/)
+  return p_rc
+end 
+; function cal_season_trend(data,season)
+;   begin
+;     p_djf_r=month_to_season(data, season)
+
+;     if season.eq."DJF"
+;       p_djf_r(0:dimsizes(p_djf_r&time)-2,:,:) = p_djf_r(1:,:,:)
+;       p_djf_r(dimsizes(p_djf_r&time)-1,:,:) = data(dimsizes(data&time)-1,:,:)
+;     end if
+;     dim = dimsizes(p_djf_r)
+;     p_mk=trend_manken(p_djf_r, False, 0)
+;     p_rc = p_mk(1,:,:)
+;     copy_VarCoords(p_djf_r(1,:,:), p_rc)
+;     p_rc=(/p_rc*dim(0)/)
+;     p_rc@prob = p_mk(0,:,:)
+;   return p_rc
+; end 
+
+begin
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+    date=cd_calendar(f2->time, 1)
+    timeind=ind(date.ge.197901.and.date.le.201512)
+    p=f2->precip(timeind,:,:)
+   
+    delete(p&time)
+    p&time=date(timeind)
+    printVarSummary(p)
+    p_pi = p
+    
+    rc_mam = cal_season_trend(p_pi,"MAM")
+    rc_jja = cal_season_trend(p_pi,"JJA")
+    rc_son = cal_season_trend(p_pi,"SON")
+    rc_djf = cal_season_trend(p_pi,"DJF")
+
+    prob_mam=rc_test(rc_mam)
+    prob_jja=rc_test(rc_jja)
+    prob_son=rc_test(rc_son)
+    prob_djf=rc_test(rc_djf)
+    
+    ; prob_mam = 1- rc_mam@prob
+    ; prob_jja = 1- rc_jja@prob
+    ; prob_son = 1- rc_son@prob
+    ; prob_djf = 1- rc_djf@prob
+
+
+    copy_VarCoords(p_pi(1,:,:), prob_mam)
+    copy_VarCoords(p_pi(1,:,:), prob_jja)
+    copy_VarCoords(p_pi(1,:,:), prob_son)
+    copy_VarCoords(p_pi(1,:,:), prob_djf)
+
+
+    rc_mam_mean = avg(rc_mam({0:20},{125:160}))
+
+    mam_mean = month_to_season(p_pi, "MAM")
+
+    mam_mean_wnp = avg(mam_mean(:,{0:20},{125:160}))
+
+    print(rc_mam_mean)
+
+    print(rc_mam_mean/mam_mean_wnp)
+    ; exit()
+
+
+
+    
+wks   = gsn_open_wks("pdf", "不同季节CMAP降水的趋势-1979-2015")
+;;**************************************************************
+;画图
+;;***************************************************************
+      
+    res=True
+    res@gsnFrame=False
+    res@gsnDraw=False
+    res@gsnLeftStringFontHeightF=20.0
+    res@cnFillOn=True
+    res@cnLinesOn=False
+
+    res@cnLineLabelsOn=False
+    res@lbLabelBarOn=False
+    res@lbLabelStride=2
+    res@mpLimitMode           = "LatLon"
+    res@mpMinLatF             = -5
+    res@mpMaxLatF             = 30
+    res@mpMinLonF             = 100
+    res@mpMaxLonF             = 170
+    res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
+
+    res@tmXTOn=False
+    res@tmYROn=False
+    res@tmXBOn=True
+    res@tmYROn=False
+
+    res@tmXBMode="Explicit"
+    res@tmYLMode="Explicit"
+
+    res@tmXBLabelFontHeightF      = 0.025    ;font height of tick labels
+    res@tmYLLabelFontHeightF      = 0.025
+    res@gsnLeftStringFontHeightF = 0.03
+    res@tmYLMinorOn = True
+
+    res@lbBoxLinesOn              = True
+    res@lbBoxLineThicknessF       = 0.
+
+
+    res@tmXBValues = (/100,120,140,160/) 
+    res@tmXBLabels = (/100,120,140,160/) +""+"E" 
+
+
+    ; res@tmXBLabelFontHeightF=0.015
+    ; res@tmYLLabelFontHeightF=0.015
+    ; res@tmXBMajorThicknessF=1.0
+    ; res@tmYLMajorThicknessF=1.0
+    ; res@tmBorderThicknessF=1.0
+
+    ; res@mpShapeMode="FreeAspect"
+    ; res@vpHeightF=0.3
+    ; res@vpWidthF=0.7
+
+    res@cnFillPalette = "precip_diff_12lev"
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    ; res@cnLevels = (/-1.5,-1.0,-0.5,-0.25,0.25,0.5,1.0,1.5,2.0,2.5/)
+    ; res@cnFillColors= (/4,5,6,7,8,9,10,11,12,13,14/) - 2
+
+    res@cnLevels = (/-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+    res@cnFillColors= (/5,6,7,8,10,11,12,13,14/) - 2
+
+
+
+
+
+  res@gsnLeftString="(a) MAM Precip trend " 
+  plot = new(4,graphic)
+  plot(0) = gsn_csm_contour_map(wks, rc_mam, res)
+  res@gsnLeftString= "(b) JJA Precip trend "
+  plot(1) = gsn_csm_contour_map(wks, rc_jja, res)
+  res@gsnLeftString="(c) SON Precip trend "
+  plot(2) = gsn_csm_contour_map(wks, rc_son, res)
+  res@gsnLeftString="(d) DJF Precip trend "
+  plot(3) = gsn_csm_contour_map(wks, rc_djf, res)
+
+
+   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
+ 
+
+  ;;;添加indo-pacific warm pool
+    ; ;;添加区域
+   ;;warm pool
+    pgres=True
+    pgres@gsLineColor="black"
+    pgres@gsLineThicknessF=2.0
+    pgres@gsLineDashPattern=1
+
+   
+   ;;;画box
+   lat1 = 0
+   lat2 = 20
+   lon1 = 125
+   lon2 = 160
+
+   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+   ;;;
+
+     str2 = ispan(21, 24, 1) +""
+   do i =0,3 
+     plot@$str2(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+  end do 
+
+
+    ;;;打点
+
+    iplot=new(4,graphic)
+
+    res_pro=True
+    res_pro@gsnAddCyclic = False
+    res_pro@gsnDraw=False
+    res_pro@gsnFrame=False
+    res_pro@cnFillOn = True
+
+    res_pro@cnLevelSelectionMode = "ExplicitLevels"
+    res_pro@cnLevels = (/0,0.1/)
+    res_pro@lbLabelBarOn = False
+
+
+    res_pro@cnLinesOn=False
+
+
+    res_pro@cnMonoFillPattern = True
+    res_pro@cnFillPattern = 17
+    ; res_pro@cnFillDotSizeF = 0.0045
+    res_pro@cnFillDotSizeF = 0.002
+    res_pro@cnMonoFillColor = False
+
+
+    res_pro@cnLineLabelsOn=False
+    res_pro@tmYRMode = "Automatic"
+    res_pro@cnInfoLabelOn=False
+    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
+
+    iplot(0) = gsn_csm_contour(wks,prob_mam,res_pro)    
+    iplot(1) = gsn_csm_contour(wks,prob_jja,res_pro)
+    iplot(2) = gsn_csm_contour(wks,prob_son,res_pro)
+    iplot(3) = gsn_csm_contour(wks,prob_djf,res_pro)
+
+    
+     do i=0,3
+  
+     overlay(plot(i), iplot(i))
+  end do
+
+    ;;;  
+   
+pres = True
+pres@gsnPanelLabelBar  = True
+pres@lbLabelFontHeightF = 0.015
+
+gsn_panel(wks, plot, (/2,2/), pres)
+
+end
