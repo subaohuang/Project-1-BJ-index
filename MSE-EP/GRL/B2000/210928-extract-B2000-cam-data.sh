@@ -16,9 +16,9 @@
 
 # Path of the original data
 # Caution: DO NOT DELETE /" IN STRING!
-PRE_DIR_ORG=/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/
+PRE_DIR_ORG=/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_JFMAM_80_20/
 STEP=3
-modelname=B2000_alt_north_year
+modelname=lsh_B2000_alt_north_JFMAM_80_20
 # variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,UBOT,VBOT,TREFHT
 variable=U,V,OMEGA,PRECL,PRECC,PSL,PS,Z3,Q,TREFHT,T,
 # variable=hyam

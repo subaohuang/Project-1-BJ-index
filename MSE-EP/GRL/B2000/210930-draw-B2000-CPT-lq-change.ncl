@@ -60,12 +60,15 @@ begin
     q_ct = f1->Q(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
     ; q = q/1000.0  ;;;convert to kg/kg
     hgt_ct = f1->Z3(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
+
 ;;;
 
 
 ;;;;read data
-    diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
-    filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    ; diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
+    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/"
+    ; filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    filename = "lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
 
     f1 = addfile(diri+filename, "r")
    
@@ -77,6 +80,7 @@ begin
 
     t_sen = f1->T(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
     q_sen = f1->Q(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
+
     ; q = q/1000.0  ;;;convert to kg/kg
     hgt_sen = f1->Z3(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
 ;;;
@@ -143,15 +147,15 @@ begin
  t_ct_col_annual = month_to_season(t_ct_col, "MAM")
  q_ct_col_annual = month_to_season(q_ct_col, "MAM")
  
- t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(0:4,:,:,:), 0)/)
- q_ct_col_annual = (/dim_avg_n_Wrap(q_ct_col_12(0:4,:,:,:), 0)/)
+ t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(8:10,:,:,:), 0)/)
+ q_ct_col_annual = (/dim_avg_n_Wrap(q_ct_col_12(8:10,:,:,:), 0)/)
 
 
  t_sen_col_annual = month_to_season(t_sen_col, "MAM")
  q_sen_col_annual = month_to_season(q_sen_col, "MAM")
  
- t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(0:4,:,:,:), 0)/)
- q_sen_col_annual = (/dim_avg_n_Wrap(q_sen_col_12(0:4,:,:,:), 0)/)
+ t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(8:10,:,:,:), 0)/)
+ q_sen_col_annual = (/dim_avg_n_Wrap(q_sen_col_12(8:10,:,:,:), 0)/)
  
  
 
@@ -177,7 +181,7 @@ begin
 
 
 
-  wks = gsn_open_wks("pdf","CpT和Lq的变化-CT-SEN-1980-2020")          ; send graphics to PNG file
+  wks = gsn_open_wks("pdf","SON-CpT和Lq的变化-CT-"+filename+"-1980-2020")          ; send graphics to PNG file
 
 ;;**************************************************************
 ;画图

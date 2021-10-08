@@ -61,8 +61,11 @@ begin
 
 
 ;;;;read data
-    diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
-    filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    ; diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
+    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/"
+    ; filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    filename = "lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
+    modelname = "lsh_B2000_alt_north_year_80_20"
 
     f1 = addfile(diri+filename, "r")
    
@@ -93,7 +96,7 @@ begin
  
 
 ;;;;;;;;;;;;;;;;;;;
- ; t_ct_col =  dim_avg_wgt_n_Wrap(t_ct(:,{1000:300},:,:), dz({1000:300}), 1, 1)
+ ; t_ct_col =  dim_avg_wgt_n_Wrap(t_ct(:,{1000:500},:,:), dz({1000:700}), 1, 1)
  t_ct_col =  t_ct(:,{500},:,:)
  
  t_ct_col_12 = split_12(t_ct_col)
@@ -102,9 +105,9 @@ begin
 
 
 ;;;
- ; t_sen_col =  dim_avg_wgt_n_Wrap(t_sen(:,{1000:300},:,:), dz({1000:300}), 1, 1)
- t_sen_col =  dim_avg_n_Wrap(t_sen(:,{1000:500},:,:), 1)
- ; t_sen_col =  t_sen(:,{500},:,:)
+ ; t_sen_col =  dim_avg_wgt_n_Wrap(t_sen(:,{1000:500},:,:), dz({1000:700}), 1, 1)
+ ; t_sen_col =  dim_avg_n_Wrap(t_sen(:,{1000:700},:,:), 1)
+ t_sen_col =  t_sen(:,{500},:,:)
 
  t_sen_col_12 = split_12(t_sen_col)
 
@@ -115,11 +118,11 @@ begin
 
  t_ct_col_annual = month_to_season(t_ct_col, "MAM")
 
- t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(0:4,:,:,:), 0)/)
+ t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(8:10,:,:,:), 0)/)
 
  t_sen_col_annual = month_to_season(t_sen_col, "MAM")
  
- t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(0:4,:,:,:), 0)/)
+ t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(8:10,:,:,:), 0)/)
 
  
  
@@ -138,7 +141,7 @@ begin
 
 
 
-  wks = gsn_open_wks("pdf","OMEGA变化-CT-SEN")          ; send graphics to PNG file
+  wks = gsn_open_wks("pdf",modelname+"OMEGA变化-CT-SEN")          ; send graphics to PNG file
 
 ;;**************************************************************
 ;画图
@@ -201,9 +204,9 @@ begin
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.4
-  res@cnMaxLevelValF       =   0.4
-  res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.2
 
   ; res@cnLevelSelectionMode = "ExplicitLevels"     ; set manual contour level
   ; res@cnLevels = (/-2.0,-1.5,-1.0,1.0,1.5,2.0/)
