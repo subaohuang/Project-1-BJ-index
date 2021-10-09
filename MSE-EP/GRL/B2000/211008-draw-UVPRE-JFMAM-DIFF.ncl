@@ -38,30 +38,30 @@ begin
 season = (/"MAM"/)
 
    
-  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
-  ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-  fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
- 
-   ; modelname = "B2000_alt_north_year"
-   modelname = "lsh_B2000_alt_north_year_80_20"
-    wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM.pdf")
+fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
+; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
 
-    plot = new(1,graphic)
-    iplot = plot
-    
-    f1=addfile(fils1, "r")
-    f2=addfile(fils2, "r")
-    
-    time1 = f1->time
-    time2 = f2->time
-    time1 = (/time1 -1/)
-    time2 = (/time2 -1/)
-    date1=cd_calendar(time1, 1)
-    date2=cd_calendar(time2, 1)
+; modelname = "B2000_alt_north_year"
+modelname = "lsh_B2000_alt_north_year_80_20"
+wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM.pdf")
+
+plot = new(1,graphic)
+iplot = plot
+
+f1=addfile(fils1, "r")
+f2=addfile(fils2, "r")
+
+time1 = f1->time
+time2 = f2->time
+time1 = (/time1 -1/)
+time2 = (/time2 -1/)
+date1=cd_calendar(time1, 1)
+date2=cd_calendar(time2, 1)
 
 
-    timeind1=ind(date1.ge.25601.and.date1.le.28012)
-    timeind2=ind(date2.ge.25601.and.date2.le.28012)
+timeind1=ind(date1.ge.25601.and.date1.le.28012)
+timeind2=ind(date2.ge.25601.and.date2.le.28012)
   
  
   PRECL_CT  =  f1->PRECL(timeind1,:,:)
