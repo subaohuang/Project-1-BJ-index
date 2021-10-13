@@ -672,7 +672,7 @@ print("=====finish read data==========")
 
   ; res2@vcRefMagnitudeF          = 1000.0
   ; res2@vcMinMagnitudeF          =100.0
-  res2@gsnLeftString = "(d) MAM CVIMF Trend"
+  res2@gsnLeftString = "(d) MAM MFC Trend"
   ; res2@gsnLeftStringOrthogonalPosF  = -0.12
 
 
@@ -948,7 +948,7 @@ print("=====finish read data==========")
     ; res4@cnFillColors = (/22,32,45,60,-1,80,97,100,110/) -4
 
     
-    res4@gsnLeftString = "(c) MAM low-level wind convergence trend "
+    res4@gsnLeftString = "(c) MAM low-level convergence trend "
     res4@gsnLeftStringFontHeightF = 0.03
     plot(2) = gsn_csm_contour_map(wks, wgt_w_rc, res4)
 
