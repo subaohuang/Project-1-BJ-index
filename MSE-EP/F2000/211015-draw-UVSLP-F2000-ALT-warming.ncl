@@ -38,13 +38,13 @@ begin
 season = (/"MAM"/)
 
    
-fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
+fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/F_2000_CTRL/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
 ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/F/lsh_F2000_atl_sstano/lsh_F2000_atl_sstano.cam.h1.0101-4012_chazhi.nc"
 
 ; modelname = "B2000_alt_north_year"
-modelname = "lsh_B2000_alt_north_db_year_80_20"
-wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM_db.pdf")
+modelname = "F2000_alt"
+wks=gsn_open_wks("pdf", modelname+"-u,v,pre-F2000-ALT-WARMING.pdf")
 
 plot = new(1,graphic)
 iplot = plot
@@ -60,8 +60,8 @@ date1=cd_calendar(time1, 1)
 date2=cd_calendar(time2, 1)
 
 
-timeind1=ind(date1.ge.25601.and.date1.le.28012)
-timeind2=ind(date2.ge.25601.and.date2.le.28012)
+timeind1=ind(date1.ge.501.and.date1.le.3012)
+timeind2=ind(date2.ge.501.and.date2.le.3012)
   
  
   PRECL_CT  =  f1->PRECL(timeind1,:,:)

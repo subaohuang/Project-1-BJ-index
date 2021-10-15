@@ -45,8 +45,8 @@ begin
 
 
 ;;;;read data
-    diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
-    filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
+    filename="lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
 
     f1 = addfile(diri+filename, "r")
    
@@ -133,7 +133,7 @@ begin
     ; order = (/"(c)","(d)"/)
 
     plot = new(1,graphic)
-    wks = gsn_open_wks("pdf", "B2000-ATL-YEAR-MSE-CPT-Lvq_change")
+    wks = gsn_open_wks("pdf", "db_B2000-ATL-YEAR-MSE-CPT-Lvq_change")
 ;;;;
     resxy = True
     resxy@gsnDraw = False

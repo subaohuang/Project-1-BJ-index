@@ -69,8 +69,8 @@ begin
 
 
 ;;;;read data
-    diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
-    filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
+    filename="lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
 
     f1 = addfile(diri+filename, "r")
    
@@ -92,12 +92,12 @@ begin
 
 
 ;;;;;;;;;;;;;;;;;;;
-  div_ct_col =  dim_avg_n_Wrap(div_ct(:,{1000:900},:,:),1)
+  div_ct_col =  dim_avg_n_Wrap(div_ct(:,{1000:850},:,:),1)
   ; div_ct_col =  div_ct(:,{1000},:,:)
 
   div_ct_col_12 = split_12(div_ct_col)
 
-  div_sen_col =  dim_avg_n_Wrap(div_sen(:,{1000:900},:,:),1)
+  div_sen_col =  dim_avg_n_Wrap(div_sen(:,{1000:850},:,:),1)
   ; div_sen_col = div_sen(:,{1000},:,:)
   div_sen_col_12 = split_12(div_sen_col)
 ;;;;;
@@ -130,9 +130,6 @@ begin
  printVarSummary(rc_A_mam)
 
  print("rc_A_mam="+avg(rc_A_mam({0:20},{250:280})))
-
- 
- 
 
 
 
@@ -199,9 +196,9 @@ begin
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.4
-  res@cnMaxLevelValF       =   0.4
-  res@cnLevelSpacingF      =  0.1
+  res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
+  res@cnLevelSpacingF      =  0.2
 
   ; res@cnLevelSelectionMode = "ExplicitLevels"     ; set manual contour level
   ; res@cnLevels = (/-2.0,-1.5,-1.0,1.0,1.5,2.0/)
@@ -219,7 +216,7 @@ begin
   ; res@gsnLeftString="Annual mean MSE trend " 
   plot = new(1,graphic)
 
-  res@gsnLeftString="(a) JFMAM 1000-300hPa integrated CpT (ATO - CTRL) " 
+  res@gsnLeftString="(a) JFMAM 1000-850hPa averaged DIV (ATO - CTRL) " 
   plot = gsn_csm_contour_map(wks, rc_A_mam, res)
   
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    

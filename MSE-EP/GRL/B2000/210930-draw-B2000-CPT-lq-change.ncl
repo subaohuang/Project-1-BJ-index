@@ -66,9 +66,12 @@ begin
 
 ;;;;read data
     ; diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
-    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/"
-    ; filename="B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-    filename = "lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
+    ; diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
+    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
+    filename="/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+    modelname = "lsh_B2000_alt_north_db_year_80_20"
+
+     wks = gsn_open_wks("pdf","JFMAM-CpT和Lq的变化-CT-"+modelname+"-1980-2020")          ; send graphics to PNG file
 
     f1 = addfile(diri+filename, "r")
    
@@ -147,15 +150,15 @@ begin
  t_ct_col_annual = month_to_season(t_ct_col, "MAM")
  q_ct_col_annual = month_to_season(q_ct_col, "MAM")
  
- t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(8:10,:,:,:), 0)/)
- q_ct_col_annual = (/dim_avg_n_Wrap(q_ct_col_12(8:10,:,:,:), 0)/)
+ t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(0:4,:,:,:), 0)/)
+ q_ct_col_annual = (/dim_avg_n_Wrap(q_ct_col_12(0:4,:,:,:), 0)/)
 
 
  t_sen_col_annual = month_to_season(t_sen_col, "MAM")
  q_sen_col_annual = month_to_season(q_sen_col, "MAM")
  
- t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(8:10,:,:,:), 0)/)
- q_sen_col_annual = (/dim_avg_n_Wrap(q_sen_col_12(8:10,:,:,:), 0)/)
+ t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(0:4,:,:,:), 0)/)
+ q_sen_col_annual = (/dim_avg_n_Wrap(q_sen_col_12(0:4,:,:,:), 0)/)
  
  
 
@@ -181,7 +184,7 @@ begin
 
 
 
-  wks = gsn_open_wks("pdf","SON-CpT和Lq的变化-CT-"+filename+"-1980-2020")          ; send graphics to PNG file
+ 
 
 ;;**************************************************************
 ;画图
@@ -204,8 +207,8 @@ begin
 
   res@mpLimitMode           = "LatLon"
   
-  res@mpMinLatF             = -40
-  res@mpMaxLatF             = 40
+  res@mpMinLatF             = -20
+  res@mpMaxLatF             = 20
   res@mpMinLonF             = 0
   res@mpMaxLonF             = 360
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
@@ -244,9 +247,9 @@ begin
 
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.8
-  res@cnMaxLevelValF       =   0.8
-  res@cnLevelSpacingF      =  0.2
+  res@cnMinLevelValF       =   -0.8*2
+  res@cnMaxLevelValF       =   0.8*2
+  res@cnLevelSpacingF      =  0.2*2
 
   ; res@cnLevelSelectionMode = "ExplicitLevels"     ; set manual contour level
   ; res@cnLevels = (/-2.0,-1.5,-1.0,1.0,1.5,2.0/)
