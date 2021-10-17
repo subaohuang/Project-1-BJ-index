@@ -481,7 +481,7 @@ do i=0,4
   ;;;画box
   lat1 = -5
   lat2 = 5
-  lon1 = 210
+  lon1 = 190
   lon2 = 240
 
   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)

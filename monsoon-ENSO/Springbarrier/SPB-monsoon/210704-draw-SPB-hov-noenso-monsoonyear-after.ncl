@@ -128,11 +128,11 @@ begin
 ;;;;;EAESM指数 : 850hPA ZONAL wind diff 110-140 22.5-32.5 - 90-130,5-15
     DMI_ctrl = u_850(:,1,1)
 
-    ; DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
-    ;               dim_avg_n_Wrap(u_850(:,{5:15},{90:130}), (/1,2/))/)
+    DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
+                  dim_avg_n_Wrap(u_850(:,{5:15},{90:130}), (/1,2/))/)
 
-    DMI_ctrl = (/dim_avg_n_Wrap(u_850(:,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
-                  dim_avg_n_Wrap(u_850(:,{20:30},{70:90}), (/1,2/))/)
+    ; DMI_ctrl = (/dim_avg_n_Wrap(u_850(:,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
+    ;               dim_avg_n_Wrap(u_850(:,{20:30},{70:90}), (/1,2/))/)
 
     DMI_ctrl_JJA = month_to_season(DMI_ctrl, "JJA")  ;;;jja 少一年，从25601开始
 ;;;
@@ -259,11 +259,11 @@ print("spb_weakmon="+spb_weakmon@SPB)
 ; wks = gsn_open_wks("pdf", "WNP-after-acr_hov-strong-weak-monsoon")
 ; wks1 = gsn_open_wks("pdf", "WNP-after-root_mean_square-newmonsoon.pdf")
 
-; wks = gsn_open_wks("pdf", "NOsimutaousenso-WNP-noenso-after-acr_hov-strong-weak-monsoon")
-; wks1 = gsn_open_wks("pdf", "NOsimutaousenso-WNP-noenso-after-root_mean_square.pdf")
+wks = gsn_open_wks("pdf", "NOsimutaousenso-WNP-noenso-after-acr_hov-strong-weak-monsoon")
+wks1 = gsn_open_wks("pdf", "NOsimutaousenso-WNP-noenso-after-root_mean_square.pdf")
 
-wks = gsn_open_wks("pdf", "NOsimutaousenso-ISM-noenso-after-acr_hov-strong-weak-monsoon")
-wks1 = gsn_open_wks("pdf", "NOsimutaousenso-ISM-noenso-after-root_mean_square.pdf")
+; wks = gsn_open_wks("pdf", "NOsimutaousenso-ISM-noenso-after-acr_hov-strong-weak-monsoon")
+; wks1 = gsn_open_wks("pdf", "NOsimutaousenso-ISM-noenso-after-root_mean_square.pdf")
 
 
 ;;;draw plot 
@@ -352,6 +352,6 @@ wks1 = gsn_open_wks("pdf", "NOsimutaousenso-ISM-noenso-after-root_mean_square.pd
       plotxy = new(1,graphic)
       plotxy(0) = gsn_csm_xy(wks1, ispan(0,12,1), (/R_strmon,R_weakmon/) , resxy) 
      
-    ; draw(plotxy)
+    draw(plotxy)
     frame(wks)
    end 
