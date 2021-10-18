@@ -122,15 +122,18 @@ begin
    total_year = ispan(startyear,2012,1)
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
-   inds = ind(DMI_ctrl_JJA.ge.std)
-   indw = ind(DMI_ctrl_JJA.le.-1*std)
+   inds = ind(DMI_ctrl_JJA.ge.0.43*std)
+   indw = ind(DMI_ctrl_JJA.le.-0.43*std)
 
-   indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
+   ; indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
+   indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
    ; indw2 = indw(0:dimsizes(indw)-5)
    monstryear = total_year(inds)
    monwekyear = total_year(indw)
 print(monstryear)
 print(monwekyear)
+print(indnor)
+exit()
 ; exit()
 
 ;;;;;  

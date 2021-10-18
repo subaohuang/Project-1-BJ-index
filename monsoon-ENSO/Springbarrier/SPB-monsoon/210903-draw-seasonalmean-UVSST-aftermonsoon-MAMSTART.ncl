@@ -122,11 +122,11 @@ begin
 ;;;;;EAESM指数 : 850hPA ZONAL wind diff 110-140 22.5-32.5 - 90-130,5-15
     DMI_ctrl = u_850(0:dimsizes(u_850&time)-13,1,1)
 
-    DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{22.5:32.5},{110:140}), (/1,2/)) - \
-                  dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{5:15},{90:130}), (/1,2/))/)
+    ; DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{22.5:32.5},{110:140}), (/1,2/)) - \
+    ;               dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{5:15},{90:130}), (/1,2/))/)
 
-    ; DMI_ctrl = (/dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
-    ;               dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{20:30},{70:90}), (/1,2/))/)
+    DMI_ctrl = (/dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
+                  dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-13,{20:30},{70:90}), (/1,2/))/)
 
     DMI_ctrl_JJA = month_to_season(DMI_ctrl, "JJA")  
 ;;;
@@ -264,19 +264,19 @@ begin
    print(ind_uw1)
 
 
-  plot = new(5,graphic)
-  plot1 = new(5,graphic)
+  plot = new(6,graphic)
+  plot1 = new(6,graphic)
   iplot = plot1
   iplot1 = plot
 
-  wks = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_strong-monsoon-after")
-  wks1 = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_weak-monsoon-after")
+  ; wks = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_strong-monsoon-after")
+  ; wks1 = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_weak-monsoon-after")
 
-  ; wks = gsn_open_wks("pdf", "seasonalmean-ISM-UVSST_strong-monsoon-after")
-  ; wks1 = gsn_open_wks("pdf", "seasonalmean-ISM-UVSST_weak-monsoon-after")
+  wks = gsn_open_wks("pdf", "seasonalmean-ISM-UVSST_strong-monsoon-after")
+  wks1 = gsn_open_wks("pdf", "seasonalmean-ISM-UVSST_weak-monsoon-after")
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
- month = (/"JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
+ month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
  
  
 ;;;split to 12 month 
@@ -292,19 +292,19 @@ begin
 
 
  do i=0,11   
-     if i.le.6 then
-       ssta_month_12(i,:,:,:) = ssta(i+5:dimsizes(ssta&time)-1-12:12,:,:)
-       u_850_month_12(i,:,:,:) = u_850(i+5:dimsizes(u_850&time)-1-12:12,:,:)
-       v_850_month_12(i,:,:,:) = v_850(i+5:dimsizes(v_850&time)-1-12:12,:,:)
+     if i.le.9 then
+       ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1-12:12,:,:)
+       u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1-12:12,:,:)
+       v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1-12:12,:,:)
      else
-        ssta_month_12(i,:,:,:) = ssta(i+5:dimsizes(ssta&time)-1:12,:,:)
-        u_850_month_12(i,:,:,:) = u_850(i+5:dimsizes(u_850&time)-1:12,:,:)
-        v_850_month_12(i,:,:,:) = v_850(i+5:dimsizes(v_850&time)-1:12,:,:)
+        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1:12,:,:)
+        u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1:12,:,:)
+        v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1:12,:,:)
      end if
  end do 
 
 
-do i=0,4
+do i=0,5
 ;;; strong and weak monsoon year ssta , u ,v 
    if i.le.3 then 
     ssta_month_str = dim_avg_n_Wrap(ssta_month_12(i*3:i*3+2,ind_ts1,:,:),(/0,1/))
@@ -330,26 +330,26 @@ do i=0,4
     
     else
 
-    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(0:2,ind_ts1+1,:,:),(/0,1/))
+    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(i*3-12:i*3+2-12,ind_ts1+1,:,:),(/0,1/))
 
-    u_month_str = dim_avg_n_Wrap(u_850_month_12(0:2,ind_us1+1,:,:),(/0,1/))
+    u_month_str = dim_avg_n_Wrap(u_850_month_12(i*3-12:i*3+2-12,ind_us1+1,:,:),(/0,1/))
 
-    v_month_str = dim_avg_n_Wrap(v_850_month_12(0:2,ind_us1+1,:,:),(/0,1/))
+    v_month_str = dim_avg_n_Wrap(v_850_month_12(i*3-12:i*3+2-12,ind_us1+1,:,:),(/0,1/))
    
     
-    ssta_month_weak = dim_avg_n_Wrap(ssta_month_12(0:2,ind_tw1+1,:,:),(/0,1/))
+    ssta_month_weak = dim_avg_n_Wrap(ssta_month_12(i*3-12:i*3+2-12,ind_tw1+1,:,:),(/0,1/))
 
-    u_month_weak = dim_avg_n_Wrap(u_850_month_12(0:2,ind_uw1+1,:,:),(/0,1/))
+    u_month_weak = dim_avg_n_Wrap(u_850_month_12(i*3-12:i*3+2-12,ind_uw1+1,:,:),(/0,1/))
 
-    v_month_weak = dim_avg_n_Wrap(v_850_month_12(0:2,ind_uw1+1,:,:),(/0,1/))
+    v_month_weak = dim_avg_n_Wrap(v_850_month_12(i*3-12:i*3+2-12,ind_uw1+1,:,:),(/0,1/))
 
-    prob_ssta_str = one_test(dim_avg_n_Wrap(ssta_month_12(0:2,:,:,:),0), ind_ts1+1)
-    prob_u_str = one_test(dim_avg_n_Wrap(u_850_month_12(0:2,:,:,:),0), ind_us1+1)
-    prob_v_str = one_test(dim_avg_n_Wrap(v_850_month_12(0:2,:,:,:),0), ind_us1+1)
+    prob_ssta_str = one_test(dim_avg_n_Wrap(ssta_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_ts1+1)
+    prob_u_str = one_test(dim_avg_n_Wrap(u_850_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_us1+1)
+    prob_v_str = one_test(dim_avg_n_Wrap(v_850_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_us1+1)
 
-    prob_ssta_weak = one_test(dim_avg_n_Wrap(ssta_month_12(0:2,:,:,:),0), ind_tw1+1)
-    prob_u_weak = one_test(dim_avg_n_Wrap(u_850_month_12(0:2,:,:,:),0), ind_uw1+1)
-    prob_v_weak = one_test(dim_avg_n_Wrap(v_850_month_12(0:2,:,:,:),0), ind_uw1+1)
+    prob_ssta_weak = one_test(dim_avg_n_Wrap(ssta_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_tw1+1)
+    prob_u_weak = one_test(dim_avg_n_Wrap(u_850_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_uw1+1)
+    prob_v_weak = one_test(dim_avg_n_Wrap(v_850_month_12(i*3-12:i*3+2-12,:,:,:),0), ind_uw1+1)
 
     end if
 
@@ -409,7 +409,7 @@ do i=0,4
   ; res@cnLevels := (/-20,-15,-10,-5,5,10,15,20/)*0.01
   ; res@cnInfoLabelOn = False
   
-  res@gsnLeftString = "SST&850UV " + month(i)
+  res@gsnLeftString = month(i) + " SST&850UV " 
   res@gsnLeftStringFontHeightF = 0.015
 
   ; res@mpShapeMode = "FreeAspect"
@@ -430,9 +430,9 @@ do i=0,4
     res@vcLineArrowHeadMaxSizeF = 0.013           ;change the vector line arrows
     res@vcLineArrowHeadMinSizeF = 0.006
 
-    if i.eq.3 then 
+    if i.eq.5 then 
     res@vcRefAnnoOn = True
-    res@vcRefAnnoOrthogonalPosF = 0.4
+    res@vcRefAnnoOrthogonalPosF = 0.2
     else 
     res@vcRefAnnoOn = False
     end if
@@ -509,7 +509,7 @@ pres = True
 pres@gsnPanelLabelBar  = True
 
 
-pres@pmLabelBarOrthogonalPosF = -0.01
+pres@pmLabelBarOrthogonalPosF = 0.01
 
 ; pres@lbLabelStride=1
 gsn_panel(wks, plot, (/3,2/), pres)

@@ -26,12 +26,14 @@ season_r = (/"spring","summer","autumn","winter"/)
 season = (/"MAM","JJA","SON","DJF"/)
 
    
-  fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
+  ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
   ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
- 
+  ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+   fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_CTRL_obsclm/lsh_B2000_alt_north_year_CTRL_obsclm.cam.h1.0251-0280_chazhi.nc"
+   fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_obsclm/lsh_B2000_alt_north_year_obsclm.cam.h1.0251-0280_chazhi.nc"
 
-    wks=gsn_open_wks("pdf", "210930-u,v,pre-restore-altantic_db_80-20-fourseason.pdf")
+
+    wks=gsn_open_wks("pdf", "210930-u,v,pre-restore-altantic_warming-obsclm_80-20-fourseason.pdf")
 
     plot = new(4,graphic)
     str3 = ispan(1, 4, 1) +""

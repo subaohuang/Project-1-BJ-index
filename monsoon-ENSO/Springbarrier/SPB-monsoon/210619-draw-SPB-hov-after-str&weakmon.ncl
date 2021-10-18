@@ -40,9 +40,9 @@ end
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 187101
+    startmon = 190001
     endmon = 201912
-    startyear = 1871
+    startyear = 1900
     endyear = 2019
 ;;;读入HadiSST海温数据
     diri="/home/yangsong3/data-observation/linshh/data/sst/"
@@ -132,12 +132,16 @@ begin
    total_year = ispan(startyear,2012,1)
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
-   inds = ind(DMI_ctrl_JJA.ge.std)
-   indw = ind(DMI_ctrl_JJA.le.-1*std)
+   ; inds = ind(DMI_ctrl_JJA.ge.std)
+   ; indw = ind(DMI_ctrl_JJA.le.-1*std)
 
-  print(DMI_ctrl_clm)
+   inds = ind(DMI_ctrl_JJA.ge.0.43*std)
+   indw = ind(DMI_ctrl_JJA.le.-0.43*std)
 
-   indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
+   indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+
+
+   ; indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
    ; indnor = ind(DMI_ctrl_JJA.lt.-0.2*DMI_ctrl_clm.and.DMI_ctrl_JJA.gt.0.2*DMI_ctrl_clm)
    ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
 

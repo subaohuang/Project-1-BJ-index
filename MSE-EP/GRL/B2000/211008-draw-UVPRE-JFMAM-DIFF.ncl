@@ -38,13 +38,19 @@ begin
 season = (/"MAM"/)
 
    
-fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
-; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
+; ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
+; fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+
+ fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_CTRL_obsclm/lsh_B2000_alt_north_year_CTRL_obsclm.cam.h1.0251-0280_chazhi.nc"
+ fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_obsclm/lsh_B2000_alt_north_year_obsclm.cam.h1.0251-0280_chazhi.nc"
+
 
 ; modelname = "B2000_alt_north_year"
-modelname = "lsh_B2000_alt_north_db_year_80_20"
-wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM_db.pdf")
+; modelname = "lsh_B2000_alt_north_db_year_80_20"
+modelname = "B2000_alt_north_obsclm_year_80_20"
+
+wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM.pdf")
 
 plot = new(1,graphic)
 iplot = plot
