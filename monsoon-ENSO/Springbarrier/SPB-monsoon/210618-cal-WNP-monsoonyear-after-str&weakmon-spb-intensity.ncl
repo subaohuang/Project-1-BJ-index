@@ -130,10 +130,10 @@ begin
    ; indw2 = indw(0:dimsizes(indw)-5)
    monstryear = total_year(inds)
    monwekyear = total_year(indw)
-print(monstryear)
-print(monwekyear)
-print(indnor)
-exit()
+; print(monstryear)
+; print(monwekyear)
+; print(indnor)
+; exit()
 ; exit()
 
 ;;;;;  

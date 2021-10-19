@@ -125,10 +125,16 @@ begin
    total_year = ispan(startyear,endyear,1)
    std = dim_stddev_Wrap(ISM_JJA)
 
-   inds = ind(ISM_JJA.ge.std)
-   indw = ind(ISM_JJA.le.-1*std)
+   ; inds = ind(ISM_JJA.ge.std)
+   ; indw = ind(ISM_JJA.le.-1*std)
 
-   indnor = ind(ISM_JJA.gt.-0.5*std.and.ISM_JJA.lt.0.5*std)
+   ; indnor = ind(ISM_JJA.gt.-0.5*std.and.ISM_JJA.lt.0.5*std)
+
+
+   inds = ind(ISM_JJA.gt.0.43*std)
+   indw = ind(ISM_JJA.lt.-0.43*std)
+
+   indnor = ind(ISM_JJA.ge.-0.43*std.and.ISM_JJA.le.0.43*std)
 
    monstryear = total_year(inds)
    monwekyear = total_year(indw)

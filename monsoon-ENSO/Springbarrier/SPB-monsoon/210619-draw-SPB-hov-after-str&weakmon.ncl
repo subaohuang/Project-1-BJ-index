@@ -119,11 +119,11 @@ begin
 ;;;;;EAESM指数 : 850hPA ZONAL wind diff 110-140 22.5-32.5 - 90-130,5-15
     DMI_ctrl = u_850(:,1,1)
 
-    ; DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
-    ;               dim_avg_n_Wrap(u_850(:,{5:15},{90:130}), (/1,2/))/)
+    DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
+                  dim_avg_n_Wrap(u_850(:,{5:15},{90:130}), (/1,2/))/)
 
-    DMI_ctrl = (/dim_avg_n_Wrap(u_850(:,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
-                  dim_avg_n_Wrap(u_850(:,{20:30},{70:90}), (/1,2/))/)
+    ; DMI_ctrl = (/dim_avg_n_Wrap(u_850(:,{5:15},{40:80}), (/1,2/)) - \   ;;;ISM 
+    ;               dim_avg_n_Wrap(u_850(:,{20:30},{70:90}), (/1,2/))/)
 
     DMI_ctrl_JJA = month_to_season(DMI_ctrl, "JJA")  ;;;jja 少一年，从25601开始
 ;;;
@@ -135,10 +135,10 @@ begin
    ; inds = ind(DMI_ctrl_JJA.ge.std)
    ; indw = ind(DMI_ctrl_JJA.le.-1*std)
 
-   inds = ind(DMI_ctrl_JJA.ge.0.43*std)
-   indw = ind(DMI_ctrl_JJA.le.-0.43*std)
+   inds = ind(DMI_ctrl_JJA.gt.0.43*std)
+   indw = ind(DMI_ctrl_JJA.lt.-0.43*std)
 
-   indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+   indnor = ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std)
 
 
    ; indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
@@ -149,10 +149,10 @@ begin
    monwekyear = total_year(indw)
    noryear = total_year(indnor)
 
-   ; print(monstryear)
-   ; print(monwekyear)
-   ; print(noryear)
-   ; exit()
+   print(monstryear)
+   print(monwekyear)
+   print(noryear)
+   exit()
 ;;;;;  
 
 ;;;
