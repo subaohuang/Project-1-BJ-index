@@ -55,8 +55,12 @@ begin
     
     std_nino = dim_stddev(nino34_djf)
     sst_total_year = ispan(startyear, endyear, 1)
-    nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
-    lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
+
+    ; nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
+    ; lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
+
+    nino_year = sst_total_year(ind(nino34_djf.ge.0.2*std_nino))
+    lanina_year = sst_total_year(ind(nino34_djf.le.-0.2*std_nino))
 
 ;;;
 
@@ -119,15 +123,15 @@ begin
     total_year = ispan(startyear,2012,1)
     std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
-    ; inds = ind(DMI_ctrl_JJA.ge.std)
-    ; indw = ind(DMI_ctrl_JJA.le.-1*std)
+    inds = ind(DMI_ctrl_JJA.ge.std)
+    indw = ind(DMI_ctrl_JJA.le.-1*std)
 
-    ; indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
+    indnor = ind(DMI_ctrl_JJA.gt.-0.5*std.and.DMI_ctrl_JJA.lt.0.5*std)
 
-    inds = ind(DMI_ctrl_JJA.ge.0.43*std)
-    indw = ind(DMI_ctrl_JJA.le.-0.43*std)
+    ; inds = ind(DMI_ctrl_JJA.ge.0.43*std)
+    ; indw = ind(DMI_ctrl_JJA.le.-0.43*std)
 
-    indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+    ; indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
 
 
 
@@ -315,8 +319,8 @@ begin
   ; wks = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_strong-monsoon-after")
   ; wks1 = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_weak-monsoon-after")
 
-  wks = gsn_open_wks("pdf", "noenso-seasonalmean-AISMR-UVSST_strong-monsoon-after")
-  wks1 = gsn_open_wks("pdf", "noenso-seasonalmean-AISMR-UVSST_weak-monsoon-after")
+  wks = gsn_open_wks("pdf", "0.43-std_noenso-1std-seasonalmean-AISMR-UVSST_strong-monsoon-after")
+  wks1 = gsn_open_wks("pdf", "0.43-std_noenso-1std-seasonalmean-AISMR-UVSST_weak-monsoon-after")
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
