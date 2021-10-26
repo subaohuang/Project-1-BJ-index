@@ -257,6 +257,7 @@ begin
 
 
   plot = new(3,graphic)
+  midplot = plot
 
   wks = gsn_open_wks("pdf", "ssta-evolution-during-diffmonsoon")
    
@@ -400,8 +401,9 @@ do k=0,2
   res@trXMinF        = 0
   res@trXMaxF        = 17
 
-  res@trYMinF        = -1.0
-  res@trYMaxF        = 1.0
+
+
+  res@gsnYRefLine = 0.0
 
 
   res@tmXBLabelFontHeightF = 0.02
@@ -412,12 +414,23 @@ do k=0,2
 
   res@tmXBMode = "Explicit"
   res@tmXBValues = ispan(0, 17, 1)
-  res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M(+1)","A(+1)","M(+1)","J(+1)","J(+1)","A(+1)"/)
+  ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M(+1)","A(+1)","M(+1)","J(+1)","J(+1)","A(+1)"/)
+  res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
+   res@tmYLMode = "Explicit"
 
+  if k.ne.0 then 
+   res@trYMinF        = -1.0
+   res@trYMaxF        = 1.0
 
-  res@tmYLMode = "Explicit"
-  res@tmYLValues = fspan(-1.0, 1.0, 11)
-  res@tmYLLabels = fspan(-1.0, 1.0, 11)
+   res@tmYLValues := fspan(-1.0, 1.0, 11)
+   res@tmYLLabels := fspan(-1.0, 1.0, 11)
+  else
+    res@trYMinF        = -1.2
+   res@trYMaxF        = 1.2
+
+   res@tmYLValues := fspan(-1.2, 1.2, 13)
+   res@tmYLLabels := fspan(-1.2, 1.2, 13)
+  end if 
 
   res@tiYAxisString = "SST [~S~o~N~C]" 
   res@tiYAxisFontHeightF=0.02
@@ -429,21 +442,46 @@ do k=0,2
   res@xyMarkLineModes = (/"MarkLines","MarkLines","MarkLines"/)
   res@xyMarkers = (/1,1,1/)
   res@xyMarkerSizes = (/0.03,0.03,0.03/)
-  res@xyMarkerColors= (/"blue","red","black"/)
+  res@xyMarkerColors= (/"red","blue","black"/)
 
 
   res@xyMarkerThicknesses = (/4.0,4.0,4.0/)
   res@xyLineThicknesses  = (/2.0,2.0,2.0/)
-  res@xyLineColors       = (/"blue","red","black"/)
+  res@xyLineColors       = (/"red","blue","black"/)
   res@xyDashPatterns     = (/1,1,1/)
   res@lgPerimOn = False
   res@lgLabelFontHeightF = 0.018
 
   res@gsnLeftString = stringlesft(k)
   plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/), res)
+  ;;添加legend 
+    gres = True
+    if k.eq.0 then 
+    gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
+    else
+    gres@YPosPercent = 25.    ; expressed as %, 0->100, sets position of top border of legend 
+    end if
+                ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
+    gres@XPosPercent = 8    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
+
+    lineres = True
+    ; lineres@lgLineColors = (/"black"，/) ; line colors
+    lineres@lgLineColors       = res@xyLineColors   ; colors chosen
+    lineres@lgLineThicknesses = 4.0                       ; line thicknesses
+    lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
+    lineres@lgDashIndexes = res@xyDashPatterns
+    textres = True
+
+    textres@lgLabels = (/"Strong ISMR","Weak ISMR", "Normal ISMR"/)
+    textres@lgLabelFontHeightF = 0.01
+    ; textres@lgLabelOpacity = (/0/) 
+
+    midplot(k) = simple_legend(wks,plot(k),gres,lineres,textres)   
+   
+
 end do
 pres = True
 ; pres@gsnPanelLabelBar  = True
 ; pres@lbLabelStride=1
-gsn_panel(wks, plot, (/3,1/), pres)
+gsn_panel(wks, plot, (/2,2/), pres)
 end 

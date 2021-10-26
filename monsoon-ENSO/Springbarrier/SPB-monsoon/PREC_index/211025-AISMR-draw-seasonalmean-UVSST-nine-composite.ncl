@@ -355,7 +355,7 @@ do i=0,5
 
 
     else 
-    com_month_str  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_ts1,ind_us1,ind_us1)
+    com_month_str  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_ts1+1,ind_us1+1,ind_us1+1)
     
     ssta_month_str = com_month_str[0]
     u_month_str = com_month_str[1]
@@ -365,7 +365,7 @@ do i=0,5
     prob_u_str = com_month_str[4]
     prob_v_str = com_month_str[5]
 
-    com_month_weak  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_tw1,ind_uw1,ind_uw1)
+    com_month_weak  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_tw1+1,ind_uw1+1,ind_uw1+1)
     
     ssta_month_weak = com_month_weak[0]
     u_month_weak = com_month_weak[1]
@@ -375,7 +375,7 @@ do i=0,5
     prob_u_weak = com_month_weak[4]
     prob_v_weak = com_month_weak[5]
 
-    com_month_nor  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_tnor1,ind_unor1,ind_unor1)
+    com_month_nor  = composite_mean(ssta_month_12(i*3-12:i*3+2-12,:,:,:),u_850_month_12(i*3-12:i*3+2-12,:,:,:),v_850_month_12(i*3-12:i*3+2-12,:,:,:),ind_tnor1+1,ind_unor1+1,ind_unor1+1)
     
     ssta_month_nor = com_month_nor[0]
     u_month_nor = com_month_nor[1]

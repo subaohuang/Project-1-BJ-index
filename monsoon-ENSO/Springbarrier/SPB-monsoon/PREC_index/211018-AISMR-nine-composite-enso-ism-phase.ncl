@@ -25,16 +25,35 @@ begin
  ;;;ACF center diff 
    acr_gra = center_finite_diff_n(acr, 1, False, 1, 1)
    acr_gra = -1*acr_gra  ;;;change to positive
-   acr_gra_max = dim_max_n(acr_gra, 1) 
+   ; acr_gra_max = dim_max_n(acr_gra, 1) 
  
    acr_gra!0 = "initial_month"
    acr_gra!1 = "lag_month"
-   maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
-   SPB = dim_sum_n_Wrap(acr_gra_max, 0)
-   acr@maind = maind
+
+   ; maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
+   ; SPB = dim_sum_n_Wrap(acr_gra_max, 0)
+   ; acr@maind = maind
+   ; acr@SPB = SPB
+  ;;
+acr_gra_mar2aug = new(12,float)
+  
+  do i=0,11
+    if i.le.2 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
+    end if
+
+    if i.le.9.and.i.gt.2 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
+    end if
+    if i.gt.9 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
+    end if
+  end do 
+   SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
    acr@SPB = SPB
 return acr
 end 
+
 function split_12(data)
 begin
     dim = dimsizes(data) 
