@@ -29,7 +29,7 @@ begin
 ;;;read SPB data
     diri="/home/ys17-19/lsh/Project/monsoon-ENSO/Springbarrier/decadal/"
     ; fils1=systemfunc("ls "+diri+"SPB_series_1899-2019-rmtrend.nc")
-    fils1=systemfunc("ls "+diri+"SPB_series_1899-2019-rmtrend-fang2-method.nc")
+    fils1=systemfunc("ls "+diri+"SPB_ren_series_1871-2019-rmtrend-method-30windows.nc")
      ; fils1=systemfunc("ls "+diri+"SPB_series_1899-2019-rmtrend-3456-method.nc")
     f1=addfile(fils1, "r")
 
@@ -58,10 +58,10 @@ begin
 
 
 ;;;; read  HadISST data
-    startmon = 189901
+    startmon = 187101
     endmon = 201912
 
-    yearstart = 1899
+    yearstart = 1871
     yearend = 2019
 
     diri = "/home/yangsong3/data-observation/linshh/data/sst/"
@@ -96,7 +96,7 @@ begin
 
 
 ;;;get 10years running windows EAESM strength 
-    length = 2019-1899+1
+    length = 2019-1871+1
     nave = 10 
 
     ; EAESM_series = cal_mean(length,nave,DMI_ctrl_JJA)
@@ -156,65 +156,70 @@ begin
     AMO_annual = (/dim_standardize_Wrap(AMO_annual, 1)/)
     IPO_annual = (/dim_standardize_Wrap(IPO_annual, 1)/)
     nino34_series = (/dim_standardize_Wrap(nino34_series, 1)/)
-
-
-;;;读入ERA wind data
-
-    ; fils1 = "/home/yangsong3/data-observation/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/yangsong3/data-observation/20thCRV2/uwnd.mon.mean.nc"
-    f1 = addfile(fils1, "r")
-    time1 = f1->time
-    date1=cd_calendar(time1, 1)
-
-    endmon = 201212                 ;;; 1900-2019
-    startmon = 190001
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
-
- 
-;;;;U,V
-    ; u_200  = short2flt(f1->u(timeind1,{200},:,:))
-    ; u_850  = short2flt(f1->u(timeind1,{850},:,:))
-
-    u_200  = f1->uwnd(timeind1,{200},:,:)
-    u_850  = f1->uwnd(timeind1,{850},:,:)
-
-    u_850 = (/rmMonAnnCycTLL(u_850)/)
-    u_200 = (/rmMonAnnCycTLL(u_200)/)
-
-    DMI_ctrl = u_850(0:dimsizes(u_850&time)-1,1,1)
-    DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-1,{22.5:32.5},{110:140}), (/1,2/)) - \
-                  dim_avg_n_Wrap(u_850(0:dimsizes(u_850&time)-1,{5:15},{90:130}), (/1,2/))/)
-
-    DMI_ctrl_JJA = month_to_season(DMI_ctrl, "JJA")  
 ;;;
+
+
+
+;;;AISMR DATA 
+
+    ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
+    nrows=146
+    ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
+    data = asciiread("/home/ys17-19/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
+    jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
+    
+    jjas!0 = "time"
+    jjas&time = ispan(1871,2016,1)
+
+    ; pre_jjas = jjas({startyear:2016}) 
+    pre_jjas = jjas
+
+    pre_jjas = pre_jjas*0.1 ;;convert to mm
+    clm = dim_avg_n_Wrap(pre_jjas, 0)
+    pre_jjasa = dim_rmvmean(pre_jjas)
+    pre_jjasa = (/dtrend_msg_n(ispan(1871,2016,1),pre_jjasa,False,True,0)/)
+    
+    pre_jjasa = (/dim_standardize_Wrap(pre_jjasa, 1)/)
+;;;
+    length = 2016-1871+1
+    nave = 30
+    AISMR_dec = cal_mean(length,nave,pre_jjasa)
+;;;
+
 
 ;;滑动相关
-    ;;nino34_djf:1899-2019  DMI_ctrl_JJA: 1900-2012
-    ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
-    ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(0:dimsizes(nino34_djf)-9),1) ;;; 1905-2007
-    corr = slid_cor(10,DMI_ctrl_JJA,nino34_jja(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
+  ;;nino34_djf:1899-2019  DMI_ctrl_JJA: 1900-2012
+   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
+   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(0:dimsizes(nino34_djf)-9),1) ;;; 1905-2007
+   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_jja(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
 ;;;
-    ; SPB_series = (/dim_standardize_n_Wrap(SPB_series, 1, 0)/)
-    ; corr = (/dim_standardize_n_Wrap(corr, 1, 0)/)
-    spb_corr_cor = escorc(SPB_series(16:dimsizes(SPB_series)-8), corr(15:))
 
-    print(spb_corr_cor)
-    p = rtest(spb_corr_cor, dimsizes(corr)-1, 0)
-    print(p)
-;;;;
+; SPB_series = (/dim_standardize_n_Wrap(SPB_series, 1, 0)/)
+; corr = (/dim_standardize_n_Wrap(corr, 1, 0)/)
+
+; spb_corr_cor = escorc(SPB_series(16:dimsizes(SPB_series)-8), corr(15:))
+
+; print(spb_corr_cor)
+;  p = rtest(spb_corr_cor, dimsizes(corr)-1, 0)
+; print(p)
+
+corr = escorc(SPB_series(1:dimsizes(SPB_series)-3), AISMR_dec)
+
+print(corr)
+; exit()
 
 
 ;;;draw plot 
-    wks = gsn_open_wks("pdf", "SPB_timing_timeseries&-jjaENSO-monsoon relation-fangmethod2")
+    wks = gsn_open_wks("pdf", "SPB_ren_timeseries&-jjas-AISMR")
 
     res               = True                   ; plot mods desired
     res@gsnDraw = False
     res@gsnFrame = False
-    res@tiMainString  = "SPB timing 10-year windows"   ; title
+    res@tiMainString  = "SPB intensity 20-year windows"   ; title
     res@tiMainFontHeightF = 0.02
     res@tiYAxisFontHeightF = 0.02
     res@tiXAxisFontHeightF = 0.02
-    res@tiYAxisString = "SPB intensity (month)"           ; y axis title
+    res@tiYAxisString = "SPB intensity"           ; y axis title
     res@tiXAxisString = "Year (the time mid window)"
 
     ; res@xyLineColors      = (/"black","red","blue","green"/)  ; line colors
@@ -229,47 +234,33 @@ begin
     res@trXMaxF = yearend -5
     res@trXMinF = yearstart
 
-    ; res@trYMaxF = 4.0
-    ; res@trYMinF = -4.0
+    res@trYMaxF = 1.0
+    res@trYMinF = -1.0
 
     res@tmXTOn = False
-    res@tmYROn  = True
+    res@tmYROn  = False
 
 
-    res@tmXBValues=ispan(yearstart+1,yearend-5,10)
-    res@tmXBLabels=ispan(yearstart+1,yearend-5,10)+""
+    res@tmXBValues=ispan(yearstart+1,yearend-15,20)
+    res@tmXBLabels=ispan(yearstart+1,yearend-15,20)+""
     res@tmXBMinorOn=True
-    res@tmXBMinorValues=ispan(yearstart+1,yearend-5,2)
+    res@tmXBMinorValues=ispan(yearstart+1,yearend-10,2)
     res@tmYRMode="Automatic"
 
     res@vpHeightF = 0.3
     res@vpWidthF = 0.6
 
     ; plot = gsn_csm_xy(wks, ispan(1949, 2010, 1), SPB_series, res)
-    ; plot = gsn_csm_xy(wks, ispan(1904, 2015, 1), SPB_series, res)
+    plot = gsn_csm_xy(wks, ispan(1871+15, 2019-14, 1), SPB_series, res)
+    
     ; plot = gsn_csm_xy(wks, ispan(1909, 2010, 1), SPB_series_20years, res)
 
-    ; resp = True
-    ; resp@gsLineColor = "red"
-    ; resp@gsLineDashPattern = 0
-    ; resp@gsLineThicknessF = 4.0
+    resp = True
+    resp@gsLineColor = "pink"
+    resp@gsLineDashPattern = 0
+    resp@gsLineThicknessF = 4.0
 
-    resp = res
-    resp@xyLineColor = (/"red"/)
-    resp@tiYAxisString = "Corr DJF(-1)nino34& JJA SEASM "           ; y axis title
-    resp@tiXAxisString = ""
-    resp@tiYAxisFontColor = "red"
-    resp@tiYAxisFontHeightF = 0.015
-    resp@tmYRLabelFontColor = "red"
-    
-    ; resp@tmBorderLineColor = "red"
-    resp@tmYRMajorLineColor = "red"
-    resp@tmYRMinorLineColor = "red"
-    
-    ; plot_line = gsn_add_polyline(wks, plot, ispan(1905,2008,1), corr, resp)
-
-
-    plot = gsn_csm_x2y2(wks,ispan(1904, 2015, 1), ispan(1905,2008,1),SPB_series,corr,res,resp)
+    ; plot_line = gsn_add_polyline(wks, plot, ispan(1979,2010,1), ASM_series, resp)
     ; plot_line = gsn_add_polyline(wks, plot, ispan(1979,2010,1), ISM_series, resp)
     ; plot_line = gsn_add_polyline(wks, plot, ispan(1899,2010,1), SPB_series_20years, resp)
     ; resp@gsLineColor = "red"
@@ -277,12 +268,16 @@ begin
     ; resp@gsLineColor = "blue"
     ; plot_line3 = gsn_add_polyline(wks, plot, ispan(1899,2019,1), IPO_annual, resp)
 
-    ; ; resp@gsLineColor = "red"
+
+    ; resp@gsLineColor = "red"
     ; ; plot_line4 = gsn_add_polyline(wks, plot, ispan(1899,2015,1), AMO_annual(ind1:ind2), resp)
+    ; plot_line4 = gsn_add_polyline(wks, plot, ispan(1899,2019,1),NAO_series, resp)
 
-    ;  resp@gsLineColor = "red"
+     ; resp@gsLineColor = "red"
     ; plot_line4 = gsn_add_polyline(wks, plot, ispan(1904,2015,1), nino34_series, resp)
-
+    
+    resp@gsLineColor = "red"
+    plot_line4 = gsn_add_polyline(wks, plot, ispan(1871+15,2016-14,1),  AISMR_dec, resp)
 
 
     ; ;;添加legend 

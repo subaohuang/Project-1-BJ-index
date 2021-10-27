@@ -4,6 +4,9 @@
 ;; then calculate the gradient of ACF and then find the maximum ACF decline location 
 ;; more detailed can be found in Jin et al 2019,GRL
 ;;*************************************************************
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl" 
+load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/popRemap.ncl" 
+;;*************************************************************
 function spb_cal(data,data2)  ;;  data:two dimension 12×yearnum array i.e.12×10
 ;;data1 : the monsoon anomous year  data2: next year
 begin 
@@ -29,12 +32,31 @@ begin
  
    acr_gra!0 = "initial_month"
    acr_gra!1 = "lag_month"
+
    maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
    SPB = dim_sum_n_Wrap(acr_gra_max, 0)
    acr@maind = maind
    acr@SPB = SPB
+  ;
+; acr_gra_mar2aug = new(12,float)
+  
+;   do i=0,11
+;     if i.le.2 then 
+;     acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
+;     end if
+
+;     if i.le.9.and.i.gt.2 then 
+;     acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
+;     end if
+;     if i.gt.9 then 
+;     acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
+;     end if
+;   end do 
+;    SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
+;    acr@SPB = SPB
 return acr
 end 
+
 function split_12(nino34)
 begin
     yearnum = dimsizes(nino34)/12
@@ -87,11 +109,7 @@ begin
     date:=cd_calendar(time, 1)
 
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    sst_ctrl = dim_avg_n_Wrap(f1->TEMP(timeind,{0:40000},{-5:5},:),2)
-
-    sst_ctrl&z_t = (/sst_ctrl&z_t/100.0/)
-
-
+    sst_ctrl = f1->TEMP(timeind,0,:,:)
     ssta_ct = (/rmMonAnnCycTLL(sst_ctrl)/)
     copy_VarCoords(sst_ctrl, ssta_ct)
 
@@ -104,21 +122,21 @@ begin
     
     ; model_name = (/"HEAT_B_BP"/)
     model_name =(/"lsh_B2000_WNP_heating_Idl"/)
-    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_double/lsh_B2000_WNP_heating_double.TEMP.fvgrid.0251-0280.nc"
+    fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_double/lsh_B2000_WNP_heating_double.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_Idl/lsh_B2000_WNP_heating_Idl.TEMP.fvgrid.0251-0280.nc"
-    fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_IDLthree/lsh_B2000_WNP_heating_IDLthree.TEMP.fvgrid.0251-0280.nc"
+    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_IDLthree/lsh_B2000_WNP_heating_IDLthree.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/"+model_name+"/"+model_name+".TEMP.fvgrid.0251-0280.nc"
-    
+    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/lsh_B2000_alt_north_year_80_20.TEMP.h1.0251-0280.nc"
     f2 = addfile(fils2, "r")
     time := f2->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)
-
-
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-  
-    sst_wnp = dim_avg_n_Wrap(f2->TEMP(timeind,{0:40000},{-5:5},:) ,2)
-    sst_wnp&z_t = (/sst_wnp&z_t/100.0/)
+
+    sst_wnp = f2->TEMP(timeind,0,:,:)
+
+    ; sst_wnp_r = f2->TEMP(timeind,0,:,:)
+    ; sst_wnp = PopLatLon(sst_wnp_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
     
     ssta_wnp = (/rmMonAnnCycTLL(sst_wnp)/)
     copy_VarCoords(sst_wnp, ssta_wnp)

@@ -111,11 +111,19 @@ begin
     sst_wnp_clm = dim_avg_n_Wrap(sst_wnp_mam(:,{0:20},{125:160}), (/1,2/))
     sst_idl_clm = dim_avg_n_Wrap(sst_idl_mam(:,{0:20},{125:160}), (/1,2/))
 
-    sst_ctrl_clm = (/2*86400*sst_ctrl_clm/1004.0/)
+    sst_ctrl_clm = (/86400*sst_ctrl_clm/1004.0/)
     sst_wnp_clm = (/86400*sst_wnp_clm/1004.0/)
     sst_idl_clm = (/86400*sst_idl_clm/1004.0/)
     ; SST_diff = (/86400*SST_diff/1004.0/)
 
+ std1 = dim_stddev_n(sst_ctrl_clm, 0)
+ std2 = dim_stddev_n(sst_wnp_clm, 0)
+ std3 = dim_stddev_n(sst_idl_clm, 0)
+ 
+ print(std1)
+ print(std2)
+ print(std3)
+ exit()
 ;;; get variables: temperature, longitude, latitude
 
 x = ispan(251,280,1)

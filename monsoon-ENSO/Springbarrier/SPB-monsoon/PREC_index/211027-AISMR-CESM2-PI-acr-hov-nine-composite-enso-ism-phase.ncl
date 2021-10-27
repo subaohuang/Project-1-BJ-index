@@ -70,21 +70,23 @@ end
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 187101
-    endmon = 201912
-    startyear = 1871
-    endyear = 2019
-;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-    f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->time, 1)
-    lat = f1->latitude
-    lon = f1->longitude
+    startmon = 101
+    endmon = 89712
+    startyear = 1
+    endyear = 897
+;;;读入海温数据
+    diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0{0..8}"+"*")
+  
+    f1=addfiles(fils1, "r")
+    date:=cd_calendar(f1[:]->time, 1)
 
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    lat = f1[0]->lat
+    lon = f1[0]->lon
 
-    sst=lonFlip(f1->sst(timeind,:,:))
+    timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+
+    sst=lonFlip(f1[:]->tos(timeind,:,:))
     printVarSummary(sst)
     
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -98,20 +100,21 @@ begin
     
     nino34 =  dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
 
+    delete(ssta)
     nino34_djf = month_to_season(nino34, "DJF")
+
+    printVarSummary(nino34_djf)
 
     nino34_djf(0:dimsizes(nino34_djf)-2) = nino34_djf(1:) 
     nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
 
     nino34_12_r =  split_12(nino34)
 
-    nino34_jja = nino34_djf
-    nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
 
-    nino34_djf = nino34_jja
 
     std_nino = dim_stddev(nino34_djf)
-    sst_total_year = ispan(startyear, endyear, 1)
+    sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
 
     ; nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
     ; lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
@@ -119,33 +122,53 @@ begin
     nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
     lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
     normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
+
+    print("************** finish SST data*****************")
 ;;;
 
 
 
-;;;AISMR DATA 
+;;;PRE DATA 
+    diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/"
+    fils2=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..8}"+"*")
 
-    ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
-    nrows=146
-    ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
-    jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
+    f2=addfiles(fils2, "r")
+    date:=cd_calendar(f2[:]->time, 1)
+    lat = f2[0]->lat
+    lon = f2[0]->lon
     
-    jjas!0 = "time"
-    jjas&time = ispan(1871,2016,1)
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
 
-    pre_jjas = jjas({startyear:2016}) 
+    pre = lonFlip(f2[:]->pr(timeind,:,:))
+  
+    prea = pre
+    
+    prea = (/rmMonAnnCycTLL(pre)/)
+    delete(pre)
 
-    pre_jjas = pre_jjas*0.1 ;;convert to mm
-    clm = dim_avg_n_Wrap(pre_jjas, 0)
-    pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2016-startyear+1,1),pre_jjasa,False,True,0)/)
+    prea = (/dtrend_msg_n(ispan(1,dimsizes(prea&time),1),prea,False,True,0)/)
+
+    prea_indian = dim_avg_n_Wrap(prea(:,{10:30},{70:90}), (/1,2/))
+    delete(prea)
+
+    prea_indian_12 = split_12(prea_indian)
+
+    pre_jjasa = month_to_season(prea_indian, "MAM")
+    delete(prea_indian)
+
+    pre_jjasa = (/dim_avg_n_Wrap(prea_indian_12(5:8,:), 0)/)
+    print("************** finish PRE data*****************")
+;;;
+
+   
 ;;;
     DMI_ctrl_JJA = pre_jjasa
 ;;;
 
 ;;;strong and weak monsoon year 
-   total_year = ispan(startyear,2016,1)
+   total_year = ispan(startyear,endyear,1)   ;;1-399
+
+
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
    inds = ind(DMI_ctrl_JJA.ge.0.43*std)
@@ -154,9 +177,7 @@ begin
    ; print(DMI_ctrl_clm)
 
    indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
-   ; indnor = ind(pre_jjasa.gt.-0.2*clm.and.pre_jjasa.lt.0.2*clm)
-   ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
-
+ 
    monstryear = total_year(inds)
    monwekyear = total_year(indw)
    noryear = total_year(indnor)
@@ -171,7 +192,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2016))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-3)  ;;;少取一年
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -194,18 +215,18 @@ begin
  nor_norm_year =  total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
- ; print(wet_warm_year)
- ; print(wet_cold_year)
- ; print(wet_norm_year)
+ print(wet_warm_year)
+ print(wet_cold_year)
+ print(wet_norm_year)
  
- ; print(dry_warm_year)
- ; print(dry_cold_year)
- ; print(dry_norm_year)
+ print(dry_warm_year)
+ print(dry_cold_year)
+ print(dry_norm_year)
 
- ; print(nor_warm_year)
- ; print(nor_cold_year)
- ; print(nor_norm_year)
- 
+ print(nor_warm_year)
+ print(nor_cold_year)
+ print(nor_norm_year)
+
 ;;;split to 12 month nino34_12 is a array size (12,yearnum)
   yearnum = dimsizes(nino34)/12 -1
   nino34_12 = new((/12,yearnum/),float)
@@ -218,6 +239,13 @@ begin
     end if
   end do 
 ;;;;
+
+
+; case1 = [/wet_warm_year,wet_cold_year,wet_norm_year/]
+
+; case2 = [/dry_warm_year,dry_cold_year,dry_norm_year/]
+
+; case3 = [/nor_warm_year,nor_cold_year,nor_norm_year/]
 
 
 case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]
@@ -239,7 +267,6 @@ do i=0,2
    sst_year = ispan(startyear,endyear,1) ;; nino34_12 start from startyear-1 because nino34 start from startyear-2
 
    ind_s1 :=  get1Dindex(sst_year,case_need[0]);;;
-   
    ind_w1 :=  get1Dindex(sst_year,case_need[1])
    ind_nor1 :=  get1Dindex(sst_year,case_need[2])
 ;;;;
@@ -319,7 +346,7 @@ print("P1_10_nor="+P1_10_nor)
 ; wks = gsn_open_wks("pdf", "WNP-after-acr_hov-strong-weak-monsoon")
 ; wks1 = gsn_open_wks("pdf", "WNP-after-root_mean_square-newmonsoon.pdf")
 
-wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
+wks = gsn_open_wks("pdf", "CESM2-PIcontrol-ISM"+wksstring(i))
 
 ;;;draw plot 
     res=True
@@ -364,13 +391,16 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
   ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
     res@lbLabelStride=1
 
-   res@gsnLeftString = "Strong AISMR"
+   ; res@gsnLeftString = "warm year"
+    res@gsnLeftString = "Strong ISMR"
    res@gsnRightString = ""+spb_strmon@SPB
    plot(0) = gsn_csm_contour(wks,spb_strmon,res)
-   res@gsnLeftString = "Weak AISMR"
+   ; res@gsnLeftString = "cold year"
+    res@gsnLeftString = "Weak ISMR"
    res@gsnRightString = ""+spb_weakmon@SPB
    plot(1) = gsn_csm_contour(wks,spb_weakmon,res)
-   res@gsnLeftString = "Normal AISMR"
+   ; res@gsnLeftString = "normal year"
+   res@gsnLeftString = "Normal ISMR"
    res@gsnRightString = ""+spb_normon@SPB
    plot(2) = gsn_csm_contour(wks,spb_normon,res)
 
