@@ -23,8 +23,8 @@ return prob_p
 end 
 begin
  ;;;time span
-    startmon =25601
-    endmon = 28012
+    startmon =25001
+    endmon = 30012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 3 )
@@ -43,7 +43,7 @@ begin
 
 
 ;;;读入控制实验组的海温数据
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
+    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
     ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
     f1=addfile(fils1, "r")
     time := f1->time 
@@ -51,7 +51,8 @@ begin
     date:=cd_calendar(time, 1)
     
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    sst_ctrl = f1->TEMP(timeind,0,:,:)  
+    sst_ctrl_r = f1->TEMP(timeind,0,:,:)  
+    sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
 
     ;   TLAT = f1->TLAT
     ; TLONG = f1->TLONG
@@ -64,7 +65,7 @@ begin
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_IDLthree/lsh_B2000_WNP_heating_IDLthree.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/HEAT_B_BP/HEAT_B_BP.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
-    fils2 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0250-01.nc"
+    fils2 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0253-01.nc"
     f2 = addfile(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
@@ -80,6 +81,7 @@ begin
     ; sst_wnp_clm = dim_avg_n_Wrap(sst_wnp_mam, 0)
 
     sst_ctrl_clm = dim_avg_n_Wrap(sst_ctrl(0::12,:,:), 0)
+    ; sst_ctrl_clm = dim_avg_n_Wrap(sst_ctrl(10::12,:,:), 0)
     sst_wnp_clm = sst_wnp
 
 
@@ -98,7 +100,7 @@ begin
    ; wks = gsn_open_wks("pdf", "SST-diff-WNP4Kheating-minus-control")
    ; wks = gsn_open_wks("pdf", "SST-diff-MCheating-minus-control")
    ; wks = gsn_open_wks("pdf", "SST-diff-IDLheating-minus-control")
-   wks = gsn_open_wks("pdf", "SST-diff-250yr-minus-control")
+   wks = gsn_open_wks("pdf", "SST-diff-280yr-minus-control")
 
     res=True
     res@gsnDraw=False
@@ -122,8 +124,8 @@ begin
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -0.4
-    res@cnMaxLevelValF       =   0.4
+    res@cnMinLevelValF       =   -1.0
+    res@cnMaxLevelValF       =   1.0
     res@cnLevelSpacingF      =  0.1
     
 
