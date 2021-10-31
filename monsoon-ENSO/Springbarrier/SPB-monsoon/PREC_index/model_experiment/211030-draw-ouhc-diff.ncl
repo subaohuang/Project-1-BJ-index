@@ -49,7 +49,6 @@ begin
     
     fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0{250..300}"+"*")
     f1 = addfiles(fils1, "r")
-    f1=addfiles(fils1, "r")
     time := f1[:]->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)

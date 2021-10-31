@@ -32,7 +32,7 @@ OUT_DIR=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
 IN_DIR=/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/
 
 
-cdo -showlevel B2000_f19g16_CP_CTRL.pop.h.0268-11.nc > lelinfo.txt  ##print level info 
+ncl -v z_t  B2000_f19g16_CP_CTRL.pop.h.0268-11.nc > lelinfo.txt  ##print level info 
 cat lelinfo.txt | xargs -n1  > levinfo_new.txt ##convert to colum
 
 declare -a lev
@@ -53,18 +53,6 @@ done
 	rm test_lev.txt
 	echo $levselect
 
-
-    ####垂直坐标差值范围的选取
-    lev1=`seq -s , 5 10 35`
-    lev2=`seq -s , 50 15 80`
-    lev3=`seq -s , 100 20 200`
-    lev4=`seq -s , 225 25 300`
-    lev5=`seq -s , 350 50 400`
-
-    levintp=${lev1},${lev2},${lev3},${lev4},${lev5}
-     
- cdo  -intlevel,$levintp -select,name=${Var_Name_total},level=$levselect ${modelname}.pop.h.0{250..349}* ${modelname}.pop.temp_upperlevel.0250-0340.nc
-
+ cdo  -select,name=${Var_Name_total},level=$levselect ${modelname}.pop.h.0{250..349}* ${modelname}.pop.temp_upperlevel.0250-0349nc
         # rename .nc _2.5.nc $OUT_DIR/$file
-   
 echo "finish script"
