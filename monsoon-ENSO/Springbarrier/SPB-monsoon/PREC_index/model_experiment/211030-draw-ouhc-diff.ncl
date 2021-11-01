@@ -46,23 +46,30 @@ begin
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0200-0280.nc"
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
     
-    
-    fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0{250..300}"+"*")
-    f1 = addfiles(fils1, "r")
-    time := f1[:]->time 
-    time = (/time-1/)
-    date:=cd_calendar(time, 1)
-    
-    
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    sst_ctrl_r= f1[:]->TEMP(timeind,{0:30000},:,:)  
+    ; fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0{250..300}"+"*")
+    ; f1 = addfiles(fils1, "r")
+    ; time := f1[:]->time 
+    ; time = (/time-1/)
+    ; date:=cd_calendar(time, 1)
+    ; timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    ; sst_ctrl_r= f1[:]->TEMP(timeind,{0:30000},:,:)  
 
+    ; sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
 
-    sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-
-    ;   TLAT = f1->TLAT
-    ; TLONG = f1->TLONG
+    ; system("rm /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.0250-0349.nc")
+    ; pmm_out = addfile("/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.fvgrid.0250-0349.nc", "c")
+    ; pmm_out->TEMP = sst_ctrl
+    ; exit()
    
+    fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.fvgrid.0250-0300.nc")
+    f1 = addfile(fils1, "r")
+    time := f1->time 
+    time = (/time-1/)
+
+    date:=cd_calendar(time, 1)
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    sst_ctrl= dim_avg_n_Wrap(f1->TEMP(timeind,:,:,:),1)  ;;;0-300m
+  
         
 ;;;读入B22000 WNPCLM海温数据
     
@@ -78,7 +85,7 @@ begin
     f2 = addfiles(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
-    sst_r = f2[:]->TEMP(:,{0:30000},:,:)  
+    sst_r = dim_avg_n_Wrap(f2[:]->TEMP(:,0,:,:),1)
      ;;;;差值TEMP 
     sst_wnp = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
     
@@ -97,11 +104,17 @@ begin
     SST_diff = (/sst_wnp_clm - sst_ctrl_clm/)
 
 
-    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,:,{-5:5},{120:280}), (/1,2/))
+    ; SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{120:280}), (/1/))
+    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},:), (/1/))
+
+    print(SST_diff_nino3_4(:,{110:120}))
+    exit()
 
     SST_diff_nino3_4&time = ispan(1,12,1)
-    wks = gsn_open_wks("pdf", "ouc_evolution_hov_diff")
 
+    SST_diff_nino3_4 = where( ismissing(SST_diff_nino3_4),0.0, SST_diff_nino3_4)
+
+    wks = gsn_open_wks("pdf", "ouc_evolution_hov_diff")
 
 ;;**************************************************************
 ;画图
@@ -133,7 +146,7 @@ begin
     res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
     res@cnMinLevelValF       = -2.               ; min level
     res@cnMaxLevelValF       =  2.              ; max leve
-    res@cnLevelSpacingF      =0.2
+    res@cnLevelSpacingF      = 0.2
 
     res@cnFillPalette = "BlueWhiteOrangeRed"
  

@@ -44,19 +44,16 @@ begin
 
 ;;;读入控制实验组的海温数据
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0200-0280.nc"
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
-    ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
-    f1=addfile(fils1, "r")
+    fils1 = systemfunc("ls /WORK/sysu_hjkx_ys/linshh/B/ensemble_run/ncl_for_monsoon_enso_experiment/pop.temp.fvgrid.0250-0300.nc")
+    f1 = addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
+
     date:=cd_calendar(time, 1)
-    
-    
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    sst_ctrl_r= f1->TEMP(timeind,0,:,:)  
+    sst_ctrl= f1->TEMP(timeind,:,:)  ;;;0-300m
 
-
-    sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+   
 
     ;   TLAT = f1->TLAT
     ; TLONG = f1->TLONG
@@ -70,9 +67,9 @@ begin
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/HEAT_B_BP/HEAT_B_BP.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
 
-    year = "0253"
+    year = "0260"
     
-    fils2 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h."+year+"*")
+    fils2 = systemfunc("ls /WORK/sysu_hjkx_ys/array/hank/B2000_f19g16_CTRL/run/B2000_f19g16_CTRL.pop.h."+year+"*")
     f2 = addfiles(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
