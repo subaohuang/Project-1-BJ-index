@@ -49,23 +49,34 @@ begin
     sst_ct = sst(:,{lat1:lat2},{lon1:lon2})
 
     sst_ct = (/rmMonAnnCycTLL(sst_ct)/)
+
+    sst_ct = (/dtrend_msg_n(ispan(1,dimsizes(sst_ct&time),1),sst_ct,False,True,0)/)
+    
+
+    nwt = 49                            ; loose 24 months each end  
+    fca = 1.0/(12*9.0)
+    ihp = 1                 ;;;high pass          
+    nsigma = 1.
+    wts = filwgts_lanczos (nwt, ihp, fca, -999., nsigma)  
+
+    sst_ct = (/wgt_runave_n(sst_ct, wts, 0,0)/)
     
 ;;;读入B22000-SST海温数据
 
     ;;;;model name 
-     modelname = "B2000_alt_north_year"
+    modelname = "B2000_alt_north_year"
     ;;;;
     diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
     fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
     f1=addfile(fils1, "r")
-     time := f1->time 
+    time := f1->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)
 
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
 
     sst_r = f1->TEMP(timeind,0,:,:)  
-   ;;;;差值TEMP 
+    ;;;;差值TEMP 
     sst = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
     printVarSummary(sst)
 
@@ -86,26 +97,32 @@ begin
     ; diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
     ; fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
 
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
+    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp.fvgrid.0250-0300.nc"
 
     f1=addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)
 
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    timeind:=ind(date.le.30012.and.date.ge.25001)
 
-    sst_r = f1->TEMP(timeind,0,:,:)  
+    ; sst_r = f1->TEMP(timeind,0,:,:)  
+    sst_r := f1->TEMP(timeind,:,:)  
    ;;;;差值TEMP 
-    sst = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-    printVarSummary(sst)
-
-    sst_wnp = sst(:,{lat1:lat2},{lon1:lon2})
+    ; sst = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+    ; printVarSummary(sst)
+    ; sst = sst_r
+    sst_wnp = sst_r(:,{lat1:lat2},{lon1:lon2})
     sst_wnp = (/rmMonAnnCycTLL(sst_wnp)/)
+    sst_wnp = (/dtrend_msg_n(ispan(1,dimsizes(sst_wnp&time),1),sst_wnp,False,True,0)/)
+   
+
+    sst_wnp = (/wgt_runave_n(sst_wnp, wts, 0,0)/)
 ;;;;
 
 ;;;
-  sst_wnp_jja = month_to_season(sst_wnp,"JJA")
+    sst_wnp_jja = month_to_season(sst_ct,"JJA")
+    ; sst_wnp_jja = month_to_season(sst_wnp,"JJA")
   ; sst_sen_jja = month_to_season(sst_sen,"JJA")
 
  ;;;;EOF 
@@ -135,9 +152,9 @@ begin
     ; ts_model_std = dim_standardize(ts_model, 0)
     ; tos_enino  =  regCoef_n(ts_model_std, sst_wnp_jja, 0, 0)
 
-    tos_enino1 = (/tos_enino1*-1/)
+    ; tos_enino1 = (/tos_enino1*-1/)
 
-      tos_enino2 = ev_sst(1,:,:)
+    tos_enino2 = ev_sst(1,:,:)
     ; ts_model_std = dim_standardize(ts_model, 0)
     ; tos_enino  =  regCoef_n(ts_model_std, sst_wnp_jja, 0, 0)
 
@@ -159,7 +176,7 @@ begin
 ; ;;;
 
 
-   wks = gsn_open_wks("pdf", "Indian Ocean Pattern in CTRL run")
+   wks = gsn_open_wks("pdf", "Indian Ocean Pattern in fix atlantic CTRL run")
 
    ;  res               = True                   ; plot mods desired
    ;  res@gsnDraw = False
