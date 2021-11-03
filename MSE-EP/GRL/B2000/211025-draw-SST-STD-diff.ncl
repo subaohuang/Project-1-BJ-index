@@ -6,7 +6,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/popRemap.ncl"
 ;;***************************************************************
 begin
  ;;;time span
-    startmon =25101
+    startmon =25601
     endmon = 28012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
@@ -25,9 +25,11 @@ begin
 ;;;;
 
 ;;;;读入控制实验结果
-    ; diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
-    ; fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
-    fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
+
+    modelname = "B2000_alt_north_year_CTRL"
+    diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
+    fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
+    ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
     f1=addfile(fils1, "r")
     time = f1->time 
@@ -95,17 +97,19 @@ begin
     ; std1  = dim_stddev_n_Wrap(sst_ct_jja, 0)
     ; std3  = dim_stddev_n_Wrap(sst_wnp_jja, 0)
 
-    sst_ct_jja = month_to_season(sst_ct, "DJF")
-    sst_wnp_jja = month_to_season(sst_wnp, "DJF")
+    ; sst_ct_jja = month_to_season(sst_ct, "DJF")
+    ; sst_wnp_jja = month_to_season(sst_wnp, "DJF")
+
+    sst_ct_jja = month_to_annual(sst_ct, 1)
+    sst_wnp_jja = month_to_annual(sst_wnp, 1)
+
+
 
     ; print(sst_ct_jja)
     ; exit()
 
     ; var1 = dim_variance_n_Wrap(sst_ct_jja, 0)
     ; var2 = dim_variance_n_Wrap(sst_wnp_jja, 0)
-
-
-
     std1  = dim_stddev_n_Wrap(sst_ct_jja, 0)
     std3  = dim_stddev_n_Wrap(sst_wnp_jja, 0)
 

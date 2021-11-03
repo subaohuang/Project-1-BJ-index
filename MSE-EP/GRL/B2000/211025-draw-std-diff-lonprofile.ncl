@@ -6,7 +6,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/popRemap.ncl"
 ;;***************************************************************
 begin
  ;;;time span
-    startmon =25101
+    startmon =25601
     endmon = 28012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
@@ -88,8 +88,12 @@ begin
    ;  std1  = dim_stddev_n_Wrap(sst_ct_jja, 0)
    ;  std3  = dim_stddev_n_Wrap(sst_wnp_jja, 0)
 
-   sst_tro_ct = dim_avg_n_Wrap(sst_ct(:,{-5:5},:), (/1/))  
-   sst_tro_wnp = dim_avg_n_Wrap(sst_wnp(:,{-5:5},:), (/1/))  
+      sst_ct_jja = month_to_annual(sst_ct, 1)
+    sst_wnp_jja = month_to_annual(sst_wnp, 1)
+
+
+   sst_tro_ct = dim_avg_n_Wrap(sst_ct_jja(:,{-5:5},:), (/1/))  
+   sst_tro_wnp = dim_avg_n_Wrap(sst_wnp_jja(:,{-5:5},:), (/1/))  
    
    std1 = dim_stddev_n_Wrap(sst_tro_ct(:,{120:280}), 0)
    std2 = dim_stddev_n_Wrap(sst_tro_wnp(:,{120:280}), 0)
