@@ -6,8 +6,8 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/popRemap.ncl"
 ;;***************************************************************
 begin
  ;;;time span
-    startmon =22001
-    endmon = 30012
+    startmon =25501
+    endmon = 28012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 3 )
@@ -25,8 +25,8 @@ begin
 ;;;;
 
 ;;;;读入控制实验结果
-    ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
+    fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
+    ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
     f1=addfile(fils1, "r")
     time = f1->time 
@@ -139,41 +139,23 @@ begin
 
     print(ep_year_wnp)
     print(cp_year_wnp)
-    exit()
     
+    
+    sst_ct_djf_ep_enino = dim_avg_n_Wrap(sst_ct_djf(ep_year_ct,:,:), 0)
+    sst_wnp_djf_ep_enino = dim_avg_n_Wrap(sst_wnp_djf(ep_year_wnp,:,:), 0)
 
-  
-  
-    sst_ct_djf_ep_enino = dim_avg_n_Wrap(sst_ct_djf(ep_enino_year_ct,:,:), 0)
-    sst_wnp_djf_ep_enino = dim_avg_n_Wrap(sst_wnp_djf(ep_enino_year_wnp,:,:), 0)
-
+    sst_ct_djf_cp_enino = dim_avg_n_Wrap(sst_ct_djf(cp_year_ct,:,:), 0)
+    sst_wnp_djf_cp_enino = dim_avg_n_Wrap(sst_wnp_djf(cp_year_wnp,:,:), 0)
     
-    sst_ct_djf_cp_enino = dim_avg_n_Wrap(sst_ct_djf(cp_enino_year_ct,:,:), 0)
-    sst_wnp_djf_cp_enino = dim_avg_n_Wrap(sst_wnp_djf(cp_enino_year_wnp,:,:), 0)
-    
-    
-    data = new((/3,3/),float)
-    data(0,:) = (/1,1.52,1.46/)
-    data(1,:) = (/0.6579,1.00,1.55/)
-    data(2,:) = (/0.6849,0.6452,1.00/)
-
-    perc1 = sum(data(1,:))/sum(data)
-    print(perc1)
-    exit()
 
     ; sst_diff = sst_ct_djf_enino
     ; sst_diff = (/sst_wnp_djf_enino - sst_ct_djf_enino/)
-
-    exit()
 ;;;
 
-
-
-
 ;;;;
-    plot = new(3,graphic)
+    plot = new(4,graphic)
 
-    wks = gsn_open_wks("pdf", "NINO4-Elnino_spatial_pattern_"+modelname)
+    wks = gsn_open_wks("pdf", "Control_ATLwarming_Elnino_spatial_pattern_"+modelname)
 
     res=True
     res@gsnDraw=False
@@ -228,18 +210,19 @@ begin
     res@tmYLMajorThicknessF=2.0
     res@tmBorderThicknessF=2.0
 
-    res@gsnLeftString = "El Nino SSTA in control run"
-    res@gsnRightString = ""
-    plot(0) = gsn_csm_contour_map(wks,sst_ct_djf_enino,res)
-    res@gsnLeftString = "El Nino SSTA in ATL warming run"
-    plot(1) = gsn_csm_contour_map(wks,sst_wnp_djf_enino,res)
-    res@gsnLeftString = "ATL warming - CTRL"
-    plot(2) = gsn_csm_contour_map(wks,sst_diff,res)
+    res@gsnLeftString = "EP El Nino SSTA in control run"
+    plot(0) = gsn_csm_contour_map(wks,sst_ct_djf_ep_enino,res)
+    res@gsnLeftString = "CP El Nino SSTA in control run"
+    plot(1) = gsn_csm_contour_map(wks,sst_ct_djf_cp_enino,res)
+    res@gsnLeftString = "EP El Nino SSTA in ATL warming run"
+    plot(2) = gsn_csm_contour_map(wks,sst_wnp_djf_ep_enino,res)
+    res@gsnLeftString = "CP El Nino SSTA in ATL warming run"
+    plot(3) = gsn_csm_contour_map(wks,sst_wnp_djf_cp_enino,res)
     ; res@gsnRightString = ev_sst@pcvar(1) +""
     ; plot(1) = gsn_csm_contour_map(wks,tos_enino2,res)
 
     pres = True
-    gsn_panel(wks, plot, (/3,1/), pres)
+    gsn_panel(wks, plot, (/2,2/), pres)
 
 
 end
