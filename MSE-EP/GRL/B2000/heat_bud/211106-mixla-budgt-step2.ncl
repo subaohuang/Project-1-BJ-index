@@ -5,8 +5,11 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 ;==========================================================
 begin
 ;========================================================== Basics settings
-  model_name = (/"B2000_alt_north_year_CTRL"/)
-  diri = "/home/yangsong3/data-model/lsh/CESM/B/"
+  ; model_name = (/"B2000_alt_north_year_CTRL"/)
+  ; diri = "/home/yangsong3/data-model/lsh/CESM/B/"
+
+  model_name = (/"lsh_B2000_alt_north_db_year_80_20"/)
+  diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/"
   dim_models = dimsizes(model_name)
 
   opt = False
@@ -229,7 +232,21 @@ i=0
     copy_VarCoords(wo_his_bot_anom, Wanom_Tzanom_his)
     printVarSummary(Wanom_Tzanom_his)
     printMinMax(Wanom_Tzanom_his, opt)
+;================================================================================= Nonlinear terms
 
+    Uanom_Txbar_his = uo_his_mixed_anom
+    Uanom_Txbar_his = -uo_his_mixed_anom * dTdx_his_clm * 86400 * 30
+    copy_VarCoords(uo_his_mixed_anom, Uanom_Txbar_his)
+    printVarSummary(Uanom_Txbar_his)
+    printMinMax(Uanom_Txbar_his, opt)
+
+    
+    Wanom_Tzanom_his = wo_his_bot_anom
+    Wanom_Tzanom_his = -wo_his_bot_anom * dTdz_his_anom * 86400 * 30
+    copy_VarCoords(wo_his_bot_anom, Wanom_Tzanom_his)
+
+
+   
 ;================================================================================= thermodynamics Q
     Hm = 50
     Cp = 3940;1996
@@ -253,6 +270,21 @@ i=0
     WATZA = Wanom_Tzanom_his
 
     Q = Q_his
+
+
+    UATXB = (/UATXB/100.0/)  ;;;centimeter to meter 
+    VATYB = (/VATYB/100.0/)
+
+    WATZB = (/WATZB/100.0/)
+
+    UBTXA = (/UBTXA/100.0/)
+    VBTYA = (/VBTYA/100.0/)
+    WBTZA = (/WBTZA/100.0/)
+
+    UATXA = (/UATXA/100.0/)
+    VATYA = (/VATYA/100.0/)
+
+    WATZA = (/WATZA/100.0/)
 
 ;=================================================================================
     system("rm ./cesmmodel/"+model_name(i)+"/"+"hb_"+model_name(i)+".nc")

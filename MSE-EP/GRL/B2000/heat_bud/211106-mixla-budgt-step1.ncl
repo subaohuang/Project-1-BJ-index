@@ -5,8 +5,13 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 ;==========================================================
 begin
 ;========================================================== Basics settings
-  model_name = (/"B2000_alt_north_year_CTRL"/)
-  diri = "/home/yangsong3/data-model/lsh/CESM/B/"
+  ; model_name = (/"B2000_alt_north_year_CTRL"/)
+  ; diri = "/home/yangsong3/data-model/lsh/CESM/B/"
+
+  model_name = (/"lsh_B2000_alt_north_db_year_80_20"/)
+  diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/"
+
+
   dim_models = dimsizes(model_name)
 
   opt = False
@@ -43,9 +48,7 @@ begin
     if var_name(i).ne."SHF".and.var_name(i).ne."WVEL" then
     thetao_his := thetao_his_org(timeind,:,{-30:30},:)
     ; thetao_his = where(thetao_his.ge.10000.,thetao_his@_FillValue,thetao_his)
-
     dim_thetao := dimsizes(thetao_his)
-   
     thetao_his_mixed = dim_avg_n_Wrap(thetao_his(:,0:dim_thetao(1)-2,:,:), 1)
     printVarSummary(thetao_his_mixed)
     thetao_his_bot = thetao_his(:,dim_thetao(1)-1,:,:)
