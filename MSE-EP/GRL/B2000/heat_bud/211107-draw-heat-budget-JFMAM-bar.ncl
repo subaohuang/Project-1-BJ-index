@@ -213,15 +213,15 @@ do i=0,1
     NLT = (/UATXA_ct+VATYA_ct+WATZA_ct/)
 ;;;;
 
-   lat1 = -10
-   lat2 = 0
-   lon1 = 270
-   lon2 = 280
+   ; lat1 = -10
+   ; lat2 = 0
+   ; lon1 = 270
+   ; lon2 = 280
 
-   ; lat1 = -5
-   ; lat2 = 5
-   ; lon1 = 210
-   ; lon2 = 270
+   lat1 = -5
+   lat2 = 5
+   lon1 = 210
+   lon2 = 270
 
 
 ;;;regional mean 
@@ -264,10 +264,10 @@ end do
 
   ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,0:5), 2)
   hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,1:9), 2)
-print("**********************************")
+  print("**********************************")
   print(sum(hb_mean_mamjja(1,1:8)))
   print(hb_mean_mamjja(1,0))
-exit()
+
   plot = new(2,graphic)
   midplot = plot
    
@@ -276,8 +276,8 @@ exit()
 ;画图
 ;;***************************************************************
 
-     ; wks = gsn_open_wks("pdf","NINO3-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
-     wks = gsn_open_wks("pdf","NINO1+2-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     wks = gsn_open_wks("pdf","NINO3-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     ; wks = gsn_open_wks("pdf","NINO1+2-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7
@@ -296,7 +296,7 @@ exit()
      sres@gsnXYBarChartBarWidth = 0.3           ; change bar widths
      sres@tmXBMode          = "Explicit"         ; explicit labels
      sres@tmXBValues        = ispan(1, 9, 1)
-     sres@tmXBLabels = (/"dTdt","ZA","VA","EK","MAU","MAV","TH","NHF","NLT"/)
+     sres@tmXBLabels = (/"dTdt","ZA","VA","EK","MAU","MAV","TH","NHF","NDH"/)
      ; sres@tmYLPrecision = 1
       ; sres@tmYLMode   = "Explicit"        ; explicitly set Y-axis labels
       ; sres@tmYLValues = ispan(-8, 8, 2)*0.01

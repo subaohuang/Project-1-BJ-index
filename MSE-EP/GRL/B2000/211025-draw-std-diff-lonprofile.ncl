@@ -25,9 +25,10 @@ begin
 ;;;;
 
 ;;;;读入控制实验结果
-    ; diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
-    ; fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
-    fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
+  modelname = "B2000_alt_north_year_CTRL"
+    diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
+    fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
+    ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
     f1=addfile(fils1, "r")
     time = f1->time 
@@ -47,7 +48,9 @@ begin
     sst_ct = (/rmMonAnnCycTLL(sst_ct)/)
 
 ;;;读入B22000 WNPCLM海温数据
-   modelname = "lsh_B2000_alt_north_db_year_80_20"
+   ; modelname = "lsh_B2000_alt_north_db_year_80_20"
+   modelname = "lsh_B2000_alt_north_year_80_20"
+   ; modelname = "lsh_B2000_alt_north_db_year"
   ; ;;;;
   ; diri="/home/yangsong3/data-observation/linshh/CESM-data/B/"+ modelname+"/"
   ; fils1=systemfunc("ls "+diri+""+modelname+".TEMP_taux_tauy.h1.0251-0280.nc")
@@ -88,7 +91,7 @@ begin
    ;  std1  = dim_stddev_n_Wrap(sst_ct_jja, 0)
    ;  std3  = dim_stddev_n_Wrap(sst_wnp_jja, 0)
 
-      sst_ct_jja = month_to_annual(sst_ct, 1)
+    sst_ct_jja = month_to_annual(sst_ct, 1)
     sst_wnp_jja = month_to_annual(sst_wnp, 1)
 
 
@@ -106,14 +109,14 @@ begin
    std_diff = std1
    std_diff = (/std2 - std1/)
 
-    x = std1&lon
+  x = std1&lon
 
 
 
    ; std_diff = where(prob.le.0.1, std_diff, std_diff@_FillValue)
    
 
-  wks = gsn_open_wks("pdf", "STD-DIFF-tropical-pacific-longitude")
+  wks = gsn_open_wks("pdf", "1heating-STD-DIFF-tropical-pacific-longitude")
 ;;*************************************************
 ; create plot
 ;**************************************************
