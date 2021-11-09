@@ -5,28 +5,23 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 ;==========================================================
 begin
 ;========================================================== Basics settings
-  ; model_name = (/"B2000_alt_north_year_CTRL"/)
-  ; diri = "/home/yangsong3/data-model/lsh/CESM/B/"
-
-  model_name = (/"lsh_B2000_alt_north_db_year_80_20"/)
-  diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/"
-  dim_models = dimsizes(model_name)
+  diri = "/home/ys17-19/lsh/Project/MSE-EP/GRL/B2000/heat_bud/obs/"
+  ; dim_models = dimsizes(model_name)
 
   opt = False
 
-  his_start = 25601
-  his_end   = 28012
+  his_start = 198001
+  his_end   = 202012
 
 ;========================================================== Read data
-    var_name = (/"TEMP","UVEL","VVEL","WVEL","SHF"/)
+ var_name = (/"TEMP","UVEL","VVEL","WVEL","SHF"/)
 
-i=0
+ i=0
 ;*******************************************
 ;  Read data
 ;*******************************************
-    print(model_name(i))
-
-    fin_thetao_his = addfile("./cesmmodel/"+model_name(i)+"/"+var_name(0)+"_mixed_"+model_name(i)+".nc", "r")
+    
+    fin_thetao_his = addfile("./obs/"+var_name(0)+"_mixed_godas.nc", "r")
 
 
     thetao_his_mixed = fin_thetao_his->TEMP_mixed_avg
@@ -45,7 +40,7 @@ i=0
     printVarSummary(thetao_his_bot_anom)
 
 ;==========================================================
-    fin_uo_his = addfile("./cesmmodel/"+model_name(i)+"/"+var_name(1)+"_mixed_"+model_name(i)+".nc", "r")
+    fin_uo_his = addfile("./obs/"+var_name(1)+"_mixed_godas.nc", "r")
     uo_his_mixed = fin_uo_his->UVEL_mixed_avg
     printVarSummary(uo_his_mixed)
 
@@ -55,7 +50,7 @@ i=0
     printVarSummary(uo_his_mixed_anom)
 
 ;==========================================================
-    fin_vo_his = addfile("./cesmmodel/"+model_name(i)+"/"+var_name(2)+"_mixed_"+model_name(i)+".nc", "r")
+    fin_vo_his = addfile("./obs/"+var_name(2)+"_mixed_godas.nc", "r")
     vo_his_mixed = fin_vo_his->VVEL_mixed_avg
     printVarSummary(vo_his_mixed)
 
@@ -65,7 +60,7 @@ i=0
     printVarSummary(vo_his_mixed_anom)
 
 ;==========================================================
-    fin_wo_his = addfile("./cesmmodel/"+model_name(i)+"/"+var_name(3)+"_mixed_"+model_name(i)+".nc", "r")
+    fin_wo_his = addfile("./obs/"+var_name(3)+"_mixed_godas.nc", "r")
     wo_his_bot = fin_wo_his->WVEL_mixed_bot
     printVarSummary(wo_his_bot)
 
@@ -80,7 +75,7 @@ i=0
     printVarSummary(wo_his_bot_anom)
 
 ;==========================================================
-    fin_hfds_his = addfile("./cesmmodel/"+model_name(i)+"/"+var_name(4)+"_mixed_"+model_name(i)+".nc", "r")
+    fin_hfds_his = addfile("./obs/"+var_name(4)+"_mixed_godas.nc", "r")
     hfds_his = fin_hfds_his->SHF_mixed_avg
     printVarSummary(hfds_his)
 
@@ -287,8 +282,8 @@ i=0
     ; WATZA = (/WATZA/100.0/)
 
 ;=================================================================================
-    system("rm ./cesmmodel/"+model_name(i)+"/"+"hb_"+model_name(i)+".nc")
-    out = addfile("./cesmmodel/"+model_name(i)+"/"+"hb_"+model_name(i)+".nc", "c")
+    system("rm ./obs/"+"hb_godas.nc")
+    out = addfile("./obs/"+"hb_godas.nc", "c")
     out->dTdt   = dTdt_his
     out->UATXB  = UATXB
     out->VATYB  = VATYB

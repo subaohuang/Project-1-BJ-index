@@ -146,7 +146,6 @@ percent = sprintf("%4.2f",100*number/sum_change_ver) + "%"
 print(q1_change_ver)
 
 print(sum_change_ver)
-exit()
 
 
 wks = gsn_open_wks("pdf","Barplot-individual-heating-trend-MAM-WNP")                  ; send graphics to PNG file
@@ -171,7 +170,7 @@ wks = gsn_open_wks("pdf","Barplot-individual-heating-trend-MAM-WNP")            
      sres@gsnDraw = True
      sres@gsnFrame = False
      sres@gsnXYBarChart = True
-     sres@gsnXYBarChartBarWidth = 0.2           ; change bar widths
+     sres@gsnXYBarChartBarWidth = 0.3           ; change bar widths
      sres@tmXBMode          = "Explicit"         ; explicit labels
      sres@tmXBValues        = (/1,2,3,4,5,6,7/)
      sres@tmXBLabels = (/"DIABH","DPLH","SHLH","LSCH","LWRH","SWRH","VDH"/)

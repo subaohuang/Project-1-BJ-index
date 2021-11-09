@@ -118,15 +118,15 @@ begin
     ; print(enino_year_ct)
     ; print(nino3_4_ct)
 
+ 
+  enino_year_1 =(/1980,1983,1987,1988,1992,1995,1998/)
 
-    enino_year_1 =(/1980,1983,1987,1988,1992,1995,1998/)
+  enino_year_2 =(/2003,2005,2007,2010,2015,2016/)
 
-    enino_year_2 =(/2003,2005,2007,2010,2015,2016/)
+  sst_year = ispan(1980,2020,1)
 
-   sst_year = ispan(1980,2020,1)
-
-   enino_year_ct = get1Dindex(sst_year,enino_year_1)
-   enino_year_wnp = get1Dindex(sst_year,enino_year_2)
+  enino_year_ct = get1Dindex(sst_year,enino_year_1)
+  enino_year_wnp = get1Dindex(sst_year,enino_year_2)
 
 
     ; ely=[1952,1954,1958,1959,1964,1966,1969,1970,1973,1977,1978,1980,1983,1987,1988,1992,1995,1998,2003,2005,2007,2010,2015,2016];
@@ -139,13 +139,12 @@ begin
   hb_mean = new((/2,8,14/),float)
 
 
-do i=0,1
+
    
     f4 = addfile("/home/ys17-19/lsh/Project/MSE-EP/GRL/B2000/heat_bud/obs/hb_godas.nc", "r")
 
 
     time := f4->time 
-    time = (/time-1/)
     date:=cd_calendar(time, 1)
     print(date(0))
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
@@ -192,7 +191,7 @@ do i=0,1
 
 
 ;;;composite mean 
-   
+ do i=0,1  
     hb_mean_ct = composite_mean(dTdt_ct_nino3_12,UATXB_ct_nino3_12,VATYB_ct_nino3_12,WATZB_ct_nino3_12,UBTXA_ct_nino3_12,\
                                 VBTYA_ct_nino3_12,WBTZA_ct_nino3_12,Q_ct_nino3_12,enino_year[i])
 ;;;
