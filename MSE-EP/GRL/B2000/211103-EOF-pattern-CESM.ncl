@@ -82,8 +82,8 @@ begin
 
 ;;;;读入控制实验结果
     ; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.TEMP_taux_tauy.h1.0251-0280.nc"\
-    ; fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.TEMP.h1.0251-0280.nc"
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.TEMP.h1.0251-0280.nc"
+    ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0251-0280.nc"
     f1=addfile(fils1, "r")
     time = f1->time 
     time = (/time-1/)
@@ -91,11 +91,11 @@ begin
 
     timeind=ind(date.le.endmon.and.date.ge.startmon)
 
-    ; sst_r = f1->TEMP(timeind,0,:,:)  
-    sst = f1->TEMP(timeind,0,:,:)  
+    sst_r = f1->TEMP(timeind,0,:,:)  
+    ; sst = f1->TEMP(timeind,0,:,:)  
    ;;差值TEMP 
-    ; sst = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-    ; printVarSummary(sst)
+    sst = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+    printVarSummary(sst)
     
     sst_ct = sst(:,{lat1:lat2},{lon1:lon2})
 
@@ -111,8 +111,6 @@ begin
 ;;;;
 
 
-   
-
     ;;;去掉Nino4去信号
     nino1_2 = dim_avg_n_Wrap(tos_djf(:,{0:-10},{270:280}), (/1,2/))
     nino4 = dim_avg_n_Wrap(tos_djf(:,{-5:5},{160:210}), (/1,2/))
@@ -127,7 +125,7 @@ begin
     ;;;;EOF 
     eof_cp = enso_eof(tos_djf)
     eof_cp_pattern = eof_cp[0]
-    eof_cp_pattern = (/-1*eof_cp_pattern/)
+    ; eof_cp_pattern = (/eof_cp_pattern/)
 
     pc_cp = eof_cp[1]
 
@@ -166,7 +164,8 @@ begin
 ;     out->pcvar = ev_sst@pcvar(0)
 ; ;;;
    ; wks = gsn_open_wks("pdf", "ATL warming-pattern EOF-CP&EPelnino")
-   wks = gsn_open_wks("pdf", "dbheating-ATL warming-pattern EOF-elnino")
+   ; wks = gsn_open_wks("pdf", "controlrun-pattern-EOF1-elnino")
+   wks = gsn_open_wks("pdf", "ATLwarmingrun-pattern-EOF1-elnino")
 
     plot = new(2,graphic)
 
@@ -203,9 +202,12 @@ begin
     ; res@cnFillPalette = "BlueDarkRed18"
 
     res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
-    res@cnLevelSpacingF      =  0.2
+    ; res@cnMinLevelValF       =   -1
+    ; res@cnMaxLevelValF       =   1
+    ; res@cnLevelSpacingF      =  0.2
+    res@cnMinLevelValF       =   -0.6
+    res@cnMaxLevelValF       =   0.6
+    res@cnLevelSpacingF      =  0.1
     ; res@cnFillPalette = "NCV_jaisnd"
     ; res@cnFillPalette = "sunshine_9lev"
     
@@ -227,10 +229,11 @@ begin
     
 
     res@gsnRightString = var1(0) +""
-    res@gsnLeftString = "Free run EOF1"
+    res@gsnLeftString = "(a) Control run EOF1 pattern of SST"
     ; res@gsnLeftString = "ATL warming CP El Nino"
 
-    res@gsnLeftStringFontHeightF = 0.03
+    res@gsnLeftStringFontHeightF = 0.02
+    res@gsnRightStringFontHeightF = 0.02
 
     ; res@vpHeightF = 0.3
     ; res@vpWidthF = 0.7

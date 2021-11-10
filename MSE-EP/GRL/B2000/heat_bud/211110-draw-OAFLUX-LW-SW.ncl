@@ -129,6 +129,8 @@ begin
     enino_year_1 = enino_year_ct_or(0:5)
 
     enino_year_2 = enino_year_ct_or(6:)
+    print(enino_year_ct_or)
+    exit()
   ; enino_year_2 := (/2015,2015/)
 
     enino_year_ct = get1Dindex(sst_year,enino_year_1)

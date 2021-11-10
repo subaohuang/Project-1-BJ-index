@@ -38,38 +38,41 @@ begin
 season = (/"MAM"/)
 
    
-; fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
+fils1 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year_CTRL/B2000_alt_north_year_CTRL.cam.h1.0251-0280_chazhi.nc"
 ; ; fils2 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/B2000_alt_north_year.cam.h1.0251-0280_chazhi.nc"
-; fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
 
- fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_CTRL_obsclm/lsh_B2000_alt_north_year_CTRL_obsclm.cam.h1.0251-0280_chazhi.nc"
- fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_obsclm/lsh_B2000_alt_north_year_obsclm.cam.h1.0251-0280_chazhi.nc"
+; fils2= "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
+ ; fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_CTRL_obsclm/lsh_B2000_alt_north_year_CTRL_obsclm.cam.h1.0251-0280_chazhi.nc"
+ ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_obsclm/lsh_B2000_alt_north_year_obsclm.cam.h1.0251-0280_chazhi.nc"
 
 
 ; modelname = "B2000_alt_north_year"
-; modelname = "lsh_B2000_alt_north_db_year_80_20"
-modelname = "B2000_alt_north_obsclm_year_80_20"
+; modelname = "lsh_B2000_alt_north_year_80_20"
+modelname = "lsh_B2000_alt_north_db_year_80_20"
+; modelname = "B2000_alt_north_obsclm_year_80_20"
 
 wks=gsn_open_wks("pdf", modelname+"-u,v,pre-restore-altantic-JFMAM.pdf")
 
-plot = new(1,graphic)
-iplot = plot
+  plot = new(1,graphic)
+  iplot = plot
 
-f1=addfile(fils1, "r")
-f2=addfile(fils2, "r")
+  f1=addfile(fils1, "r")
+  f2=addfile(fils2, "r")
 
-time1 = f1->time
-time2 = f2->time
-time1 = (/time1 -1/)
-time2 = (/time2 -1/)
-date1=cd_calendar(time1, 1)
-date2=cd_calendar(time2, 1)
+  time1 = f1->time
+  time2 = f2->time
+  time1 = (/time1 -1/)
+  time2 = (/time2 -1/)
+  date1=cd_calendar(time1, 1)
+  date2=cd_calendar(time2, 1)
+
+  print(date1)
+
+  timeind1=ind(date1.ge.25601.and.date1.le.28012)
+  timeind2=ind(date2.ge.25601.and.date2.le.28012)
 
 
-timeind1=ind(date1.ge.25601.and.date1.le.28012)
-timeind2=ind(date2.ge.25601.and.date2.le.28012)
-  
- 
   PRECL_CT  =  f1->PRECL(timeind1,:,:)
   PRECC_CT  =  f1->PRECC(timeind1,:,:)
 
@@ -161,7 +164,7 @@ i = 0
 
 
     res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
+    res@lbLabelBarOn=True
     res@cnFillOn = True 
     res@cnLinesOn =False
     ; res@cnLineColor = "White"
@@ -170,20 +173,22 @@ i = 0
     res@cnRasterSmoothingOn=True
 
     res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette =
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -2
-    res@cnMaxLevelValF       =   2
-    res@cnLevelSpacingF      =  0.25
-    
+    ; res@cnMinLevelValF       =   -2
+    ; res@cnMaxLevelValF       =   2
+    ; res@cnLevelSpacingF      =  0.25
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@cnLevels := (/-0.25,-0.2,-0.15,-0.1,-0.05,-0.025,0.025,0.05,0.1,0.15,0.2,0.25/)*10.0
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -30.0
-    res@mpMaxLatF             = 30.0
+    res@mpMinLatF             = -50.0
+    res@mpMaxLatF             = 50.0
     res@mpMinLonF             =0.0
     res@mpMaxLonF             = 360.0
     res@mpCenterLonF          = (/res@mpMinLonF + res@mpMaxLonF/)/2
@@ -197,8 +202,10 @@ i = 0
     ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = season(i)
+    res@gsnLeftString = "PRE&UV850 DIFF (ATL warming - CTRL)"
+    res@gsnLeftStringFontHeightF = 0.02
 
+   
     
     res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
     ; res@vcGlyphStyle="CurlyVector"
@@ -206,14 +213,19 @@ i = 0
     res@vcMinDistanceF           = 0.015           ; thin vectors
     res@vcMinMagnitudeF          =0.02
     res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 2.0
+    ; res@vcRefMagnitudeF          = 2.0
+    res@vcRefMagnitudeF          = 3.0
     res@vcRefLengthF             = 0.05     ; define length of v
-    res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
+    res@vcRefAnnoOrthogonalPosF  = -1.18              ; move ref vector down -1.0在图的右上
     res@vcLineArrowThicknessF=1.5
     res@vcLineArrowHeadMaxSizeF=0.005
     res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
 
+    res@vcRefAnnoBackgroundColor = "Transparent"
+    res@vcRefAnnoPerimOn = False
+
+    res@gsnLeftStringOrthogonalPosF  = -0.15
     
     
     res@gsnRightString = ""
@@ -229,9 +241,9 @@ i = 0
      
      ;;;画box
      lat1 = 0
-     lat2 = 15
-     lon1 = 110
-     lon2 = 155
+     lat2 = 20
+     lon1 = 250
+     lon2 = 280
 
      pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
      pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
@@ -247,7 +259,7 @@ i = 0
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0,0.05/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False

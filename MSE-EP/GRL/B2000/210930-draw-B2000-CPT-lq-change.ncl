@@ -97,11 +97,19 @@ begin
     hgt_ct = (/hgt_ct*9.8/)
     t_ct  = Cp*t_ct
     q_ct  = Lv*q_ct
+    
+    mse_ct = hgt_ct
+    mse_ct = hgt_ct + t_ct + q_ct
 
     hgt_sen = (/hgt_sen*9.8/)
     t_sen  = Cp*t_sen
     q_sen  = Lv*q_sen
     season  = (/"MAM"/)
+    
+    mse_sen = hgt_ct
+    mse_sen = hgt_sen + t_sen + q_sen
+
+
 ;;;;
 
 
@@ -129,6 +137,12 @@ begin
 
  q_ct_col_12 = split_12(q_ct_col)
 
+
+ mse_ct_col =  dim_sum_wgt_n_Wrap(mse_ct(:,{1000:300},:,:), dz({1000:300}), 1, 1)
+ 
+
+ mse_ct_col_12 = split_12(mse_ct_col)
+
 ;;;;;
 
 
@@ -144,21 +158,33 @@ begin
 
  q_sen_col_12 = split_12(q_sen_col)
 
+
+ mse_sen_col =  dim_sum_wgt_n_Wrap(mse_sen(:,{1000:300},:,:), dz({1000:300}), 1, 1)
+ 
+ mse_sen_col_12 = split_12(mse_sen_col)
+
 ;;;;
 
 
  t_ct_col_annual = month_to_season(t_ct_col, "MAM")
  q_ct_col_annual = month_to_season(q_ct_col, "MAM")
+ mse_ct_col_annual = month_to_season(mse_ct_col, "MAM")
+
+
+
  
  t_ct_col_annual = (/dim_avg_n_Wrap(t_ct_col_12(0:4,:,:,:), 0)/)
  q_ct_col_annual = (/dim_avg_n_Wrap(q_ct_col_12(0:4,:,:,:), 0)/)
+ mse_ct_col_annual = (/dim_avg_n_Wrap(mse_ct_col_12(0:4,:,:,:), 0)/)
 
 
  t_sen_col_annual = month_to_season(t_sen_col, "MAM")
  q_sen_col_annual = month_to_season(q_sen_col, "MAM")
+ mse_sen_col_annual = month_to_season(mse_sen_col, "MAM")
  
  t_sen_col_annual = (/dim_avg_n_Wrap(t_sen_col_12(0:4,:,:,:), 0)/)
  q_sen_col_annual = (/dim_avg_n_Wrap(q_sen_col_12(0:4,:,:,:), 0)/)
+ mse_sen_col_annual = (/dim_avg_n_Wrap(mse_sen_col_12(0:4,:,:,:), 0)/)
  
  
 
@@ -172,16 +198,21 @@ begin
  rc_A_mam = (/rc_A_mam/10^6/)
  rc_B_mam = (/rc_B_mam/10^6/)
 
+
+ rc_C_mam  = mse_ct_col_annual(1,:,:)
+ rc_C_mam  = (/dim_avg_n_Wrap(mse_sen_col_annual,0) - dim_avg_n_Wrap(mse_ct_col_annual,0)/)
+ 
+ rc_C_mam = (/rc_C_mam/10^6/)
+
  prob_A = t_test(t_ct_col_annual,t_sen_col_annual)
  prob_B = t_test(q_ct_col_annual,q_sen_col_annual)
+ prob_C = t_test(mse_ct_col_annual,mse_sen_col_annual)
   
-
-
 
  printVarSummary(rc_A_mam)
  printVarSummary(rc_B_mam)
+  printVarSummary(rc_C_mam)
  
-
 
 
  
@@ -265,12 +296,15 @@ begin
 ;   res@vpWidthF = 0.7
 ; ; 
   ; res@gsnLeftString="Annual mean MSE trend " 
-  plot = new(2,graphic)
+  plot = new(3,graphic)
+  res@gsnRightString = ""
 
-  res@gsnLeftString="(a) JFMAM 1000-300hPa integrated CpT (ATO - CTRL) " 
-  plot(0) = gsn_csm_contour_map(wks, rc_A_mam, res)
-  res@gsnLeftString="(b) JFMAM 1000-500hPa integrated Lq (ATO - CTRL) " 
-  plot(1) = gsn_csm_contour_map(wks, rc_B_mam, res)
+  res@gsnLeftString="(a) JFMAM 1000-300hPa integrated MSE (ATL warming - CTRL) " 
+  plot(0) = gsn_csm_contour_map(wks, rc_C_mam, res)
+  res@gsnLeftString="(b) JFMAM 1000-300hPa integrated CpT (ATL warming - CTRL) " 
+  plot(1) = gsn_csm_contour_map(wks, rc_A_mam, res)
+  res@gsnLeftString="(c) JFMAM 1000-500hPa integrated Lq (ATL warming - CTRL) " 
+  plot(2) = gsn_csm_contour_map(wks, rc_B_mam, res)
 
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
@@ -289,8 +323,8 @@ begin
   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
   ;;;
-  add  = ispan(1,2,1)+""
-  do i=0,1
+  add  = ispan(1,3,1)+""
+  do i=0,2
   plot@$add(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
   end do
   ;;;打点
@@ -324,10 +358,11 @@ begin
   ; res_pro@cnFillOn        = True
    
   iplot = plot 
-  iplot(0) = gsn_csm_contour(wks,prob_A,res_pro)
-  iplot(1) = gsn_csm_contour(wks,prob_B,res_pro)
+  iplot(0) = gsn_csm_contour(wks,prob_C,res_pro)
+  iplot(1) = gsn_csm_contour(wks,prob_A,res_pro)
+  iplot(2) = gsn_csm_contour(wks,prob_B,res_pro)
   
-  do i=0,1
+  do i=0,2
   overlay(plot(i), iplot(i))
   end do
 
@@ -340,7 +375,7 @@ begin
   pres@pmLabelBarHeightF = 0.05
   pres@pmLabelBarWidthF = 0.6
 
-  gsn_panel(wks, plot, (/2,1/), pres)
+  gsn_panel(wks, plot, (/3,1/), pres)
 
 end
 

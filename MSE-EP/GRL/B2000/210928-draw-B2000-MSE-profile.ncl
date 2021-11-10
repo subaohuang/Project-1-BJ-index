@@ -162,14 +162,14 @@ begin
    
     resxy@trYReverse        = True                       ; reverse Y-axis
 
-    resxy@trXMaxF :=  2.
+    resxy@trXMaxF :=  3.
     resxy@trXMinF := -1.
-    resxy@tmXBValues := ispan(-10,20,5)*0.1
-    resxy@tmXBLabels := ispan(-10,20,5)*0.1
+    resxy@tmXBValues := ispan(-10,30,5)*0.1
+    resxy@tmXBLabels := ispan(-10,30,5)*0.1
     resxy@tmXBMinorOn = False
     ; resxy@tmXBMinorValues := ispan(-10,40,1)*0.1
     resxy@tiXAxisString = "(10~S~3~N~J/kg)"
-    resxy@gsnLeftString = "(b) MSE change profile"
+    resxy@gsnLeftString = "(b) MSE change profile (ATL warming - CTRL)"
 
     plot = gsn_csm_xy(wks, (/t_nep_change,q_nep_change, \
                              hgt_nep_change,mse_change/),plev ,resxy)
