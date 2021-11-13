@@ -197,7 +197,8 @@ begin
 
     enino_year_ct_or = sst_year(ind(nino3_4_ct.ge.1.0*std_ct_nino3_4))
     lanina_year_ct_or = sst_year(ind(nino3_4_ct.le.-1.0*std_ct_nino3_4))
-
+    
+    enino_lanina_year = sst_year(ind(nino3_4_ct.ge.1.0*std_ct_nino3_4.or.nino3_4_ct.le.-1.0*std_ct_nino3_4))
 
     print(enino_year_ct_or)
     print(lanina_year_ct_or)
@@ -208,13 +209,15 @@ begin
 
     ; enino_year_1 = enino_year_ct_or(0:3)
     ; lanina_year_1 = lanina_year_ct_or(0:2)
-    enino_year_1 = enino_year_ct_or(4:5)
-    lanina_year_1 = lanina_year_ct_or(3:5)
 
+    enino_year_1 = enino_lanina_year(0:6)
+    lanina_year_1 = enino_lanina_year(7:)
 
 
     enino_year1 = get1Dindex(sst_year,enino_year_1)
     lanina_year1 = get1Dindex(sst_year,lanina_year_1)
+
+
 
 
     ; ely=[1952,1954,1958,1959,1964,1966,1969,1970,1973,1977,1978,1980,1983,1987,1988,1992,1995,1998,2003,2005,2007,2010,2015,2016];
@@ -224,41 +227,23 @@ begin
 ;;;composite mean 
    MSE_enino = dim_avg_n_Wrap(MSE_nep_annual(enino_year1,:,:),0)
    MSE_lanina = dim_avg_n_Wrap(MSE_nep_annual(lanina_year1,:,:),0)
-
-   ssta_enino = avg(nino3_4_ct(enino_year1))
-   ssta_lanina = avg(nino3_4_ct(lanina_year1))
-
-   ;;normalized
-   MSE_enino_nor = MSE_enino
-   MSE_lanina_nor = MSE_lanina
-
-   MSE_enino_nor = (/MSE_enino/ssta_enino/)
-   MSE_lanina_nor = (/MSE_lanina/ssta_lanina/)
+;;;;
    
-   
-   MSE_asy = MSE_enino
-   MSE_asy = (/MSE_enino + MSE_lanina/)
+   nino3_4_ct_3d = conform_dims(dimsizes(MSE_nep_annual), nino3_4_ct, (/0/))
+   MSE_nep_annual_nor = MSE_nep_annual
+   MSE_nep_annual_nor = (/MSE_nep_annual/abs(nino3_4_ct_3d)/)
 
-   MSE_asy_nor = MSE_enino
-   MSE_asy_nor = (/MSE_enino_nor - MSE_lanina_nor/)
+   MSE_enino_nor = dim_avg_n_Wrap(MSE_nep_annual_nor(enino_year1,:,:),0)
+   MSE_lanina_nor = dim_avg_n_Wrap(MSE_nep_annual_nor(lanina_year1,:,:),0)
+
+
+   ; MSE_asy = MSE_enino
+   ; MSE_asy = (/MSE_enino + MSE_lanina/)
+
+   ; MSE_asy_nor = MSE_enino
+   ; MSE_asy_nor = (/MSE_enino_nor - MSE_lanina_nor/)
    
 ;;;;
-
-;;;;;
-  prob_enino = one_test(MSE_nep_annual ,enino_year1)
-  prob_lanina = one_test(MSE_nep_annual,enino_year1)
-;;; 
-
-
-    var1 = dim_variance_n(nino3_4_ct(enino_year1), 0)  
-    var2 = dim_variance_n(nino3_4_ct(:), 0) 
-
-    var2 = (/(2*var2^2)/dimsizes(enino_year1)/)
-
-
-; print(var1)
-; print(var2)
-; exit()
 
 ;;;   
   printMinMax(MSE_enino, 1)
@@ -268,7 +253,8 @@ begin
 
   
   ; wks   = gsn_open_wks("pdf", "all-normalized-ENSO-ASY-MSE-spatial-pattern")
-  wks   = gsn_open_wks("pdf", "after-1999-all-ENSO-ASY-MSE-spatial-pattern")
+  ; wks   = gsn_open_wks("pdf", "all-elnino+lanina-ENSO-ASY-MSE-spatial-pattern")
+  wks   = gsn_open_wks("pdf", "two-epoch-all-elnino+lanina-ENSO-ASY-MSE-spatial-pattern")
 
 ;;**************************************************************
 ;画图
@@ -325,7 +311,7 @@ begin
   ; res@cnLevelSpacingF      =  0.2
 
   res@cnLevelSelectionMode = "ExplicitLevels"     ; set manual contour level
-  res@cnLevels = ispan(-10, 10, 2)*0.2
+  res@cnLevels = ispan(-10, 10, 2)*0.05
 
 
   res@lbLabelFontHeightF = 0.01
@@ -348,20 +334,19 @@ begin
   plot = new(4,graphic)
 
   ; res@tiMainString = data+ " MSE trend " + startyear + "-" + endyear
-  res@gsnLeftString="JFMAM MSE&PRE El Nino" 
+  res@gsnLeftString="JFMAM MSE&PRE El Nino + La Nina (1980-1999)" 
   plot(0) = gsn_csm_contour_map(wks, MSE_enino, res)
-  res@gsnLeftString="JFMAM MSE&PRE La Nina" 
+  res@gsnLeftString="JFMAM MSE&PRE El Nino + La Nina (2000-2020)" 
   plot(1) = gsn_csm_contour_map(wks, MSE_lanina, res)
   ; res@cnLevels = ispan(-10, 10, 2)*0.05
-  res@cnLevels = ispan(-10, 10, 2)*0.1
+  res@cnLevels = ispan(-10, 10, 2)*0.05
 ; res@cnLevels = (/-2.0,-1.5,-1.0,1.0,1.5,2.0/)*0.25
-  res@gsnLeftString="JFMAM MSE&PRE ASY" 
-  plot(2) = gsn_csm_contour_map(wks, MSE_asy, res)
-  res@gsnLeftString="JFMAM MSE&PRE ASY (normalized)" 
-  plot(3) = gsn_csm_contour_map(wks, MSE_asy_nor, res)
+  res@gsnLeftString="JFMAM MSE&PRE El Nino + La Nina (normalized) (1980-1999)" 
+  plot(2) = gsn_csm_contour_map(wks, MSE_enino_nor, res)
+  res@gsnLeftString="JFMAM MSE&PRE El Nino + La Nina (normalized) (2000-2020)" 
+  plot(3) = gsn_csm_contour_map(wks, MSE_lanina_nor, res)
 
  
-
   str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
   pgres=True
@@ -414,9 +399,9 @@ begin
   ; res_pro@cnLineLabelBackgroundColor="Transparent"
   ; res_pro@cnLineThicknessF = 3.
   ; res_pro@cnFillOn        = True
-  iplot = new(2,graphic)
-  iplot(0) = gsn_csm_contour(wks,prob_enino,res_pro)
-  iplot(1) = gsn_csm_contour(wks,prob_lanina,res_pro)
+  ; iplot = new(2,graphic)
+  ; iplot(0) = gsn_csm_contour(wks,prob_enino,res_pro)
+  ; iplot(1) = gsn_csm_contour(wks,prob_lanina,res_pro)
   
 ;   do i=0,1 
 ;   overlay(plot(i), iplot(i))
