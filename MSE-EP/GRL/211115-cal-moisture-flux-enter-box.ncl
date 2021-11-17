@@ -281,17 +281,17 @@ print(boundary_north_rc)
 ;;;
 
 
-    ; f2=addfile("/home/yangsong3/data-observation/NCEP_NCAR/monthly/prate.sfc.mon.mean.nc", "r")
-    ; date:=cd_calendar(f2->time, 1)
-    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    ; p_r=f2->prate(timeind,{-90:90},{0:360}) ;;;untis : kg/m^2S
-
-    f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
-    ; f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+    f2=addfile("/home/yangsong3/data-observation/NCEP_NCAR/monthly/prate.sfc.mon.mean.nc", "r")
     date:=cd_calendar(f2->time, 1)
     timeind:=ind(date.ge.startmon.and.date.le.endmon)
-    p_r=f2->precip(timeind,{-90:90},{0:360})
-    p_r = (/p_r*10^3*0.001/86400/)  ;;;untis : kg/m^2S
+    p_r=f2->prate(timeind,{-90:90},{0:360}) ;;;untis : kg/m^2S
+
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    ; ; f2=addfile("/home/yangsong3/data-observation/CPC_monthly_precip/precip.mon.mean.nc", "r")
+    ; date:=cd_calendar(f2->time, 1)
+    ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
+    ; p_r=f2->precip(timeind,{-90:90},{0:360})
+    ; p_r = (/p_r*10^3*0.001/86400/)  ;;;untis : kg/m^2S
 
     ;;;处理数据
     ;;; 水平插值 lat:-88.75：88.75 ； lon:1.25 2.5×2.5度
@@ -328,241 +328,95 @@ print(boundary_north_rc)
     p_rc = (/p_rc*yearnum/)
     print(p_rc)
 ;;;
-;;;
-
-exit()
 
 
-; ;==============================================================
-; ; Mission 3.  trend
-; ; ==============================================================
-    ;;;;Q component
-    Q_rc =  cal_trend(yearnum,era_divQ_delta,era_wgt_qu_delta,era_wgt_qv_delta)
+    print(boundary_east_rc)
+    print(boundary_west_rc)
+    print(boundary_south_rc)
+    print(boundary_north_rc)
+
+    boundary_west_rc = (/boundary_west_rc/10^7/)
+    boundary_east_rc = (/boundary_east_rc/10^7/)
+
+    boundary_south_rc = (/boundary_south_rc/10^7/)
+    boundary_north_rc = (/boundary_north_rc/10^7/)
+
+    evp_rc = (/evp_rc/10^7/)
+
+    p_rc = (/p_rc/10^7/)
+
+
+
+;;**************************************************************
+;画图
+;;***************************************************************
+
+     ; wks = gsn_open_wks("pdf","OBS-NINO3-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     ; wks = gsn_open_wks("pdf","NINO1+2-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     wks = gsn_open_wks("pdf","Moisture-transport-bar-trend")          ; send graphics to PNG file
+
+     sres = True
+     sres@vpWidthF = 0.7
+     sres@vpHeightF = 0.5
+     sres@vpXF = .15
+
+
+     sres@trXMinF = 0.5
+     sres@trXMaxF = 6.5
+     sres@trYMinF = -100.0
+     sres@trYMaxF = 800.0
+
+     sres@gsnDraw = False
+     sres@gsnFrame = False
+     sres@gsnXYBarChart = True
+     sres@gsnXYBarChartBarWidth = 0.3           ; change bar widths
+     sres@tmXBMode          = "Explicit"         ; explicit labels
+     sres@tmXBValues        = ispan(1, 6, 1)
+     sres@tmXBLabels = (/"West","Eeat","North","South","P","E"/)
+
+     ; sres@tmYLPrecision = 1
+      ; sres@tmYLMode   = "Explicit"        ; explicitly set Y-axis labels
+      ; sres@tmYLValues = ispan(-8, 8, 2)*0.01
+      ; sres@tmYLLabels = ispan(-8, 8, 2)*0.01
+     
+     sres@tmXBLabelFontHeightF = 0.01
+     sres@tmXTLabelFontHeightF = 0.0205
+     sres@tmYLLabelFontHeightF = 0.0225
+     sres@tiMainFontHeightF = 0.025
+     sres@gsnRightString = ""
+     sres@tiYAxisString = "[10~S~7~N~ kg*S~S~-1~N~/40year]" 
+     sres@tiYAxisFontHeightF  =0.02
+     sres@gsnYRefLine = 0.      ; set the reference line equal to 0
     
-    q_rc = Q_rc[0]
-    qu_rc  =  Q_rc[1]
-    qv_rc  =  Q_rc[2]
 
-    prob_q = rc_test(q_rc)
-    prob_qu = rc_test(qu_rc)
-    prob_qv = rc_test(qv_rc)
-    ;;;;
-    Q_dyna_rc  =  cal_trend(yearnum,era_wgt_dyna_q,era_wgt_dyna_qu,era_wgt_dyna_qv)    
-    q_dyna_rc = Q_dyna_rc[0]
-    qu_dyna_rc  =  Q_dyna_rc[1]
-    qv_dyna_rc  =  Q_dyna_rc[2]
-
-    prob_q_dyna = rc_test(q_dyna_rc)
-    prob_qu_dyna = rc_test(qu_dyna_rc)
-    prob_qv_dyna = rc_test(qv_dyna_rc)
-    ;;;;
-
-    Q_thermaldyna_rc  =  cal_trend(yearnum,era_wgt_thermaldyna_q,era_wgt_thermaldyna_qu,era_wgt_thermaldyna_qv)    
-    q_thermaldyna_rc = Q_thermaldyna_rc[0]
-    qu_thermaldyna_rc  =  Q_thermaldyna_rc[1]
-    qv_thermaldyna_rc  =  Q_thermaldyna_rc[2]
-
-    prob_q_thermaldyna = rc_test(q_thermaldyna_rc)
-    prob_qu_thermaldyna = rc_test(qu_thermaldyna_rc)
-    prob_qv_thermaldyna = rc_test(qv_thermaldyna_rc)
-    ;;;
-
-    Q_quad_rc  =  cal_trend(yearnum,era_wgt_quad_q,era_wgt_quad_qu,era_wgt_quad_qv)    
-    q_quad_rc = Q_quad_rc[0]
-    qu_quad_rc  =  Q_quad_rc[1]
-    qv_quad_rc  =  Q_quad_rc[2]
-
-    prob_q_quad = rc_test(q_quad_rc)
-    prob_qu_quad = rc_test(qu_quad_rc)
-    prob_qv_quad = rc_test(qv_quad_rc)
-   
-    ;;;;;;;;
-    Q_eddy_rc  =  cal_trend(yearnum,era_wgt_eddy_q,era_wgt_eddy_qu,era_wgt_eddy_qv)    
-    q_eddy_rc = Q_eddy_rc[0]
-    qu_eddy_rc  =  Q_eddy_rc[1]
-    qv_eddy_rc  =  Q_eddy_rc[2]
-
-    prob_q_eddy = rc_test(q_eddy_rc)
-    prob_qu_eddy = rc_test(qu_eddy_rc)
-    prob_qv_eddy = rc_test(qv_eddy_rc)
-    ;;;
+     str = ispan(1,6,1)
+     ; color = (/"black","gray","yellow","green","pink","deeppink3","red","blue"/)
+     color = (/"black"/)
+     
     
-    ; qu_rc = where(prob_qu.le.0.2, qu_rc,qu_rc@_FillValue)
-    ; qv_rc = where(prob_qv.le.0.2, qv_rc,qv_rc@_FillValue)
+     sres@gsnXYBarChartColors = color
 
+     sres@gsnLeftStringFontHeightF = 0.02
+     ; sres@gsnLeftString = "AMJJASOND mean Heat Budget Nino1+2 "
+     ; sres@gsnLeftString = "JJASON mean Heat Budget Nino1+2 "
+     sres@gsnLeftString = "JFMAM mean moisture flux trend "
+     ; plot(i) = gsn_csm_xy(wks,(/0.75+0.15*i,1.75+0.15*i,2.75+0.15*i,3.75+0.15*i/),number(:,i),sres)   ; draw each time series
 
-;==============================================================
-; Mission 6. draw plot
-; ==============================================================
-  wks   = gsn_open_wks("pdf", "水汽通量输送的趋势图")
-  plot=new(5,graphic)
-  res=True
-  res@gsnFrame=False
-  res@gsnDraw=False
-  res@gsnAddCyclic = False
-  
-  ; res@cnFillPalette="MPL_RdBu"
-  res@cnFillPalette = "precip_diff_12lev"
-  res@cnFillOn=True
-  res@cnLinesOn=False
-  res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -40.0
-  res@cnMaxLevelValF       =   40.0
-  res@cnLevelSpacingF      = 10.0
-  res@cnLineLabelsOn=False
-  res@lbLabelBarOn=True
-  res@lbLabelStride=2
-  res@lbOrientation="Horizontal"
-  res@mpLimitMode           = "LatLon"
-  ; res@mpMinLatF             = -5
-  ; res@mpMaxLatF             = 45
-  ; res@mpMinLonF             = 90
-  ; res@mpMaxLonF             = 160
-  
-  ;;;global region
-   res@mpMinLatF             = -10
-   res@mpMaxLatF             = 50
-   res@mpMinLonF             = 60
-   res@mpMaxLonF             = 160
-  ; ;;;
+     plot1 = gsn_csm_xy(wks,ispan(1,6,1),(/boundary_west_rc,-1*boundary_east_rc,-1*boundary_north_rc,boundary_south_rc,p_rc,evp_rc/),sres)   ; draw each time series
 
-  res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
-
-  res@tmXTOn=False
-  res@tmYROn=False
-  res@tmXBOn=True
-  res@tmYROn=False
-
-  res@tmXBLabelFontHeightF=0.015
-  res@tmYLLabelFontHeightF=0.015
-  res@tmXBMajorThicknessF=3.0
-  res@tmYLMajorThicknessF=3.0
-  res@tmBorderThicknessF=4.0
-
-  res@mpFillOn = False
-  res@gsnScalarContour        = True
-    ;;;;;;;LineArrow
-  res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-  ; res@vcGlyphStyle="CurlyVector"
-
-  res@vcMinDistanceF           = 0.02           ; thin vectors
-  ; res@vcMinMagnitudeF          =0.04
- 
-  res@vcRefLengthF             = 0.025     ; define length of v
-  res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-  res@vcLineArrowThicknessF=1.0
-  res@vcVectorDrawOrder="PostDraw"
-  res@vcRefMagnitudeF          = 20.0
-  res@gsnLeftString = "Moisture Transport"
-
-
-  
-  plot(0)=gsn_csm_vector_scalar_map(wks,qu_rc ,qv_rc, q_rc, res)
-  res@gsnLeftString = "Dynamic component"
-  res@vcRefMagnitudeF          = 20.0
-  res@cnMinLevelValF       =   -20.0
-  res@cnMaxLevelValF       =   20.0
-  res@cnLevelSpacingF      = 5.0
-  plot(1)=gsn_csm_vector_scalar_map(wks,qu_dyna_rc ,qv_dyna_rc, q_dyna_rc, res)
-  res@gsnLeftString = "Thermaldynamic component"
-  res@vcRefMagnitudeF          = 4.0
-  res@cnMinLevelValF       =   -4.0
-  res@cnMaxLevelValF       =   4.0
-  res@cnLevelSpacingF      = 1.0
-
-; res@lbAutoManage = False
-; res@lbLabelAutoStride = False
-; res@lbLabelStride = 4
-; ; res@lbLabelStrings =  sprintf("%2.1e", fspan(res@cnMinLevelValF,res@cnMaxLevelValF,17))
-; ; m = res@lbLabelStrings 
-; ; m(8) = "0"
-; ; res@lbLabelStrings = m
-
-
-  plot(2)=gsn_csm_vector_scalar_map(wks,qu_thermaldyna_rc ,qv_thermaldyna_rc, q_thermaldyna_rc, res)
-  res@gsnLeftString = "Quadratic component"
-  res@vcRefMagnitudeF          = 1.0
+     ; color = (/"red"/)
+     ; sres@gsnXYBarChartColors = color
+     ; plot2 = gsn_csm_xy(wks,ispan(1,2,1)+0.15,hb_mean_mamjja(1,:),sres)   ; draw each time series     
     
-  plot(3)=gsn_csm_vector_scalar_map(wks,qu_quad_rc ,qv_quad_rc, q_quad_rc, res)
-  res@vcRefMagnitudeF          = 4.0
-  res@gsnLeftString = "Transient component"
-    
-  plot(4)=gsn_csm_vector_scalar_map(wks,qu_eddy_rc ,qv_eddy_rc, q_eddy_rc, res)
- 
 
-  ; ;;添加区域
-   ;;warm pool
-   pgres = True
-   pgres@gsLineThicknessF=2.0
-   pgres@gsLineDashPattern=0
-  
-   str = "" + ispan(1,5,1) + ""
-   
-   ;;;画box
-   lat1 = 0
-   lat2 = 15
-   lon1 = 110
-   lon2 = 155
+draw(plot1)
+; draw(plot2)
+frame(wks)
+; pres = True
+; ; pres@gsnPanelLabelBar  = True
+; ; pres@lbLabelStride=1
+; gsn_panel(wks, plot, (/2,1/), pres)
 
-   pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-   ;;;
-   do i = 0,4
-   plot@$str(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
-   end do
-
-   ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
-
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.2/)
-    res_pro@lbLabelBarOn = False
-
-    ; res_pro@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
-    ; res_pro@cnMinLevelValF       =   0
-    ; res_pro@cnMaxLevelValF       =   0.05
-    ; res_pro@cnLevelSpacingF      =  0.05
-
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
-
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.0045
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","White","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
-    ; res_pro@cnLineLabelBackgroundColor="Transparent"
-    ; res_pro@cnLineThicknessF = 3.
-    ; res_pro@cnFillOn        = True
-    iplot = new(5,graphic)
-
-    iplot(0)=gsn_csm_contour(wks,prob_q,res_pro)
-    iplot(1)=gsn_csm_contour(wks,prob_q_dyna,res_pro)
-    iplot(2)=gsn_csm_contour(wks,prob_q_thermaldyna,res_pro)
-    iplot(3)=gsn_csm_contour(wks,prob_q_quad,res_pro)
-    iplot(4)=gsn_csm_contour(wks,prob_q_eddy,res_pro)
-  
-
-    do i=0,4
-    overlay(plot(i), iplot(i))
-    end do
-
- pres = True
- pres@gsnPanelLabelBar = False
- pres@lbOrientation = "vertical"
- pres@gsnPanelFigureStrings = (/"a","b","c","d","e","f"/)
-
- gsn_panel(wks, plot, (/3,2/), pres)
- 
 
 end 
     
