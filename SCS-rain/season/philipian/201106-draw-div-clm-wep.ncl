@@ -55,7 +55,7 @@ begin
     div_r = new((/dimsizes(time), dimsizes(lat),dimsizes(lon)/),float)
       
     do i = 0,dimsizes(timeind)/12-1
-    div_r(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,{850},:,:))
+    div_r(i*12:(i+1)*12-1,:,:) = short2flt(f3[i]->d(:,{200},:,:))
     end do
     
     
@@ -89,7 +89,8 @@ begin
     ;;;;
 
   ; wks   = gsn_open_wks("pdf", "global季节平均SST的趋势-philipian-79-16")
-    wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15-850")
+    ; wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15-850")
+    wks   = gsn_open_wks("pdf", "西太低层风场幅合季节平均div的气候态-79-15-200")
     ; wks   = gsn_open_wks("pdf", "全球风场幅合季节平均div的气候态-79-15")
 ;;**************************************************************
 ;画图
@@ -185,7 +186,7 @@ begin
  pgres=True
    pgres@gsLineColor="black"
    pgres@gsLineThicknessF=1.0
-   pgres@gsLineDashPattern=1
+   pgres@gsLineDashPattern=0
 
   str = ispan(1, 4, 1) + ""
     plot_add = new(4,graphic)
@@ -202,7 +203,7 @@ begin
    
 ;;画box
    lat1 = 0
-   lat2 = 15
+   lat2 = 20
    lon1 = 125
    lon2 = 160
 
