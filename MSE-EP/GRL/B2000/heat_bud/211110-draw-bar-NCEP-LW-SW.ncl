@@ -122,9 +122,14 @@ begin
     ; print(nino3_4_ct)
 
  
-    enino_year_1 =(/1983,1987,1988,1992,1995,1998/) -1
+    ; enino_year_1 =(/1983,1987,1988,1992,1995,1998/) -1
 
-    enino_year_2 =(/2003,2005,2007,2010,2015,2016/)-1
+    ; enino_year_2 =(/2003,2005,2007,2010,2015,2016/)-1
+
+    ;;;for lanina
+    enino_year_1 =(/1989,1999/)-1
+    enino_year_2 =(/2000,2008,2011,2012/) -1
+    ; ; enino_year_2 =(/2011,2012/) -1
 
     ; enino_year_1 = enino_year_ct_or(0:5)
 
@@ -206,9 +211,6 @@ begin
 
 
 
-
-
-
 ;;;;
     Hm = 50
     Cp = 3940;1996
@@ -251,7 +253,7 @@ do i=0,1
 end do
   ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,0:5), 2)
   ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,1:9), 2)
-  hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,3:9), 2)
+  hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,3:8), 2)
 
   print("**********************************")
   
@@ -266,7 +268,7 @@ end do
 
      ; wks = gsn_open_wks("pdf","OBS-NINO3-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
      ; wks = gsn_open_wks("pdf","NINO1+2-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
-     wks = gsn_open_wks("pdf","SW-LW-NINO1+2-M2D-BAR-JJASON")          ; send graphics to PNG file
+     wks = gsn_open_wks("pdf","lanina-SW-LW-NINO1+2-M2D-BAR-JJASON")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7

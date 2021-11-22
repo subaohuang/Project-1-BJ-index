@@ -123,8 +123,8 @@ begin
 
  
     ; enino_year_1 =(/1983,1987,1988,1992,1995,1998/) -1
-
     ; enino_year_2 =(/2003,2007,2010,2015,2016/) -1
+
     ;;;for lanina
     enino_year_1 =(/1989,1999/)-1
     enino_year_2 =(/2000,2008,2011,2012/) -1
@@ -187,15 +187,38 @@ begin
    ; lon2 = 200
 
 
-    nino_type = (/"Nino1+2","Nino3","Nino3.4"/)
+    nino_type = (/"Nino1+2","Nino3","Nino3.4","Nino4"/)
 
-do j=0,2
+do j=0,3
 
 
-   lat1 = -5
+  if nino_type(j).eq."Nino1+2" then 
+   lat1 = -10
+   lat2 = 0
+   lon1 = 270
+   lon2 = 280
+   end if 
+
+  if nino_type(j).eq."Nino3" then 
+    lat1 = -5
+   lat2 = 5
+   lon1 = 210
+   lon2 = 270
+   end if 
+
+  if nino_type(j).eq."Nino3.4" then 
+    lat1 = -5
    lat2 = 5
    lon1 = 190
    lon2 = 240
+   end if 
+
+  if nino_type(j).eq."Nino4" then 
+   lat1 = -5
+   lat2 = 5
+   lon1 = 150
+   lon2 = 200
+   end if 
   
   
 ;;;regional mean 
@@ -254,7 +277,9 @@ end do
      ; wks = gsn_open_wks("pdf","OBS-NINO3-M2D-BAR-MAMJJA-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
      ; wks = gsn_open_wks("pdf","NOAA-YEAR-NINO1+2-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
      ; wks = gsn_open_wks("pdf","NOAA-YEAR-NINO3-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
-     wks = gsn_open_wks("pdf","LAnina-NOAA-YEAR-"+nino_type(j)+"-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     ; wks = gsn_open_wks("pdf","LAnina-NOAA-YEAR-"+nino_type(j)+"-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     ; wks = gsn_open_wks("pdf","El Nino-NOAA-YEAR-"+nino_type(j)+"-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     wks = gsn_open_wks("pdf","La Nina-NOAA-YEAR-"+nino_type(j)+"-M2D-BAR-JJASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
 
      sres = True
      sres@vpWidthF = 0.7
@@ -300,7 +325,7 @@ end do
      ; sres@gsnLeftString = "AMJJASOND mean Heat Budget Nino1+2 "
      ; sres@gsnLeftString = "JJASON mean Heat Budget Nino1+2 "
      ; sres@gsnLeftString = "JJASON mean Heat Budget Nino3 "
-     sres@gsnLeftString = "JJASON mean Heat Budget"+" "+nino_type(j)
+     sres@gsnLeftString = "GODAS JJASON mean Heat Budget"+" "+nino_type(j)
      ; plot(i) = gsn_csm_xy(wks,(/0.75+0.15*i,1.75+0.15*i,2.75+0.15*i,3.75+0.15*i/),number(:,i),sres)   ; draw each time series
 
      plot1 = gsn_csm_xy(wks,ispan(1,9,1)-0.15,hb_mean_mamjja(0,:),sres)   ; draw each time series     
