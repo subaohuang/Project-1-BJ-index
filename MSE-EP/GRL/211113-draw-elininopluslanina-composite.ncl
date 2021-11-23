@@ -148,6 +148,15 @@ begin
     MSE_nep_annual = month_to_annual(MSE_nep, 1)
     MSE_nep_annual = (/dim_avg_n(MSE_nep_12(0:4,:,:,:),0)/)
 
+    MSE_nep_annual_nep = dim_avg_n_Wrap(MSE_nep_annual(:,{0:20},{250:280}), (/1,2/))
+
+   rc1 =regCoef_n(ispan(1,41,1),MSE_nep_annual_nep,0,0)
+
+   rc1 = rc1*41
+   diff  = (/avg(MSE_nep_annual_nep(20:))-avg(MSE_nep_annual_nep(0:19))/)
+   print(diff)
+exit()
+
 ;;;;;
 
 
@@ -249,6 +258,17 @@ begin
   printMinMax(MSE_enino, 1)
   printMinMax(MSE_lanina, 1)
 ;;;
+  
+  MSE_DIFF = MSE_enino
+  MSE_DIFF = (/MSE_lanina - MSE_enino/)
+printVarSummary(MSE_DIFF)
+  change = avg(MSE_DIFF({0:20},{250:280}))
+
+  print(rc1)
+  print(change)
+  PERCENT= change/rc1
+  print(PERCENT)
+  exit()
 
 
   

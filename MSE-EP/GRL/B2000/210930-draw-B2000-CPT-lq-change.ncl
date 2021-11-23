@@ -67,11 +67,15 @@ begin
 ;;;;read data
     ; diri = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_alt_north_year/"
     ; diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
-    diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
-    filename="/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
-    modelname = "lsh_B2000_alt_north_db_year_80_20"
+    ; diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_db_year_80_20/"
+    ; filename="/lsh_B2000_alt_north_db_year_80_20.cam.h1.0251-0280_chazhi.nc"
+    ; modelname = "lsh_B2000_alt_north_db_year_80_20"
 
-     wks = gsn_open_wks("pdf","JFMAM-CpT和Lq的变化-CT-"+modelname+"-1980-2020")          ; send graphics to PNG file
+        diri = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_alt_north_year_80_20/"
+    filename="/lsh_B2000_alt_north_year_80_20.cam.h1.0251-0280_chazhi.nc"
+    modelname = "lsh_B2000_alt_north_year_80_20"
+
+    wks = gsn_open_wks("pdf","JFMAM-CpT和Lq的变化-CT-"+modelname+"-1980-2020")          ; send graphics to PNG file
 
     f1 = addfile(diri+filename, "r")
    
@@ -203,6 +207,10 @@ begin
  rc_C_mam  = (/dim_avg_n_Wrap(mse_sen_col_annual,0) - dim_avg_n_Wrap(mse_ct_col_annual,0)/)
  
  rc_C_mam = (/rc_C_mam/10^6/)
+
+print(avg(rc_C_mam({0:20},{250:280})))
+exit()
+
 
  prob_A = t_test(t_ct_col_annual,t_sen_col_annual)
  prob_B = t_test(q_ct_col_annual,q_sen_col_annual)
