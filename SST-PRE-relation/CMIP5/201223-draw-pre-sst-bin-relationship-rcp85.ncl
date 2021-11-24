@@ -215,9 +215,9 @@ dolr_dsst = center_finite_diff(olr_bin, bin(1:) - 0.125, False, 0)
     res@vpHeightF=0.5
     res@vpWidthF=0.6
     
-    res@tiMainString="~F22~SST and OLR"
+    res@tiMainString="~F22~SST and PRE"
 
-    res@tiYAxisString="~F22~OLR [W/m^2]"
+    res@tiYAxisString="~F22~PRE [mm/day]"
     res@tiYAxisFontHeightF=0.02
     
     res@tiXAxisString="~F22~SST [~S~o~N~C]"
