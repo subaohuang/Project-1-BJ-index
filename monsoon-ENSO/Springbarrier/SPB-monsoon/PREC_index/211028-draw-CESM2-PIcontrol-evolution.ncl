@@ -45,13 +45,18 @@ end
 ;; main program 
 ;;*************************************************************
 begin
-  startmon = 101
-    endmon = 89712
+    ; startmon = 101
+    ; endmon = 89712
+    ; startyear = 1
+    ; endyear = 897
+
+    startmon = 101
+    endmon = 99712
     startyear = 1
-    endyear = 897
+    endyear = 997
 ;;;读入海温数据
     diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
-    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0{0..8}"+"*")
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
   
     f1=addfiles(fils1, "r")
     date:=cd_calendar(f1[:]->time, 1)
@@ -103,7 +108,7 @@ begin
 
 ;;;PRE DATA 
     diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/"
-    fils2=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..8}"+"*")
+    fils2=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
 
     f2=addfiles(fils2, "r")
     date:=cd_calendar(f2[:]->time, 1)
@@ -158,7 +163,8 @@ begin
    ; print(monstryear)
    ; print(monwekyear)
    ; print(noryear)
-   ; ; exit()
+
+   
 ;;;;;  
 
 
@@ -200,6 +206,31 @@ begin
  print(nor_cold_year)
  print(nor_norm_year)
 
+
+    system("rm piControl_monsoon_and_ensoyear.nc")
+    year_out = addfile("piControl_monsoon_and_ensoyear.nc", "c")
+
+    year_out->nino_year = nino_year
+    year_out->lanina_year = lanina_year
+    year_out->normal_year = normal_year
+
+    year_out->monstryear = monstryear
+    year_out->monwekyear = monwekyear
+    year_out->noryear = noryear
+
+    year_out->wet_warm_year = wet_warm_year
+    year_out->wet_cold_year = wet_cold_year
+    year_out->wet_norm_year = wet_norm_year
+
+    year_out->dry_warm_year = dry_warm_year
+    year_out->dry_cold_year = dry_cold_year
+    year_out->dry_norm_year = dry_norm_year
+
+    year_out->nor_warm_year = nor_warm_year
+    year_out->nor_cold_year = nor_cold_year
+    year_out->nor_norm_year = nor_norm_year
+
+   exit()
 
 ;;;;;
    sst_year = ispan(startyear,endyear,1) 

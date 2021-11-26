@@ -90,12 +90,6 @@ begin
     std_nino = dim_stddev(nino34_djf)
     sst_total_year = ispan(startyear, endyear, 1)
 
-    ; nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
-    ; lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
-
-    nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
-    lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
-    normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
 ;;;
 
 
