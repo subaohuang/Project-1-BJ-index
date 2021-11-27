@@ -15,6 +15,19 @@ begin
     copy_VarCoords(pv_east, confi_pv_east)
  return confi_pv_east
  end
+function composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind1,ind2,ind3)
+begin 
+
+    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,:,:),(/0,1/))
+    u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,:,:),(/0,1/))
+    v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,:,:),(/0,1/))
+
+    prob_ssta_str = one_test(dim_avg_n_Wrap(ssta_month_12(:,:,:,:),0), ind1)
+    prob_u_str = one_test(dim_avg_n_Wrap(u_850_month_12(:,:,:,:),0), ind2)
+    prob_v_str = one_test(dim_avg_n_Wrap(v_850_month_12(:,:,:,:),0), ind3)
+
+return [/ssta_month_str,u_month_str,v_month_str,prob_ssta_str,prob_u_str,prob_v_str/]
+end 
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
@@ -57,10 +70,7 @@ begin
     nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
 
     ; nino34_12_r =  split_12(nino34)
-
     ; nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
-
-
     ; std_nino = dim_stddev(nino34_djf)
     sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
     print("************** finish SST data*****************")
@@ -80,14 +90,14 @@ begin
 
     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
 
-    u_850 = lonFlip(f2[:]->ua(timeind,:,:,:))
-    printVarSummary(sst)
-    exit()
+    u_850 = lonFlip(f2[:]->ua(timeind,{85000},:,:))
+    printVarSummary(u_850)
+ 
 ;;;;
 
 ;;读入va
     diri3 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
-    fils3 = systemfunc("ls "+diri2+"va_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..8}"+"*")
+    fils3 = systemfunc("ls "+diri2+"va_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
   
     f3 = addfiles(fils3, "r")
     date:=cd_calendar(f3[:]->time, 1)
@@ -97,8 +107,8 @@ begin
 
     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
 
-    v_850 = lonFlip(f3[:]->va(timeind,85000,:,:))
-    printVarSummary(va)
+    v_850 = lonFlip(f3[:]->va(timeind,{85000},:,:))
+    printVarSummary(v_850)
 ;;;;
     u_850 = (/rmMonAnnCycTLL(u_850)/)
     v_850 = (/rmMonAnnCycTLL(v_850)/)
@@ -182,9 +192,9 @@ do k=0,2
   ; wks = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_strong-monsoon-after")
   ; wks1 = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_weak-monsoon-after")
 
-  wks = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-warm"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-cold"+" "+wksstring(k))
-  wks2 = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-normal"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-warm-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-cold-"+" "+wksstring(k))
+  wks2 = gsn_open_wks("pdf", "PIcontrol-seasonalmean-UVSST-normal-"+" "+wksstring(k))
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
