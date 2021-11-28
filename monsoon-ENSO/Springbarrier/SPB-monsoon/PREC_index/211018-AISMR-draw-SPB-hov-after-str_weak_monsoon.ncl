@@ -30,9 +30,27 @@ begin
    acr_gra!0 = "initial_month"
    acr_gra!1 = "lag_month"
    maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
-   SPB = dim_sum_n_Wrap(acr_gra_max, 0)
+
+   acr_gra_mar2aug = new(12,float)
+
+  do i=0,11
+    if i.le.2 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
+    end if
+
+    if i.le.9.and.i.gt.2 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
+    end if
+    if i.gt.9 then 
+    acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
+    end if
+  end do 
+
+   SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
+   ; SPB = dim_sum_n_Wrap(acr_gra_max, 0)
    acr@maind = maind
    acr@SPB = SPB
+   
 return acr
 end 
 ;;;;
@@ -96,12 +114,16 @@ begin
    total_year = ispan(startyear,2016,1)
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
-   inds = ind(DMI_ctrl_JJA.ge.0.43*std)
-   indw = ind(DMI_ctrl_JJA.le.-0.43*std)
+   ; inds = ind(DMI_ctrl_JJA.ge.0.43*std)
+   ; indw = ind(DMI_ctrl_JJA.le.-0.43*std)
+   inds = ind(DMI_ctrl_JJA.ge.std)
+   indw = ind(DMI_ctrl_JJA.le.-1*std)
+
 
    ; print(DMI_ctrl_clm)
 
-   indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+   ; indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+   indnor = ind(DMI_ctrl_JJA.gt.-1*std.and.DMI_ctrl_JJA.lt.1.0*std)
    ; indnor = ind(pre_jjasa.gt.-0.2*clm.and.pre_jjasa.lt.0.2*clm)
    ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
 
@@ -262,11 +284,14 @@ wks1 = gsn_open_wks("pdf", "ISM-after-root_mean_square-newmonsoon.pdf")
   ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
     res@lbLabelStride=1
 
-  res@gsnLeftString = "strongmonsoon"
+   res@gsnLeftString = "strongmonsoon"
+    res@gsnRightString = "" + spb_strmon@SPB*-1
    plot(0) = gsn_csm_contour(wks,spb_strmon,res)
    res@gsnLeftString = "weakmonsoon"
+   res@gsnRightString = "" + spb_weakmon@SPB*-1
    plot(1) = gsn_csm_contour(wks,spb_weakmon,res)
    res@gsnLeftString = "normalmonsoon"
+   res@gsnRightString = "" + spb_normon@SPB*-1
    plot(2) = gsn_csm_contour(wks,spb_normon,res)
 
    resp = True
