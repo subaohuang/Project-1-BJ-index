@@ -133,7 +133,7 @@ begin
     std_ct = dim_stddev_n(nino34_ct_12, 1)
     std_wnp = dim_stddev_n(nino34_wnp_12, 1)
 
-a = (/1,4,8/)
+ a = (/1,4,8/)
  std_1 = dim_stddev_n(a,0)
  std_2 = dim_stddev_n(a*2, 0)
  std_3 = dim_stddev_n(a+10, 0)

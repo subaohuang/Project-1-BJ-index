@@ -281,9 +281,9 @@ do k=0,2
   ; wks = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_strong-monsoon-after")
   ; wks1 = gsn_open_wks("pdf", "seasonalmean-WNP-UVSST_weak-monsoon-after")
 
-  wks = gsn_open_wks("pdf", "seasonalmean-UVSST-warm"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "seasonalmean-UVSST-cold"+" "+wksstring(k))
-  wks2 = gsn_open_wks("pdf", "seasonalmean-UVSST-normal"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "seasonalmean-UVSST-elnino-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "seasonalmean-UVSST-lanina-"+" "+wksstring(k))
+  wks2 = gsn_open_wks("pdf", "seasonalmean-UVSST-normal-"+" "+wksstring(k))
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 

@@ -418,18 +418,30 @@ do k=0,2
   res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
    res@tmYLMode = "Explicit"
 
-  if k.ne.0 then 
-   res@trYMinF        = -1.0
-   res@trYMaxF        = 1.0
 
-   res@tmYLValues := fspan(-1.0, 1.0, 11)
-   res@tmYLLabels := fspan(-1.0, 1.0, 11)
-  else
-    res@trYMinF        = -1.2
-   res@trYMaxF        = 1.2
 
-   res@tmYLValues := fspan(-1.2, 1.2, 13)
-   res@tmYLLabels := fspan(-1.2, 1.2, 13)
+  if k.eq.0 then 
+   res@trYMinF        = -0.6
+   res@trYMaxF        = 1.6
+
+   res@tmYLValues := ispan(-6, 16, 2)*0.1
+   res@tmYLLabels := ispan(-6, 16, 2)*0.1
+  end if 
+
+    if k.eq.1 then 
+   res@trYMinF        = -1.2
+   res@trYMaxF        = 0.4
+
+   res@tmYLValues := ispan(-12, 4, 2)*0.1
+   res@tmYLLabels := ispan(-12, 4, 2)*0.1
+  end if 
+
+     if k.eq.2 then 
+   res@trYMinF        = -0.6
+   res@trYMaxF        = 0.6
+
+   res@tmYLValues := ispan(-6, 6, 2)*0.1
+   res@tmYLLabels := ispan(-6, 6, 2)*0.1
   end if 
 
   res@tiYAxisString = "SST [~S~o~N~C]" 

@@ -285,23 +285,23 @@ wks1 = gsn_open_wks("pdf", "ISM-after-root_mean_square-newmonsoon.pdf")
     res@lbLabelStride=1
 
    res@gsnLeftString = "strongmonsoon"
-    res@gsnRightString = "" + spb_strmon@SPB*-1
+    res@gsnRightString = "" + spb_strmon@SPB
    plot(0) = gsn_csm_contour(wks,spb_strmon,res)
    res@gsnLeftString = "weakmonsoon"
-   res@gsnRightString = "" + spb_weakmon@SPB*-1
+   res@gsnRightString = "" + spb_weakmon@SPB
    plot(1) = gsn_csm_contour(wks,spb_weakmon,res)
    res@gsnLeftString = "normalmonsoon"
-   res@gsnRightString = "" + spb_normon@SPB*-1
+   res@gsnRightString = "" + spb_normon@SPB
    plot(2) = gsn_csm_contour(wks,spb_normon,res)
 
-   resp = True
-   resp@gsMarkerColor = "black"
-   resp@gsMarkerSizeF = 0.1
-   resp@gsMarkerIndex = 1
+   ; resp = True
+   ; resp@gsMarkerColor = "black"
+   ; resp@gsMarkerSizeF = 0.1
+   ; resp@gsMarkerIndex = 1
 
-   plot_gs = gsn_add_polymarker(wks, plot(0), spb_strmon@maind, ispan(0,11,1), resp)
-   plot_gs1 = gsn_add_polymarker(wks, plot(1), spb_weakmon@maind, ispan(0,11,1), resp)
-   plot_gs2 = gsn_add_polymarker(wks, plot(2), spb_normon@maind, ispan(0,11,1), resp)
+   ; plot_gs = gsn_add_polymarker(wks, plot(0), spb_strmon@maind, ispan(0,11,1), resp)
+   ; plot_gs1 = gsn_add_polymarker(wks, plot(1), spb_weakmon@maind, ispan(0,11,1), resp)
+   ; plot_gs2 = gsn_add_polymarker(wks, plot(2), spb_normon@maind, ispan(0,11,1), resp)
 
 
    pres = True

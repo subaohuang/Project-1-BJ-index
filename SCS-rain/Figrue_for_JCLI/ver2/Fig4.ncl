@@ -224,7 +224,7 @@ begin
   res@cnInfoLabelOn = False
   
 
-  res@gsnLeftString="(a) MAM SST trend"
+  res@gsnLeftString="MAM SST trend and climatology"
   res@gsnRightString = ""
 
 
@@ -351,15 +351,18 @@ begin
      overlay(plot(i), iplot(i))
     end do
 
-pres = True
-pres@gsnPanelLabelBar  = True
-pres@gsnMaximize = False
-; pres@lbOrientation = "Vertical"
-pres@lbOrientation = "Horizontal"
-; pres@pmLabelBarHeightF = 0.3
-pres@lbLabelFontHeightF = 0.02
-; pres@lbLabelStride = 2
-gsn_panel(wks, plot, (/2,2/), pres)
+; pres = True
+; pres@gsnPanelLabelBar  = True
+; pres@gsnMaximize = False
+; ; pres@lbOrientation = "Vertical"
+; pres@lbOrientation = "Horizontal"
+; ; pres@pmLabelBarHeightF = 0.3
+; pres@lbLabelFontHeightF = 0.02
+; ; pres@lbLabelStride = 2
+; gsn_panel(wks, plot, (/2,2/), pres)
+
+draw(plot(0))
+frame(wks)
 
 ; wks   = gsn_open_wks("png", "global季节平均SST的趋势-79-15")
   ; wks = gsn_open_wks(pltType, pltName)
