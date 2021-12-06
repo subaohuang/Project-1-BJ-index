@@ -52,8 +52,7 @@ begin
   fcb   = 1./2.                        ; 2 years
   fca   = 1./9.                         ;7年
   wgts  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
-
-   msf_500_band=wgt_runave_Wrap(data, wgts, 0)
+  msf_500_band=wgt_runave_Wrap(data, wgts, 0)
   return msf_500_band
   end 
 begin
@@ -84,7 +83,7 @@ begin
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
 
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    timeind:=ind(date.le.endmon.and.date.ge.startmon-100)
 
     sst  = lonFlip(f1->sst(timeind,:,:))
     ; sst  = short2flt(f1->sst(timeind,:,:))
@@ -182,22 +181,25 @@ begin
   v = (/dtrend_msg_n(ispan(1,dimsizes(v&time),1),v,False,True,0)/)
 ;;;;
   
-  ; f3 = addfile(filein(2),"r")
-  f3 = addfile(filein(3),"r")
+  f3 = addfile(filein(2),"r")
+  ; f3 = addfile(filein(3),"r")
   date:=cd_calendar(f3->time, 1)
   timeind:=ind(date.ge.startmon.and.date.le.endmon)
+  q = f3->shum(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
 
-  ; q = f3->shum(timeind,{1000:500},{lat1:lat2},{lon1:lon2})
-  q = f3->air(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
+  ; f4 = addfile(filein(3),"r")
+  ; f3 = addfile(filein(3),"r")
+  ; date:=cd_calendar(f4->time, 1)
+  ; timeind:=ind(date.ge.startmon.and.date.le.endmon)
+  ; t = f4->air(timeind,{1000:300},{lat1:lat2},{lon1:lon2})
 
-  ; Cp = 1004
-  ; Lv = 2.5*10^6
-  ; g = 9.8
+  Cp = 1004
+  Lv = 2.5*10^6
+  g = 9.8
 
-  ; q = q +273.15
-
-
-  ; q = Cp*q
+  ; t = t +273.15
+  ; t = Cp*t 
+  ; q = (/t + Lv*q/)
 
   plev := q&level
   ptop = min(plev)
@@ -210,7 +212,7 @@ begin
 
   q_col = (/dtrend_msg_n(ispan(1,dimsizes(q_col&time),1),q_col,False,True,0)/)
    
-  MSE_nep = q_col
+  ; MSE_nep = q_col
 
 
 ;;;;;;split to 12 month  is a array size (12,yearnum)
@@ -220,9 +222,6 @@ begin
 
    u_12 = split_12(u)
    v_12 = split_12(v)
-   
-
-   
 ;;;;;
 
    
@@ -233,12 +232,22 @@ begin
 
     ssta_annual = month_to_annual(ssta, 1)
     ssta_annual!0 = "time"
-    ssta_annual&time = ispan(startyear,endyear,1)
-    
+    ssta_annual&time = ispan(startyear-1,endyear,1)
     ssta_annual = (/dim_avg_n(ssta_12(0:4,:,:,:),0)/)
-    MSE_nep_annual = (/dim_avg_n(MSE_nep_12(0:4,:,:,:),0)/)
 
-    ssta_mam = ssta_annual
+    ssta_mam = ssta_annual(1:dimsizes(ssta_annual&time)-1,:,:)
+
+
+    
+   ; ;;;;去掉前期DJF的SST信号
+   ;  ssta_annual = month_to_season(ssta, "DJF")
+   ;  ssta_annual&time = ispan(startyear-1,endyear,1)
+   ;  ssta_mam = ssta_annual(1:dimsizes(ssta_annual&time)-1,:,:)
+   ; ;;;;
+
+
+
+    MSE_nep_annual = (/dim_avg_n(MSE_nep_12(0:4,:,:,:),0)/)
 
     u_annual = month_to_annual(u, 1)
     v_annual = month_to_annual(v, 1)
@@ -248,7 +257,6 @@ begin
 ;;;;;
 
 ;;;
- 
     MSE_nep_mam = dim_avg_n_Wrap(MSE_nep_annual(:,{0:20},{250:280}), (/1,2/))
 
     ;;;局地海温
@@ -266,13 +274,14 @@ begin
       nino3_4 = dim_avg_n_Wrap(ssta_mam(:,{-5:5},{190:240}), (/1,2/))
       ; nino3_4_decadal = runave_n_Wrap(nino3_4, 11, 0, 0)
       ; nino3_4 = (/nino3_4 - nino3_4_decadal/)
-      nino3_4 = (/band_pass(nino3_4)/)
+      ; nino3_4 = (/band_pass(nino3_4)/)
       atlantic = dim_avg_n_Wrap(ssta_mam(:,{10:30},{280:330}), (/1,2/))
       ; atlantic = dim_avg_n_Wrap(ssta_mam(:,{0:20},{40:100}), (/1,2/))  ;;;indian
       ; atlantic = dim_avg_n_Wrap(ssta_mam(:,{-20:0},{300:360}), (/1,2/))  ;;;indian
-
-      atlantic = (/band_pass(atlantic)/)
+      ; atlantic = (/band_pass(atlantic)/)
     ;;;
+
+    
 
     ;;;;去掉局地海温的影响,偏相关性
     ;;; 1 for MSE, 2 for global sst , 3 for nino3_4 ,4 for atlantic SST
@@ -290,7 +299,7 @@ begin
 
         r13no4_23no4_2dim  = r12no4
         r13no4_23no4_2dim  = r13no4_23no4
-        rc_mam = (/r12no4 - r13no4_23no4_2dim/)/(sqrt((1- r13no4^2)*(1- r23no4^2)))
+        ; rc_mam = (/r12no4 - r13no4_23no4_2dim/)/(sqrt((1- r13no4^2)*(1- r23no4^2)))
 
         copy_VarCoords(ssta_mam(0,:,:), rc_mam)
     ;;;;
@@ -313,7 +322,7 @@ begin
 
         r13no4_23no4_u_2dim  = r12no4_u
         r13no4_23no4_u_2dim  = r13no4_23no4_u
-        rc_mam_u = (/r12no4_u - r13no4_23no4_u_2dim/)/(sqrt((1- r13no4_u^2)*(1- r23no4_u^2)))
+        ; rc_mam_u = (/r12no4_u - r13no4_23no4_u_2dim/)/(sqrt((1- r13no4_u^2)*(1- r23no4_u^2)))
 
         copy_VarCoords(u_annual(0,:,:), rc_mam_u)
     ;;;;
@@ -336,7 +345,7 @@ begin
 
         r13no4_23no4_v_2dim  = r12no4_v
         r13no4_23no4_v_2dim  = r13no4_23no4_v
-        rc_mam_v = (/r12no4_v - r13no4_23no4_v_2dim/)/(sqrt((1- r13no4_v^2)*(1- r23no4_v^2)))
+        ; rc_mam_v = (/r12no4_v - r13no4_23no4_v_2dim/)/(sqrt((1- r13no4_v^2)*(1- r23no4_v^2)))
 
         copy_VarCoords(v_annual(0,:,:), rc_mam_v)
  ;;;;;;
@@ -345,14 +354,17 @@ begin
     ;;;;有效自由度
       
         N = dimsizes(ssta_mam(:,1,1))
+
+        ; effN = N-2  ;;; for remove two variable 
+        effN = N-1
         ; prob_mam = rtest(rc_mam, N-1, 0)  ;;;1个变量去掉，加1
-        prob_mam = rtest(rc_mam, N-2, 0)  ;;;1个变量去掉，加1
+        prob_mam = rtest(rc_mam, effN, 0)  ;;;1个变量去掉，加1
         copy_VarCoords(ssta_mam(0,:,:), prob_mam)
 
-        prob_mam_u = rtest(rc_mam_u, N-2, 0)  ;;;1个变量去掉，加1
+        prob_mam_u = rtest(rc_mam_u, effN, 0)  ;;;1个变量去掉，加1
         copy_VarCoords(u_annual(0,:,:), prob_mam_u)
 
-        prob_mam_v = rtest(rc_mam_v, N-2, 0)  ;;;1个变量去掉，加1
+        prob_mam_v = rtest(rc_mam_v, effN, 0)  ;;;1个变量去掉，加1
         copy_VarCoords(v_annual(0,:,:), prob_mam_v)
 
     ;;;;;
@@ -394,7 +406,9 @@ begin
     
 ; wks   = gsn_open_wks("pdf", "MSE与SST的相关-JFMAM-remove_Nino3.4_rmi(ndian")
 ; wks   = gsn_open_wks("pdf", "MSE与SST&UV850的相关-JFMAM-remove_Nino3.4 (Interannual)")
-wks   = gsn_open_wks("pdf", "CpT与SST&UV850的相关-JFMAM-remove_Nino3.4 & NTA (Interannual)")
+; wks   = gsn_open_wks("pdf", "Lvq与SST&UV850的相关-JFMAM-remove_Nino3.4 & NTA (Interannual)")
+   ; wks   = gsn_open_wks("pdf", "去掉前期ENSOLvq与SST&UV850的相关-JFMAM-remove_Nino3.4 & NTA")
+   wks   = gsn_open_wks("pdf", "去掉前期ENSO-MSE与SST&UV850的相关-JFMAM-remove_Nino3.4")
 ; wks   = gsn_open_wks("pdf", "MSE与SST&UV850的相关-JFMAM-remove_Nino3.4_rmatlantic")
 ; wks   = gsn_open_wks("pdf", "MSE与SST&UV850的相关-JFMAM-remove_Nino3.4_rmatlantic")
 
@@ -496,7 +510,8 @@ wks   = gsn_open_wks("pdf", "CpT与SST&UV850的相关-JFMAM-remove_Nino3.4 & NTA
    ; res@gsnLeftString="Corr (NEP MSE & SST UV850)"  
   ; res@gsnLeftString="Partial corr (NEP MSE & SST UV850, remove Nino3.4 & IND SST)" 
    ; res@gsnLeftString="Partial corr (NEP MSE & SST UV850, remove Nino3.4 & NTA SST)" 
-  res@gsnLeftString="Partial corr (NEP  CpT & SST UV850, remove Nino3.4 & NTA (Interannual))" 
+  ; res@gsnLeftString="Partial corr (NEP  CpT & SST UV850, remove Nino3.4 & NTA (Interannual))" 
+  res@gsnLeftString="Partial corr (NEP  CpT & SST UV850, remove Nino3.4 & NTA )" 
   ; res@gsnLeftString="Partial corr (NEP MSE & SST , remove Nino3.4 & NTA SST)"
 
   res@gsnLeftStringFontHeightF = 0.015
