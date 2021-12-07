@@ -49,7 +49,7 @@ begin
   sigma = 1.0                           ; Lanczos sigma
   nWgt  = 9                           ; will lose nwgt-1 data must odd number 
   fcb   = 1./2.                        ; 2 years
-  fca   = 1./9.                         ;7年
+  fca   = 1./9.                         ;9年
   wgts  = filwgts_lanczos (nWgt, ihp, fca, fcb, sigma )
   msf_500_band=wgt_runave_Wrap(data, wgts, 0)
   return msf_500_band
@@ -91,8 +91,9 @@ begin
 
 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-
     copy_VarCoords(sst, ssta)
+
+    ssta = (/band_pass(ssta)/)
 
     ssta_12 = split_12(ssta) ;;; month,year,lat,lon
   ;;
@@ -171,7 +172,7 @@ begin
     res@vpWidthF=0.6
     
     ; res@tiMainString=" Spring Double ITCZ Bias and DJF Enino Intensity"
-    res@tiMainString=" EAESM  and Nino3 lead-lag-corr"
+    res@tiMainString= "Lead-lag correlation"
     ; res@tiMainFontHeightF = 0.015
     ; res@tiYAxisString="~F22~ SSTA std change[k]"
     ; res@tiYAxisFontHeightF=0.012
@@ -195,7 +196,7 @@ begin
     lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
 
     textres = True
-    textres@lgLabels = (/"Nino3_4","North Atlantic","Indian"/)
+    textres@lgLabels = (/"Nino3.4","North Atlantic","Indian"/)
 
     plot = simple_legend(wks,plot,gres,lineres,textres)   
 
