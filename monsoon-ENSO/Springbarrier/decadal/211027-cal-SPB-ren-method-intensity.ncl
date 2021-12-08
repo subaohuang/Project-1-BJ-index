@@ -100,7 +100,7 @@ begin
 
 ;;;get 10years running windows SPB strength 
     length = yearnum
-    nave = 30
+    nave = 10
     SPB_series = new((/length-nave+1/),float)
 
   do t = nave,length  
@@ -116,8 +116,11 @@ begin
 
  printVarSummary(SPB_series)
  
- system("rm SPB_ren_series_1871-2019-rmtrend-method-30windows.nc")
- f2 = addfile("SPB_ren_series_1871-2019-rmtrend-method-30windows.nc", "c")
+ ; system("rm SPB_ren_series_1871-2019-rmtrend-method-30windows.nc")
+ ; f2 = addfile("SPB_ren_series_1871-2019-rmtrend-method-30windows.nc", "c")
+
+  system("rm SPB_ren_series_1871-2019-rmtrend-method-10windows.nc")
+ f2 = addfile("SPB_ren_series_1871-2019-rmtrend-method-10windows.nc", "c")
 
  ; system("rm SPB_series_1979-2019.nc")
  ; f2 = addfile("SPB_series_1979-2019.nc", "c")

@@ -29,8 +29,8 @@ begin
 ;;;read SPB data
     diri="/home/ys17-19/lsh/Project/monsoon-ENSO/Springbarrier/decadal/"
     ; fils1=systemfunc("ls "+diri+"SPB_series_1899-2019-rmtrend.nc")
-    ; fils1=systemfunc("ls "+diri+"SPB_ren_series_1871-2019-rmtrend-method-30windows.nc")
-    fils1=systemfunc("ls "+diri+"SPB_ren_series_1871-2019-rmtrend-method-10windows.nc")
+    fils1=systemfunc("ls "+diri+"SPB_ren_series_1871-2019-rmtrend-method-30windows.nc")
+    ; fils1=systemfunc("ls "+diri+"SPB_ren_series_1871-2019-rmtrend-method-10windows.nc")
      ; fils1=systemfunc("ls "+diri+"SPB_series_1899-2019-rmtrend-3456-method.nc")
     f1=addfile(fils1, "r")
 
@@ -98,7 +98,7 @@ begin
 
 ;;;get 10years running windows EAESM strength 
     length = 2019-1871+1
-    nave = 10 
+    nave = 30 
 
     ; EAESM_series = cal_mean(length,nave,DMI_ctrl_JJA)
     ; ASM_series = cal_mean(length,nave,ASM_DJF)
@@ -182,7 +182,7 @@ begin
     pre_jjasa = (/dim_standardize_Wrap(pre_jjasa, 1)/)
 ;;;
     length = 2016-1871+1
-    nave = 10
+    nave = 30
     AISMR_dec = cal_mean(length,nave,pre_jjasa)
 ;;;
 
@@ -191,12 +191,10 @@ printVarSummary(AISMR_dec)
 printVarSummary(SPB_series)
 
 
-;;滑动相关
-  ;;nino34_djf:1899-2019  DMI_ctrl_JJA: 1900-2012
-   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
-   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_djf(0:dimsizes(nino34_djf)-9),1) ;;; 1905-2007
-   ; corr = slid_cor(10,DMI_ctrl_JJA,nino34_jja(1:dimsizes(nino34_djf)-8),1) ;;; 1905-2007
-;;;
+;滑动相关
+  ;nino34_djf:1899-2019  DMI_ctrl_JJA: 1900-2012
+   corr = slid_cor(30,pre_jjasa,nino34_jja(0:dimsizes(nino34_djf)-4),1) ;;; 1871-2016
+;;
 
 ; SPB_series = (/dim_standardize_n_Wrap(SPB_series, 1, 0)/)
 ; corr = (/dim_standardize_n_Wrap(corr, 1, 0)/)
@@ -207,14 +205,19 @@ printVarSummary(SPB_series)
 ;  p = rtest(spb_corr_cor, dimsizes(corr)-1, 0)
 ; print(p)
 
-corr = escorc(SPB_series(1:dimsizes(SPB_series)-3), AISMR_dec)
+; corr = escorc(SPB_series(1:dimsizes(SPB_series)-3), AISMR_dec)
 
-print(corr)
-; exit()
+; print(corr)
+printVarSummary(corr)
 
+SPB_series = (/dim_standardize(SPB_series, 1)/)
+corr = (/dim_standardize(corr, 1)/)
+
+corr_2 =escorc(SPB_series(0:dimsizes(SPB_series)-4),corr)
+print(corr_2)
 
 ;;;draw plot 
-    wks = gsn_open_wks("pdf", "SPB_ren_timeseries&-jjas-AISMR")
+    wks = gsn_open_wks("pdf", "SPB_ren_timeseries&-jjas-AISMR-enso-relation-30windows")
 
     res               = True                   ; plot mods desired
     res@gsnDraw = False
@@ -238,8 +241,8 @@ print(corr)
     res@trXMaxF = yearend -5
     res@trXMinF = yearstart
 
-    res@trYMaxF = 1.0
-    res@trYMinF = -1.0
+    ; res@trYMaxF = 1.0
+    ; res@trYMinF = -1.0
 
     res@tmXTOn = False
     res@tmYROn  = False
@@ -281,7 +284,8 @@ print(corr)
     ; plot_line4 = gsn_add_polyline(wks, plot, ispan(1904,2015,1), nino34_series, resp)
     
     resp@gsLineColor = "red"
-    plot_line4 = gsn_add_polyline(wks, plot, ispan(1871+nave/2,2016-(nave/2)+1,1),  AISMR_dec, resp)
+    ; plot_line4 = gsn_add_polyline(wks, plot, ispan(1871+nave/2,2016-(nave/2)+1,1),  AISMR_dec, resp)
+    plot_line4 = gsn_add_polyline(wks, plot, ispan(1871+nave/2,2016-(nave/2)+1,1),  corr, resp)
 
 
     ; ;;添加legend 
