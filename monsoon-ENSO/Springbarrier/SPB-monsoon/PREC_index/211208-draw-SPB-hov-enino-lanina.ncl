@@ -23,30 +23,45 @@ begin
      end do
    ;;;
  ;;;ACF center diff 
-   acr_gra = center_finite_diff_n(acr, 2, False, 1, 1)
+   acr_gra = center_finite_diff_n(acr, 1, False, 1, 1)
    acr_gra = -1*acr_gra  ;;;change to positive
-   acr_gra_max = dim_max_n(acr_gra, 1) 
+   ; acr_gra_max = dim_max_n(acr_gra, 1) 
  
    acr_gra!0 = "initial_month"
    acr_gra!1 = "lag_month"
-   maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
-   SPB = dim_sum_n_Wrap(acr_gra_max, 0)
 
-   acr!0 = "initial_month"
-   acr!1 = "lag_month"
+   ; maind = dim_maxind(acr_gra(lag_month|:,initial_month|:),0)
+   ; SPB = dim_sum_n_Wrap(acr_gra_max, 0)
+   ; acr@maind = maind
+   ; acr@SPB = SPB
+  ;;
+  acr_gra_mar2aug = new(12,float)
 
-   acr@maind = maind
+  do i=0,11
+    if i.le.2 then 
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:12))
+    end if
+
+    if i.le.9.and.i.gt.2 then 
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:6-i+3+5))
+    end if
+    if i.gt.9 then 
+    acr_gra_mar2aug(i) = sum(acr_gra(i,0:5+9-i))
+    end if
+  end do 
+   SPB = dim_avg_n_Wrap(acr_gra_mar2aug, 0)
    acr@SPB = SPB
-return acr
-end 
+  return acr
+  end 
+
 ;;;;
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 190001
+    startmon = 187101
     endmon = 201912
-    startyear = 1900
+    startyear = 1871
     endyear = 2019
 
 ;;;读入HadiSST海温数据
@@ -73,22 +88,29 @@ begin
     
     nino34 =  dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
 
-    ; nino3_4 = month_to_season(nino34, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
-    ; printVarSummary(nino3_4)
+    nino3_4 = month_to_season(nino34, "DJF")   ;;;第一年是JF平均，第二年是DJF平均
+    printVarSummary(nino3_4)
    
-    ; nino3_4(0:dimsizes(nino3_4)-2) = (/nino3_4(1:)/)
-    ; nino3_4(dimsizes(nino3_4)-1) =nino34(dimsizes(nino3_4)*12-1) 
+    nino3_4(0:dimsizes(nino3_4)-2) = (/nino3_4(1:)/)
+    nino3_4(dimsizes(nino3_4)-1) =nino34(dimsizes(nino3_4)*12-1) 
     
-    nino3_4 = month_to_season(nino34, "JJA")
+    ; nino3_4 = month_to_season(nino34, "JJA")
   
     std_sst = dim_stddev_n(nino3_4, 0)
-    year_sst = ispan(startyear,endyear,1)  ;;1900-2019
+    year_sst = ispan(startyear,endyear-3,1)  ;;1900-2019
 
-    enino_year = year_sst(ind(nino3_4.gt.0.43*std_sst))
-    lanina_year = year_sst(ind(nino3_4.lt.-0.43*std_sst))
-    normal_year = year_sst(ind(nino3_4.le.0.43*std_sst.and.nino3_4.ge.-0.43*std_sst))
+    nino3_4_sel = nino3_4(0:dimsizes(nino3_4)-4) ;;;1871-2016
 
+    enino_year = year_sst(ind(nino3_4_sel.gt.0.43*std_sst))
+    lanina_year = year_sst(ind(nino3_4_sel.lt.-0.43*std_sst))
+    normal_year = year_sst(ind(nino3_4_sel.le.0.43*std_sst.and.nino3_4_sel.ge.-0.43*std_sst))
 ;;;  
+
+print(enino_year)
+print(lanina_year)
+print(normal_year)
+
+
 ;;;split to 12 month nino34_12 is a array size (12,yearnum)
   yearnum = dimsizes(nino34)/12 -1
   nino34_12 = new((/12,yearnum/),float)
@@ -100,18 +122,15 @@ begin
      nino34_12(i,:) = nino34(i+5:dimsizes(nino34)-1:12)
     end if
   end do 
-
+   printVarSummary(nino34_12)
   ;;;;;1900-2018  1900年12月-1901年11月
 
-   sst_year = ispan(startyear,endyear-1,1) ;; nino34_12 start from startyear-1 because nino34 start from startyear-2
+   sst_year = ispan(startyear,endyear,1) ;; nino34_12 start from startyear-1 because nino34 start from startyear-2
 
    ind_s1 =  get1Dindex(sst_year,enino_year)
    ind_w1 =  get1Dindex(sst_year,lanina_year)
    ind_nor1 =  get1Dindex(sst_year,normal_year)
 
-print(ind_s1)
-exit()
- printVarSummary(nino34_12)
 
 ;;; strong and weak monsoon year ssta 
 
@@ -187,8 +206,8 @@ wks1 = gsn_open_wks("pdf", "Elnino-after-root_mean_square.pdf")
     res@tmXBLabels = ispan(0,12,1) +""
 
     res@tmYLValues = ispan(0,11,1)
-    ; res@tmYLLabels = (/"Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"/) 
-    res@tmYLLabels = (/"Dec(0)","Jan(+1)","Feb(+1)","Mar(+1)","Apr(+1)","May(+1)","Jun(+1)","Jul(+1)","Aug(+1)","Sep(+1)","Oct(+1)","Nov(+1)"/) 
+    res@tmYLLabels = (/"Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"/) 
+    ; res@tmYLLabels = (/"Dec(0)","Jan(+1)","Feb(+1)","Mar(+1)","Apr(+1)","May(+1)","Jun(+1)","Jul(+1)","Aug(+1)","Sep(+1)","Oct(+1)","Nov(+1)"/) 
 
     ; res@cnFillPalette = "BlueDarkOrange18"
     gsn_define_colormap(wks,"BlueDarkRed18")
@@ -215,9 +234,55 @@ wks1 = gsn_open_wks("pdf", "Elnino-after-root_mean_square.pdf")
     resp@gsMarkerSizeF = 0.1
     resp@gsMarkerIndex = 1
 
-    plot_gs = gsn_add_polymarker(wks, plot(0), spb_strmon@maind, ispan(0,11,1), resp)
-    plot_gs1 = gsn_add_polymarker(wks, plot(1), spb_weakmon@maind, ispan(0,11,1), resp)
-    plot_gs2 = gsn_add_polymarker(wks, plot(2), spb_normon@maind, ispan(0,11,1), resp)
+    ; plot_gs = gsn_add_polymarker(wks, plot(0), spb_strmon@maind, ispan(0,11,1), resp)
+    ; plot_gs1 = gsn_add_polymarker(wks, plot(1), spb_weakmon@maind, ispan(0,11,1), resp)
+    ; plot_gs2 = gsn_add_polymarker(wks, plot(2), spb_normon@maind, ispan(0,11,1), resp)
+
+   x1 = ispan(0,9,1)
+   y1 = x1 ;;; line for mar
+
+   x2 = ispan(3,12,1)
+   y2 = ispan(2,11,1) ;;; line for aug
+   
+   x3 = ispan(0,2,1)
+   y3 = ispan(0,2,1) ;;; line for aug
+
+
+   resp = True
+   resp@gsLineColor = "green"
+   resp@gsLineThicknessF = 6.0
+   
+   
+    plot_gs = gsn_add_polyline(wks, plot(0), x1(::-1), y1, resp)
+    plot_gs1 = gsn_add_polyline(wks, plot(1),  x1(::-1), y1, resp)
+    plot_gs2 = gsn_add_polyline(wks, plot(2),  x1(::-1), y1, resp)
+    resp@gsLineColor = "blue"
+    plot_gs_aug = gsn_add_polyline(wks, plot(0), x2(::-1), y2, resp)
+    plot_gs_aug1 = gsn_add_polyline(wks, plot(1),  x2(::-1), y2, resp)
+    plot_gs_aug2 = gsn_add_polyline(wks, plot(2),  x2(::-1), y2, resp)
+
+
+    ; plot_gs_augs = gsn_add_polyline(wks, plot(0), x3, y3(::-1), resp)
+    ; plot_gs_augs1 = gsn_add_polyline(wks, plot(1),  x3, y3(::-1), resp)
+    ; plot_gs_augs2 = gsn_add_polyline(wks, plot(2),  x3, y3(::-1), resp)
+
+    rest = True
+    rest@txFontColor = "black"
+    rest@txFontHeightF = 0.02
+
+    plot_gt = gsn_add_text(wks, plot(0),"MAR", 5 ,5, rest)
+    plot_gt1 = gsn_add_text(wks, plot(1),"MAR", 5 ,5, rest)
+    plot_gt2 = gsn_add_text(wks, plot(2),"MAR", 5 ,5, rest)
+
+
+    plot_gx = gsn_add_text(wks, plot(0),"AUG", 8.2 ,6.5, rest)
+    plot_gx1 = gsn_add_text(wks, plot(1),"AUG", 8.2 ,6.5, rest)
+    plot_gx2 = gsn_add_text(wks, plot(2),"AUG", 8.2 ,6.5, rest)
+
+
+    ; plot_gxs = gsn_add_text(wks, plot(0),"AUG", 2 ,1, rest)
+    ; plot_gxs1 = gsn_add_text(wks, plot(1),"AUG", 2 ,1, rest)
+    ; plot_gxs2 = gsn_add_text(wks, plot(2),"AUG", 2 ,1, rest)
 
 
    pres = True

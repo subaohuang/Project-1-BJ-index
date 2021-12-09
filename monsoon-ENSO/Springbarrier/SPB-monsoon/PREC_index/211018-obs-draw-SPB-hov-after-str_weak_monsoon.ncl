@@ -35,18 +35,18 @@ begin
 
   do i=0,11
     if i.le.2 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:12))
     end if
 
     if i.le.9.and.i.gt.2 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:6-i+3+5))
     end if
     if i.gt.9 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,0:5+9-i))
     end if
   end do 
 
-   SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
+   SPB = dim_avg_n_Wrap(acr_gra_mar2aug, 0)
    ; SPB = dim_sum_n_Wrap(acr_gra_max, 0)
    acr@maind = maind
    acr@SPB = SPB
@@ -97,21 +97,23 @@ begin
     data = asciiread("All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
     jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
     
+    monendyear = 2016 
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2016}) 
+    pre_jjas = jjas({startyear:monendyear}) 
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2016-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,monendyear-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA = pre_jjasa
+    DMI_ctrl_clm = dim_avg_n_Wrap(pre_jjasa, 0)
 ;;;
 
 ;;;strong and weak monsoon year 
-   total_year = ispan(startyear,2016,1)
+   total_year = ispan(startyear,monendyear,1)
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
    ; inds = ind(DMI_ctrl_JJA.ge.0.43*std)
@@ -123,7 +125,9 @@ begin
    ; print(DMI_ctrl_clm)
 
    ; indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
-   indnor = ind(DMI_ctrl_JJA.gt.-1*std.and.DMI_ctrl_JJA.lt.1.0*std)
+   indnor = ind(DMI_ctrl_JJA.gt.-1.0*std.and.DMI_ctrl_JJA.lt.1.0*std)
+   ; indnor = ind(DMI_ctrl_JJA.gt.-0.3*std.and.DMI_ctrl_JJA.lt.0.3*std)
+   ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
    ; indnor = ind(pre_jjasa.gt.-0.2*clm.and.pre_jjasa.lt.0.2*clm)
    ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
 
