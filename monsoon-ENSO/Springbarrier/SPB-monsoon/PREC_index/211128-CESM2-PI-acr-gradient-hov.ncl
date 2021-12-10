@@ -39,17 +39,17 @@ begin
 
   do i=0,11
     if i.le.2 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:12))
     end if
 
     if i.le.9.and.i.gt.2 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:6-i+3+5))
     end if
     if i.gt.9 then 
-    acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
+    acr_gra_mar2aug(i) = sum(acr_gra(i,0:5+9-i))
     end if
   end do 
-   SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
+   SPB = dim_avg_n_Wrap(acr_gra_mar2aug, 0)
    acr_gra@SPB = SPB
   return acr_gra
   end 

@@ -77,7 +77,7 @@ begin
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
 
-    ssta = (/center_finite_diff_n(ssta, 1, False, 0, 0)/)
+    
     delete(date)
     delete(timeind) 
     
@@ -104,6 +104,8 @@ begin
     nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
     lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
     normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
+
+    ssta = (/center_finite_diff_n(ssta, 1, False, 0, 0)/)
 
     print("************** finish SST data*****************")
 ;;;

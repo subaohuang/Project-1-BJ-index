@@ -35,24 +35,24 @@ begin
    ; acr@maind = maind
    ; acr@SPB = SPB
   ;;
-acr_gra_mar2aug = new(12,float)
-  
+  acr_gra_mar2aug = new(12,float)
+
   do i=0,11
     if i.le.2 then 
-    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:12))
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:12))
     end if
 
     if i.le.9.and.i.gt.2 then 
-    acr_gra_mar2aug(i) = sum(acr_gra(i,6-i+3:6-i+3+5))
+    acr_gra_mar2aug(i) = avg(acr_gra(i,6-i+3:6-i+3+5))
     end if
     if i.gt.9 then 
-    acr_gra_mar2aug(i) = sum(acr_gra(i,0:5+9-i))
+    acr_gra_mar2aug(i) = avg(acr_gra(i,0:5+9-i))
     end if
   end do 
-   SPB = dim_avg_n_Wrap(acr_gra_mar2aug, 0)
+   SPB = dim_sum_n_Wrap(acr_gra_mar2aug, 0)
    acr_gra@SPB = SPB
-return acr_gra
-end 
+  return acr_gra
+  end 
 
 function split_12(data)
 begin
@@ -70,25 +70,23 @@ end
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 187101 
-    endmon = 201912
-    startyear = 1871
-    endyear = 2019
-    ; startmon = 190001
-    ; endmon = 201912
-    ; startyear = 1900
-    ; endyear = 2019
-;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
-    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-    f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->time, 1)
-    lat = f1->latitude
-    lon = f1->longitude
+    startmon = 101
+    endmon = 99712
+    startyear = 1
+    endyear = 997
+;;;读入海温数据
+    diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
+  
+    f1=addfiles(fils1, "r")
+    date:=cd_calendar(f1[:]->time, 1)
 
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    lat = f1[0]->lat
+    lon = f1[0]->lon
 
-    sst=lonFlip(f1->sst(timeind,:,:))
+    timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+
+    sst=lonFlip(f1[:]->tos(timeind,:,:))
     printVarSummary(sst)
     
     ssta=(/rmMonAnnCycTLL(sst)/)
@@ -102,71 +100,83 @@ begin
     
     nino34 =  dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
 
+    delete(ssta)
     nino34_djf = month_to_season(nino34, "DJF")
+
+    printVarSummary(nino34_djf)
 
     nino34_djf(0:dimsizes(nino34_djf)-2) = nino34_djf(1:) 
     nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
 
     nino34_12_r =  split_12(nino34)
 
-    nino34_jja = nino34_djf
-    nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
 
-    nino34_djf = nino34_jja
 
     std_nino = dim_stddev(nino34_djf)
-    sst_total_year = ispan(startyear, endyear, 1)
+    sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
 
     ; nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
     ; lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
+
     nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
     lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
-    normal_year = sst_total_year(ind(nino34_djf.ge.-0.43*std_nino.and.nino34_djf.le.0.43*std_nino))
+    normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
+
+    print("************** finish SST data*****************")
 ;;;
 
 
 
-;;;AISMR DATA 
-    ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
-    nrows=146
-    ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
-    jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
-    
-    jjas!0 = "time"
-    jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2016}) 
+;;读入ua
+    diri2 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
+    fils2 = systemfunc("ls "+diri2+"ua_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
+  
+    f2 = addfiles(fils2, "r")
+    date:=cd_calendar(f2[:]->time, 1)
 
-    pre_jjas = pre_jjas*0.1 ;;convert to mm
-    clm = dim_avg_n_Wrap(pre_jjas, 0)
-    pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2016-startyear+1,1),pre_jjasa,False,True,0)/)
+    lat := f2[0]->lat
+    lon := f2[0]->lon
+
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+
+    u_850 = lonFlip(f2[:]->ua(timeind,{85000},:,:))
+    printVarSummary(u_850)
+ 
+;;;;
+
+
+    u_850 = (/rmMonAnnCycTLL(u_850)/)
+    u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
+
+
+;;;;;EAESM指数 : 850hPA ZONAL wind diff 110-140 22.5-32.5 - 90-130,5-15
+    DMI_ctrl = u_850(:,1,1)
+
+    DMI_ctrl  =  (/dim_avg_n_Wrap(u_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
+                  dim_avg_n_Wrap(u_850(:,{5:15},{90:130}), (/1,2/))/)
+
+    DMI_ctrl_JJA = month_to_season(DMI_ctrl, "JJA")  ;;;jja 少一年，从25601开始
 ;;;
-    DMI_ctrl_JJA = pre_jjasa
-;;;
+
 
 ;;;strong and weak monsoon year 
-   total_year = ispan(startyear,2016,1)
+   total_year = ispan(startyear,endyear,1)   ;;1-399
+
+
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
-   inds = ind(DMI_ctrl_JJA.gt.0.43*std)
-   indw = ind(DMI_ctrl_JJA.lt.-0.43*std)
+   inds = ind(DMI_ctrl_JJA.ge.0.43*std)
+   indw = ind(DMI_ctrl_JJA.le.-0.43*std)
 
    ; print(DMI_ctrl_clm)
 
-   indnor = ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std)
-   ; indnor = ind(pre_jjasa.gt.-0.2*clm.and.pre_jjasa.lt.0.2*clm)
-   ; indnor = ind(DMI_ctrl_JJA.gt.-0.2*std.and.DMI_ctrl_JJA.lt.0.2*std)
-
+   indnor = ind(DMI_ctrl_JJA.gt.-0.43*std.and.DMI_ctrl_JJA.lt.0.43*std)
+ 
    monstryear = total_year(inds)
    monwekyear = total_year(indw)
    noryear = total_year(indnor)
-
-   print(avg(pre_jjasa(inds)))
-   print(avg(pre_jjasa(indw)))
-
-
 
    ; print(monstryear)
    ; print(monwekyear)
@@ -178,7 +188,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2016))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-3)  ;;;少取一年
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -209,10 +219,10 @@ begin
  print(dry_cold_year)
  print(dry_norm_year)
 
- ; print(nor_warm_year)
- ; print(nor_cold_year)
- ; print(nor_norm_year)
- 
+ print(nor_warm_year)
+ print(nor_cold_year)
+ print(nor_norm_year)
+
 ;;;split to 12 month nino34_12 is a array size (12,yearnum)
   yearnum = dimsizes(nino34)/12 -1
   nino34_12 = new((/12,yearnum/),float)
@@ -227,6 +237,12 @@ begin
 ;;;;
 
 
+; case1 = [/wet_warm_year,wet_cold_year,wet_norm_year/]
+
+; case2 = [/dry_warm_year,dry_cold_year,dry_norm_year/]
+
+; case3 = [/nor_warm_year,nor_cold_year,nor_norm_year/]
+
 case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]
 
 case2 = [/wet_cold_year,dry_cold_year,nor_cold_year/]
@@ -236,9 +252,7 @@ case3 = [/wet_norm_year,dry_norm_year,nor_norm_year/]
 case = [/case1,case2,case3/]
 
 
-wksstring = (/"-grad-warm-ENSO-SPB-hov","-grad-cold-ENSO-SPB-hov","-grad-norm-ENSO-SPB-hov"/)
-
-stringadd = (/"El Nino","La Nina","Normal"/)
+wksstring = (/"-EASM-warm-ENSO-SPB-grad","-EASM-cold-ENSO-SPB-grad","-EASM-norm-ENSO-SPB-grad"/)
 
 do i=0,2
 ;;; 
@@ -248,7 +262,6 @@ do i=0,2
    sst_year = ispan(startyear,endyear,1) ;; nino34_12 start from startyear-1 because nino34 start from startyear-2
 
    ind_s1 :=  get1Dindex(sst_year,case_need[0]);;;
-   
    ind_w1 :=  get1Dindex(sst_year,case_need[1])
    ind_nor1 :=  get1Dindex(sst_year,case_need[2])
 ;;;;
@@ -268,11 +281,11 @@ do i=0,2
   spb_normon = spb_cal(nino34_12_normon,nino34_12_normon2)
   
    
-;   system("rm WNP_acr_hov_after_monsoon.nc")
-;   fi_out = addfile("WNP_acr_hov_after_monsoon.nc", "c")
-;   fi_out->spb_strmon = spb_strmon 
-;   fi_out->spb_weakmon = spb_weakmon
-;   fi_out->spb_normon = spb_normon
+  ; system("rm Picontrol_acr_hov_after_monsoon_"+wksstring(i)+".nc")
+  ; fi_out = addfile("Picontrol_acr_hov_after_monsoon_"+wksstring(i)+".nc", "c")
+  ; fi_out->spb_strmon = spb_strmon 
+  ; fi_out->spb_weakmon = spb_weakmon
+  ; fi_out->spb_normon = spb_normon
 
 ; exit()
  print("strongmonsoon="+spb_strmon@SPB)
@@ -328,7 +341,7 @@ print("P1_10_nor="+P1_10_nor)
 ; wks = gsn_open_wks("pdf", "WNP-after-acr_hov-strong-weak-monsoon")
 ; wks1 = gsn_open_wks("pdf", "WNP-after-root_mean_square-newmonsoon.pdf")
 
-wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
+wks = gsn_open_wks("pdf", "CESM2-PIcontrol-"+wksstring(i))
 
 ;;;draw plot 
     res=True
@@ -336,7 +349,7 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
     res@gsnDraw=False
 
     res@cnFillOn=True
-    res@cnLinesOn=False
+    res@cnLinesOn=True
     res@gsnAddCyclic = False
 
     res@cnLineLabelsOn=False
@@ -359,13 +372,14 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
 
     res@tmYLValues = ispan(0,11,1)
     res@tmYLLabels = (/"Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr","May"/) 
+ 
 
     ; res@cnFillPalette = "BlueDarkOrange18"
-    gsn_define_colormap(wks,"BlueDarkRed18")
+    ; gsn_define_colormap(wks,"BlueDarkRed18")
+    gsn_define_colormap(wks,"amwg256")
+    gsn_define_colormap(wks,"BlAqGrYeOrReVi200")
 
 
-    
-     gsn_define_colormap(wks,"BlAqGrYeOrReVi200")
 
     res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
 
@@ -376,20 +390,24 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
     ; res@cnFillColors = (/2,4,5,8,9,10,11,13/) 
     res@cnFillColors = (/200,185,176,161,145,0,0/) 
     ; res@cnFillColors = (/17,33,49,65,81,0,0,129/) 
+
+
+  ; gsn_define_colormap(wks, "precip_diff_12lev")
+  ; res@cnFillColors= (/2,3,4,5,6,8,9,10,11,12,13/) - 2
+  ; res@cnFillColors= (/2,3,4,5,6,-1,9,10,11,12,13/) -2
     res@lbLabelStride=1
 
-
- 
-
-
-   res@gsnLeftString = stringadd(i)+" + Strong AISMR"
-   res@gsnRightString = ""+spb_strmon@SPB*-1
+   ; res@gsnLeftString = "warm year"
+    res@gsnLeftString = "Strong ISMR"
+   res@gsnRightString = ""+spb_strmon@SPB
    plot(0) = gsn_csm_contour(wks,spb_strmon,res)
-   res@gsnLeftString = stringadd(i)+" + Weak AISMR"
-   res@gsnRightString = ""+spb_weakmon@SPB*-1
+   ; res@gsnLeftString = "cold year"
+    res@gsnLeftString = "Weak ISMR"
+   res@gsnRightString = ""+spb_weakmon@SPB
    plot(1) = gsn_csm_contour(wks,spb_weakmon,res)
-   res@gsnLeftString = stringadd(i)+" + Normal AISMR"
-   res@gsnRightString = ""+spb_normon@SPB*-1
+   ; res@gsnLeftString = "normal year"
+   res@gsnLeftString = "Normal ISMR"
+   res@gsnRightString = ""+spb_normon@SPB
    plot(2) = gsn_csm_contour(wks,spb_normon,res)
 
    ; resp = True
@@ -400,20 +418,18 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
    ; plot_gs = gsn_add_polymarker(wks, plot(0), spb_strmon@maind, ispan(0,11,1), resp)
    ; plot_gs1 = gsn_add_polymarker(wks, plot(1), spb_weakmon@maind, ispan(0,11,1), resp)
    ; plot_gs2 = gsn_add_polymarker(wks, plot(2), spb_normon@maind, ispan(0,11,1), resp)
+   
 
    x1 = ispan(0,9,1)
    y1 = x1 ;;; line for mar
 
    x2 = ispan(3,12,1)
-   y2 = ispan(2,11,1) ;;; line for aug
+   y2 = ispan(2,11,1) ;;; line for mar
    
-   x3 = ispan(0,2,1)
-   y3 = ispan(0,2,1) ;;; line for aug
-
 
    resp = True
-   resp@gsLineColor = "green"
-   resp@gsLineThicknessF = 6.0
+   resp@gsLineColor = "black"
+   resp@gsLineThicknessF = 3.0
    
    
 
@@ -421,33 +437,12 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
    plot_gs = gsn_add_polyline(wks, plot(0), x1(::-1), y1, resp)
    plot_gs1 = gsn_add_polyline(wks, plot(1),  x1(::-1), y1, resp)
    plot_gs2 = gsn_add_polyline(wks, plot(2),  x1(::-1), y1, resp)
-    resp@gsLineColor = "blue"
+
    plot_gs_aug = gsn_add_polyline(wks, plot(0), x2(::-1), y2, resp)
    plot_gs_aug1 = gsn_add_polyline(wks, plot(1),  x2(::-1), y2, resp)
    plot_gs_aug2 = gsn_add_polyline(wks, plot(2),  x2(::-1), y2, resp)
 
 
-   plot_gs_augs = gsn_add_polyline(wks, plot(0), x3, y3(::-1), resp)
-   plot_gs_augs1 = gsn_add_polyline(wks, plot(1),  x3, y3(::-1), resp)
-   plot_gs_augs2 = gsn_add_polyline(wks, plot(2),  x3, y3(::-1), resp)
-
-   rest = True
-   rest@txFontColor = "black"
-   rest@txFontHeightF = 0.02
-   
-    plot_gt = gsn_add_text(wks, plot(0),"MAR", 5 ,5, rest)
-    plot_gt1 = gsn_add_text(wks, plot(1),"MAR", 5 ,5, rest)
-    plot_gt2 = gsn_add_text(wks, plot(2),"MAR", 5 ,5, rest)
-  
-    
-    plot_gx = gsn_add_text(wks, plot(0),"AUG", 8.2 ,6.5, rest)
-    plot_gx1 = gsn_add_text(wks, plot(1),"AUG", 8.2 ,6.5, rest)
-    plot_gx2 = gsn_add_text(wks, plot(2),"AUG", 8.2 ,6.5, rest)
-    
-
-    plot_gxs = gsn_add_text(wks, plot(0),"AUG", 2 ,1, rest)
-    plot_gxs1 = gsn_add_text(wks, plot(1),"AUG", 2 ,1, rest)
-    plot_gxs2 = gsn_add_text(wks, plot(2),"AUG", 2 ,1, rest)
    pres = True
 
    gsn_panel(wks, plot, (/2,2/), pres)
@@ -496,6 +491,6 @@ wks = gsn_open_wks("pdf", "ISM"+wksstring(i))
     ;   plotxy(0) = simple_legend(wks1,plotxy(0),gres,lineres,textres)
      
     ; draw(plotxy)
-    frame(wks)
+    ; frame(wks)
    end do 
    end 

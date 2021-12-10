@@ -69,6 +69,8 @@ begin
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
+
+
     delete(date)
     delete(timeind)
      
@@ -95,6 +97,8 @@ begin
     nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
     lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
     normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
+
+    ssta = (/center_finite_diff_n(ssta, 1, False, 0, 0)/)
 ;;;
 
 
@@ -259,7 +263,7 @@ begin
   plot = new(3,graphic)
   midplot = plot
 
-  wks = gsn_open_wks("pdf", "ssta-evolution-during-diffmonsoon")
+  wks = gsn_open_wks("pdf", "OBS-SSTtendency-evolution-during-diffmonsoon")
    
   stss = ispan(1,3,1)+""
 do k=0,2 
@@ -420,30 +424,22 @@ do k=0,2
 
 
 
-  if k.eq.0 then 
-   res@trYMinF        = -0.6
-   res@trYMaxF        = 1.6
+  if k.ne.2 then 
+   res@trYMinF        = -0.5
+   res@trYMaxF        = 0.5
 
-   res@tmYLValues := ispan(-6, 16, 2)*0.1
-   res@tmYLLabels := ispan(-6, 16, 2)*0.1
+   res@tmYLValues := ispan(-5, 5, 1)*0.1
+   res@tmYLLabels := ispan(-5, 5, 1)*0.1
   end if 
 
-    if k.eq.1 then 
-   res@trYMinF        = -1.2
-   res@trYMaxF        = 0.4
+  if k.eq.2 then 
+   res@trYMinF        = -0.2
+   res@trYMaxF        = 0.2
 
-   res@tmYLValues := ispan(-12, 4, 2)*0.1
-   res@tmYLLabels := ispan(-12, 4, 2)*0.1
+   res@tmYLValues := ispan(-200, 200, 40)*0.001
+   res@tmYLLabels := ispan(-200, 200, 40)*0.001
   end if 
-
-     if k.eq.2 then 
-   res@trYMinF        = -0.6
-   res@trYMaxF        = 0.6
-
-   res@tmYLValues := ispan(-6, 6, 2)*0.1
-   res@tmYLLabels := ispan(-6, 6, 2)*0.1
-  end if 
-
+  
   res@tiYAxisString = "SST [~S~o~N~C]" 
   res@tiYAxisFontHeightF=0.02
 
@@ -467,24 +463,24 @@ do k=0,2
   res@gsnLeftString = stringlesft(k)
   plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/), res)
  
-  respl = True
-  respl@gsLineColor = "gray"
-  respl@gsLineDashPattern = 1.0
+  ; respl = True
+  ; respl@gsLineColor = "gray"
+  ; respl@gsLineDashPattern = 1.0
 
-  x =  1.0*res@tmXBValues
-  y = x
+  ; x =  1.0*res@tmXBValues
+  ; y = x
 
-  if k.eq.0 then 
-  y = 0.43*std_nino
-  end if 
+  ; if k.eq.0 then 
+  ; y = 0.43*std_nino
+  ; end if 
 
-  if k.eq.1 then 
-  y = -0.43*std_nino
-  end if 
+  ; if k.eq.1 then 
+  ; y = -0.43*std_nino
+  ; end if 
   
-  if k.ne.2 then 
-  plot@$stss(k)$ =  gsn_add_polyline(wks, plot(k),x, y, respl)
-  end if
+  ; if k.ne.2 then 
+  ; plot@$stss(k)$ =  gsn_add_polyline(wks, plot(k),x, y, respl)
+  ; end if
 
 
 
