@@ -20,21 +20,32 @@ begin
 return prob_p
 end 
 
+function split_12(data)
 begin
-season_r = (/"spring","summer","autumn","winter"/)
-season = (/"MAM","JJA","SON","DJF"/)
+    dim = dimsizes(data) 
+    yearnum = dim(0)/12
+
+    data_12 = new((/12,yearnum,dim(1),dim(2)/),float)
+    do i=0,11   
+    data_12(i,:,:,:) = data(i::12,:,:)
+    end do 
+return data_12
+end 
+
+begin
+  modelname = "F2000_TPP_indNTA_warming"
+  ; modelname = "F2000_TPP_indALLTA_junwarming"
 
   fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
-  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F_mm/F_2000_TPP_indNTA_warming/F2000_TPP_indNTA_warming.cam.h1.0001-0030_chazhi.nc" 
-  
-  wks=gsn_open_wks("pdf", "CESM-F2000-u,v,p-atlantic-warming-foul-season")
-  
-  plot = new(4,graphic)
-  iplot = new(4,graphic)
-  str3 = ispan(1,4,1) + ""
 
+  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F_mm/"+modelname+"/"+modelname+".cam.h1.0001-0030_chazhi.nc"
+  
+  wks=gsn_open_wks("pdf", modelname+"-Jun-PREDIFF-alt-Jun-warming.pdf")
+  
+  plot = new(1,graphic)
+  iplot = new(1,graphic)
+  ; str3 = ispan(1,4,1) + ""
 
-   
   f1=addfile(fils1, "r")
   f2=addfile(fils2, "r")
 
@@ -66,40 +77,74 @@ season = (/"MAM","JJA","SON","DJF"/)
   u_id  =  f2->U(timeind,{850},:,:)
   v_id  =  f2->V(timeind,{850},:,:)
 
+  PRE_CT_12 = split_12(PRE_CT)
+  PRE_id_12 = split_12(PRE_id)
+  
+  u_CT_12 = split_12(u_CT)
+  u_id_12 = split_12(u_id)
 
+  v_CT_12 = split_12(v_CT)
+  v_id_12 = split_12(v_id)
+  
+ 
+
+  PRE_CT_jja =  dim_avg_n_Wrap(PRE_CT_12(5:6,:,:,:), 0)
+  PRE_indian_jja = dim_avg_n_Wrap(PRE_id_12(5:6,:,:,:), 0)
+
+
+  PRE_CT_jja =  PRE_CT_12(5,:,:,:)
+  PRE_indian_jja = PRE_id_12(5,:,:,:)
+
+
+  PRE_CT_clm =  dim_avg_n_Wrap(PRE_CT_jja(:,:,:), 0)
+  PRE_indian_clm = dim_avg_n_Wrap(PRE_indian_jja(:,:,:), 0)
   
 
-
-do i = 0,3 
-
-   PRE_CT_clm = dim_avg_n_Wrap(month_to_season(PRE_CT, season(i)), 0)
-  PRE_indian_clm =dim_avg_n_Wrap(month_to_season(PRE_id, season(i)), 0)
-
+ 
   PRE_diff = PRE_CT_clm
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
-  u_CT_clm = dim_avg_n_Wrap(month_to_season(u_CT, season(i)), 0)
-  u_indian_clm = dim_avg_n_Wrap(month_to_season(u_id, season(i)), 0)
 
+  u_CT_jja = dim_avg_n_Wrap(u_CT_12(5:6,:,:,:), 0)
+  u_indian_jja = dim_avg_n_Wrap(u_id_12(5:6,:,:,:), 0)
+
+  u_CT_jja =  u_CT_12(5,:,:,:)
+  u_indian_jja = u_id_12(5,:,:,:)
+
+
+  u_CT_clm =  dim_avg_n_Wrap(u_CT_jja(:,:,:), 0)
+  u_indian_clm = dim_avg_n_Wrap(u_indian_jja(:,:,:), 0)
   u_diff = u_CT_clm
   u_diff = (/u_indian_clm - u_CT_clm/)
 
-  v_CT_clm = dim_avg_n_Wrap(month_to_season(v_CT, season(i)), 0)
-  v_indian_clm = dim_avg_n_Wrap(month_to_season(v_id, season(i)), 0)
+
+
+  v_CT_jja = dim_avg_n_Wrap(v_CT_12(5:6,:,:,:), 0)
+  v_indian_jja = dim_avg_n_Wrap(v_id_12(5:6,:,:,:), 0)
+ 
+  v_CT_jja =  v_CT_12(5,:,:,:)
+  v_indian_jja = v_id_12(5,:,:,:)
+
+
+  v_CT_clm =  dim_avg_n_Wrap(v_CT_jja(:,:,:), 0)
+  v_indian_clm = dim_avg_n_Wrap(v_indian_jja(:,:,:), 0)
 
   v_diff = v_CT_clm
   v_diff = (/v_indian_clm - v_CT_clm/)
+ 
+
+
   ;;;t_test 
-    prob_p = t_test( month_to_season(PRE_CT, season(i)) ,month_to_season(PRE_id, season(i)))
-    prob_u = t_test( month_to_season(u_CT, season(i)) ,month_to_season(u_id, season(i)))
-    prob_v = t_test( month_to_season(v_CT, season(i)) ,month_to_season(v_id, season(i)))
+    prob_p = t_test( PRE_CT_jja,PRE_indian_jja)
+    prob_u = t_test( u_CT_jja ,u_indian_jja)
+    prob_v = t_test( v_CT_jja ,v_indian_jja)
   ;;;
    PRE_diff@_FillValue = 10^9
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    ; u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    ; v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -111,7 +156,7 @@ do i = 0,3
 
 
     res@cnLineColors="Transparent"  ;
-    res@lbLabelBarOn=False
+    res@lbLabelBarOn=  True
     res@cnFillOn = True 
     res@cnLinesOn =False
     res@cnLineColor = "White"
@@ -119,26 +164,29 @@ do i = 0,3
     res@cnLineLabelsOn=False
     res@cnRasterSmoothingOn=True
 
-    ; res@cnFillPalette = "precip_diff_12lev"
-    res@cnFillPalette = "MPL_BrBG"
+    res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "MPL_BrBG"
 
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour levels
 
-    res@cnMinLevelValF       =   -1
-    res@cnMaxLevelValF       =   1
-    res@cnLevelSpacingF      =  0.1
+    ; res@cnMinLevelValF       =   -2
+    ; res@cnMaxLevelValF       =   2
+    ; res@cnLevelSpacingF      =  0.5
     
+    res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
+    res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnLevels := (/-1.5,-1.0,-0.5,-0.2,0.2,0.5,1.0,1.5/)
 
     res@tmXTOn=False
     res@tmYROn=False
 
     res@mpLimitMode           = "LatLon"
-    res@mpMinLatF             = -40.0
-    res@mpMaxLatF             = 40.0
+    res@mpMinLatF             = -20.0
+    res@mpMaxLatF             = 80.0
     ; res@mpMinLonF             = 40.0
-    res@mpMinLonF             = 0.0
-    res@mpMaxLonF             = 360.0
+    res@mpMinLonF             = -180.0
+    res@mpMaxLonF             = 180.0
     ; res@mpMinLatF             = -60.0
     ; res@mpMaxLatF             = 60.0
     ; res@mpMinLonF             = 0.0
@@ -149,53 +197,52 @@ do i = 0,3
     res@mpGeophysicalLineColor      = "Grey18"
     res@mpGeophysicalLineThicknessF = 1.5
     
-    res@mpShapeMode = "FreeAspect"
-    res@vpWidthF = 0.7
-    res@vpHeightF = 0.3
-    ;;
+    ; res@mpShapeMode = "FreeAspect"
+    ; res@vpWidthF = 0.7
+    ; res@vpHeightF = 0.3
+    ; ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = season(i)
+    res@gsnLeftString = "Jun NTA warming induced J PRE&850U,V diff (SEN - CTRL)"
 
-    
-    res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
-    ; res@vcGlyphStyle="CurlyVector"
 
-    res@vcMinDistanceF           = 0.02           ; thin vectors
-    ; res@vcMinMagnitudeF          =0.02
+    ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
+    res@vcGlyphStyle="CurlyVector"
+
+    res@vcMinDistanceF           = 0.01           ; thin vectors
+    res@vcMinMagnitudeF          =0.2
     ; res@vcMaxMagnitudeF = 7.0
-    res@vcRefMagnitudeF          = 1.0
+    res@vcRefMagnitudeF          = 2.0
     res@vcRefLengthF             = 0.05     ; define length of v
     res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
-    res@vcLineArrowThicknessF=1.5
-    res@vcLineArrowHeadMaxSizeF=0.005
-    res@vcLineArrowHeadMinSizeF=0.005
+    ; res@vcLineArrowThicknessF=1.5
+    ; res@vcLineArrowHeadMaxSizeF=0.005
+    ; res@vcLineArrowHeadMinSizeF=0.005
     res@vcVectorDrawOrder="PostDraw"
-
     
     
     res@gsnRightString = ""
-    plot(i) = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
+    plot = gsn_csm_vector_scalar_map(wks,u_diff,v_diff, PRE_diff,res)
 
     ; plot(i) = gsn_csm_contour_map(wks,PRE_diff,res)
 
 
-     pgres=True
-     pgres@gsLineColor="black"
-     pgres@gsLineThicknessF=2.0
-     pgres@gsLineDashPattern=0
+     ; pgres=True
+     ; pgres@gsLineColor="black"
+     ; pgres@gsLineThicknessF=2.0
+     ; pgres@gsLineDashPattern=0
 
      
-     ;;;画box
-     lat1 = 0
-     lat2 = 15
-     lon1 = 125
-     lon2 = 160
+     ; ;;;画box
+     ; lat1 = 0
+     ; lat2 = 15
+     ; lon1 = 125
+     ; lon2 = 160
 
-     pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
-     pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
-     ;;;
-      plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
+     ; pgx_pool=(/lon1,lon2,lon2,lon1,lon1/)
+     ; pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
+     ; ;;;
+     ;  plot@$str3(i)$ = gsn_add_polyline(wks, plot(i), pgx_pool, pgy_pool, pgres)
 
     ;;;打点
     ; res_pro=True
@@ -244,7 +291,7 @@ do i = 0,3
     res_pro@cnInfoLabelOn=False
 
 
-    iplot(i) = gsn_csm_contour(wks,prob_p,res_pro)
+    iplot = gsn_csm_contour(wks,prob_p,res_pro)
 
      
     
@@ -255,16 +302,14 @@ do i = 0,3
     ; opt@gsnShadeFillDotSizeF =  0.0025
     ; opt@gsnShadeHigh   = "green"
     opt@gsnShadeFillScaleF   = 0.5         ; add extra density ,越大越
-    iplot(i) = gsn_contour_shade(iplot(i) , 0,0.01,opt)
-    ; overlay(plot(i), iplot(i))
+    iplot = gsn_contour_shade(iplot , 0,0.01,opt)
+    ; overlay(plot, iplot)
     print("finish subset figure")
-end do
-  print("panel")
-  pres = True
-  pres@gsnPanelLabelBar = True
 
-  gsn_panel(wks, plot, (/2,2/), pres)
-  print("done script")
+    draw(plot)
+    frame(wks)
+
+ 
 end
   
 
