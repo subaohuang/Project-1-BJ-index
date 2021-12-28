@@ -62,7 +62,6 @@ begin
 
     sst=lonFlip(f1->sst(timeind,:,:))
    
-    
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
 
