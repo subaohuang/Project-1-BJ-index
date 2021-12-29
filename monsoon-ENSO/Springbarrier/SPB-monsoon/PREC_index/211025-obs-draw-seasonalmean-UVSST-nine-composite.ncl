@@ -101,7 +101,7 @@ begin
     time1 = f1->time
     date1=cd_calendar(time1, 1)
 
-    endmon = endmon                 ;;; 1900-2019
+    endmon = endmon                 ;;; 1871-2012
     startmon = startmon 
     timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
 
@@ -127,18 +127,18 @@ begin
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2012}) 
+    pre_jjas = jjas({startyear+1:2011})  ;;;1872-2011
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,2011-startyear-1+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA = pre_jjasa
 ;;;
 
 ;;;strong and weak monsoon year 
-    total_year = ispan(startyear,2012,1)
+    total_year = ispan(startyear+1,2011,1)
     std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
     inds = ind(DMI_ctrl_JJA.gt.0.43*std)
@@ -153,7 +153,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2012))
+ nino34_djf_2 = nino34_djf(1:dimsizes(nino34_djf)-1-(endyear-2011))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 

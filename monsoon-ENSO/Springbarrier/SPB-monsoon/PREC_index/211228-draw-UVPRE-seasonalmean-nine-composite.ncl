@@ -89,14 +89,12 @@ begin
 
     std_nino = dim_stddev(nino34_djf)
     sst_total_year = ispan(startyear, endyear, 1)
-
 ;;;
 
 
 ;;;读入ERA wind data
 
-    ; fils1 = "/home/yangsong3/data-observation/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/yangsong3/data-observation/20thCRV2/uwnd.mon.mean.nc"
+    fils1 = "/home/yangsong3/data-observation/20thCRV2/prate.mon.mean.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
