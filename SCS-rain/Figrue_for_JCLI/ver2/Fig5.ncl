@@ -221,7 +221,7 @@ print("**********start interp************")
         olr_bin_div(i) = dim_avg(olr_one(in))
         std_olr_div(i) = dim_stddev(olr_one(in))
  end do 
-olr_bin_div(0) = 265.0
+  olr_bin_div(0) = 265.0
   dolr_ddiv = center_finite_diff(olr_bin_div, bin_div(1:) - 0.025, False, 0)
 ;;;;
 
