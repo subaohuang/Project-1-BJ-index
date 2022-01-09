@@ -74,18 +74,18 @@ begin
 ;     print(dim)
 ; ;;;;
 
-; ;;;;Nino3.4
-;     Nino3_ctrl = dim_avg_n_Wrap(sst_ctrl(:,{-5:5},{190:240}), (/1,2/))
+;;;;Nino3.4
+    Nino3_ctrl = dim_avg_n_Wrap(sst_ctrl(:,{-5:5},{190:240}), (/1,2/))
 
-;     dim = dimsizes(Nino3_ctrl)
-;     print(dim)
-; ;;;;
-
-;;;; TASST -30-30, 290-360
-    Nino3_ctrl = dim_avg_n_Wrap(sst_ctrl(:,{-5:5},{290:360}), (/1,2/))
     dim = dimsizes(Nino3_ctrl)
     print(dim)
-;;; 
+;;;;
+
+; ;;;; TASST -30-30, 290-360
+;     Nino3_ctrl = dim_avg_n_Wrap(sst_ctrl(:,{-5:5},{290:360}), (/1,2/))
+;     dim = dimsizes(Nino3_ctrl)
+;     print(dim)
+; ;;; 
 
 
 
@@ -94,8 +94,11 @@ begin
     DMI_ctrl = u_CT_850(:,1,1)
   
   
-    DMI_ctrl  =  (/dim_avg_n_Wrap(u_CT_850(:,{5:20},{40:110}), (/1,2/)) - \
-                  dim_avg_n_Wrap(u_CT_200(:,{5:20},{40:110}), (/1,2/))/)
+    ; DMI_ctrl  =  (/dim_avg_n_Wrap(u_CT_850(:,{5:20},{40:110}), (/1,2/)) - \
+    ;               dim_avg_n_Wrap(u_CT_200(:,{5:20},{40:110}), (/1,2/))/)
+
+        DMI_ctrl  =  (/dim_avg_n_Wrap(u_CT_850(:,{22.5:32.5},{110:140}), (/1,2/)) - \
+                  dim_avg_n_Wrap(u_CT_850(:,{5:15},{90:130}), (/1,2/))/)
    
     DMI_ctrl_JJA = month_to_season(DMI_ctrl(24:dim-13), "JJA")  ;;;jja 少一年，从25601开始
 ;;;;
@@ -161,16 +164,17 @@ end
 
 begin
     ;;;cam4 输出结果
-    fils5 =  "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CP_CTRL.cam.h1.0251-0340_chazhi.nc" 
-    fils6 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CP_CTRL.TEMP.h1.0251-0340.nc"  
+    fils5 =  "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_f19g16_CP_CTRL/B2000_f19g16_CP_CTRL.cam.h1.0251-0340_chazhi.nc" 
+    fils6 = "/home/yangsong3/data-observation/linshh/CESM-data/B/B2000_f19g16_CP_CTRL/B2000_f19g16_CP_CTRL.TEMP.h1.0251-0340.nc"  
     
 
     corr_ATLfree = lead_corr(fils5,fils6)
 
 
 
-   wks=gsn_open_wks("pdf", "lead-lag-corr-ISM-nino3-freerun-100year")
+   ; wks=gsn_open_wks("pdf", "lead-lag-corr-ISM-nino3-freerun-100year")
    ; wks=gsn_open_wks("pdf", "lead-lag-corr-EAESM-TASST-freerun-100year")
+   wks=gsn_open_wks("pdf", "lead-lag-corr-EAESM-nino3-freerun-100year")
 
     res                   = True                     ; plot mods desired
     res@gsnDraw=False
@@ -227,7 +231,8 @@ begin
     res@vpWidthF=0.6
     
     ; res@tiMainString=" Spring Double ITCZ Bias and DJF Enino Intensity"
-    res@tiMainString=" ISM  and Nino3 lead-lag-corr"
+    ; res@tiMainString=" ISM  and Nino3 lead-lag-corr"
+    res@tiMainString="SEASM  and Nino3 lead-lag-corr"
     ; res@tiMainFontHeightF = 0.015
     ; res@tiYAxisString="~F22~ SSTA std change[k]"
     ; res@tiYAxisFontHeightF=0.012
