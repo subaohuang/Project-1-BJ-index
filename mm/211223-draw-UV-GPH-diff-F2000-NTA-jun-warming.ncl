@@ -32,14 +32,15 @@ return data_12
 end 
 begin
 
-modelname = "F2000_TPP_indNTA_warming"
+ ; modelname = "F2000_TPP_indNTA_warming"
+  modelname= "F2000_TPP_indNTA_JAwarming"
   ; modelname = "F2000_TPP_indALLTA_junwarming"
 
   fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
 
-  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F_mm/"+modelname+"/"+modelname+".cam.h1.0001-0030_chazhi.nc" 
+  fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F_mm/"+modelname+"/"+modelname+".cam.h1.0001-0030_chazhi.nc"
   
-  wks=gsn_open_wks("pdf", modelname+"-F2000-Z3-alt-Jun-warming")
+  wks=gsn_open_wks("pdf", modelname+"-F2000-Z3-alt-warming")
   
 
   f1=addfile(fils1, "r")
@@ -50,11 +51,11 @@ modelname = "F2000_TPP_indNTA_warming"
   timeind=ind(date.ge.601.and.date.le.3012)
 
 
-  PRECC_CT  =  f1->Z3(timeind,{200},:,:)
+  PRECC_CT  =  f1->Z3(timeind,{500},:,:)
 
   PRE_CT = PRECC_CT
 
-  PRECC_id  =  f2->Z3(timeind,{200},:,:)
+  PRECC_id  =  f2->Z3(timeind,{500},:,:)
   
  
   PRE_id = PRECC_id
@@ -66,11 +67,11 @@ modelname = "F2000_TPP_indNTA_warming"
   
 
 
-  PRE_CT_jja =  dim_avg_n_Wrap(PRE_CT_12(5:6,:,:,:), 0)
-  PRE_indian_jja = dim_avg_n_Wrap(PRE_id_12(5:6,:,:,:), 0)
+  PRE_CT_jja =  dim_avg_n_Wrap(PRE_CT_12(6:7,:,:,:), 0)
+  PRE_indian_jja = dim_avg_n_Wrap(PRE_id_12(6:7,:,:,:), 0)
 
-    PRE_CT_jja =  PRE_CT_12(5,:,:,:)
-  PRE_indian_jja = PRE_id_12(5,:,:,:)
+  ;   PRE_CT_jja =  PRE_CT_12(5,:,:,:)
+  ; PRE_indian_jja = PRE_id_12(5,:,:,:)
 
   PRE_CT_clm =  dim_avg_n_Wrap(PRE_CT_jja(:,:,:), 0)
   PRE_indian_clm = dim_avg_n_Wrap(PRE_indian_jja(:,:,:), 0)
@@ -82,11 +83,11 @@ modelname = "F2000_TPP_indNTA_warming"
 
 
   ;;;;U,V
-  u_CT  =  f1->U(timeind,{200},:,:)
-  v_CT  =  f1->V(timeind,{200},:,:)
+  u_CT  =  f1->U(timeind,{500},:,:)
+  v_CT  =  f1->V(timeind,{500},:,:)
 
-  u_id  =  f2->U(timeind,{200},:,:)
-  v_id  =  f2->V(timeind,{200},:,:)
+  u_id  =  f2->U(timeind,{500},:,:)
+  v_id  =  f2->V(timeind,{500},:,:)
 
     u_CT_12 = split_12(u_CT)
   u_id_12 = split_12(u_id)
@@ -95,14 +96,11 @@ modelname = "F2000_TPP_indNTA_warming"
   v_id_12 = split_12(v_id)
   
 
-  u_CT_jja = dim_avg_n_Wrap(u_CT_12(5:6,:,:,:), 0)
-  u_indian_jja = dim_avg_n_Wrap(u_id_12(5:6,:,:,:), 0)
+  u_CT_jja = dim_avg_n_Wrap(u_CT_12(6:7,:,:,:), 0)
+  u_indian_jja = dim_avg_n_Wrap(u_id_12(6:7,:,:,:), 0)
 
-
-
-  u_CT_jja =  u_CT_12(5,:,:,:)
-  u_indian_jja = u_id_12(5,:,:,:)
-
+  ; u_CT_jja =  u_CT_12(5,:,:,:)
+  ; u_indian_jja = u_id_12(5,:,:,:)
 
   u_CT_clm =  dim_avg_n_Wrap(u_CT_jja(:,:,:), 0)
   u_indian_clm = dim_avg_n_Wrap(u_indian_jja(:,:,:), 0)
@@ -111,12 +109,12 @@ modelname = "F2000_TPP_indNTA_warming"
   u_diff = (/u_indian_clm - u_CT_clm/)
 
   
-  v_CT_jja =  v_CT_12(5,:,:,:)
-  v_indian_jja = v_id_12(5,:,:,:)
+  ; v_CT_jja =  v_CT_12(5,:,:,:)
+  ; v_indian_jja = v_id_12(5,:,:,:)
 
 
-  v_CT_jja = dim_avg_n_Wrap(v_CT_12(5:6,:,:,:), 0)
-  v_indian_jja = dim_avg_n_Wrap(v_id_12(5:6,:,:,:), 0)
+  v_CT_jja = dim_avg_n_Wrap(v_CT_12(6:7,:,:,:), 0)
+  v_indian_jja = dim_avg_n_Wrap(v_id_12(6:7,:,:,:), 0)
 
 
   v_CT_clm =  dim_avg_n_Wrap(v_CT_jja(:,:,:), 0)
@@ -196,7 +194,7 @@ modelname = "F2000_TPP_indNTA_warming"
     ; res@mpMinLonF             = 70.0
     ; res@mpMaxLonF             = 170.0
     res@mpMinLatF             = -20.0
-    res@mpMaxLatF             = 80.0
+    res@mpMaxLatF             = 60.0
     res@mpMinLonF             = -180.0
     res@mpMaxLonF             = 180.0
     ;  res@mpMinLonF             = 0.0
@@ -216,7 +214,7 @@ modelname = "F2000_TPP_indNTA_warming"
      ;;;LineArrow
     res@gsnScalarContour        = True
 
-    res@gsnLeftString = "AGCM Jun NTA warming induced 200hpa geopotensial Height and U,V diff (SEN - CTRL)"
+    res@gsnLeftString = "AGCM JA NTA warming induced JA 200hpa geopotensial Height and U,V diff (SEN - CTRL)"
   
     
     ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors

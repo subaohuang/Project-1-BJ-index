@@ -33,14 +33,16 @@ return data_12
 end 
 
 begin
-  modelname = "F2000_TPP_indNTA_warming"
+  ; modelname = "F2000_TPP_indNTA_warming"
+  modelname= "F2000_TPP_indNTA_JAwarming"
   ; modelname = "F2000_TPP_indALLTA_junwarming"
 
   fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/F/F_2000_CTRL_new/F_2000_CTRL.cam.h1.0101-4012_chazhi.nc"
 
   fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/F_mm/"+modelname+"/"+modelname+".cam.h1.0001-0030_chazhi.nc"
   
-  wks=gsn_open_wks("pdf", modelname+"-Jun-PREDIFF-alt-Jun-warming.pdf")
+  ; wks=gsn_open_wks("pdf", modelname+"-Jun-PREDIFF-alt-Jun-warming.pdf")
+  wks=gsn_open_wks("pdf", modelname+"-Jun-PREDIFF-alt-warming.pdf")
   
   plot = new(1,graphic)
   iplot = new(1,graphic)
@@ -88,12 +90,12 @@ begin
   
  
 
-  PRE_CT_jja =  dim_avg_n_Wrap(PRE_CT_12(5:6,:,:,:), 0)
-  PRE_indian_jja = dim_avg_n_Wrap(PRE_id_12(5:6,:,:,:), 0)
+  PRE_CT_jja =  dim_avg_n_Wrap(PRE_CT_12(6:7,:,:,:), 0)
+  PRE_indian_jja = dim_avg_n_Wrap(PRE_id_12(6:7,:,:,:), 0)
 
 
-  PRE_CT_jja =  PRE_CT_12(5,:,:,:)
-  PRE_indian_jja = PRE_id_12(5,:,:,:)
+  ; PRE_CT_jja =  PRE_CT_12(5,:,:,:)
+  ; PRE_indian_jja = PRE_id_12(5,:,:,:)
 
 
   PRE_CT_clm =  dim_avg_n_Wrap(PRE_CT_jja(:,:,:), 0)
@@ -105,11 +107,11 @@ begin
   PRE_diff = (/PRE_indian_clm - PRE_CT_clm/)
 
 
-  u_CT_jja = dim_avg_n_Wrap(u_CT_12(5:6,:,:,:), 0)
-  u_indian_jja = dim_avg_n_Wrap(u_id_12(5:6,:,:,:), 0)
+  u_CT_jja = dim_avg_n_Wrap(u_CT_12(6:7,:,:,:), 0)
+  u_indian_jja = dim_avg_n_Wrap(u_id_12(6:7,:,:,:), 0)
 
-  u_CT_jja =  u_CT_12(5,:,:,:)
-  u_indian_jja = u_id_12(5,:,:,:)
+  ; u_CT_jja =  u_CT_12(5,:,:,:)
+  ; u_indian_jja = u_id_12(5,:,:,:)
 
 
   u_CT_clm =  dim_avg_n_Wrap(u_CT_jja(:,:,:), 0)
@@ -119,11 +121,11 @@ begin
 
 
 
-  v_CT_jja = dim_avg_n_Wrap(v_CT_12(5:6,:,:,:), 0)
-  v_indian_jja = dim_avg_n_Wrap(v_id_12(5:6,:,:,:), 0)
+  v_CT_jja = dim_avg_n_Wrap(v_CT_12(6:7,:,:,:), 0)
+  v_indian_jja = dim_avg_n_Wrap(v_id_12(6:7,:,:,:), 0)
  
-  v_CT_jja =  v_CT_12(5,:,:,:)
-  v_indian_jja = v_id_12(5,:,:,:)
+  ; v_CT_jja =  v_CT_12(5,:,:,:)
+  ; v_indian_jja = v_id_12(5,:,:,:)
 
 
   v_CT_clm =  dim_avg_n_Wrap(v_CT_jja(:,:,:), 0)
@@ -143,8 +145,8 @@ begin
    u_diff@_FillValue = 10^9
    v_diff@_FillValue = 10^9
    ; PRE_diff = where(prob_p.le.0.1, PRE_diff, PRE_diff@_FillValue)
-    u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
-    v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
+   ;  u_diff = where(prob_u.le.0.1.or.prob_v.le.0.1, u_diff, u_diff@_FillValue)
+   ;  v_diff = where(prob_v.le.0.1.or.prob_u.le.0.1, v_diff, v_diff@_FillValue)
 ;;;
 
 
@@ -203,7 +205,7 @@ begin
     ; ;;
      ;;;LineArrow
     res@gsnScalarContour        = True
-    res@gsnLeftString = "Jun NTA warming induced J PRE&850U,V diff (SEN - CTRL)"
+    res@gsnLeftString = "JA NTA warming induced JA PRE&850U,V diff (SEN - CTRL)"
 
 
     ; res@vcGlyphStyle             = "LineArrow"      ; turn on curly vectors
