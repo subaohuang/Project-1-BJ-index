@@ -12,6 +12,9 @@ begin
 
   his_start = 198001
   his_end   = 202012
+;;;
+
+;;;;clm 1982-2004 
 
 ;========================================================== Read data
  var_name = (/"TEMP","UVEL","VVEL","WVEL","SHF"/)
