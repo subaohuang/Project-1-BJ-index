@@ -23,7 +23,7 @@ return prob_p
 end 
 begin
  ;;;time span
-    startmon =25001
+    startmon =25101
     endmon = 30012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
@@ -43,33 +43,30 @@ begin
 
 
 ;;;读入控制实验组的海温数据
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0251-0300_fvgrid.nc"
     ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
     f1=addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)
+
+
     
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
     sst_ctrl_r = f1->TEMP(timeind,0,:,:)  
 
-    sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-
+    ; sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+    sst_ctrl = sst_ctrl_r
     ;   TLAT = f1->TLAT
     ; TLONG = f1->TLONG
    
         
 ;;;读入B22000 WNPCLM海温数据
     
-    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_Idl/lsh_B2000_WNP_heating_Idl.TEMP.fvgrid.0251-0280.nc"
-    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_double/lsh_B2000_WNP_heating_double.TEMP.fvgrid.0251-0280.nc"
-    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/lsh_B2000_WNP_heating_IDLthree/lsh_B2000_WNP_heating_IDLthree.TEMP.fvgrid.0251-0280.nc"
-    ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/HEAT_B_BP/HEAT_B_BP.TEMP.fvgrid.0251-0280.nc"
-    ; fils2 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
 
-    year = "0253"
+    year = "0254"
     
-    fils2 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h."+year+"*")
+    fils2 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.pop.h."+year+"*")
     f2 = addfiles(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
@@ -93,7 +90,7 @@ begin
 
 
     SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{210:270}), (/1,2/))
-    wks = gsn_open_wks("pdf", "sst_evolution_diff")
+    wks = gsn_open_wks("pdf", "Lanina-sst_evolution_diff")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -132,7 +129,8 @@ begin
     res@tmXBMode = "Explicit"
     res@tmXBValues = ispan(0,11,1)
     ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M(+1)","A(+1)","M(+1)","J(+1)","J(+1)","A(+1)"/)
-    res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
+    ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
+    res@tmXBLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
     res@tmYLMode = "Explicit"
 
  
