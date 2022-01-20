@@ -42,33 +42,43 @@ begin
 ;;;;
 
 
-;;;读入控制实验组的海温数据
+;;读入控制实验组的海温数据
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0200-0280.nc"
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
     
-    ; fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h.0{250..300}"+"*")
+    ; fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.pop.h.0{250..300}"+"*")
     ; f1 = addfiles(fils1, "r")
     ; time := f1[:]->time 
     ; time = (/time-1/)
     ; date:=cd_calendar(time, 1)
     ; timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    ; sst_ctrl_r= f1[:]->TEMP(timeind,{0:30000},:,:)  
+    ; ; sst_ctrl_r=  f1[:]->TEMP(timeind,{0:31000},:,:)  
+    ; sst_ctrl_r=  dim_avg_n_Wrap(f1[:]->TEMP(timeind,{0:31000},:,:),1)
 
     ; sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
 
-    ; system("rm /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.0250-0349.nc")
-    ; pmm_out = addfile("/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.fvgrid.0250-0349.nc", "c")
+    ; system("rm /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300_levelmean.nc")
+    ; pmm_out = addfile("/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300_levelmean.nc", "c")
     ; pmm_out->TEMP = sst_ctrl
     ; exit()
+
    
-    fils1 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/pop.temp_upperlevel.fvgrid.0250-0300.nc")
+    fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300.nc")
+    ; fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300_levelmean.nc")
     f1 = addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
 
     date:=cd_calendar(time, 1)
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    sst_ctrl= dim_avg_n_Wrap(f1->TEMP(timeind,:,:,:),1)  ;;;0-300m
+    sst_ctrl_r = f1->TEMP(timeind,:,:,:)  ;;;0-300m
+    ; sst_ctrl = f1->TEMP(timeind,:,:)  ;;;0-300m
+    ; sst_ctrl = dim_avg_n_Wrap(f1->TEMP(timeind,:,:,:),1)  ;;;0-300m
+
+    ; printVarSummary(sst_ctrl_r)
+    sst_ctrl = dim_avg_n_Wrap(sst_ctrl_r,1)  ;;;0-300
+    printVarSummary(sst_ctrl)
+
   
         
 ;;;读入B22000 WNPCLM海温数据
@@ -79,16 +89,21 @@ begin
     ; fils2 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/HEAT_B_BP/HEAT_B_BP.TEMP.fvgrid.0251-0280.nc"
     ; fils2 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
 
-    year = "0253"
+    year = "0254"
     
-    fils2 = systemfunc("ls /home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.pop.h."+year+"*")
+    fils2 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.pop.h."+year+"*")
     f2 = addfiles(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
-    sst_r = dim_avg_n_Wrap(f2[:]->TEMP(:,0,:,:),1)
-     ;;;;差值TEMP 
-    sst_wnp = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+    ; sst_r = dim_avg_n_Wrap(f2[:]->TEMP(:,{0:31000},:,:),1)
+    sst_r  = f2[:]->TEMP(:,{0:31000},:,:)
     
+     ;;;;差值TEMP 
+    sst_wnp_r = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+
+    ; sst_wnp = sst_wnp_r
+    sst_wnp  = dim_avg_n_Wrap(sst_wnp_r(:,{0:31000},:,:),1)
+
       
 ;;;;
     ; sst_ctrl_mam = month_to_season(sst_ctrl, "MAM")
@@ -104,17 +119,19 @@ begin
     SST_diff = (/sst_wnp_clm - sst_ctrl_clm/)
 
 
-    ; SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{120:280}), (/1/))
-    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},:), (/1/))
+    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{120:280}), (/1/))
 
-    print(SST_diff_nino3_4(:,{110:120}))
-    exit()
+    ; SST_diff_nino3_4 = dim_avg_n_Wrap(sst_wnp_clm(:,{-5:5},{120:280}), (/1/))
+
+    ; SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},:), (/1/))
+
+
 
     SST_diff_nino3_4&time = ispan(1,12,1)
 
     SST_diff_nino3_4 = where( ismissing(SST_diff_nino3_4),0.0, SST_diff_nino3_4)
 
-    wks = gsn_open_wks("pdf", "ouc_evolution_hov_diff")
+    wks = gsn_open_wks("pdf", year+"_ouc_evolution_hov_diff")
 
 ;;**************************************************************
 ;画图
@@ -144,9 +161,9 @@ begin
     ; res@cnLevelSpacingF      =0.2
 
     res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-    res@cnMinLevelValF       = -2.               ; min level
-    res@cnMaxLevelValF       =  2.              ; max leve
-    res@cnLevelSpacingF      = 0.2
+    res@cnMinLevelValF       = -0.9               ; min level
+    res@cnMaxLevelValF       =  0.9              ; max leve
+    res@cnLevelSpacingF      = 0.1
 
     res@cnFillPalette = "BlueWhiteOrangeRed"
  
