@@ -23,8 +23,10 @@ return prob_p
 end 
 begin
  ;;;time span
-    startmon =25001
+    startmon =25101
     endmon = 30012
+
+
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
     endyear_r = str_split_by_length(endmon, 3 )
@@ -44,17 +46,15 @@ begin
 
 ;;;读入控制实验组的海温数据
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0200-0280.nc"
-    fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.h1.0210-0340.nc"
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0251-0300.nc"
     ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
     f1=addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
     date:=cd_calendar(time, 1)
     
-    
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
     sst_ctrl_r= f1->TEMP(timeind,0,:,:)  
-
 
     sst_ctrl = PopLatLon(sst_ctrl_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
 ;;;;
@@ -156,7 +156,7 @@ wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
     res@lgPerimOn = False
     res@lgLabelFontHeightF = 0.018
     
-    x = ispan(250, 300, 1)
+    x = ispan(startyear,endyear, 1)
     plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
     ;;添加legend 
     gres = True
