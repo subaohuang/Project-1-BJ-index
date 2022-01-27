@@ -72,6 +72,33 @@ begin
 ;;;;
 
 
+;;;cam data 
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/Cam/B2000_f19g16_CTRL.cam.h1.0250-0300_chazhi.nc"
+    f1=addfile(fils1, "r")
+    time := f1->time 
+    time = (/time-1/)
+    date:=cd_calendar(time, 1)
+
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    
+    PRECL_CT  =  f1->PRECL(timeind,:,:)
+    PRECC_CT  =  f1->PRECC(timeind,:,:)
+
+    PRE_CT = PRECC_CT
+    PRE_CT = (/PRECC_CT+PRECL_CT/)
+    ; PRE_CT = (/PRECL_CT/)  ;;;大尺度降水
+    PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
+    
+    prea = rmMonAnnCycTLL(PRE_CT)
+
+    prea_djf = month_to_season(prea, "JAS")
+    
+
+
+    prea_indian = dim_avg_n_Wrap(prea_djf(:,{10:30},{70:90}), (/1,2/))
+
+   ; prea_indian = dim_avg_n_Wrap(prea_djf(:,{-5:5},{150:180}), (/1,2/))
+
 wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
 
 
@@ -157,7 +184,8 @@ wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
     res@lgLabelFontHeightF = 0.018
     
     x = ispan(startyear,endyear, 1)
-    plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
+    plot  = gsn_csm_xy (wks, x, (/ssta_nino3_4,prea_indian/), res)
+    ; plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
     ;;添加legend 
     gres = True
 

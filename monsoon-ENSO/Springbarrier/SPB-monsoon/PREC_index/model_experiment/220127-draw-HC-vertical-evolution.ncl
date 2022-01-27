@@ -63,16 +63,16 @@ begin
     ; exit()
 
    
-    ; fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300.nc")
-    fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300_levelmean.nc")
+    fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300.nc")
+    ; fils1 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/pop.temp_upperlevel.0250-0300_levelmean.nc")
     f1 = addfile(fils1, "r")
     time := f1->time 
     time = (/time-1/)
 
     date:=cd_calendar(time, 1)
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    ; sst_ctrl_r = f1->TEMP(timeind,:,:,:)  ;;;0-300m
-    sst_ctrl = f1->TEMP(timeind,:,:)  ;;;0-300m
+    sst_ctrl = f1->TEMP(timeind,:,:,:)  ;;;0-300m
+    ; sst_ctrl = f1->TEMP(timeind,:,:)  ;;;0-300m
     ; sst_ctrl = dim_avg_n_Wrap(f1->TEMP(timeind,:,:,:),1)  ;;;0-300m
 
     ; printVarSummary(sst_ctrl_r)
@@ -95,13 +95,12 @@ begin
     f2 = addfiles(fils2, "r")
   
     ; sst_wnp = f2->TEMP(0,0,:,:)  
-    sst_r = dim_avg_n_Wrap(f2[:]->TEMP(:,{0:31000},:,:),1)
-    ; sst_r  = f2[:]->TEMP(:,{0:31000},:,:)
+    ; sst_r = dim_avg_n_Wrap(f2[:]->TEMP(:,{0:31000},:,:),1)
+    sst_r  = f2[:]->TEMP(:,{0:31000},:,:)
     
      ;;;;差值TEMP 
-    sst_wnp_r = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-
-    sst_wnp = sst_wnp_r  
+    sst_wnp = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
+  
     ; sst_wnp  = dim_avg_n_Wrap(sst_wnp_r(:,{0:31000},:,:),1)
 
       
@@ -111,15 +110,15 @@ begin
     ; sst_ctrl_clm = dim_avg_n_Wrap(sst_ctrl_mam, 0)
     ; sst_wnp_clm = dim_avg_n_Wrap(sst_wnp_mam, 0)
 
-    sst_ctrl_clm = clmMonTLL(sst_ctrl)
+    sst_ctrl_clm = clmMonTLLL(sst_ctrl) 
     sst_wnp_clm = sst_wnp
 
 
     SST_diff = sst_wnp_clm
-    SST_diff = (/sst_wnp_clm - sst_ctrl_clm/)
+    SST_diff = (/sst_wnp_clm - sst_ctrl_clm/)  ;;; 12,level,lat,lon 
 
 
-    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{120:280}), (/1/))
+    SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,:,{-5:5},{120:280}), (/2/))
 
     ; SST_diff_nino3_4 = dim_avg_n_Wrap(sst_wnp_clm(:,{-5:5},{120:280}), (/1/))
 
@@ -129,54 +128,51 @@ begin
 
     SST_diff_nino3_4&time = ispan(1,12,1)
 
-    SST_diff_nino3_4 = where( ismissing(SST_diff_nino3_4),0.0, SST_diff_nino3_4)
+    SST_diff_nino3_4 = where(ismissing(SST_diff_nino3_4),0.0, SST_diff_nino3_4)
 
-    wks = gsn_open_wks("pdf", year+"_ouc_evolution_hov_diff")
+    wks = gsn_open_wks("pdf", year+"_ouc_vertical_hov_diff")
+
+    plot = new(12,graphic)
 
 ;;**************************************************************
 ;画图
 ;;***************************************************************
 
   ; gsn_define_colormap(wks, "NCV_blue_red")
+    res=True
+    res@gsnDraw=False
+    res@gsnFrame=False
+    res@gsnAddCyclic=False
 
-    res            = True                         ; plot mods desired
-    res@gsnDraw    = False                        ; don't draw
-    res@gsnFrame   = False                        ; don't advance frame
-    res@gsnLeftString=""
-    res@gsnRightString=""
 
+    res@cnLineColors="Transparent"  ;
     res@lbLabelBarOn=True
-    res@lbOrientation="Vertical"
+    res@cnFillOn = True 
+    res@cnLinesOn =False
 
-    res@cnFillOn=True
-    res@cnFillDrawOrder="PreDraw"
-    res@cnLinesOn=False
+    res@cnLineLabelInterval = 2
+    res@cnLineLabelsOn=False
+   
+    ; res@cnFillPalette = "precip_diff_12lev"
+    ; res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "BlRe"
+    res@cnInfoLabelOn  =False
 
-    res@cnInfoLabelOn=False
-
-    
- ;    res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-    ; res@cnMinLevelValF       = -2.8               ; min level
-    ; res@cnMaxLevelValF       =  2.8              ; max leve
-    ; res@cnLevelSpacingF      =0.2
 
     res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-    res@cnMinLevelValF       = -0.9               ; min level
-    res@cnMaxLevelValF       =  0.9              ; max leve
-    res@cnLevelSpacingF      = 0.1
+    res@cnMinLevelValF       = -2.5               ; min level
+    res@cnMaxLevelValF       =  2.5              ; max leve
+    res@cnLevelSpacingF      = 0.25
 
-    res@cnFillPalette = "BlueWhiteOrangeRed"
- 
-    res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
-    ; res@tmYLLabelsOn=True
-    res@tmYUseLeft=True
-    ; res@trYReverse               = True       ; reverses y-axis  
+    res@tmXTOn=False
+    res@tmYROn=False
 
-    res@tmYLValues    = ispan(1,12,1)
-    res@tmYLLabels    = ispan(1,12,1) +""
-
-    res@trYMaxF        = 12
-    res@trYMinF        = 1
+    ; res@mpShapeMode = "FreeAspect"
+    res@vpWidthF = 0.6
+    res@vpHeightF = 0.4
+    ; ;;
+    res@gsnRightString = ""
+    res@trYReverse               = True       ; reverses y-axis  
 
 
     res@tmXTOn=False
@@ -188,10 +184,12 @@ begin
     ; res@tmXBMinorOn=True
     ; res@tmXBMinorValues=ispan(0,360,10)
 
-    
-     plot = gsn_csm_hov(wks, SST_diff_nino3_4, res)   ; create plot
-     draw(plot)
-     frame(wks)
+    do i=0,11 
+      plot(i) = gsn_csm_contour(wks,SST_diff_nino3_4(i,:,:),res)
+    end do 
+pres  = True
+
+gsn_panel(wks, plot, (/4,3/), pres)
 
 end
 
