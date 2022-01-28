@@ -21,6 +21,18 @@ begin
      copy_VarCoords(avg1, prob_p)
 return prob_p
 end 
+function split_12(data)
+begin
+    dim = dimsizes(data) 
+    yearnum = dim(0)/12
+
+    data_12 = new((/12,yearnum/),float)
+    do i=0,11   
+    data_12(i,:) = data(i::12)
+    end do 
+return data_12
+end 
+;;;;
 begin
  ;;;time span
     startmon =25101
@@ -90,13 +102,14 @@ begin
     PRE_CT = (/PRE_CT*1000*3600*24/)  ;; m/s conver to mm/day
     
     prea = rmMonAnnCycTLL(PRE_CT)
+    prea_indian = dim_avg_n_Wrap(prea(:,{10:30},{70:90}), (/1,2/))
 
-    prea_djf = month_to_season(prea, "JAS")
-    
+    prea_indian_12  = split_12(prea_indian)
+    prea_indian_jjas = dim_avg_n_Wrap(prea_indian_12(5:8,:),0)
 
-
-    prea_indian = dim_avg_n_Wrap(prea_djf(:,{10:30},{70:90}), (/1,2/))
-
+corr = escorc_n(prea_indian_jjas, ssta_nino3_4,0, 0)
+print(corr)
+exit()
    ; prea_indian = dim_avg_n_Wrap(prea_djf(:,{-5:5},{150:180}), (/1,2/))
 
 wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
@@ -184,7 +197,7 @@ wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
     res@lgLabelFontHeightF = 0.018
     
     x = ispan(startyear,endyear, 1)
-    plot  = gsn_csm_xy (wks, x, (/ssta_nino3_4,prea_indian/), res)
+    plot  = gsn_csm_xy (wks, x, (/ssta_nino3_4,prea_indian_jjas/), res)
     ; plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
     ;;添加legend 
     gres = True

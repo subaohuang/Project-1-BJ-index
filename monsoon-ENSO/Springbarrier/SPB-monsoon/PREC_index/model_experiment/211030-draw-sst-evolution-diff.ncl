@@ -64,7 +64,7 @@ begin
 ;;;读入B22000 WNPCLM海温数据
     
 
-    year = "0254"
+    year = "0257"
     
     fils2 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.pop.h."+year+"*")
     f2 = addfiles(fils2, "r")
@@ -90,7 +90,7 @@ begin
 
 
     SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{210:270}), (/1,2/))
-    wks = gsn_open_wks("pdf", "Lanina-sst_evolution_diff")
+    wks = gsn_open_wks("pdf", year+"_sst_evolution_diff")
 ;;**************************************************************
 ;画图
 ;;***************************************************************

@@ -25,7 +25,7 @@ begin
   season = (/"MAM","JJA","SON","DJF"/)
   fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/Cam/B2000_f19g16_CTRL.cam.h1.0250-0300_chazhi.nc"
  
-  year = "0262"
+  year = "0264"
     
   fils2 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/Cam/B2000_f19g16_CTRL.cam.h0."+year+"*")
   f2 = addfiles(fils2, "r")
