@@ -61,19 +61,13 @@ begin
     ; TLONG = f1->TLONG
    
         
-;;;读入B22000 WNPCLM海温数据
-    
+;;;读入
+    year1 = 25701
+    year2 = 25812
 
-    year = "0257"
+    timeind2 = ind(date.le.year2.and.date.ge.year1)
     
-    fils2 = systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.pop.h."+year+"*")
-    f2 = addfiles(fils2, "r")
-  
-    ; sst_wnp = f2->TEMP(0,0,:,:)  
-    sst_r = f2[:]->TEMP(:,0,:,:)  
-     ;;;;差值TEMP 
-    sst_wnp = PopLatLon(sst_r,"gx1v6","fv1.9x2.5","bilin","da","090206")
-    
+    sst_wnp = f1->TEMP(timeind2,0,:,:)  
       
 ;;;;
     ; sst_ctrl_mam = month_to_season(sst_ctrl, "MAM")
@@ -82,15 +76,22 @@ begin
     ; sst_wnp_clm = dim_avg_n_Wrap(sst_wnp_mam, 0)
 
     sst_ctrl_clm = clmMonTLL(sst_ctrl)
-    sst_wnp_clm = sst_wnp
+
+    printVarSummary(sst_ctrl_clm)
+    
+    dim = dimsizes(sst_ctrl_clm)
+    sst_ctrl_clm_con = new((/24,dim(1),dim(2)/),typeof(sst_ctrl_clm))
+    sst_ctrl_clm_con(0:11,:,:) = sst_ctrl_clm
+    sst_ctrl_clm_con(12:,:,:) = sst_ctrl_clm
+    sst_wnp_clm =  sst_wnp
 
 
     SST_diff = sst_wnp_clm
-    SST_diff = (/sst_wnp_clm - sst_ctrl_clm/)
+    SST_diff = (/sst_wnp_clm - sst_ctrl_clm_con/)
 
 
     SST_diff_nino3_4 = dim_avg_n_Wrap(SST_diff(:,{-5:5},{210:270}), (/1,2/))
-    wks = gsn_open_wks("pdf", year+"_sst_evolution_diff")
+    wks = gsn_open_wks("pdf", year1+"_sst_evolution_diff")
 ;;**************************************************************
 ;画图
 ;;***************************************************************
@@ -113,7 +114,7 @@ begin
 
 
     res@trXMinF        = 0
-    res@trXMaxF        = 11
+    res@trXMaxF        = 23
 
 
 
@@ -127,10 +128,10 @@ begin
     res@gsnRightStringFontHeightF  = 0.02
 
     res@tmXBMode = "Explicit"
-    res@tmXBValues = ispan(0,11,1)
+    res@tmXBValues = ispan(0,23,1)
     ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M(+1)","A(+1)","M(+1)","J(+1)","J(+1)","A(+1)"/)
     ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
-    res@tmXBLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
+    res@tmXBLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A","S","O","N","D"/)
     res@tmYLMode = "Explicit"
 
  
@@ -172,7 +173,7 @@ begin
     res@lgPerimOn = False
     res@lgLabelFontHeightF = 0.018
 
-    plot  = gsn_csm_xy (wks, ispan(0,11,1), SST_diff_nino3_4, res)
+    plot  = gsn_csm_xy (wks, ispan(0,23,1), SST_diff_nino3_4, res)
     ;;添加legend 
     gres = True
 
