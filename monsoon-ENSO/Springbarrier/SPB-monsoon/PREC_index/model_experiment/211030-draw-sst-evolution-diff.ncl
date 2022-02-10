@@ -62,8 +62,8 @@ begin
    
         
 ;;;读入
-    year1 = 25701
-    year2 = 25812
+    year1 = 29501
+    year2 = 29612
 
     timeind2 = ind(date.le.year2.and.date.ge.year1)
     

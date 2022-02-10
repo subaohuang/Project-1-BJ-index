@@ -118,6 +118,8 @@ begin
    total_year = ispan(startyear,2016,1)
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
+
+
    ; inds = ind(DMI_ctrl_JJA.gt.0.43*std)
    ; indw = ind(DMI_ctrl_JJA.lt.0.43*std)
 

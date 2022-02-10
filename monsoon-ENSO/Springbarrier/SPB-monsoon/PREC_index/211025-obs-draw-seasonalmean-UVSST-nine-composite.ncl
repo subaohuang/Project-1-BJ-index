@@ -137,6 +137,22 @@ begin
     DMI_ctrl_JJA = pre_jjasa
 ;;;
 
+
+    ; f2=addfile("/home/yangsong3/data-observation/GPCP/precip.mon.mean.nc", "r")
+    ; date=cd_calendar(f2->time, 1)
+    ; timeind=ind(date.ge.197901.and.date.le.201612)
+    ; p=f2->precip(timeind,:,:)
+   
+    ; p = (/rmMonAnnCycTLL(p)/)
+    ; p_ind = dim_avg_n_Wrap(p(:,{5:25},{60:100}), (/1,2/))
+    ; p_ind_12 = split_12(p_ind)
+    ; ; p_jjas = dim_avg_n_Wrap(p_ind_12(:,5:8), 1)
+    ; std = dim_avg_n(dim_stddev_n(p_ind_12(:,5:8), 0),0)
+    
+
+    ; print(std)
+    ; exit()
+
 ;;;strong and weak monsoon year 
     total_year = ispan(startyear+1,2011,1)   ;;;1872-2011
     DMI_ctrl_JJA_2 = DMI_ctrl_JJA(1:dimsizes(DMI_ctrl_JJA)-2)  ;;;1871-2011
@@ -146,6 +162,10 @@ begin
     inds = ind(DMI_ctrl_JJA_2.gt.0.43*std)
     indw = ind(DMI_ctrl_JJA_2.lt.-0.43*std)
     indnor = ind(DMI_ctrl_JJA_2.gt.-0.43*std.and.DMI_ctrl_JJA_2.lt.0.43*std)
+
+    strmonrainfall = dim_avg_n_Wrap(DMI_ctrl_JJA_2(inds),0)/120.0
+    print(strmonrainfall)
+    exit()
 
     monstryear = total_year(inds)
     monwekyear = total_year(indw)
