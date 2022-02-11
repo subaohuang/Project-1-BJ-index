@@ -22,8 +22,8 @@ PRE_DIR_OUT=/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/
 STEP=3
 modelname=B2000_f19g16_CTRL
 
-startyear=0251
-endyear=0300
+startyear=0250
+endyear=0325
 yearselect=${startyear}..${endyear}
 echo $yearselect
 
@@ -34,7 +34,7 @@ echo $yearselect
   if  [ ! -e  ${PRE_DIR_OUT}${modelname}.sst.${startyear}-${endyear}.nc ] ; then
     echo "don't exit merge file, procecing..."
     cd $PRE_DIR_ORG 
-    cdo_old select,name=TEMP,level=500.0  ${modelname}.pop.h.{0251..0300}*  ${PRE_DIR_OUT}${modelname}.sst.${startyear}-${endyear}.nc
+    cdo_old select,name=TEMP,level=500.0  ${modelname}.pop.h.{0250..0325}*  ${PRE_DIR_OUT}${modelname}.sst.${startyear}-${endyear}.nc
     # cdo_old select,name=TEMP,level=500.0  ${modelname}.pop.h.`{$select_year}`*  ${PRE_DIR_OUT}${modelname}.sst.${startyear}-${endyear}.nc
   fi
 

@@ -23,7 +23,7 @@ return prob_p
 end 
 begin
  ;;;time span
-    startmon =25101
+    startmon =25001
     endmon = 30012
 
     startyear_r = str_split_by_length(startmon, 3)  ;; 将时间string分解成年和月
@@ -43,7 +43,7 @@ begin
 
 
 ;;;读入控制实验组的海温数据
-    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0251-0300_fvgrid.nc"
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0250-0325_fvgrid.nc"
     ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
     f1=addfile(fils1, "r")
     time := f1->time 
@@ -62,8 +62,8 @@ begin
    
         
 ;;;读入
-    year1 = 29501
-    year2 = 29612
+    year1 = 25701
+    year2 = 25812
 
     timeind2 = ind(date.le.year2.and.date.ge.year1)
     

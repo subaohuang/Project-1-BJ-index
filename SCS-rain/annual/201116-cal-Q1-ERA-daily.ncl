@@ -50,10 +50,16 @@ begin
 
 
 
-    g_latS=-10.
-    g_latN=20.
-    g_lonW=100.
-    g_lonE=170.
+    ; g_latS=-10.
+    ; g_latN=20.
+    ; g_lonW=100.
+    ; g_lonE=170.
+
+    g_latS=-30.
+    g_latN=30.
+    g_lonW=0.
+    g_lonE=360.
+
     ; create an array of desired pressure levels:
 
         

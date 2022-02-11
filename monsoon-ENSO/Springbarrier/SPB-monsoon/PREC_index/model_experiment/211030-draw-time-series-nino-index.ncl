@@ -35,8 +35,8 @@ end
 ;;;;
 begin
  ;;;time span
-    startmon =25101
-    endmon = 30012
+    startmon =25001
+    endmon = 32512
 
 
 
@@ -58,7 +58,7 @@ begin
 
 ;;;读入控制实验组的海温数据
     ; fils1 = "/home/yangsong3/data-model/CESM_CTRL/B2000_F19G16_CAM4_CTRL/pre/B2000_f19g16_CP_CTRL.TEMP.fvgrid.0200-0280.nc"
-    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0251-0300.nc"
+    fils1 = "/home/yangsong3/CMIP6/linshh/CESM-data/B/B2000_f19g16_CTRL/B2000_f19g16_CTRL.sst.0250-0325.nc"
     ; fils1 = "/home/ys17-19/cjx/all_output_data/HEAT_B_BP_output/HEAT_B_BP.sst.250-289.nc"
     f1=addfile(fils1, "r")
     time := f1->time 
@@ -74,7 +74,11 @@ begin
 
 ;;;series
 
-    ssta = rmMonAnnCycTLL(sst_ctrl)
+    ; ssta = rmMonAnnCycTLL(sst_ctrl)
+    ssta = sst_ctrl
+    sst_clm = clmMonTLL(sst_ctrl(0:(300-250)*12-1,:,:))
+
+    ssta = calcMonAnomTLL(sst_ctrl, sst_clm)
 
     ssta_djf = month_to_season(ssta, "DJF")
     ssta_djf(0:dimsizes(ssta_djf&time)-2,:,:) = ssta_djf(1:,:,:) 
@@ -107,9 +111,9 @@ begin
     prea_indian_12  = split_12(prea_indian)
     prea_indian_jjas = dim_avg_n_Wrap(prea_indian_12(5:8,:),0)
 
-corr = escorc_n(prea_indian_jjas, ssta_nino3_4,0, 0)
-print(corr)
-exit()
+; corr = escorc_n(prea_indian_jjas, ssta_nino3_4,0, 0)
+; print(corr)
+; exit()
    ; prea_indian = dim_avg_n_Wrap(prea_djf(:,{-5:5},{150:180}), (/1,2/))
 
 wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
@@ -197,8 +201,8 @@ wks = gsn_open_wks("pdf", "ssta_nino3_4_index")
     res@lgLabelFontHeightF = 0.018
     
     x = ispan(startyear,endyear, 1)
-    plot  = gsn_csm_xy (wks, x, (/ssta_nino3_4,prea_indian_jjas/), res)
-    ; plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
+    ; plot  = gsn_csm_xy (wks, x, (/ssta_nino3_4,prea_indian_jjas/), res)
+    plot  = gsn_csm_xy (wks, x, ssta_nino3_4, res)
     ;;添加legend 
     gres = True
 
