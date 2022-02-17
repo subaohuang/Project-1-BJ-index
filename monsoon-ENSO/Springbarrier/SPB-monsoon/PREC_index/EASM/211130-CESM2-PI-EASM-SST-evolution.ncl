@@ -308,7 +308,7 @@ do k=0,2
     ; ssta_month_weak = where(prob_ssta_weak.le.0.1, ssta_month_weak, ssta_month_weak@_FillValue)
     data := (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/)
     
-    opt1=str1(k)+""+"diffmonsoon-SSTevolution.txt"
+    opt1=str1(k)+""+"-EASM-diffmonsoon-SSTevolution.txt"
     ; write_matrix(data, "12f7.2",opt1)
     asciiwrite (opt1, data)
 
@@ -406,7 +406,7 @@ do k=0,2
     lineres@lgDashIndexes = res@xyDashPatterns
     textres = True
 
-    textres@lgLabels = (/"Strong ISMR","Weak ISMR", "Normal ISMR"/)
+    textres@lgLabels = (/"Weak EASM","Strong EASM", "Normal EASM"/)
     textres@lgLabelFontHeightF = 0.01
     ; textres@lgLabelOpacity = (/0/) 
 
