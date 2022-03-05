@@ -1,0 +1,1 @@
+stat2(x, xmean, xvar, nptused)
