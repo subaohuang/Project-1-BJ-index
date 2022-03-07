@@ -29,6 +29,7 @@ begin
     time = fin_thetao_his->time
 
     thetao_his_mixed = fin_thetao_his->TEMP_mixed_avg
+    dim = dimsizes(thetao_his_mixed)
     printVarSummary(thetao_his_mixed)
     thetao_his_bot = fin_thetao_his->TEMP_mixed_bot
     printVarSummary(thetao_his_bot)
@@ -36,11 +37,15 @@ begin
     thetao_his_mixed_CLM = clmMonTLL(thetao_his_mixed)
     printVarSummary(thetao_his_mixed_CLM)
     thetao_his_mixed_anom = calcMonAnomTLL(thetao_his_mixed, thetao_his_mixed_CLM)
+
+    thetao_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),thetao_his_mixed_anom,False,True,0)/)
+
     printVarSummary(thetao_his_mixed_anom)
 
     thetao_his_bot_CLM = clmMonTLL(thetao_his_bot)
     printVarSummary(thetao_his_bot_CLM)
     thetao_his_bot_anom = calcMonAnomTLL(thetao_his_bot, thetao_his_bot_CLM)
+    thetao_his_bot_anom = (/dtrend_msg_n(ispan(1,dim(0),1),thetao_his_bot_anom,False,True,0)/)
     printVarSummary(thetao_his_bot_anom)
 
 ;==========================================================
@@ -51,6 +56,7 @@ begin
     uo_his_mixed_CLM = clmMonTLL(uo_his_mixed)
     printVarSummary(uo_his_mixed_CLM)
     uo_his_mixed_anom = calcMonAnomTLL(uo_his_mixed, uo_his_mixed_CLM)
+    uo_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),uo_his_mixed_anom, False,True, 0)/)
     printVarSummary(uo_his_mixed_anom)
 
 ;==========================================================
@@ -61,6 +67,7 @@ begin
     vo_his_mixed_CLM = clmMonTLL(vo_his_mixed)
     printVarSummary(vo_his_mixed_CLM)
     vo_his_mixed_anom = calcMonAnomTLL(vo_his_mixed, vo_his_mixed_CLM)
+    vo_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),vo_his_mixed_anom, False,  True, 0)/)
     printVarSummary(vo_his_mixed_anom)
 
 ;==========================================================
@@ -77,6 +84,7 @@ begin
     copy_VarCoords(wo_his_bot, wo_his_bot_positive)
     wo_his_bot_anom = calcMonAnomTLL(wo_his_bot_positive, wo_his_bot_CLM)
     printVarSummary(wo_his_bot_anom)
+    wo_his_bot_anom = (/dtrend_msg_n(ispan(1,dim(0),1),wo_his_bot_anom,False, True, 0)/)
 ;==========================================================
 
 

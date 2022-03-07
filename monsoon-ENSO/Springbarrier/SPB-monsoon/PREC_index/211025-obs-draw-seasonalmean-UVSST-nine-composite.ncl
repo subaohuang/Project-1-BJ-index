@@ -165,7 +165,7 @@ begin
 
     strmonrainfall = dim_avg_n_Wrap(DMI_ctrl_JJA_2(inds),0)/120.0
     print(strmonrainfall)
-    exit()
+    
 
     monstryear = total_year(inds)
     monwekyear = total_year(indw)
