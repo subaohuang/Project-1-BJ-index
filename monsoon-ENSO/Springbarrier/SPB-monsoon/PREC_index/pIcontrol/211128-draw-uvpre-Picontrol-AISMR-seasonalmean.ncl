@@ -315,7 +315,8 @@ do i=0,5
   res@gsnFrame=False
   res@gsnDraw=False
 ; 
-  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+  res@cnFillPalette = "precip_diff_12lev"
   ; res@cnFillPalette = "BlueRed"
 
   res@cnFillOn=True
@@ -353,7 +354,9 @@ do i=0,5
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
   res@cnMinLevelValF       =   -2.0
   res@cnMaxLevelValF       =   2.0
-  res@cnLevelSpacingF      =  0.5
+  res@cnLevelSpacingF      =  0.4
+
+   res@cnFillColors= (/2,3,4,5,6,8,8,9,10,11,13,14/) - 2 
 
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; ; res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 

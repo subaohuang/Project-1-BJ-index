@@ -62,7 +62,6 @@ begin
 
     sst=lonFlip(f1->sst(timeind,:,:))
    
-    
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
 
@@ -82,7 +81,7 @@ begin
     nino34_12_r =  split_12(nino34)
 
     nino34_jja = nino34_djf
-    nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)  ;;;;JJA > 0.43*STD
 
     nino34_djf = nino34_jja
 
@@ -261,7 +260,7 @@ begin
 
   wks = gsn_open_wks("pdf", "ssta-evolution-during-diffmonsoon")
    
-
+  stss = ispan(1,3,1)+""
 do k=0,2 
   print("***********start*********************"+k)
 
@@ -466,6 +465,28 @@ do k=0,2
 
   res@gsnLeftString = stringlesft(k)
   plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/), res)
+ 
+  respl = True
+  respl@gsLineColor = "gray"
+  respl@gsLineDashPattern = 1.0
+
+  x =  1.0*res@tmXBValues
+  y = x
+
+  if k.eq.0 then 
+  y = 0.43*std_nino
+  end if 
+
+  if k.eq.1 then 
+  y = -0.43*std_nino
+  end if 
+  
+  if k.ne.2 then 
+  plot@$stss(k)$ =  gsn_add_polyline(wks, plot(k),x, y, respl)
+  end if
+
+
+
   ;;添加legend 
     gres = True
     if k.eq.0 then 

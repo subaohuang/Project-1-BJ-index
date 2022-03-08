@@ -5,6 +5,8 @@ function one_test(pv_ano,east_time)
 begin
     pv_east=dim_avg_n_Wrap(pv_ano(east_time,:,:),0)
     n=dimsizes(east_time)
+    var = dim_variance_n(pv_ano(east_time,:,:), 0)
+    var  =where(var.eq.0, var@_FillValue, var)
     var_pv_ano_east    =  dim_variance_n(pv_ano(east_time,:,:), 0)    ; 13.477
     var_pv_ano_east  =  sqrt(var_pv_ano_east/n) 
     var_pv_ano_east  =where(var_pv_ano_east.eq.0, var_pv_ano_east@_FillValue, var_pv_ano_east)
@@ -13,8 +15,10 @@ begin
     confi_pv_east=student_t(t_pv_ano_east , n-1)
 
     copy_VarCoords(pv_east, confi_pv_east)
- return confi_pv_east
+    var@dim = n
+ return var
  end
+
 
 function split_12(data)
 begin
@@ -514,6 +518,8 @@ do i=0,dimsizes(month)-1
     else 
     res@vcRefAnnoOn = False
     end if
+
+
   
     res@gsnRightString = wksstring(k) + " event (Str Mon - Without Mon)"
     ; res@gsnRightString = "Strong ISM"
@@ -526,6 +532,22 @@ do i=0,dimsizes(month)-1
     u_month_weak = (/u_month_weak - u_month_nor/)
     v_month_weak = (/v_month_weak - v_month_nor/)
     p_month_weak = (/p_month_weak - p_month_nor/)
+
+
+    var1 = (/prob_p_str/)
+    var2 = (/prob_p_nor/)
+    var3 = (/prob_p_weak/)
+
+    s1 = prob_p_str@dim
+    s2 = prob_p_nor@dim
+    s3 = prob_p_weak@dim
+
+
+    prob_p_str = (/ttest(p_month_str, var1,s1 , p_month_nor, var2, s2, False, False)/)
+    prob_p_weak = (/ttest(p_month_weak, var3, s3, p_month_nor, var2, s2, False, False)/)
+
+    copy_VarCoords(p_month_str,prob_p_str)
+    copy_VarCoords(p_month_str,prob_p_weak)
 
 
     plot(i) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
@@ -602,6 +624,8 @@ do i=0,dimsizes(month)-1
     overlay(plot(i), iplot(i))
     overlay(plot1(i), iplot1(i))
     ; overlay(plot2(i), iplot2(i))
+      delete(prob_p_str)
+    delete(prob_p_weak)
 end do
 pres = True
 pres@gsnPanelLabelBar  = True

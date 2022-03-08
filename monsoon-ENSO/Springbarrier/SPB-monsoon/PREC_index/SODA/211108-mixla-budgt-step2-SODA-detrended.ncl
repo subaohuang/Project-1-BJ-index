@@ -59,6 +59,10 @@ begin
     uo_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),uo_his_mixed_anom, False,True, 0)/)
     printVarSummary(uo_his_mixed_anom)
 
+    system("rm uo_his_mixed_anom.nc")
+    out = addfile("uo_his_mixed_anom.nc", "c")
+    out->uo_his_mixed_anom  =uo_his_mixed_anom
+
 ;==========================================================
     fin_vo_his = addfile("./"+var_name(2)+"_mixed_soda.nc", "r")
     vo_his_mixed = fin_vo_his->VVEL_mixed_avg
@@ -195,6 +199,10 @@ begin
     copy_VarCoords(thetao_his_mixed_anom, dTdz_his_anom)
     printVarSummary(dTdz_his_anom)
 
+    system("rm dTdz_his_anom.nc")
+    out = addfile("dTdz_his_anom.nc", "c")
+    out->dTdz_his_anom  =dTdz_his_anom
+exit()
 ;========================================================== dTdx/y/z clm
 
     dTclmdxdy = grad_latlon_cfd(thetao_his_mixed_clm,thetao_his_mixed_clm&lat,thetao_his_mixed_clm&lon,True,False)
