@@ -166,7 +166,6 @@ begin
 
 
 
-
     case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]   ;;;;;
 
     case2 = [/wet_cold_year,dry_cold_year,nor_cold_year/]
