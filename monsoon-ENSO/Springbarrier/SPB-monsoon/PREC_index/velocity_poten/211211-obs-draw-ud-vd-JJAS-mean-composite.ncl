@@ -52,7 +52,7 @@ begin
     endyear = 2019
 
 ;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
+    diri="/home/ys17-23/Extension/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -96,7 +96,7 @@ begin
     ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
     nrows=146
     ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("/home/ys17-19/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
+    data = asciiread("../All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
     jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
     
     jjas!0 = "time"
@@ -154,7 +154,7 @@ begin
 
 
 ;;;读入wind data
-    fils1 = "/home/yangsong3/data-observation/linshh/obs-derived/vp_ud_vd_ERA5_187101-201212.nc"
+    fils1 = "/home/ys17-23/Extension/linshh/obs-derived/vp_ud_vd_20CR_187101-201212.nc"
     f1 = addfile(fils1, "r")
 
     time1 = f1->time
@@ -354,7 +354,15 @@ do i=0,1
   ; res@mpFillDrawOrder = "PostDraw"
   res@mpFillOn = False
 
-  
+  ; u_month_str = (/u_month_str - u_month_nor/)
+  ; v_month_str = (/v_month_str - v_month_nor/)
+  ; ssta_month_str = (/ssta_month_str - ssta_month_nor/)
+
+
+  ; u_month_weak = (/u_month_weak - u_month_nor/)
+  ; v_month_weak = (/v_month_weak - v_month_nor/)
+  ; ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
+
   
     res@gsnRightString = "JJAS div wind&Velocity Potensial"
     res@gsnLeftString = wksstring(i) + " + Strong monsoon" 

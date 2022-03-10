@@ -5,7 +5,7 @@
 ;;;*********************************************************
 begin
 
-model = "ERA5"
+model = "20CR"
 ;;;region and time period 
    timestart  = 187101
    timeend  =201212
@@ -80,7 +80,6 @@ model = "ERA5"
       copy_VarCoords(uwnd, vp)
       copy_VarAtts(uwnd, vp)
       delete(sfvp)
-
 
       print("结束计算势函数")
      
