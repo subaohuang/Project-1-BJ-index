@@ -116,7 +116,7 @@ begin
 
     pre_jjas =  month_to_season(p, "JJA")
 
-    pre_jjasa = dim_avg_n_Wrap(pre_jjas(:,{10:30},{70:90}), (/1,2/))
+    pre_jjasa = dim_avg_n_Wrap(pre_jjas(:,{10:30},{60:100}), (/1,2/))
 
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
@@ -382,8 +382,8 @@ do i=0,dimsizes(month)-1
     prob_u_str = com_month_str[4]
     prob_v_str = com_month_str[5]
    
-    printVarSummary(u_850_month_12)
-    print(i)
+    ; printVarSummary(u_850_month_12)
+    ; print(i)
     
 
     com_month_weak  = composite_mean(p_month_12(i*3-21:i*3-19,:,:,:),u_850_month_12(i*3-21:i*3-19,:,:,:),v_850_month_12(i*3-21:i*3-19,:,:,:),ind_uw1+1,ind_uw1+1,ind_uw1+1)
@@ -419,7 +419,8 @@ do i=0,dimsizes(month)-1
   res@gsnFrame=False
   res@gsnDraw=False
 ; 
-  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "precip_diff_12lev"
   ; res@cnFillPalette = "BlueRed"
 
   res@cnFillOn=True
@@ -458,7 +459,7 @@ do i=0,dimsizes(month)-1
   res@cnMinLevelValF       =   -2.0
   res@cnMaxLevelValF       =   2.0
   res@cnLevelSpacingF      =  0.4
-
+   res@cnFillColors= (/2,3,4,5,6,8,8,9,10,11,13,14/) - 2 
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; ; res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
   ; ; res@cnLevels := (/-12,-9,-6,-3,3,6,9,12/)*0.01
@@ -475,8 +476,8 @@ do i=0,dimsizes(month)-1
    res@gsnScalarContour        = True
 
     ;;;;;;;LineArrow
-    res@vcMinDistanceF           = 0.02           ; thin vectors
-    res@vcMinMagnitudeF          =0.4
+    res@vcMinDistanceF           = 0.015           ; thin vectors
+    res@vcMinMagnitudeF          =0.1
     res@vcRefMagnitudeF          = 4.0
     res@vcRefLengthF             = 0.1     ; define length of v
     ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
@@ -507,10 +508,10 @@ do i=0,dimsizes(month)-1
    plot1(i) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
     res@gsnRightString = "SST normal event"
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -0.5
-    res@cnMaxLevelValF       =   0.5
-    res@cnLevelSpacingF      =  0.1
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+    ; res@cnMinLevelValF       =   -0.5
+    ; res@cnMaxLevelValF       =   0.5
+    ; res@cnLevelSpacingF      =  0.1
 
    plot2(i) = gsn_csm_vector_scalar_map(wks2,u_month_nor, v_month_nor, p_month_nor, res)
 

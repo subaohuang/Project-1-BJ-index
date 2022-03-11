@@ -428,7 +428,9 @@ do i=0,dimsizes(month)-1
   res@gsnFrame=False
   res@gsnDraw=False
 ; 
-  res@cnFillPalette = "BlueWhiteOrangeRed"
+  ; res@cnFillPalette = "BlueWhiteOrangeRed"
+    res@cnFillPalette = "precip_diff_12lev"
+    
   ; res@cnFillPalette = "BlueRed"
 
   res@cnFillOn=True
@@ -469,7 +471,7 @@ do i=0,dimsizes(month)-1
   res@cnLevelSpacingF      =  0.4
 
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
-  ; ; res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
+    res@cnFillColors= (/2,3,4,5,6,8,8,9,10,11,13,14/) - 2 
   ; ; res@cnLevels := (/-12,-9,-6,-3,3,6,9,12/)*0.01
   ; res@cnLevels := (/-20,-15,-10,-5,5,10,15,20/)*0.01
   ; res@cnInfoLabelOn = False
@@ -516,10 +518,10 @@ do i=0,dimsizes(month)-1
     plot1(i) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
     res@gsnRightString = "SST normal event"
 
-    res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-    res@cnMinLevelValF       =   -0.5
-    res@cnMaxLevelValF       =   0.5
-    res@cnLevelSpacingF      =  0.1
+    ; res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
+    ; res@cnMinLevelValF       =   -0.5
+    ; res@cnMaxLevelValF       =   0.5
+    ; res@cnLevelSpacingF      =  0.1
 
    plot2(i) = gsn_csm_vector_scalar_map(wks2,u_month_nor, v_month_nor, p_month_nor, res)
 

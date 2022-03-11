@@ -114,6 +114,18 @@ begin
     p  = f1->prate(timeind1,:,:)
     p = (/p*86400/) ;; mm/day
     p = (/rmMonAnnCycTLL(p)/)
+
+    ;;detrend 
+    p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
+    ;;;
+
+    p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
+    p_indian_jjas = month_to_season(p_indian, "JJA")
+    p_indian_12 = split_12(p_indian)
+    p_indian_jjas = (/dim_avg_n_Wrap(p_indian_12(5:8,:),0)/)
+
+
+
 ;;;
 
 
@@ -137,6 +149,9 @@ begin
     pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
+
+    ; ;;;FOR TEST 20CR pre
+    ; DMI_ctrl_JJA_r = p_indian_jjas
 ;;;
 
 ;;;strong and weak monsoon year 
@@ -310,10 +325,11 @@ do k=0,2
 
     ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
 
-  wks = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  ; wks = gsn_open_wks("pdf", "20crbase-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  ; wks1 = gsn_open_wks("pdf", "20crbase-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))
+  
+    wks = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
   wks1 = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))
-  
-  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
@@ -501,7 +517,7 @@ do i=0,dimsizes(month)-1
    res@gsnScalarContour        = True
 
     ;;;;;;;LineArrow
-    res@vcMinDistanceF           = 0.02           ; thin vectors
+    res@vcMinDistanceF           = 0.015           ; thin vectors
     res@vcMinMagnitudeF          =0.4
     res@vcRefMagnitudeF          = 4.0
     res@vcRefLengthF             = 0.1     ; define length of v

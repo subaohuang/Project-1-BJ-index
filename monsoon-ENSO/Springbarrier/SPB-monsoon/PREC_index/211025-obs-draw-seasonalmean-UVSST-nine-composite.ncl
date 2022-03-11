@@ -52,7 +52,7 @@ begin
     endyear = 2019
 
 ;;;读入HadiSST海温数据
-    diri="/home/yangsong3/data-observation/linshh/data/sst/"
+    diri="/home/ys17-23/Extension/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
     date:=cd_calendar(f1->time, 1)
@@ -96,7 +96,7 @@ begin
 ;;;读入ERA wind data
 
     ; fils1 = "/home/yangsong3/data-observation/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/yangsong3/data-observation/20thCRV2/uwnd.mon.mean.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV2/uwnd.mon.mean.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
@@ -177,25 +177,25 @@ begin
 
  nino34_djf_2 = nino34_djf(1:dimsizes(nino34_djf)-1-(endyear-2011))
 
- wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
+ wet_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
- wet_cold_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
+ wet_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
 
- wet_norm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
+ wet_norm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
- dry_warm_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
+ dry_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
- dry_cold_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
+ dry_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
  
- dry_norm_year =  total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
+ dry_norm_year =  total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
  
- nor_warm_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
+ nor_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
- nor_cold_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
+ nor_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
  
- nor_norm_year =  total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
+ nor_norm_year =  total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 ;;;;
 
 
@@ -203,7 +203,7 @@ begin
 
 ;;;读入ERA wind data
     ; fils1 = "/home/yangsong3/data-observation/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/yangsong3/data-observation/20thCRV2/uwnd.mon.mean.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV2/uwnd.mon.mean.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
@@ -234,7 +234,7 @@ begin
 
 
 ;;;
-    fils2 = "/home/yangsong3/data-observation/20thCRV2/vwnd.mon.mean.nc"
+    fils2 = "/home/ys17-23/Extension/20thCRV2/vwnd.mon.mean.nc"
     f2 = addfile(fils2, "r")
     time2 = f2->time
     date2 = cd_calendar(time2, 1)

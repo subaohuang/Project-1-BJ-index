@@ -17,7 +17,7 @@ model = "20CR"
   dfi=(pi*10)/180
 
 ;;;读入数据
-  diri = "/home/yangsong3/data-observation/20thCRV2/"
+  diri = "/home/ys17-23/Extension/20thCRV2/"
 
   fils1 = systemfunc("ls "+diri+"uwnd.mon.mean.nc")
   fils2 = systemfunc("ls "+diri+"vwnd.mon.mean.nc")
@@ -33,7 +33,7 @@ model = "20CR"
   lev = f1->level
 
   ; levwant= (/1000.0, 925.0, 850.0, 700.0, 600.0,500.0,400.0,300.0,250.0,200.0,150.0,100.0,50.0,10.0/)   ;level反着取
-  levwant= (/850.0,200.0/)   ;level反着取
+  levwant= (/950.0,850.0,200.0/)   ;level反着取
   levind1 = get1Dindex(lev,levwant)
   level  = f1->level(levind1)
 
@@ -102,7 +102,7 @@ model = "20CR"
       
    print("***************开始写nc文件****************************")
 ;*********************************************写成nc文件,注意坐标变量之间的dimension也要命名。
-    diro="/home/yangsong3/data-observation/linshh/obs-derived/"
+    diro="/home/ys17-23/Extension/linshh/obs-derived/"
     filo1="vp_ud_vd_"+model+"_187101-201212.nc"
     system("/bin/rm -f "+diro + filo1+"")
     setfileoption("nc","Format","LargeFile")

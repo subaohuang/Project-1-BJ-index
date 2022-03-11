@@ -282,17 +282,19 @@ begin
 ;    end if 
 
 ;   if nino_type(j).eq."Nino3" then 
-;     lat1 = -5
-;    lat2 = 5
-;    lon1 = 210
-;    lon2 = 270
+   ;  lat1 = -5
+   ; lat2 = 5
+   ; lon1 = 210
+   ; lon2 = 270
 ;    end if 
 
 ;   if nino_type(j).eq."Nino3.4" then 
-    lat1 = -5
+   lat1 = -5
    lat2 = 5
-   lon1 = 190
-   lon2 = 240
+   ; lon1 = 190
+   ; lon2 = 240
+     lon1 = 160
+   lon2 = 270
 ;    end if 
 
 ;   if nino_type(j).eq."Nino4" then 
@@ -311,7 +313,7 @@ begin
 
     UATXB_ct_nino3  =  dim_avg_n_Wrap(UATXB_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
     VATYB_ct_nino3  =  dim_avg_n_Wrap(VATYB_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
-    WATZB_ct_nino3 =  dim_avg_n_Wrap(VATYB_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/)) ;;;EK
+    WATZB_ct_nino3 =  dim_avg_n_Wrap(WATZB_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/)) ;;;EK
     UBTXA_ct_nino3 = dim_avg_n_Wrap(UBTXA_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/)) ;;MEAN zonal advection
     VBTYA_ct_nino3 = dim_avg_n_Wrap(VBTYA_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/)) ;;MEAN zonal advection
     WBTZA_ct_nino3 = dim_avg_n_Wrap(WBTZA_ct(:,{lat1:lat2},{lon1:lon2}), (/1,2/)) ;;MEAN zonal advection
@@ -367,6 +369,7 @@ do k=0,2
    ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,6:9), 2)   ;;SOND
    ; hb_mean_mamjja = dim_sum_n_Wrap(hb_mean(:,:,6:9), 2)   ;;SOND
    hb_mean_mamjja = dim_sum_n_Wrap(hb_mean(:,:,5:9), 2)   ;;ASON
+   
 
    print(hb_mean_mamjja(0,0))
    print(sum(hb_mean_mamjja(0,1:)))

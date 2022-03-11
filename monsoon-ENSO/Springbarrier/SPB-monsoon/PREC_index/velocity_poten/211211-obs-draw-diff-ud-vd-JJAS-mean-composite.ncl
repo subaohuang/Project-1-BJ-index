@@ -232,7 +232,7 @@ begin
 
   plot = new(6,graphic)
   iplot = plot
-  wks = gsn_open_wks("pdf", "DIFF-JJAS-Ud-Vd-VP-diffmonsoon")
+  wks = gsn_open_wks("pdf", "950-DIFF-JJAS-Ud-Vd-VP-diffmonsoon")
 
 do i=0,1
 
@@ -329,10 +329,13 @@ do i=0,1
   ; res@cnMinLevelValF       =   -0.6
   ; res@cnMaxLevelValF       =   0.6
   ; res@cnLevelSpacingF      =  0.1
-
-   res@cnMinLevelValF       =   -1.2
-  res@cnMaxLevelValF       =   1.2
+    res@cnMinLevelValF       =   -1.0
+  res@cnMaxLevelValF       =   1.0
   res@cnLevelSpacingF      =  0.2
+
+  ;  res@cnMinLevelValF       =   -1.2
+  ; res@cnMaxLevelValF       =   1.2
+  ; res@cnLevelSpacingF      =  0.2
 
   ; res@cnLevelSelectionMode  = "ExplicitLevels" ; set manual contour levels
   ; ; res@cnFillColors= (/2,3,4,6,8,9,10,11,13/) - 2 
