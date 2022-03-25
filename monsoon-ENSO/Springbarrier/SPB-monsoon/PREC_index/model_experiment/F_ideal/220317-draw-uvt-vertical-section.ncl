@@ -59,33 +59,33 @@ begin
   printVarSummary(VS)
 ;;;;
 
-; ;;; read data from model intial file 
+;;; read data from model intial file 
 
-;   fils2 = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_JJASMEAN.nc") ;;;daily数据计算的q1
-;   ; fils2 = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_era5.nc") ;;;daily数据计算的q1
-
-;   f4 = addfile(fils2, "r")
-
-;   US_2 = f4->US(0,:,:,:)
-;   VS_2 = f4->VS(0,:,:,:)
-;   T_2 = f4->T(0,:,:,:)
-;   printVarSummary(US_2)
-;   printVarSummary(VS_2)
-; ;;;;
-
-;; read data from model intial file 
-
-  fils2 = systemfunc("ls F_dynamic_f19_ctrl_1year.cam.h0.0001-08.nc") ;;;daily数据计算的q1
+  fils2 = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_JJASMEAN.nc") ;;;daily数据计算的q1
   ; fils2 = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_era5.nc") ;;;daily数据计算的q1
 
   f4 = addfile(fils2, "r")
 
-  US_2 = f4->U(0,:,:,:)
-  VS_2 = f4->V(0,:,:,:)
+  US_2 = f4->US(0,:,:,:)
+  VS_2 = f4->VS(0,:,:,:)
   T_2 = f4->T(0,:,:,:)
   printVarSummary(US_2)
   printVarSummary(VS_2)
 ;;;;
+
+; ;; read data from model intial file 
+
+;   fils2 = systemfunc("ls F_dynamic_f19_ctrl_1year.cam.h0.0001-08.nc") ;;;daily数据计算的q1
+;   ; fils2 = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_era5.nc") ;;;daily数据计算的q1
+
+;   f4 = addfile(fils2, "r")
+
+;   US_2 = f4->U(0,:,:,:)
+;   VS_2 = f4->V(0,:,:,:)
+;   T_2 = f4->T(0,:,:,:)
+;   printVarSummary(US_2)
+;   printVarSummary(VS_2)
+; ;;;;
 
 ;   T_diff = T_2
 ;   T_diff = (/T_2 - T/)

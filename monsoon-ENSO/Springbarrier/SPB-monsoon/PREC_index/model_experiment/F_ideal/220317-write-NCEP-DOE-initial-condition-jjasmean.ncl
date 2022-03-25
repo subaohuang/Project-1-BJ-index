@@ -68,24 +68,23 @@ begin
   US = f3->US
   VS = f3->VS
   T = f3->T
+
+  hyam = f3->hyam
+  hybm = f3->hybm
+  P0 = f3->P0
+  PS = f3->PS(0,:,:)
+
+  printVarSummary(P0)
+  printVarSummary(PS)
+
   printVarSummary(US)
   printVarSummary(VS)
+
 ;;;;
 
 ;;;=========================================================
 ;;;intepolate t 
 ;;;=========================================================
-  ;;;Vertical
-  linlog = 1   ; ln(p) interpolation
-
-  pi = 1.0*t_clm_jjas&level 
-           
-  ti = t_clm_jjas
-  po = T&lev
-  
-  to = int2p_n_Wrap(pi,ti,po,linlog,0)
-  printVarSummary(to)
-  ;;;;
 
   ;;; Horizontal
   lati = t_clm_jjas&lat
@@ -94,31 +93,22 @@ begin
   loni = t_clm_jjas&lon
   lono = T&lon
 
-  to_final = linint2_Wrap(loni,lati,to, True, lono,lato, 0)
-  printVarSummary(to_final)
+  to_hr = linint2_Wrap(loni,lati,t_clm_jjas,True, lono,lato, 0)
+  printVarSummary(to_hr)
   ;;;
+
+  ;;;Vertical pres2hybrid
+  psfc = PS
+  pi = 100.0*t_clm_jjas&level 
+  printVarSummary(pi)
+
+  to_final   = pres2hybrid(pi,psfc,P0,to_hr,hyam,hybm,4)  ;;;ti four demensions
+  printVarSummary(to_final)
 ;;;;
 
 ;;;=========================================================
 ;;;intepolate US,VS
 ;;;=========================================================
-  ;;;Vertical
-  linlog = 1   ; ln(p) interpolation
-
-  pi := 1.0*u_clm_jjas&level 
-           
-  Ui := u_clm_jjas
-  po := US&lev
-  
-  USo = int2p_n_Wrap(pi,Ui,po,linlog,0)
-  printVarSummary(USo)
-  
-  Vi := v_clm_jjas
-
-  VSo = int2p_n_Wrap(pi,Vi,po,linlog,0)
-  printVarSummary(VSo)
-  ;;;;
-
   ;;; Horizontal
   lati := u_clm_jjas&lat
   lato := US&slat
@@ -126,29 +116,52 @@ begin
   loni = u_clm_jjas&lon
   lono = US&lon
 
-  USo_final = linint2_Wrap(loni,lati,USo, True, lono,lato, 0)
-  printVarSummary(USo_final)
+  USo_hr = linint2_Wrap(loni,lati,u_clm_jjas, True, lono,lato, 0)
+  printVarSummary(USo_hr)
 
   ;;;for v
   lati := v_clm_jjas&lat
   lato := VS&lat  
-  VSo_final = linint2_Wrap(loni,lati,VSo, True, lono,lato, 0)
+  VSo_hr = linint2_Wrap(loni,lati,v_clm_jjas, True, lono,lato, 0)
+  printVarSummary(VSo_hr)
+  
+
+  ;;;for PS 
+  lati := PS&lat
+  lato := US&slat
+
+  loni := US&lon
+  lono := US&lon
+  
+  PS_hr = linint2_Wrap(loni,lati,PS, True, lono,lato, 0)
+  printVarSummary(PS_hr)
+  
+;;;;
+
+  ;;;Vertical
+  pi := 100.0*u_clm_jjas&level 
+   
+  USo_final   = pres2hybrid_Wrap(pi,PS_hr,P0,USo_hr,hyam,hybm,4)
+  printVarSummary(USo_final)
+
+  VSo_final   = pres2hybrid_Wrap(pi,psfc,P0,VSo_hr,hyam,hybm,4)
   printVarSummary(VSo_final)
   ;;;
+    ;;;
   delete(u_clm_jjas)
   delete(v_clm_jjas)
   delete(t_clm_jjas)
-
+;;;;
 
   T_diff = T
-  T_diff(0,:,:,:) = T(0,:,:,:) - flt2dble(to_final)
+  T_diff(0,:,:,:) = T(0,:,:,:) -to_final
 
-  printMinMax(T_diff, 1)
-  exit()
+  ; printMinMax(T_diff, 1)
+  ; exit()
 
-  T(0,:,:,:) = (/flt2dble(to_final)/)
-  US(0,:,:,:) = (/flt2dble(USo_final)/)
-  VS(0,:,:,:) = (/flt2dble(VSo_final)/)
+  T(0,:,:,:) = (/to_final/)
+  US(0,:,:,:) = (/USo_final/)
+  VS(0,:,:,:) = (/VSo_final/)
 
 ;=====================================================================
 

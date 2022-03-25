@@ -61,29 +61,40 @@ begin
 
 ;;; read data from model intial file 
 
-  fils = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703.nc") ;;;daily数据计算的q1
+  fils = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703.nc") 
 
   f3 = addfile(fils, "r")
 
   US = f3->US
   VS = f3->VS
   T = f3->T
+
+  hyam = f3->hyam
+  hybm = f3->hybm
+  P0 = f3->P0
+  PS = f3->PS
+
+  printVarSummary(P0)
+  printVarSummary(PS)
+
   printVarSummary(US)
   printVarSummary(VS)
+
 ;;;;
 
 ;;;=========================================================
 ;;;intepolate t 
 ;;;=========================================================
-  ;;;Vertical
-  linlog = 1   ; ln(p) interpolation
+  ;;;Vertical pres2hybrid
+  psfc = PS
 
-  pi = 1.0*t_clm_jjas&level 
+  pi = 100.0*t_clm_jjas&level 
+  printVarSummary(pi)
            
   ti = t_clm_jjas
-  po = T&lev
   
-  to = int2p_n_Wrap(pi,ti,po,linlog,0)
+  
+  to   = pres2hybrid_Wrap(pi,psfc,p0,ti,hyam,hybm,0)
   printVarSummary(to)
   ;;;;
 
@@ -103,20 +114,18 @@ begin
 ;;;intepolate US,VS
 ;;;=========================================================
   ;;;Vertical
-  linlog = 1   ; ln(p) interpolation
-
-  pi := 1.0*u_clm_jjas&level 
+  pi := 100.0*u_clm_jjas&level 
            
   Ui := u_clm_jjas
-  po := US&lev
-  
-  USo = int2p_n_Wrap(pi,Ui,po,linlog,0)
+
+  USo   = pres2hybrid_Wrap(pi,psfc,p0,Ui,hyam,hybm,0)
   printVarSummary(USo)
   
   Vi := v_clm_jjas
 
-  VSo = int2p_n_Wrap(pi,Vi,po,linlog,0)
+  VSo   = pres2hybrid_Wrap(pi,psfc,p0,Vi,hyam,hybm,0)
   printVarSummary(VSo)
+  
   ;;;;
 
   ;;; Horizontal
