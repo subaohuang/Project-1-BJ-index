@@ -69,12 +69,27 @@ begin
     print("************** finish SST data*****************")
 
  ;;;; high pass 10years, lose each end 2years
-    ssta  = (/Lanczos_highpass(ssta)/)
+    ; ssta  = (/Lanczos_highpass(ssta)/)
+ ;;;
+    ca    = 10.0*12.0        ; band start (longer period)
+    cb    = 12.0        ; band end
 
-     system("rm ssta_picontrol_highpass.nc")
-    ncout = addfile("ssta_picontrol_highpass.nc", "c")
+    fca   = 1.0/ca      ; 'left'  frequency
+    fcb   = 1.0/cb      ; 'right' frequency
+
+    opt   = False       ; use default options (time series of filtered
+                        ; values will be returned)
+
+    ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
+
+    system("rm ssta_picontrol_highpass_bw.nc")
+    ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
     ncout->ssta = ssta
+    exit()
+;;;;;;
 
+
+;;;;;
     nino34 = dim_avg_n_Wrap(ssta(:,{-5:5},{190:240}), (/1,2/))
     nino34_12_r =  split_12(nino34)
 
