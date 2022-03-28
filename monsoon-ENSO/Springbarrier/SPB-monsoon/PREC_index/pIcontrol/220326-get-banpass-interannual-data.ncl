@@ -13,19 +13,37 @@ begin
 return data_12
 end 
 
+
 function Lanczos_highpass(var)
 begin
     month1 = 10*12*1.0
+    ; month2 = 12.0
     nwt = 49     ;;; loose 24 months each end
     fca = 1./month1 ;;;通过的频率
-    ihp = 1     ;;;high pass           
+    ; fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
     nsigma = 1.  ; Lanczos sigma
 
-    wgts = filwgts_lanczos (nwt, ihp, fca, -999., nsigma)  
+    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
 
-    var  = (/wgt_runave_Wrap(var, wgts, 0)/)
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
  return var
  end
+
+ function bw_bandpass(var)
+ begin
+    ca    = 10.0*12.0        ; band start (longer period)
+    cb    = 12.0        ; band end
+
+    fca   = 1.0/ca      ; 'left'  frequency
+    fcb   = 1.0/cb      ; 'right' frequency
+
+    opt   = False       ; use default options (time series of filtered
+                        ; values will be returned)
+
+    var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
+ return var
+ end 
 
 ;;*************************************************
 ;; main program 
@@ -68,24 +86,31 @@ begin
    
     print("************** finish SST data*****************")
 
- ;;;; high pass 10years, lose each end 2years
-    ; ssta  = (/Lanczos_highpass(ssta)/)
- ;;;
-    ca    = 10.0*12.0        ; band start (longer period)
-    cb    = 12.0        ; band end
+ ;;; high pass 10years, lose each end 2years
+    ssta  = (/Lanczos_highpass(ssta)/)
+    ; ssta = (/bw_bandpass(ssta)/)   ; 
 
-    fca   = 1.0/ca      ; 'left'  frequency
-    fcb   = 1.0/cb      ; 'right' frequency
-
-    opt   = False       ; use default options (time series of filtered
-                        ; values will be returned)
-
-    ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
-
-    system("rm ssta_picontrol_highpass_bw.nc")
-    ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
+    system("rm ssta_picontrol_highpass.nc")
+    ncout = addfile("ssta_picontrol_highpass.nc", "c")
     ncout->ssta = ssta
-    exit()
+
+
+ ;;;
+    ; ca    = 10.0*12.0        ; band start (longer period)
+    ; cb    = 12.0        ; band end
+
+    ; fca   = 1.0/ca      ; 'left'  frequency
+    ; fcb   = 1.0/cb      ; 'right' frequency
+
+    ; opt   = False       ; use default options (time series of filtered
+    ;                     ; values will be returned)
+
+    ; ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
+
+    ; system("rm ssta_picontrol_highpass_bw.nc")
+    ; ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
+    ; ncout->ssta = ssta
+    ; exit()
 ;;;;;;
 
 
@@ -140,6 +165,10 @@ begin
 
     u_850 = (/Lanczos_highpass(u_850)/)
     v_850 = (/Lanczos_highpass(v_850)/)
+
+
+    ; u_850 = (/bw_bandpass(u_850)/)
+    ; v_850 = (/bw_bandpass(v_850)/)
     
 
     system("rm uv_picontrol_highpass.nc")
@@ -172,6 +201,7 @@ begin
 
 ;;;; write precipitation data 
     prea = (/Lanczos_highpass(prea)/)
+    ; prea = (/bw_bandpass(prea)/)
 
     system("rm pre_picontrol_highpass.nc")
     ncout = addfile("pre_picontrol_highpass.nc", "c")

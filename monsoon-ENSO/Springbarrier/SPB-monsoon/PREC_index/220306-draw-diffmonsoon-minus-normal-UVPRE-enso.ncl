@@ -157,7 +157,7 @@ begin
 ;;;strong and weak monsoon year 
     total_year = ispan(startyear+1,2011,1)   ;;;1872-2011
     DMI_ctrl_JJA = DMI_ctrl_JJA_r(1:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2011
-    std = dim_stddev_Wrap(DMI_ctrl_JJA)
+    std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 
 
     inds = ind(DMI_ctrl_JJA.gt.0.43*std)
@@ -315,21 +315,23 @@ begin
 
 do k=0,2
 
-    case_need:= case[k]
+  case_need:= case[k]
 
-    ind_us1_or :=  get1Dindex(u_year,case_need[0])
-    ind_uw1_or :=  get1Dindex(u_year,case_need[1])
-    ind_unor1 :=  get1Dindex(u_year,case_need[2])
+  ind_us1_or :=  get1Dindex(u_year,case_need[0])
+  ind_uw1_or :=  get1Dindex(u_year,case_need[1])
+  ;   ind_us1 :=  get1Dindex(u_year,case_need[0])
+  ; ind_uw1 :=  get1Dindex(u_year,case_need[1])
+  ind_unor1 :=  get1Dindex(u_year,case_need[2])
 
-    ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
+  ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
-    ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
+  ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
 
   ; wks = gsn_open_wks("pdf", "20crbase-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
   ; wks1 = gsn_open_wks("pdf", "20crbase-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))
-  
-    wks = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))
+
+  wks = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
@@ -565,6 +567,24 @@ do i=0,dimsizes(month)-1
     copy_VarCoords(p_month_str,prob_p_str)
     copy_VarCoords(p_month_str,prob_p_weak)
 
+    var1_u = (/prob_u_str/)
+    var2_u = (/prob_u_nor/)
+    var3_u = (/prob_u_weak/)
+
+    s1_u = prob_u_str@dim
+    s2_u = prob_u_nor@dim
+    s3_u = prob_u_weak@dim
+
+
+    prob_u_str = (/ttest(u_month_str, var1_u,s1_u , u_month_nor, var2_u, s2_u, False, False)/)
+    prob_u_weak = (/ttest(u_month_weak, var3_u, s3_u, u_month_nor, var2_u, s2_u, False, False)/)
+
+    copy_VarCoords(u_month_str,prob_u_str)
+    copy_VarCoords(u_month_str,prob_u_weak)
+
+    u_month_str = where(prob_u_str.le.0.1, u_month_str, u_month_str@_FillValue)
+    u_month_weak = where(prob_u_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
+
 
     plot(i) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
 
@@ -640,8 +660,10 @@ do i=0,dimsizes(month)-1
     overlay(plot(i), iplot(i))
     overlay(plot1(i), iplot1(i))
     ; overlay(plot2(i), iplot2(i))
-      delete(prob_p_str)
+    delete(prob_p_str)
     delete(prob_p_weak)
+    delete(prob_u_str)
+    delete(prob_u_weak)
 end do
 pres = True
 pres@gsnPanelLabelBar  = True

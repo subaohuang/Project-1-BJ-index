@@ -45,6 +45,16 @@ begin
     lon1 = -180
     lon2 = 180
 
+; ; ; ;;;读入海温数据
+;     f1 = addfile("ssta_picontrol_highpass_bw.nc", "r")
+;     ssta = f1->ssta
+; ;;;;;;
+
+; ; ; ;;;;
+;     f2 = addfile("uv_picontrol_highpass_bw.nc", "r")
+;     u_850 = f2->u_850
+;     v_850 = f2->v_850
+; ;;;;
 ; ; ;;;读入海温数据
     f1 = addfile("ssta_picontrol_highpass.nc", "r")
     ssta = f1->ssta
@@ -55,7 +65,6 @@ begin
     u_850 = f2->u_850
     v_850 = f2->v_850
 ;;;;
-
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
     year_out = addfile("piControl_monsoon_and_ensoyear_highpass.nc", "r") 
@@ -285,9 +294,9 @@ do i=0,5
   res@tmBorderThicknessF=1.0
 
   res@cnLevelSelectionMode = "ManualLevels"      ; set manual contour level
-  res@cnMinLevelValF       =   -0.1
-  res@cnMaxLevelValF       =   0.1
-  res@cnLevelSpacingF      =  0.02
+  res@cnMinLevelValF       =   -0.5
+  res@cnMaxLevelValF       =   0.5
+  res@cnLevelSpacingF      =  0.1
 
    ; res@cnFillColors= (/2,3,4,5,6,8,8,9,10,11,13,14/) - 2 
 

@@ -30,7 +30,7 @@ begin
 ;;;;;;
 
 ; ; ;;;;
-    f1 = addfile("ssta_picontrol_highpass_bw.nc", "r")
+    f1 = addfile("ssta_picontrol_highpass.nc", "r")
     ssta_highpass = f1->ssta
 ;;;;
 
