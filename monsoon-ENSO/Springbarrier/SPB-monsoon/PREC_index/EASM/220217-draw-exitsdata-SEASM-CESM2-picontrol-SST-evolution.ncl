@@ -141,15 +141,17 @@ do k=0,2
   res@xyMarkerColors= (/"red","blue","black"/)
 
 
+
   res@xyMarkerThicknesses = (/4.0,4.0,4.0/)
   res@xyLineThicknesses  = (/2.0,2.0,2.0/)
-  res@xyLineColors       = (/"red","blue","black"/)
+  res@xyLineColors       = res@xyMarkerColors
   res@xyDashPatterns     = (/1,1,1/)
   res@lgPerimOn = False
   res@lgLabelFontHeightF = 0.018
 
   res@gsnLeftString = stringlesft(k)
-  plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/), res)
+  ; plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/), res)
+  plot(k)  = gsn_csm_xy (wks, ispan(0,17,1), (/ssta_weak_evo,ssta_str_evo,ssta_nor_evo/), res)
 
 
   respl = True
