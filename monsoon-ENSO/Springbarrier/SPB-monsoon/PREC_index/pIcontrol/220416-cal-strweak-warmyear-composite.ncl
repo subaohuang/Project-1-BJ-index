@@ -54,10 +54,16 @@ begin
     endmon = 99712
     startyear = 1
     endyear = 997
+   
+    ; startmon = 101
+    ; endmon = 9712
+    ; startyear = 1
+    ; endyear = 97
+
 ;;;读入海温数据
-    diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
-    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
-  
+    diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+
     f1=addfiles(fils1, "r")
     date:=cd_calendar(f1[:]->time, 1)
 
@@ -108,15 +114,15 @@ begin
 
 
 ;;;PRE DATA 
-    diri="/home/yangsong3/CMIP6/1.0x1.0/CESM2/piControl/"
-    fils2=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
+    diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/"
+    fils2=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
 
     f2=addfiles(fils2, "r")
     date:=cd_calendar(f2[:]->time, 1)
     lat = f2[0]->lat
     lon = f2[0]->lon
     
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
 
     pre = lonFlip(f2[:]->pr(timeind,:,:))
   
@@ -145,7 +151,7 @@ begin
 ;;;
 
 ;;;strong and weak monsoon year 
-   total_year = ispan(startyear,endyear,1)   ;;1-399
+   total_year = ispan(startyear,endyear+2,1)   ;;1-399
 
 
    std = dim_stddev_Wrap(DMI_ctrl_JJA)
@@ -174,74 +180,74 @@ begin
 
   nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-3)  ;;;少取一年
 
-  wet_str_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
-
-  wet_weak_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
-
-
-  wet_str_cold_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
-
-  wet_weak_cold_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
-
-
-  wet_norm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
+  DMI_ctrl_JJA_2= DMI_ctrl_JJA(0:dimsizes(DMI_ctrl_JJA)-3)  ;;;少取一年
 
 
 
-  dry_str_warm_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
+  wet_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
 
-  dry_weak_warm_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
-
-
-  dry_str_cold_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
-
-  dry_weak_cold_year = total_year(ind(DMI_ctrl_JJA.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+  wet_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
 
 
+  wet_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
 
-  ; nor_warm_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
+  wet_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
 
-  ; nor_cold_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
 
-  ; nor_norm_year =  total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
-
-  nor_str_warm_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
-
-  nor_weak_warm_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
+  wet_norm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
 
-  nor_str_cold_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
-  nor_weak_cold_year = total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino))
+  dry_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
+
+  dry_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
+
+
+  dry_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
+
+  dry_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+
+  dry_norm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
 
+  nor_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
 
-  nor_norm_year =  total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
-
-
- 
- print(wet_str_warm_year)
- print(wet_weak_warm_year)
- print(wet_str_cold_year)
- print(wet_weak_cold_year)
-
- print(wet_norm_year)
-
- print(dry_str_warm_year)
- print(dry_weak_warm_year)
- print(dry_str_cold_year)
- print(dry_weak_cold_year)
-
- print(dry_norm_year)
-
- print(nor_warm_year)
- print(nor_cold_year)
- print(nor_norm_year)
+  nor_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
 
 
-    system("rm piControl_monsoon_and_ensoyear.nc")
-    year_out = addfile("piControl_monsoon_and_ensoyear.nc", "c")
+
+  nor_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
+
+  nor_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+
+  nor_norm_year =  total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
+
+    print(wet_str_warm_year)
+    print(wet_weak_warm_year)
+    print(wet_str_cold_year)
+    print(wet_weak_cold_year)
+
+    print(wet_norm_year)
+
+    print(dry_str_warm_year)
+    print(dry_weak_warm_year)
+    print(dry_str_cold_year)
+    print(dry_weak_cold_year)
+
+    print(dry_norm_year)
+
+    print(nor_str_warm_year)
+    print(nor_weak_warm_year)
+
+    print(nor_str_cold_year)
+    print(nor_weak_cold_year)
+   
+    print(nor_norm_year)
+
+
+    system("rm Str_and_Weak_piControl_monsoon_and_ensoyear.nc")
+    year_out = addfile("Str_and_Weak_piControl_monsoon_and_ensoyear.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year
@@ -251,18 +257,30 @@ begin
     year_out->monwekyear = monwekyear
     year_out->noryear = noryear
 
-    year_out->wet_warm_year = wet_warm_year
-    year_out->wet_cold_year = wet_cold_year
+    year_out->wet_str_warm_year = wet_str_warm_year
+    year_out->wet_weak_warm_year = wet_weak_warm_year
+ 
+    year_out->wet_str_cold_year = wet_str_cold_year
+    year_out->wet_weak_cold_year = wet_weak_cold_year
+   
     year_out->wet_norm_year = wet_norm_year
-
-    year_out->dry_warm_year = dry_warm_year
-    year_out->dry_cold_year = dry_cold_year
+    
+    year_out->dry_str_warm_year = dry_str_warm_year
+    year_out->dry_weak_warm_year = dry_weak_warm_year
+ 
+    year_out->dry_str_cold_year = dry_str_cold_year
+    year_out->dry_weak_cold_year = dry_weak_cold_year
+   
     year_out->dry_norm_year = dry_norm_year
 
-    year_out->nor_warm_year = nor_warm_year
-    year_out->nor_cold_year = nor_cold_year
+
+    year_out->nor_str_warm_year = nor_str_warm_year
+    year_out->nor_weak_warm_year = nor_weak_warm_year
+
+    year_out->nor_str_cold_year = nor_str_cold_year
+    year_out->nor_weak_cold_year = nor_weak_cold_year
+
     year_out->nor_norm_year = nor_norm_year
 
-   exit()
 
 end
