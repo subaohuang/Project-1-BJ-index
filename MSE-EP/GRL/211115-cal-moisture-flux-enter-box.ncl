@@ -165,9 +165,6 @@ begin
 
     q_col_sum = (/q_col_sum/(9.8*86400*30)/)  ;;; /month to /s 
 
-
-
-    
     q_col_12 = split_12(q_col_sum)
 
     q_t_annual = month_to_annual(q_col_sum, 1)
@@ -184,8 +181,6 @@ begin
 ;;;
 
 ; ;;;;积分边界
-   
-
     boundary_south = era_wgt_qv(:,0,0)
     boundary_north = boundary_south
 
@@ -207,8 +202,6 @@ begin
 ;;;;
 
 
-
-
 ;;;;
    boundary_south_jfmam = dim_avg_n_Wrap(boundary_south_12(0:4,:),0)
    boundary_north_jfmam = dim_avg_n_Wrap(boundary_north_12(0:4,:),0)
@@ -216,8 +209,6 @@ begin
    boundary_east_jfmam = dim_avg_n_Wrap(boundary_east_12(0:4,:),0)
 
 ;;;;;
-
-
 
 ;;;trend 
     boundary_south_rc  = regCoef_n(ispan(1, yearnum, 1), boundary_south_jfmam, 0, 0)
