@@ -72,10 +72,22 @@ begin
   hyam = f3->hyam
   hybm = f3->hybm
   P0 = f3->P0
-  PS = f3->PS(0,:,:)
+  PSI = f3->PS
+  print(P0)
+;;;;
+
+;;;;read notopo data 
+
+  fils = systemfunc("ls /home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/F_dynamic_f19_ctrl_20years.cam.h0.0002-01.nc") ;;;daily数据计算的q1
+
+  f4 = addfile(fils, "r")
+
+  PS = f4->PS(0,:,:)
 
   printVarSummary(P0)
   printVarSummary(PS)
+  printVarSummary(PSI)
+
 
   printVarSummary(US)
   printVarSummary(VS)
@@ -169,9 +181,10 @@ begin
 ;;;WRITE DATA
 ;;================================================================
 
- fils4 = systemfunc("ls //home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_JJASMEAN.nc") 
+ fils4 = systemfunc("ls //home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/model_experiment/F_ideal/cami_0000-01-01_1.9x2.5_L30_c070703_JJASMEAN_noto.nc") 
  f4 = addfile(fils4, "w")
 
+ 
 
 
 ;overwrite a netCDF file
@@ -179,6 +192,7 @@ begin
   f4->T = (/T/)
   f4->US = (/US/)
   f4->VS = (/VS/)
+  f4->PS(0,:,:) = (/PS/)
   print("Done!")
 
 
