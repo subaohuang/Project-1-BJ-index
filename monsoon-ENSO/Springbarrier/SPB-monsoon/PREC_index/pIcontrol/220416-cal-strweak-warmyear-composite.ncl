@@ -184,42 +184,42 @@ begin
 
 
 
-  wet_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
+  wet_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.1.0*std_nino))
 
-  wet_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
+  wet_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.1.0*std_nino))
 
 
-  wet_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
+  wet_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-1.0*std_nino))
 
-  wet_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+  wet_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-1.0*std_nino))
 
 
   wet_norm_year = total_year(ind(DMI_ctrl_JJA_2.gt.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
 
-  dry_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
+  dry_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.gt.1.0*std_nino))
 
-  dry_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
+  dry_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.1.0*std_nino))
 
 
-  dry_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
+  dry_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-1.0*std_nino))
 
-  dry_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+  dry_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-1.0*std_nino))
 
   dry_norm_year = total_year(ind(DMI_ctrl_JJA_2.lt.-0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
 
 
-  nor_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.8*std_nino))
+  nor_str_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.1.0*std_nino))
 
-  nor_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.0.8*std_nino))
+  nor_weak_warm_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.gt.0.43*std_nino.and.nino34_djf_2.le.1.0*std_nino))
 
 
 
-  nor_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.8*std_nino))
+  nor_str_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-1.0*std_nino))
 
-  nor_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-0.8*std_nino))
+  nor_weak_cold_year = total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.lt.-0.43*std_nino.and.nino34_djf_2.ge.-1.0*std_nino))
 
   nor_norm_year =  total_year(ind(DMI_ctrl_JJA_2.ge.-0.43*std.and.DMI_ctrl_JJA_2.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 
@@ -227,7 +227,6 @@ begin
     print(wet_weak_warm_year)
     print(wet_str_cold_year)
     print(wet_weak_cold_year)
-
     print(wet_norm_year)
 
     print(dry_str_warm_year)
@@ -246,8 +245,8 @@ begin
     print(nor_norm_year)
 
 
-    system("rm Str_and_Weak_piControl_monsoon_and_ensoyear.nc")
-    year_out = addfile("Str_and_Weak_piControl_monsoon_and_ensoyear.nc", "c")
+    system("rm 1std-Str_and_Weak_piControl_monsoon_and_ensoyear.nc")
+    year_out = addfile("1std-Str_and_Weak_piControl_monsoon_and_ensoyear.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year
@@ -281,6 +280,80 @@ begin
     year_out->nor_weak_cold_year = nor_weak_cold_year
 
     year_out->nor_norm_year = nor_norm_year
+;;;
 
 
+;;;;;
+   sst_year = ispan(startyear,endyear,1) 
+;;;;
+  
+  case1 = [/wet_str_warm_year,wet_weak_warm_year,dry_str_warm_year,dry_weak_warm_year,nor_str_warm_year,nor_weak_warm_year/]
+
+  case2 = [/wet_str_cold_year, wet_weak_cold_year, dry_str_cold_year, dry_weak_cold_year,nor_str_cold_year,nor_weak_cold_year/]
+
+  case3 = [/wet_norm_year,dry_norm_year,nor_norm_year/]
+
+  case = [/case1,case2,case3/]
+
+  stringlesft = (/"(a) El Nino","(b) La Nina","(c) Normal"/)
+  str1= (/"El Nino","La Nina","Normal"/)  
+;;
+
+;;;split to 12 month 
+  dim1  = dimsizes(ssta)
+  yearnum = dim1(0)/12 -1
+  ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
+
+   do i=0,11   
+     if i.le.9 then
+        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1-12:12,:,:)   ;;;3月开始，到次年2月
+     else
+        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1:12,:,:)
+     end if
+ end do 
+;;;;
+
+
+do k=0,1
+  print("***********start*********************"+k)
+
+    case_need:= case[k]
+
+
+    ; ind_ts_str :=  get1Dindex(sst_year,case_need[0])
+    ; ind_ts_weak :=  get1Dindex(sst_year,case_need[1])
+
+    ; ind_tw_str :=  get1Dindex(sst_year,case_need[2])
+    ; ind_tw_weak :=  get1Dindex(sst_year,case_need[3])
+
+    ; ind_tnor_str :=  get1Dindex(sst_year,case_need[4])
+    ; ind_tnor_weak :=  get1Dindex(sst_year,case_need[5])
+
+
+    ssta_wet_str_evo = new((/6,18/),float)
+    ; ssta_wet_weak_evo = new((/18/),float)
+
+    ; ssta_dry_str_evo = new((/18/),float)
+    ; ssta_dry_weak_evo = new((/18/),float)
+
+    ; ssta_nor_str_evo = new((/18/),float)
+    ; ssta_nor_weak_evo = new((/18/),float)
+
+  do i=0,5 
+    ind_ts_str :=  get1Dindex(sst_year,case_need[i])
+
+    com_month_wet_str  = composite_mean(ssta_month_12,ind_ts_str)
+    ssta_wet_str_evo(i,0:11) = com_month_wet_str[0]
+
+    com_month_wet_str  := composite_mean(ssta_month_12(0:5,:,:,:),ind_ts_str+1)
+
+    ssta_wet_str_evo(i,12:) = com_month_wet_str[0]
+  end do 
+ 
+    data := ssta_wet_str_evo
+    opt1="1std-"+str1(k)+""+"-diff-intensity-same-monsoon-SSTevolution.txt"
+    ; write_matrix(data, "12f7.2",opt1)
+    asciiwrite (opt1, data)    
+    delete(ssta_wet_str_evo)
+end do 
 end

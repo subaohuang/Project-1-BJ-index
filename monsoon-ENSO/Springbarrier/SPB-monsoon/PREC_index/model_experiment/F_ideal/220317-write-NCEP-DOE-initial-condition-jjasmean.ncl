@@ -134,6 +134,10 @@ begin
   ;;;for v
   lati := v_clm_jjas&lat
   lato := VS&lat  
+
+  loni := v_clm_jjas&lon
+  lono := VS&slon
+
   VSo_hr = linint2_Wrap(loni,lati,v_clm_jjas, True, lono,lato, 0)
   printVarSummary(VSo_hr)
   
@@ -145,18 +149,29 @@ begin
   loni := US&lon
   lono := US&lon
   
-  PS_hr = linint2_Wrap(loni,lati,PS, True, lono,lato, 0)
-  printVarSummary(PS_hr)
+  PS_hr1 = linint2_Wrap(loni,lati,PS, True, lono,lato, 0)
+  printVarSummary(PS_hr1)
+
+  
+
+  lati := PS&lat
+  lato := VS&lat
+
+  loni := PS&lon
+  lono := VS&slon
+  
+  PS_hr2 = linint2_Wrap(loni,lati,PS, True, lono,lato, 0)
+  printVarSummary(PS_hr2)
   
 ;;;;
 
   ;;;Vertical
   pi := 100.0*u_clm_jjas&level 
    
-  USo_final   = pres2hybrid_Wrap(pi,PS_hr,P0,USo_hr,hyam,hybm,4)
+  USo_final   = pres2hybrid_Wrap(pi,PS_hr1,P0,USo_hr,hyam,hybm,4)
   printVarSummary(USo_final)
 
-  VSo_final   = pres2hybrid_Wrap(pi,psfc,P0,VSo_hr,hyam,hybm,4)
+  VSo_final   = pres2hybrid_Wrap(pi,PS_hr2,P0,VSo_hr,hyam,hybm,4)
   printVarSummary(VSo_final)
   ;;;
     ;;;
