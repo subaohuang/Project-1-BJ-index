@@ -124,8 +124,6 @@ begin
     p_indian_12 = split_12(p_indian)
     p_indian_jjas = (/dim_avg_n_Wrap(p_indian_12(5:8,:),0)/)
 
-
-
 ;;;
 
 

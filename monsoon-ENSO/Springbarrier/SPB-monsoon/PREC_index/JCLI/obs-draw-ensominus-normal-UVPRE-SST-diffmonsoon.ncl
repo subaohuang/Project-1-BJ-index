@@ -31,14 +31,16 @@ begin
     end do 
 return data_12
 end 
-function composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind1,ind2,ind3)
+function composite_mean(ssta_month_12,p_month_12,u_850_month_12,v_850_month_12,ind1,ind2,ind3)
 begin 
 
     ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,:,:),(/0,1/))
+    p_month_str = dim_avg_n_Wrap(p_month_12(:,ind1,:,:),(/0,1/))
     u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,:,:),(/0,1/))
     v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,:,:),(/0,1/))
 
     prob_ssta_str = one_test(dim_avg_n_Wrap(ssta_month_12(:,:,:,:),0), ind1)
+    prob_p_str = one_test(dim_avg_n_Wrap(p_month_12(:,:,:,:),0), ind1)
     prob_u_str = one_test(dim_avg_n_Wrap(u_850_month_12(:,:,:,:),0), ind2)
     prob_v_str = one_test(dim_avg_n_Wrap(v_850_month_12(:,:,:,:),0), ind3)
 
@@ -113,17 +115,13 @@ begin
     p  = f1->prate(timeind1,:,:)
     p = (/p*86400/) ;; mm/day
     p = (/rmMonAnnCycTLL(p)/)
-
     ;;detrend 
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
     ;;;
-
     p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
     p_indian_jjas = month_to_season(p_indian, "JJA")
     p_indian_12 = split_12(p_indian)
     p_indian_jjas = (/dim_avg_n_Wrap(p_indian_12(5:8,:),0)/)
-
-
 
 ;;;
 
@@ -219,12 +217,6 @@ begin
     u_200 = (/rmMonAnnCycTLL(u_200)/)
 ;;;
 
-   ; fils2 = "/home/ys17-23/Extension/ERA5-monthly/pressure/v_mon_1x1_1979_2020.nc"
-   ; f2 = addfile(fils2, "r")
-   ; time2 = f2->time
-   ; date2 = cd_calendar(time2, 1)
-   ; timeind2 = ind(date2.ge.197901.and.date2.le.201912)
-;;;;
 
 
 ;;;
