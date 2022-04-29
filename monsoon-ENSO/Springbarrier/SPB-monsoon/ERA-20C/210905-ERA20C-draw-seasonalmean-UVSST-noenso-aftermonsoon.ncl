@@ -72,10 +72,6 @@ begin
 
  
 ;;;;U,V
-
-    ; u_200  = short2flt(f1->u(timeind1,{200},:,:))
-    ; u_850  = short2flt(f1->u(timeind1,{850},:,:))
-
     u_200  = dble2flt(f1->u(timeind1,{200},:,:))
     u_850  = dble2flt(f1->u(timeind1,{850},:,:))
 

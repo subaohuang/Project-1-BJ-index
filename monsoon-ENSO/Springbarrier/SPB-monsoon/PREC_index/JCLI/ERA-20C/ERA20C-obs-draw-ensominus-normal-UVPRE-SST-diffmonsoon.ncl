@@ -48,9 +48,9 @@ end
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 187101
+    startmon = 190001
     endmon = 201912
-    startyear = 1871
+    startyear = 1900
     endyear = 2019
 
 ;;;读入HadiSST海温数据
@@ -96,21 +96,21 @@ begin
 
 
 ;;;读入ERA wind data
-    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV3/prate.mon.mean.nc"
+    fils1 = "/home/ys17-23/Extension/ERA-20C/pressure/total_pre/double/tp.20C.1900-2010.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
 
-    endmon = endmon                 ;;; 1871-2015
+    endmon = endmon                 ;;; 1900-2010
     startmon = startmon 
     timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
 
  
 ;;;;prate
-    p  = f1->prate(timeind1,:,:)
-    p = (/p*86400/) ;; mm/day
+    p  = dble2flt(f1->tp(timeind1,:,:))
+    p = (/p*10^3/) ;; mm/day monthly mean of daily mean
     p = (/rmMonAnnCycTLL(p)/)
+
 
     ;;detrend 
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
@@ -129,25 +129,25 @@ begin
     ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
     nrows=146
     ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("../All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
-    jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
+    data = asciiread("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
+    jjas = data(:,15) ;;sum of jjas precipitation  1900-2016
     
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2015})  ;;;1871-2015
+    pre_jjas = jjas({startyear:2010})  ;;;1900-2010
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2015-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,2010-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
 ;;;
 
 ;;;strong and weak monsoon year 
-    total_year = ispan(startyear,2014,1)   ;;;1872-2014
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2014
+    total_year = ispan(startyear,2009,1)   ;;;1872-2009
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1900-2009
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 
     inds = ind(DMI_ctrl_JJA.gt.0.43*std)
@@ -162,7 +162,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2014))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2009))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -187,24 +187,17 @@ begin
 
 
 ;;;读入ERA wind data
-    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV3/uwnd.mon.mean.nc"
+   
+    fils1 := "/home/ys17-23/Extension/ERA-20C/pressure/uwnd/double/uwnd.20C.1900-2010.nc"
     f1 = addfile(fils1, "r")
-    time1 = f1->time
-    date1=cd_calendar(time1, 1)
-
-    endmon = endmon                 ;;; 1871-2015
-    startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    time1 := f1->time
+    date1:=cd_calendar(time1, 1)
+    timeind1:=ind(date1.ge.startmon.and.date1.le.endmon)  
 ;;;;
  
 ;;;;U,V
-
-    ; u_200  = short2flt(f1->u(timeind1,{200},:,:))
-    ; u_850  = short2flt(f1->u(timeind1,{850},:,:))
-
-    u_200  = f1->uwnd(timeind1,{200},:,:)
-    u_850  = f1->uwnd(timeind1,{850},:,:)
+    u_200  = dble2flt(f1->u(timeind1,{200},:,:))
+    u_850  = dble2flt(f1->u(timeind1,{850},:,:))
 
     u_850 = (/rmMonAnnCycTLL(u_850)/)
     u_200 = (/rmMonAnnCycTLL(u_200)/)
@@ -212,7 +205,7 @@ begin
 
 
 ;;;
-    fils2 = "/home/ys17-23/Extension/20thCRV3/vwnd.mon.mean.nc"
+    fils2 = "/home/ys17-23/Extension/ERA-20C/pressure/vwnd/double/vwnd.20C.1900-2010.nc"
     f2 = addfile(fils2, "r")
     time2 = f2->time
     date2 = cd_calendar(time2, 1)
@@ -220,8 +213,8 @@ begin
     timeind2 = ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
 
 ;;;;U,V
-    v_200  = f2->vwnd(timeind1,{200},:,:)
-    v_850  = f2->vwnd(timeind1,{850},:,:)
+    v_200  = dble2flt(f2->v(timeind1,{200},:,:))
+    v_850  = dble2flt(f2->v(timeind1,{850},:,:))
 
     v_850 = (/rmMonAnnCycTLL(v_850)/)
     v_200 = (/rmMonAnnCycTLL(v_200)/)
@@ -260,7 +253,7 @@ begin
 ;;;;
 
 
-;;;split to 12 month    3月开始，第一年是1871年
+;;;split to 12 month    3月开始，第一年是1900年
   dim1  = dimsizes(ssta)
   yearnum = dim1(0)/12 - 1
   ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
@@ -276,7 +269,6 @@ begin
      if i.le.9 then
        p_month_12(i,:,:,:) = p(i+2:dimsizes(p&time)-1-12:12,:,:)
        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1-12:12,:,:) 
-
        u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1-12:12,:,:)
        v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1-12:12,:,:)
      else
@@ -289,7 +281,7 @@ begin
 
 ;;;;;
     sst_year = ispan(startyear,endyear,1) 
-    u_year = ispan(startyear,2015,1) 
+    u_year = ispan(startyear,2010,1) 
 ;;;;;;;
 
 
@@ -312,8 +304,8 @@ do k=0,2
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "ERA-20C-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "ERA-20C-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
@@ -483,9 +475,9 @@ do i=0,dimsizes(month)-1
   copy_VarCoords(ssta_month_str,prob_ssta_weak)
   ;;;;
 
-  if i.eq.1 then 
-  prob_u_str({0:30},{90:150}) = 0.05
-  end if
+  ; if i.eq.1 then 
+  ; prob_u_str({0:30},{90:150}) = 0.05
+  ; end if
   u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
