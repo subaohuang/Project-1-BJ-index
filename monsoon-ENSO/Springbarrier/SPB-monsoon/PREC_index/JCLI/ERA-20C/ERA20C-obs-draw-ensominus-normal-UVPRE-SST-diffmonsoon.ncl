@@ -44,6 +44,22 @@ begin
 return [/ssta_month_str,p_month_str,u_month_str,v_month_str,var_ssta_str,var_p_str,var_u_str,var_v_str/]
 end 
 
+function Lanczos_highpass(var)
+begin
+    month1 = 10*12*1.0
+    ; month2 = 12.0
+    nwt = 49     ;;; loose 24 months each end
+    fca = 1./month1 ;;;通过的频率
+    ; fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
+    nsigma = 1.  ; Lanczos sigma
+
+    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
+
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
+ return var
+ end
+
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
@@ -72,6 +88,11 @@ begin
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
+
+    ;;; interannual variance
+    ssta = (/Lanczos_highpass(ssta)/)
+    ;;;
+
     delete(date)
     delete(timeind)
      
@@ -116,6 +137,10 @@ begin
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
     ;;;
 
+    ;;;;filter 
+     p = (/Lanczos_highpass(p)/)
+    ;;;
+
     p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
     p_indian_jjas = month_to_season(p_indian, "JJA")
     p_indian_12 = split_12(p_indian)
@@ -143,6 +168,12 @@ begin
     pre_jjasa = (/dtrend_msg_n(ispan(1,2010-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
+   
+    ;;;;filter 
+    DMI_ctrl_JJA_r = (/Lanczos_highpass(DMI_ctrl_JJA_r)/)
+    ;;;
+
+
 ;;;
 
 ;;;strong and weak monsoon year 
@@ -160,8 +191,6 @@ begin
 ;;;;
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
-
-
  nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2009))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
@@ -227,10 +256,12 @@ begin
     dim_sst = dimsizes(ssta)
     dim_u = dimsizes(u_850)
 
+
+   ;;;filter 
+   u_850 = (/Lanczos_highpass(u_850)/)
+   v_850 = (/Lanczos_highpass(v_850)/)
+
 ;;;;;
-
-
-
     ; case1 = [/wet_warm_year,wet_cold_year,wet_norm_year/]   ;;;;;
 
     ; case2 = [/dry_warm_year,dry_cold_year,dry_norm_year/]

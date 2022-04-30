@@ -104,7 +104,7 @@ begin
 
     endmon = endmon                 ;;; 1900-2015
     startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    timeind1=ind(date1.ge.startmon.and.date1.le.201012)  
 
  
 ;;;;prate
@@ -133,20 +133,20 @@ begin
     jjas = data(:,15) ;;sum of jjas precipitation  1900-2016
     
     jjas!0 = "time"
-    jjas&time = ispan(1900,2016,1)
+    jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2015})  ;;;1900-2015
+    pre_jjas = jjas({startyear:2010})  ;;;1900-2015
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2015-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,2010-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
 ;;;
 
 ;;;strong and weak monsoon year 
-    total_year = ispan(startyear,2014,1)   ;;;1872-2014
+    total_year = ispan(startyear,2009,1)   ;;;1872-2014
     DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1900-2014
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 
@@ -162,7 +162,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2014))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2009))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -195,7 +195,7 @@ begin
 
     endmon = endmon                 ;;; 1900-2015
     startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    timeind1=ind(date1.ge.startmon.and.date1.le.201012)  
 ;;;;
  
 ;;;;U,V
@@ -217,7 +217,7 @@ begin
     time2 = f2->time
     date2 = cd_calendar(time2, 1)
 
-    timeind2 = ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
+    timeind2 = ind(date2.ge.startmon.and.date2.le.201012)  ;;;风场数据从1979年开始
 
 ;;;;U,V
     v_200  = f2->vwnd(timeind1,{200},:,:)
@@ -312,8 +312,8 @@ do k=0,2
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "test-20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "test-20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
