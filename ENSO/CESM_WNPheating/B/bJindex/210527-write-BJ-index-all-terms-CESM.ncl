@@ -143,7 +143,7 @@ print("*********************ZA feedback********************************")
 ;;;;读入纬向风应力数据
     ; fils3 :=  systemfunc("ls /home/yangsong3/data-observation/linshh/CESM-data/B/"+model+"/"+model+".TAUX.fvgrid.0251-0280.nc")
     ; fils3 :=  systemfunc("ls /home/yangsong3/CMIP6/linshh/CESM-data/B/"+model+"/"+model+".TAUX.fvgrid.0251-0280.nc")
-      fils3 :=  systemfunc("ls "+diri+model+"/"+model+".TAUX.fvgrid.0251-0280.nc")
+    fils3 :=  systemfunc("ls "+diri+model+"/"+model+".TAUX.fvgrid.0251-0280.nc")
     f3 := addfile(fils3, "r")
 
     time:=f3->time    ;;;这里用了20cr的time，因为jra的time是一个个来的

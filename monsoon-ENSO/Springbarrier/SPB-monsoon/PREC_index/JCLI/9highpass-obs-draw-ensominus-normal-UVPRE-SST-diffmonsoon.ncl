@@ -43,7 +43,21 @@ begin
 
 return [/ssta_month_str,p_month_str,u_month_str,v_month_str,var_ssta_str,var_p_str,var_u_str,var_v_str/]
 end 
+function Lanczos_highpass(var)
+begin
+    month1 = 10*12*1.0
+    ; month2 = 12.0
+    nwt = 49     ;;; loose 24 months each end
+    fca = 1./month1 ;;;通过的频率
+    ; fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
+    nsigma = 1.  ; Lanczos sigma
 
+    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
+
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
+ return var
+ end
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
@@ -72,6 +86,12 @@ begin
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
+
+    ;;; interannual variance
+    ssta = (/Lanczos_highpass(ssta)/)
+    ;;;
+
+
     delete(date)
     delete(timeind)
      
@@ -114,6 +134,10 @@ begin
 
     ;;detrend 
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
+    ;;;
+
+     ;;;;filter 
+     p = (/Lanczos_highpass(p)/)
     ;;;
 
     p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
@@ -230,6 +254,13 @@ begin
     v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
 ;;;
 
+
+
+   ;;;filter 
+   u_850 = (/Lanczos_highpass(u_850)/)
+   v_850 = (/Lanczos_highpass(v_850)/)
+
+
     yearnum = dimsizes(nino34)/12 -1
     dim_sst = dimsizes(ssta)
     dim_u = dimsizes(u_850)
@@ -312,8 +343,8 @@ do k=0,2
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "9highpass-20CRV2-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "9highpass-20CRV2-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 

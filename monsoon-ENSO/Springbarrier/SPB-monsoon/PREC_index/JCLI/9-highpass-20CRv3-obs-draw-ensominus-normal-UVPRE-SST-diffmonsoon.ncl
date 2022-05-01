@@ -44,6 +44,22 @@ begin
 return [/ssta_month_str,p_month_str,u_month_str,v_month_str,var_ssta_str,var_p_str,var_u_str,var_v_str/]
 end 
 
+function Lanczos_highpass(var)
+begin
+    month1 = 10*12*1.0
+    ; month2 = 12.0
+    nwt = 49     ;;; loose 24 months each end
+    fca = 1./month1 ;;;通过的频率
+    ; fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
+    nsigma = 1.  ; Lanczos sigma
+
+    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
+
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
+ return var
+ end
+
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
@@ -72,6 +88,11 @@ begin
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
+
+    ;;; interannual variance
+    ssta = (/Lanczos_highpass(ssta)/)
+    ;;;
+
     delete(date)
     delete(timeind)
      
@@ -97,12 +118,12 @@ begin
 
 ;;;读入ERA wind data
     ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV2/prate.mon.mean.2dgree.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV3/prate.mon.mean.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
 
-    endmon = endmon                 ;;; 1871-2012
+    endmon = endmon                 ;;; 1871-2015
     startmon = startmon 
     timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
 
@@ -114,6 +135,10 @@ begin
 
     ;;detrend 
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
+    ;;;
+
+     ;;;;filter 
+     p = (/Lanczos_highpass(p)/)
     ;;;
 
     p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
@@ -135,19 +160,23 @@ begin
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:2012})  ;;;1871-2012
+    pre_jjas = jjas({startyear:2015})  ;;;1871-2015
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,2015-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA_r = pre_jjasa
 ;;;
 
+    ;;;;filter 
+    DMI_ctrl_JJA_r = (/Lanczos_highpass(DMI_ctrl_JJA_r)/)
+    ;;;
+
 ;;;strong and weak monsoon year 
-    total_year = ispan(startyear,2011,1)   ;;;1872-2011
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2011
+    total_year = ispan(startyear,2014,1)   ;;;1872-2014
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2014
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 
     inds = ind(DMI_ctrl_JJA.gt.0.43*std)
@@ -162,7 +191,7 @@ begin
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2011))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2014))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -188,12 +217,12 @@ begin
 
 ;;;读入ERA wind data
     ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV2/uwnd.mon.mean.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV3/uwnd.mon.mean.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
 
-    endmon = endmon                 ;;; 1871-2012
+    endmon = endmon                 ;;; 1871-2015
     startmon = startmon 
     timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
 ;;;;
@@ -208,11 +237,13 @@ begin
 
     u_850 = (/rmMonAnnCycTLL(u_850)/)
     u_200 = (/rmMonAnnCycTLL(u_200)/)
+
+
 ;;;
 
 
 ;;;
-    fils2 = "/home/ys17-23/Extension/20thCRV2/vwnd.mon.mean.nc"
+    fils2 = "/home/ys17-23/Extension/20thCRV3/vwnd.mon.mean.nc"
     f2 = addfile(fils2, "r")
     time2 = f2->time
     date2 = cd_calendar(time2, 1)
@@ -228,6 +259,11 @@ begin
    
     u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
     v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
+
+      ;;;filter 
+   u_850 = (/Lanczos_highpass(u_850)/)
+   v_850 = (/Lanczos_highpass(v_850)/)
+
 ;;;
 
     yearnum = dimsizes(nino34)/12 -1
@@ -289,7 +325,7 @@ begin
 
 ;;;;;
     sst_year = ispan(startyear,endyear,1) 
-    u_year = ispan(startyear,2012,1) 
+    u_year = ispan(startyear,2015,1) 
 ;;;;;;;
 
 
@@ -312,8 +348,8 @@ do k=0,2
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "9pass-20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "9pass-20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
@@ -483,9 +519,11 @@ do i=0,dimsizes(month)-1
   copy_VarCoords(ssta_month_str,prob_ssta_weak)
   ;;;;
 
-  if i.eq.1 then 
-  prob_u_str({0:30},{90:150}) = 0.05
-  end if
+  ; if i.eq.1 then 
+  ; prob_u_str({0:30},{90:150}) = 0.05
+  ; end if
+
+  
   u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
