@@ -142,7 +142,8 @@ begin
     pre_jjasa = dim_rmvmean(pre_jjas)
     pre_jjasa = (/dtrend_msg_n(ispan(1,2015-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
-    DMI_ctrl_JJA_r = pre_jjasa
+    ; DMI_ctrl_JJA_r = pre_jjasa
+    DMI_ctrl_JJA_r = p_indian_jjas
 ;;;
 
 ;;;strong and weak monsoon year 
@@ -310,10 +311,9 @@ do k=0,2
   ind_unor1 :=  get1Dindex(u_year,case_need[2])
 
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
-
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "based-20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "based-20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
@@ -490,8 +490,8 @@ do i=0,dimsizes(month)-1
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
 
-  ; p_month_str = where(prob_p_str.le.0.2, p_month_str, p_month_str@_FillValue)
-  ; p_month_weak = where(prob_p_weak.le.0.2, p_month_weak, p_month_weak@_FillValue)
+  ; p_month_str = where(prob_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
+  ; p_month_weak = where(prob_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
 
 
 
@@ -599,7 +599,7 @@ do i=0,dimsizes(month)-1
   ; res@cnMinLevelValF       =   -2.
   ; res@cnMaxLevelValF       =   2.
   ; res@cnLevelSpacingF      =  0.4
-  res@cnLevels := (/-2.0,-1.6,-1.2,-0.8,-0.4,0.4,0.8,1.2,1.6,2.0/)
+  res@cnLevels := (/-2.0,-1.6,-1.2,-0.8,-0.1,0.1,0.8,1.2,1.6,2.0/)
   res@cnFillColors = (/2,3,4,5,6,8,9,10,11,13,14/) - 2 
 
   
