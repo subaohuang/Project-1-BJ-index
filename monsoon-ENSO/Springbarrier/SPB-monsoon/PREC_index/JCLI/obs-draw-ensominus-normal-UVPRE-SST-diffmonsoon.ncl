@@ -142,7 +142,8 @@ begin
     pre_jjasa = dim_rmvmean(pre_jjas)
     pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
-    DMI_ctrl_JJA_r = pre_jjasa
+    ; DMI_ctrl_JJA_r = pre_jjasa
+    DMI_ctrl_JJA_r = p_indian_jjas
 ;;;
 
 ;;;strong and weak monsoon year 
@@ -312,8 +313,8 @@ do k=0,2
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
 
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "20CRV2-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "Based-20CRV2-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "Based-20CRV2-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 

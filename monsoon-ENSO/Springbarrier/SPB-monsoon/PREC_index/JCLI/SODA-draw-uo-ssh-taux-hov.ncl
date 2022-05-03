@@ -27,13 +27,17 @@ begin
     end do 
 return data_12
 end 
-function composite_mean(ssta_month_12,ind1)
+function composite_mean(ssta_month_12,uo_month_12,taux_month_12 ind1)
 begin 
    lat1 = -5
    lat2 = 5
    lon1 = 190
    lon2 = 240
    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+
+   uo_month_str = dim_avg_n_Wrap(uo_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+
+   taux_month_str = dim_avg_n_Wrap(taux_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
 
 return [/ssta_month_str/]
 end 
@@ -128,8 +132,6 @@ begin
 
     std_nino = dim_stddev(nino34_djf)
     sst_total_year = ispan(startyear, endyear, 1)
-
-
 ;;;
 
 
@@ -147,33 +149,49 @@ begin
 ;;;
 
 
-;;;读入ERA wind data
-
-    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/SODA_region/soda_taux_1871-2010.nc"
+;;;read data 
+    fils1 = "/home/ys17-23/Extension/SODA_region/UVEL_mixed_soda.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->TIME
     date1=cd_calendar(time1, 1)
 
-    endmon = endmon                 ;;; 1900-2019
     startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
- 
-    ssh = f1->TAUX(timeind1,:,:)  
+    endmon = endmon                 
+    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)    
+
+    uo = f1->uo_his_mixed_anom(timeind1,:,:)
+
+    fils2 = "/home/ys17-23/Extension/SODA_region/soda_ssh_1871-2010.nc"
+    f2 = addfile(fils2, "r")
+    ssh = f2->SSH(timeind1,:,:)
+
+    fils3 = "/home/ys17-23/Extension/SODA_region/soda_taux_1871-2010.nc"
+    f3 = addfile(fils3, "r")
+    taux = f3->TAUX(timeind1,:,:)
+;;;;;
+
+
+;;;;anomaly
 
     ssh_CLM = clmMonTLL(ssh)
     ssha = calcMonAnomTLL(ssh, ssh_CLM)
-    uo = ssha
-    uo = (/dtrend_msg_n(ispan(1,dimsizes(uo&TIME),1),uo,False,True,0)/)
-    uo!0 = "time"
+    ssha = (/dtrend_msg_n(ispan(1,dimsizes(ssha&TIME),1),ssha,False,True,0)/)
 
-    ; uo = (/uo*100.0/) ;;convert to cm
+    ssha = (/ssha*100.0/) ;;convert to cm
+    
+    uo_CLM = clmMonTLL(uo)
+    uoa = calcMonAnomTLL(uo, uo_CLM)
+    uoa = (/dtrend_msg_n(ispan(1,dimsizes(uoa&TIME),1),uoa,False,True,0)/)
+    uoa!0 = "time"
 
+    taux_CLM = clmMonTLL(taux)
+    tauxa = calcMonAnomTLL(taux, taux_CLM)
+    tauxa = (/dtrend_msg_n(ispan(1,dimsizes(tauxa&TIME),1),tauxa,False,True,0)/)
+    tauxa!0 = "time"
 ;;;;
 
 
 ;;;AISMR DATA 
-
     ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
     nrows=146
     ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
@@ -197,7 +215,6 @@ begin
     total_year = ispan(startyear,2009,1)   ;;;1872-2011
     DMI_ctrl_JJA_2 = DMI_ctrl_JJA(0:dimsizes(DMI_ctrl_JJA)-2)  ;;;1871-2011
     std = dim_stddev_Wrap(DMI_ctrl_JJA)
-
 
     inds = ind(DMI_ctrl_JJA_2.gt.0.43*std)
     indw = ind(DMI_ctrl_JJA_2.lt.-0.43*std)
