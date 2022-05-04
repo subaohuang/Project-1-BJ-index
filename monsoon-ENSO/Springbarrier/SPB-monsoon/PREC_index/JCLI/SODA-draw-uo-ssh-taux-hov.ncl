@@ -1,21 +1,22 @@
 ;;*************************************************
 ;; draw circulation pattern during monsoon year 
 ;;*************************************************************
-function one_test(pv_ano,east_time)
+function var_get(pv_ano,east_time)
 begin
-    pv_east=dim_avg_n_Wrap(pv_ano(east_time,:,:),0)
+    pv_east=dim_avg_n_Wrap(pv_ano(:,east_time,:),1)
     n=dimsizes(east_time)
-    var_pv_ano_east    =  dim_variance_n(pv_ano(east_time,:,:), 0)    ; 13.477
-    var_pv_ano_east  =  sqrt(var_pv_ano_east/n) 
-    var_pv_ano_east  =where(var_pv_ano_east.eq.0, var_pv_ano_east@_FillValue, var_pv_ano_east)
+    var = dim_variance_n(pv_ano(:,east_time,:),1)
+    var  =where(var.eq.0, var@_FillValue, var)
+    ; var_pv_ano_east    =  dim_variance_n(pv_ano(east_time,:,:), 0)    ; 13.477
+    ; var_pv_ano_east  =  sqrt(var_pv_ano_east/n) 
+    ; var_pv_ano_east  =where(var_pv_ano_east.eq.0, var_pv_ano_east@_FillValue, var_pv_ano_east)
     
-    t_pv_ano_east = (pv_east)/var_pv_ano_east
-    confi_pv_east=student_t(t_pv_ano_east , n-1)
-
-    copy_VarCoords(pv_east, confi_pv_east)
- return confi_pv_east
+    ; t_pv_ano_east = (pv_east)/var_pv_ano_east
+    ; confi_pv_east=student_t(t_pv_ano_east , n-1)
+    ; copy_VarCoords(pv_east, confi_pv_east)
+    var@dim = n
+ return var
  end
-
 function split_12(data)
 begin
     dim = dimsizes(data) 
@@ -27,19 +28,22 @@ begin
     end do 
 return data_12
 end 
-function composite_mean(ssta_month_12,uo_month_12,taux_month_12 ind1)
+function composite_mean(ssta_month_12,uo_month_12,taux_month_12,ind1)
 begin 
    lat1 = -5
    lat2 = 5
    lon1 = 190
    lon2 = 240
-   ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+  ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+  uo_month_str = dim_avg_n_Wrap(uo_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+  taux_month_str = dim_avg_n_Wrap(taux_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
 
-   uo_month_str = dim_avg_n_Wrap(uo_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
+  var_ssta_str = var_get(dim_avg_n_Wrap(ssta_month_12(:,:,:,:),2), ind1)  ;;; get variance
+  var_uo_str = var_get(dim_avg_n_Wrap(uo_month_12(:,:,:,:),2), ind1)
+  var_taux_str = var_get(dim_avg_n_Wrap(taux_month_12(:,:,:,:),2), ind1)
 
-   taux_month_str = dim_avg_n_Wrap(taux_month_12(:,ind1,{lat1:lat2},:),(/1,2/))
 
-return [/ssta_month_str/]
+return [/ssta_month_str,uo_month_str,taux_month_str,var_ssta_str,var_uo_str,var_taux_str/]
 end 
 
 
@@ -140,9 +144,6 @@ begin
 ;;;
     sst_total_year = ispan(startyear, endyear, 1)
 
-    ; nino_year = sst_total_year(ind(nino34_djf.ge.std_nino))
-    ; lanina_year = sst_total_year(ind(nino34_djf.le.-1*std_nino))
-
     nino_year = sst_total_year(ind(nino34_djf.gt.0.43*std_nino))
     lanina_year = sst_total_year(ind(nino34_djf.lt.-0.43*std_nino))
     normal_year = sst_total_year(ind(nino34_djf.gt.-0.43*std_nino.and.nino34_djf.lt.0.43*std_nino))
@@ -150,9 +151,9 @@ begin
 
 
 ;;;read data 
-    fils1 = "/home/ys17-23/Extension/SODA_region/UVEL_mixed_soda.nc"
+    fils1 = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/SODA/uo_his_mixed_anom.nc"
     f1 = addfile(fils1, "r")
-    time1 = f1->TIME
+    time1 = f1->time
     date1=cd_calendar(time1, 1)
 
     startmon = startmon 
@@ -172,7 +173,6 @@ begin
 
 
 ;;;;anomaly
-
     ssh_CLM = clmMonTLL(ssh)
     ssha = calcMonAnomTLL(ssh, ssh_CLM)
     ssha = (/dtrend_msg_n(ispan(1,dimsizes(ssha&TIME),1),ssha,False,True,0)/)
@@ -181,7 +181,7 @@ begin
     
     uo_CLM = clmMonTLL(uo)
     uoa = calcMonAnomTLL(uo, uo_CLM)
-    uoa = (/dtrend_msg_n(ispan(1,dimsizes(uoa&TIME),1),uoa,False,True,0)/)
+    uoa = (/dtrend_msg_n(ispan(1,dimsizes(uoa&time),1),uoa,False,True,0)/)
     uoa!0 = "time"
 
     taux_CLM = clmMonTLL(taux)
@@ -266,27 +266,34 @@ begin
 
 ;;-=================================================
 
-;;;split to 12 month 
-  dim1  = dimsizes(uo)
-  yearnum = dim1(0)/12 -1
-  uo_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
+;;;split to 12 month    3月开始，第一年是1871年
+  dim1  = dimsizes(ssha)
+  yearnum = dim1(0)/12 - 1
+  ssh_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
 
+  dim2  = dimsizes(uoa)
+  yearnum := dim2(0)/12 - 1 
+  uo_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
 
-  uo_str_evo = new((/18,dim1(2)/),float)
-  uo_weak_evo = new((/18,dim1(2)/),float)
-  uo_nor_evo = new((/18,dim1(2)/),float)
+  taux_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
   
-  copy_VarAtts(uo(0:17,1,:), uo_str_evo)
-  copy_VarAtts(uo(0:17,1,:), uo_weak_evo)
-  copy_VarAtts(uo(0:17,1,:), uo_nor_evo)
+printVarSummary(ssha)
+printVarSummary(uoa)
+printVarSummary(tauxa)
 
  do i=0,11   
      if i.le.9 then
-       uo_month_12(i,:,:,:) = uo(i+2:dimsizes(uo&time)-1-12:12,:,:)   ;;;3月开始，到次年2月
+       ssh_month_12(i,:,:,:) = ssha(i+2:dimsizes(ssha&TIME)-1-12:12,:,:)
+       uo_month_12(i,:,:,:) = uoa(i+2:dimsizes(uoa&time)-1-12:12,:,:)
+       taux_month_12(i,:,:,:) = tauxa(i+2:dimsizes(tauxa&time)-1-12:12,:,:)
      else
-        uo_month_12(i,:,:,:) = uo(i+2:dimsizes(uo&time)-1:12,:,:)
+       ssh_month_12(i,:,:,:) = ssha(i+2:dimsizes(ssha&TIME)-1:12,:,:)
+       uo_month_12(i,:,:,:) = uoa(i+2:dimsizes(uoa&time)-1:12,:,:)
+       taux_month_12(i,:,:,:) = tauxa(i+2:dimsizes(tauxa&time)-1:12,:,:)
      end if
  end do 
+;;;;
+
 ;;======================================================
   case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]
 
@@ -297,45 +304,62 @@ begin
   case = [/case1,case2,case3/]
 
   stringlesft = (/"El Nino"," La Nina"," Normal"/)
-  plot = new(3,graphic)
+  plot = new(9,graphic)
   midplot = plot
 
   stss = ispan(1,3,1)+""
+
 do k=0,2 
+
+ wks = gsn_open_wks("pdf", "HADISST-"+stringlesft(k)+"-TAUX-anomalies-evolution-during-diffmonsoon")
   print("***********start*********************"+k)
 
-   case_need:= case[k]
+  case_need:= case[k]
 
-   ind_ts1 :=  get1Dindex(sst_year,case_need[0])
-   ind_tw1_or :=  get1Dindex(sst_year,case_need[1])
-   ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
+  ind_ts1 :=  get1Dindex(sst_year,case_need[0])
+  ind_tw1_or :=  get1Dindex(sst_year,case_need[1])
+  ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
 
-   ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
+  ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
 
-   ind_tw1 :=  ind_tw1_or(0:dimsizes(ind_tw1_or)-2)  ;;去掉最后一年
+  ind_tw1 :=  ind_tw1_or(0:dimsizes(ind_tw1_or)-2)  ;;去掉最后一年
 
 
-  com_month_str  = composite_mean(uo_month_12,ind_ts1)
-  uo_str_evo(0:11,:) = com_month_str[0]
- 
-  com_month_weak  = composite_mean(uo_month_12,ind_tw1)
-  uo_weak_evo(0:11,:) = com_month_weak[0]
+  com_month_str  = composite_mean(ssh_month_12,uo_month_12, taux_month_12, ind_ts1)
 
-  com_month_nor  = composite_mean(uo_month_12,ind_tnor1_r)
-  uo_nor_evo(0:11,:) = com_month_nor[0]
+  ssh_month_str = com_month_str[0]
+  uo_month_str = com_month_str[1]
+  taux_month_str = com_month_str[2]
 
-  com_month_str  = composite_mean(uo_month_12(0:5,:,:,:),ind_ts1+1)
-  uo_str_evo(12:,:) = com_month_str[0]
+  var_ssh_str = com_month_str[3]
+  var_uo_str = com_month_str[4]
+  var_taux_str = com_month_str[5]
+  
+  com_month_weak  = composite_mean(ssh_month_12,uo_month_12, taux_month_12, ind_tw1)
 
-  com_month_weak  = composite_mean(uo_month_12(0:5,:,:,:),ind_tw1+1)
-  uo_weak_evo(12:,:) = com_month_weak[0]
+  ssh_month_weak = com_month_weak[0]
+  uo_month_weak = com_month_weak[1]
+  taux_month_weak = com_month_weak[2]
 
-  com_month_nor  = composite_mean(uo_month_12(0:5,:,:,:),ind_tnor1_r+1)
-  uo_nor_evo(12:,:) = com_month_nor[0]
+  var_ssh_weak = com_month_weak[3]
+  var_uo_weak = com_month_weak[4]
+  var_taux_weak = com_month_weak[5]
+  
+
+  com_month_nor  = composite_mean(ssh_month_12,uo_month_12, taux_month_12, ind_tnor1)
+
+  ssh_month_nor = com_month_nor[0]
+  uo_month_nor = com_month_nor[1]
+  taux_month_nor = com_month_nor[2]
+
+  var_ssh_nor = com_month_nor[3]
+  var_uo_nor = com_month_nor[4]
+  var_taux_nor = com_month_weak[5]
+
 
     ; ssta_month_str = where(prob_ssta_str.le.0.1, ssta_month_str, ssta_month_str@_FillValue)
     ; ssta_month_weak = where(prob_ssta_weak.le.0.1, ssta_month_weak, ssta_month_weak@_FillValue)
- printMinMax(uo_str_evo, 1)
+
 
 
 ;;**************************************************************
@@ -348,7 +372,6 @@ do k=0,2
   
   res@lbLabelBarOn=False
   
-
   res@cnFillOn=True
   res@cnFillDrawOrder="PreDraw"
   res@cnLinesOn=False
@@ -361,8 +384,8 @@ do k=0,2
   res@cnLevelSpacingF      = 0.004
 
 
-  res@gsnLeftString = "(g) TAUX' for El Nino (Str monsoon)"
-  res@gsnRightString = ""
+  res@gsnLeftString = "(a) TAUX' "
+  res@gsnRightString = "El Nino (Str monsoon)"
 
   ; res@vpWidthF  = 0.6
   ; res@vpHeightF = 0.4
@@ -371,11 +394,11 @@ do k=0,2
   res@tmXBValues= ispan(140, 280, 20)
   res@tmXBLabels = ispan(140, 280, 20) +"E"
 
-  res@tmXBLabelFontHeightF = 0.025
-  res@tmYLLabelFontHeightF = 0.025
+  res@tmXBLabelFontHeightF = 0.02
+  res@tmYLLabelFontHeightF = 0.02
 
-  res@gsnLeftStringFontHeightF   = 0.025
-  ; res@gsnRightStringFontHeightF  = 0.04
+  res@gsnLeftStringFontHeightF   = 0.02
+  res@gsnRightStringFontHeightF  = 0.02
   
   res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
   ; res@tmYLLabelsOn=True
@@ -386,18 +409,72 @@ do k=0,2
   
   ; res@tiYAxisString = "Month" 
   ; res@tiYAxisFontHeightF=0.02
+ 
+  plot(0) =  gsn_csm_hov(wks,taux_month_str, res)  
+  res@gsnLeftString = "(b) TAUX' "
+  res@gsnRightString = "El Nino (Weak monsoon)"
+  plot(1) =  gsn_csm_hov(wks,taux_month_weak , res)  
 
-  wks = gsn_open_wks("pdf", "HADISST-"+stringlesft(k)+"-TAUX-anomalies-evolution-during-diffmonsoon")
-  ; wks = gsn_open_wks("pdf", stringlesft(k)+"-TAUX-anomalies-evolution-during-diffmonsoon")
-  plot(0) =  gsn_csm_hov(wks,uo_str_evo(0:11,:) , res)  
-    res@gsnLeftString = "(h) TAUX' for El Nino (Weak monsoon)"
-  plot(1) =  gsn_csm_hov(wks,uo_weak_evo(0:11,:) , res)  
-    res@gsnLeftString = "(i) TAUX' for El Nino (Normal monsoon)"
-  plot(2) =  gsn_csm_hov(wks,uo_nor_evo(0:11,:) , res)  
+
+  res@gsnLeftString = "(c) TAUX' "
+  res@gsnRightString = "El Nino (Normal monsoon)"
+  res@lbLabelBarOn=True
+  res@lbOrientation="Vertical"
+  ; res@pmLabelBarWidthF = 0.6
+  ; res@pmLabelBarHeightF =0.05
+  ; res@pmLabelBarOrthogonalPosF = 0.3
+  plot(2) =  gsn_csm_hov(wks,taux_month_nor , res)  
+
+  res@lbLabelBarOn=False
+  res@cnMinLevelValF       = -0.2               ; min level
+  res@cnMaxLevelValF       =  0.2           ; max leve
+  res@cnLevelSpacingF      = 0.04
+
+  res@gsnLeftString = "(d) UO' "
+  res@gsnRightString = "El Nino (str monsoon)"
+
+  plot(3) =  gsn_csm_hov(wks,uo_month_str, res)  
+  res@gsnLeftString = "(e) UO' "
+  res@gsnRightString = "El Nino (Weak monsoon)"
+
+  plot(4) =  gsn_csm_hov(wks,uo_month_weak , res)  
+
+
+  res@gsnLeftString = "(f) UO' "
+  res@gsnRightString = "El Nino (Normal monsoon)"
+
+  res@lbLabelBarOn=True
+  res@lbOrientation="Vertical"
+  plot(5) =  gsn_csm_hov(wks,uo_month_nor , res)  
+
+
+  res@lbLabelBarOn=False
+  res@cnMinLevelValF       = -8.0               ; min level
+  res@cnMaxLevelValF       =  8.0           ; max leve
+  res@cnLevelSpacingF      = 1.0
+
+  res@gsnLeftString = "(g) SSH' "
+  res@gsnRightString = "El Nino (str monsoon)"
+
+  plot(6) =  gsn_csm_hov(wks,ssh_month_str, res)  
+  res@gsnLeftString = "(h) SSH' "
+  res@gsnRightString = "El Nino (Weak monsoon)"
+
+  plot(7) =  gsn_csm_hov(wks,ssh_month_weak, res) 
+
+  res@gsnLeftString = "(h) SSH' "
+  res@gsnRightString = "El Nino (Normal monsoon)"
+  res@lbLabelBarOn=True
+  res@lbOrientation="Vertical"
+
+  plot(8) =  gsn_csm_hov(wks,ssh_month_nor, res) 
+
+
+
   pres = True
-  pres@gsnPanelLabelBar  = True
+  pres@gsnPanelLabelBar  = False
   pres@lbLabelStride=1
-  gsn_panel(wks, plot, (/1,3/), pres)
+  gsn_panel(wks, plot, (/3,3/), pres)
 
 end do
 

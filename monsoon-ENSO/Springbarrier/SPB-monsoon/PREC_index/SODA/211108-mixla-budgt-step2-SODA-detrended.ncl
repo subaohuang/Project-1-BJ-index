@@ -59,9 +59,9 @@ begin
     uo_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),uo_his_mixed_anom, False,True, 0)/)
     printVarSummary(uo_his_mixed_anom)
 
-    system("rm uo_his_mixed_anom.nc")
-    out = addfile("uo_his_mixed_anom.nc", "c")
-    out->uo_his_mixed_anom  =uo_his_mixed_anom
+    ; system("rm uo_his_mixed_anom.nc")
+    ; out = addfile("uo_his_mixed_anom.nc", "c")
+    ; out->uo_his_mixed_anom  =uo_his_mixed_anom
 
 ;==========================================================
     fin_vo_his = addfile("./"+var_name(2)+"_mixed_soda.nc", "r")
@@ -83,12 +83,34 @@ begin
     wo_his_bot_CLM = where(wo_his_bot_CLM_org.le.0, 0, wo_his_bot_CLM_org)
     copy_VarCoords(wo_his_bot_CLM_org, wo_his_bot_CLM)
     printVarSummary(wo_his_bot_CLM)
+    
+    
 
+    ;;; original method
     wo_his_bot_positive = where(wo_his_bot.le.0, 0, wo_his_bot)
     copy_VarCoords(wo_his_bot, wo_his_bot_positive)
     wo_his_bot_anom = calcMonAnomTLL(wo_his_bot_positive, wo_his_bot_CLM)
+    ;;;;
+
+
+     ;;;testing other method
+    ; wo_his_bot_anom = calcMonAnomTLL(wo_his_bot, wo_his_bot_CLM_org)
+    ; dim_wo_anom = dimsizes(wo_his_bot_anom)
+    ; wo_his_bot_CLM_org_4d = wo_his_bot_anom
+    ; do k = 0, 11
+    ;   do j = 0, dim_wo_anom(0)/12-1
+    ;     wo_his_bot_CLM_org_4d(j*12+k,:,:) = (/wo_his_bot_CLM_org(k,:,:)/)
+    ;   end do
+    ; end do
+
+    ; wo_his_bot_anom = where(wo_his_bot_CLM_org_4d.le.0, 0, wo_his_bot_anom)    
+    ; ;;;
+
+
     printVarSummary(wo_his_bot_anom)
     wo_his_bot_anom = (/dtrend_msg_n(ispan(1,dim(0),1),wo_his_bot_anom,False, True, 0)/)
+    printMinMax(wo_his_bot_anom, 1)
+ 
 ;==========================================================
 
 
@@ -199,10 +221,10 @@ begin
     copy_VarCoords(thetao_his_mixed_anom, dTdz_his_anom)
     printVarSummary(dTdz_his_anom)
 
-    system("rm dTdz_his_anom.nc")
-    out = addfile("dTdz_his_anom.nc", "c")
-    out->dTdz_his_anom  =dTdz_his_anom
-exit()
+    ; system("rm dTdz_his_anom.nc")
+    ; out = addfile("dTdz_his_anom.nc", "c")
+    ; out->dTdz_his_anom  =dTdz_his_anom
+; exit()
 ;========================================================== dTdx/y/z clm
 
     dTclmdxdy = grad_latlon_cfd(thetao_his_mixed_clm,thetao_his_mixed_clm&lat,thetao_his_mixed_clm&lon,True,False)
@@ -213,6 +235,9 @@ exit()
     dTdz_his_clm =  (thetao_his_mixed_clm - thetao_his_bot_clm)/(58-23)
     copy_VarCoords(thetao_his_mixed_clm, dTdz_his_clm)
     printVarSummary(dTdz_his_clm)
+
+    printMinMax(dTdz_his_clm, 1)
+ 
 
 ;========================================================== dTdt
     dTdt_his = thetao_his_mixed_anom

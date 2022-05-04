@@ -235,7 +235,6 @@ begin
 
     UATXB_ct = f4->UATXB(timeind,:,:)  ;;;; ZA 256
     VATYB_ct = f4->VATYB(timeind,:,:)
-
     WATZB_ct = f4->WATZB(timeind,:,:)  ;;;EK
 
     UBTXA_ct = f4->UBTXA(timeind,:,:)  ;;MEAN zonal advection
@@ -247,9 +246,10 @@ begin
     VATYA_ct = f4->VATYA(timeind,:,:)
     WATZA_ct = f4->WATZA(timeind,:,:)
 
-
     NLT = UATXA_ct
     NLT = (/UATXA_ct+VATYA_ct+WATZA_ct/)
+;;;;
+
 
 ;;;;
    
@@ -293,7 +293,7 @@ begin
    lat2 = 5
    ; lon1 = 190
    ; lon2 = 240
-     lon1 = 160
+   lon1 = 160
    lon2 = 270
 ;    end if 
 
