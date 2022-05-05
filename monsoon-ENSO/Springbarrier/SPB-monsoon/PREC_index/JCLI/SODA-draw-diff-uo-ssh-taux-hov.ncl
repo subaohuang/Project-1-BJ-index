@@ -74,32 +74,71 @@ begin
     startyear = 1871
     endyear = 2010
 
-    diri = "/home/ys17-23/Extension/SODA_region/"
-    fils1=systemfunc("ls "+diri+"soda_TEMP_1871-2010.nc")
+    ; diri = "/home/ys17-23/Extension/SODA_region/"
+    ; fils1=systemfunc("ls "+diri+"soda_TEMP_1871-2010.nc")
 
+    ; f1=addfile(fils1, "r")
+    ; date:=cd_calendar(f1->TIME, 1)
+    ; timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
+
+    ; sst = f1->TEMP(timeind,0,:,:)
+
+    ; ; sst=lonFlip(f1->sst(timeind,:,:))
+    ; printVarSummary(sst)
+
+    ; ssta=(/rmMonAnnCycTLL(sst)/)
+    ; copy_VarCoords(sst, ssta)
+
+
+    ; ;;detrend 
+    ; ; ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ; ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&TIME),1),ssta,False,True,0)/)
+    ; ;;;
+    ; delete(date)
+    ; delete(timeind)
+    
+    ; ssta!0 = "time"
+   
+    ; nino34 =  dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
+
+    ; nino34_djf = month_to_season(nino34, "DJF")
+
+    ; nino34_djf(0:dimsizes(nino34_djf)-2) = nino34_djf(1:) 
+    ; nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
+
+    ; nino34_12_r =  split_12(nino34)
+
+    ; nino34_jja = nino34_djf
+    ; nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+
+    ; nino34_djf = nino34_jja
+
+    ; std_nino = dim_stddev(nino34_djf)
+
+;===============================================================================     
+
+
+;;;读入HadiSST海温数据
+    diri="/home/ys17-23/Extension/linshh/data/sst/"
+    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->TIME, 1)
+    date:=cd_calendar(f1->time, 1)
+    lat = f1->latitude
+    lon = f1->longitude
+
     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
 
-    sst = f1->TEMP(timeind,0,:,:)
+    sst_had = lonFlip(f1->sst(timeind,:,:))
+    
 
-    ; sst=lonFlip(f1->sst(timeind,:,:))
-    printVarSummary(sst)
-
-    ssta=(/rmMonAnnCycTLL(sst)/)
-    copy_VarCoords(sst, ssta)
-
+    ssta_had =(/rmMonAnnCycTLL(sst_had)/)
+    copy_VarCoords(sst_had, ssta_had)
+    ssta = ssta_had
 
     ;;detrend 
-    ; ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-    ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&TIME),1),ssta,False,True,0)/)
-    ;;;
-    delete(date)
-    delete(timeind)
-    
-    ssta!0 = "time"
-   
-    nino34 =  dim_avg_n_Wrap(ssta(:,{5:-5},{190:240}), (/1,2/))
+    ssta_had = (/dtrend_msg_n(ispan(1,dimsizes(ssta_had&time),1),ssta_had,False,True,0)/)
+    ;;;    
+    nino34 =  dim_avg_n_Wrap(ssta_had(:,{5:-5},{190:240}), (/1,2/))
 
     nino34_djf = month_to_season(nino34, "DJF")
 
@@ -114,46 +153,7 @@ begin
     nino34_djf = nino34_jja
 
     std_nino = dim_stddev(nino34_djf)
-
-;===============================================================================     
-
-
-; ;;;读入HadiSST海温数据
-;     diri="/home/ys17-23/Extension/linshh/data/sst/"
-;     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-;     f1=addfile(fils1, "r")
-;     date:=cd_calendar(f1->time, 1)
-;     lat = f1->latitude
-;     lon = f1->longitude
-
-;     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
-
-;     sst_had = lonFlip(f1->sst(timeind,:,:))
-    
-
-;     ssta_had =(/rmMonAnnCycTLL(sst_had)/)
-;     copy_VarCoords(sst_had, ssta_had)
-;     ssta = ssta_had
-
-;     ;;detrend 
-;     ssta_had = (/dtrend_msg_n(ispan(1,dimsizes(ssta_had&time),1),ssta_had,False,True,0)/)
-;     ;;;    
-;     nino34 =  dim_avg_n_Wrap(ssta_had(:,{5:-5},{190:240}), (/1,2/))
-
-;     nino34_djf = month_to_season(nino34, "DJF")
-
-;     nino34_djf(0:dimsizes(nino34_djf)-2) = nino34_djf(1:) 
-;     nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
-
-;     nino34_12_r =  split_12(nino34)
-
-;     nino34_jja = nino34_djf
-;     nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
-
-;     nino34_djf = nino34_jja
-
-;     std_nino = dim_stddev(nino34_djf)
-; ;;
+;;
 
 
 
@@ -326,10 +326,12 @@ printVarSummary(tauxa)
 
   stss = ispan(1,3,1)+""
 
+  ntilde  = "n~H-13V2F35~D~FV-2H3~"
+
 do k=0,2 
 
- ; wks = gsn_open_wks("pdf", "HADISST-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
- wks = gsn_open_wks("pdf", "SODASST-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
+ wks = gsn_open_wks("pdf", "HADISST-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
+ ; wks = gsn_open_wks("pdf", "SODASST-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
   print("***********start*********************"+k)
 
   case_need:= case[k]
@@ -433,8 +435,8 @@ do k=0,2
   res@cnLevelSpacingF      = 0.004
 
 
-  res@gsnLeftString = "(a) TAUX' "
-  res@gsnRightString = "El Nino (Str - Nor monsoon)"
+  res@gsnLeftString = "(b1) TAUX' "
+  res@gsnRightString = "El Ni"+ntilde+"o (Weak - Nor monsoon)"
 
   ; res@vpWidthF  = 0.6
   ; res@vpHeightF = 0.4
@@ -443,11 +445,11 @@ do k=0,2
   res@tmXBValues= ispan(140, 280, 20)
   res@tmXBLabels = ispan(140, 280, 20) +"E"
 
-  res@tmXBLabelFontHeightF = 0.02
-  res@tmYLLabelFontHeightF = 0.02
+  res@tmXBLabelFontHeightF = 0.023
+  res@tmYLLabelFontHeightF = 0.023
 
-  res@gsnLeftStringFontHeightF   = 0.02
-  res@gsnRightStringFontHeightF  = 0.02
+  res@gsnLeftStringFontHeightF   = 0.023
+  res@gsnRightStringFontHeightF  = 0.023
   
   res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
   ; res@tmYLLabelsOn=True
@@ -460,26 +462,26 @@ do k=0,2
   ; res@tiYAxisFontHeightF=0.02
   res@tmXBLabelsOn = False
  
-  plot(0) =  gsn_csm_hov(wks,taux_month_str, res)  
-  res@gsnLeftString = "(b) UO' "
+  plot(0) =  gsn_csm_hov(wks,taux_month_weak, res)  
+  res@gsnLeftString = "(b2) UO' "
   res@cnMinLevelValF       = -0.2               ; min level
   res@cnMaxLevelValF       =  0.2           ; max leve
   res@cnLevelSpacingF      = 0.04
   
   res@tmYLLabelsOn = False
 
-  plot(1) =  gsn_csm_hov(wks,uo_month_str , res)  
+  plot(1) =  gsn_csm_hov(wks,uo_month_weak , res)  
   
-  res@gsnLeftString = "(c) SSH' "
-  res@cnMinLevelValF       = -8.0               ; min level
-  res@cnMaxLevelValF       =  8.0           ; max leve
+  res@gsnLeftString = "(b3) SSH' "
+  res@cnMinLevelValF       = -4.0               ; min level
+  res@cnMaxLevelValF       =  4.0           ; max leve
   res@cnLevelSpacingF      = 1.0
 
-  plot(2) =  gsn_csm_hov(wks,ssh_month_str , res)  
+  plot(2) =  gsn_csm_hov(wks,ssh_month_weak , res)  
   
 
-  res@gsnLeftString = "(d) TAUX' "
-  res@gsnRightString = "El Nino (Weak - Nor monsoon)"
+  res@gsnLeftString = "(c1) TAUX' "
+  res@gsnRightString = "El Ni"+ntilde+"o (Str - Nor monsoon)"
   res@lbLabelBarOn=True
   res@pmLabelBarWidthF = 0.5
   res@pmLabelBarHeightF = 0.15
@@ -494,21 +496,21 @@ do k=0,2
    res@tmYLLabelsOn = True
    res@tmXBLabelsOn = True
 
-  plot(3) =  gsn_csm_hov(wks,taux_month_weak, res)  
-  res@gsnLeftString = "(e) UO' "
+  plot(3) =  gsn_csm_hov(wks,taux_month_str, res)  
+  res@gsnLeftString = "(c2) UO' "
   res@cnMinLevelValF       = -0.2               ; min level
   res@cnMaxLevelValF       =  0.2           ; max leve
   res@cnLevelSpacingF      = 0.04
 
     res@tmYLLabelsOn = False
 
-  plot(4) =  gsn_csm_hov(wks,uo_month_weak , res)  
+  plot(4) =  gsn_csm_hov(wks,uo_month_str, res)  
   
-  res@gsnLeftString = "(f) SSH' "
+  res@gsnLeftString = "(c3) SSH' "
   res@cnMinLevelValF       = -4.0               ; min level
   res@cnMaxLevelValF       =  4.0           ; max leve
   res@cnLevelSpacingF      = 1.0
-  plot(5) =  gsn_csm_hov(wks,ssh_month_weak , res)  
+  plot(5) =  gsn_csm_hov(wks,ssh_month_str , res)  
  
 
 ;;;打点
@@ -536,13 +538,13 @@ do k=0,2
     res_pro@cnInfoLabelOn=False
 
     
-    iplot(0) = gsn_csm_contour(wks,prob_taux_str,res_pro)
-    iplot(1) = gsn_csm_contour(wks,prob_uo_str,res_pro)
-    iplot(2) = gsn_csm_contour(wks,prob_ssh_str,res_pro)
+    iplot(0) = gsn_csm_contour(wks,prob_taux_weak,res_pro)
+    iplot(1) = gsn_csm_contour(wks,prob_uo_weak,res_pro)
+    iplot(2) = gsn_csm_contour(wks,prob_ssh_weak,res_pro)
 
-    iplot(3) = gsn_csm_contour(wks,prob_taux_weak,res_pro)
-    iplot(4) = gsn_csm_contour(wks,prob_uo_weak,res_pro)
-    iplot(5) = gsn_csm_contour(wks,prob_ssh_weak,res_pro)
+    iplot(3) = gsn_csm_contour(wks,prob_taux_str,res_pro)
+    iplot(4) = gsn_csm_contour(wks,prob_uo_str,res_pro)
+    iplot(5) = gsn_csm_contour(wks,prob_ssh_str,res_pro)
     
 
     do i=0,5

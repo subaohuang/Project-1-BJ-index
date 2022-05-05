@@ -53,7 +53,7 @@ begin
     startyear = 1871
     endyear = 2019
 
-;;;读入HadiSST海温数据
+;;读入HadiSST海温数据
     diri="/home/ys17-23/Extension/linshh/data/sst/"
     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
     f1=addfile(fils1, "r")
@@ -63,7 +63,21 @@ begin
     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
-;;;;
+
+
+; ;;;;;读入ERSST
+;     diri="/home/ys17-23/Extension/SST/NOAA_ERSST/"
+;     fils1=systemfunc("ls "+diri+"sst.mnmean.v5.nc")
+;     f1=addfile(fils1, "r")
+;     date:=cd_calendar(f1->time, 1)
+;     lat = f1->lat
+;     lon = f1->lon
+;     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
+;     sst=f1->sst(timeind,:,:)
+;     printVarSummary(sst)
+; ;;;;
+
+
     ; startmon = 187101
     ; endmon = 201512
     ; startyear = 1871
@@ -100,7 +114,7 @@ begin
     nino34_12_r =  split_12(nino34)
 
     nino34_jja = nino34_djf
-    nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    ; nino34_jja = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
 
     nino34_djf = nino34_jja
 
@@ -329,8 +343,8 @@ do k=0,2
 
   ; ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
   ; ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
-  wks = gsn_open_wks("pdf", "based-20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "based-20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "DJFnino3.4-20CRV3-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "DJFnino3.4-20CRV3-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
 
  ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
   ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 

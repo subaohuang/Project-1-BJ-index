@@ -340,6 +340,8 @@ begin
   
   plot = new(3,graphic)
   midplot = plot
+
+  ntilde  = "n~H-13V2F35~D~FV-2H3~"
 ;;;;;
 
 do k=0,2 
@@ -436,7 +438,7 @@ do k=0,2
      ; sres@gsnLeftString = "AMJJASOND mean Heat Budget Nino1+2 "
      ; sres@gsnLeftString = "JJASON mean Heat Budget Nino1+2 "
      ; sres@gsnLeftString = "JJASON mean Heat Budget Nino3 "
-     sres@gsnLeftString = "(a) Jun-Nov heat budget for El Nino"
+     sres@gsnLeftString = "(a) Jun-Nov heat budget for El Ni"+ntilde+"o"
      ; plot(i) = gsn_csm_xy(wks,(/0.75+0.15*i,1.75+0.15*i,2.75+0.15*i,3.75+0.15*i/),number(:,i),sres)   ; draw each time series
 
      plot1 = gsn_csm_xy(wks,ispan(1,9,1)-0.3,hb_mean_mamjja(0,:),sres)   ; draw each time series     

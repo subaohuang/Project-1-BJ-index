@@ -308,8 +308,8 @@ begin
 ;;;******************************************************************
 ;;;;;开始画图
 ;;;******************************************************************
-
-  wksstring = (/"El Nino","La Nina","Normal"/)
+ntilde  = "n~H-13V2F35~D~FV-2H3~"
+  wksstring = (/"El Ni"+ntilde+"o","La Ni"+ntilde+"a","Normal"/)
 ;;;;
 
 
@@ -360,6 +360,8 @@ do k=0,2
   iplot = plot1
   iplot1 = plot
   iplot2 = plot
+
+  
 
 
 do i=0,dimsizes(month)-1
