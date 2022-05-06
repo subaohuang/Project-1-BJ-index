@@ -252,8 +252,11 @@ begin
 
   case = [/case1,case2,case3/]
 
-  stringlesft = (/"(a) El Nino","(b) La Nina","(c) Normal"/)
 
+  
+  ntilde  = "n~H-13V2F35~D~FV-2H3~"
+
+  stringlesft = (/"(a) El Ni"+ntilde+"o","(b) La Ni"+ntilde+"o","(c) Normal"/)
 
   plot = new(3,graphic)
   midplot = plot
@@ -261,6 +264,8 @@ begin
   wks = gsn_open_wks("pdf", "ssta-evolution-during-diffmonsoon")
    
   stss = ispan(1,3,1)+""
+
+
 do k=0,2 
   print("***********start*********************"+k)
 
@@ -382,7 +387,7 @@ do k=0,2
   num_x = 16
 
   res = True
-  res@tmBorderThicknessF = 2.0
+  
   res@gsnDraw        = False
   res@gsnFrame       = False
 
@@ -395,8 +400,8 @@ do k=0,2
   ; res@vpYF      = 0.75
 
   res@tmXTLabelsOn   = False
-  res@tmXTOn         = False
-  res@tmYROn = False
+  ; res@tmXTOn         = False
+  ; res@tmYROn = False
 
 
   res@trXMinF        = 0
@@ -407,11 +412,13 @@ do k=0,2
   res@gsnYRefLine = 0.0
 
 
-  res@tmXBLabelFontHeightF = 0.02
-  res@tmYLLabelFontHeightF = 0.02
+  res@tmXBLabelFontHeightF = 0.025
+  res@tmYLLabelFontHeightF = 0.025
 
-  res@gsnLeftStringFontHeightF   = 0.02
-  res@gsnRightStringFontHeightF  = 0.02
+  res@gsnLeftStringFontHeightF   = 0.025
+  res@gsnRightStringFontHeightF  = 0.025
+
+  res@tmBorderThicknessF = 2.0
 
   res@tmXBMode = "Explicit"
   ; res@tmXBValues = ispan(0, num_x-1, 1)
@@ -420,7 +427,8 @@ do k=0,2
 
   
 
-  res@tmXBLabels = (/"Mar","Jun","Sep","Dec","Mar1","Jun1"/)
+  res@tmXBLabels = (/"Mar","Jun","Sep","Dec","Mar(1)","Jun(1)"/)
+  ; res@tmXBLabels = (/"M","M","J","A","S","N","D","F(+1)","M(+1)","M(+1)",/)
   ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J(+1)","F(+1)","M(+1)","A(+1)","M(+1)"/)
   ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J1","F1","M1","A1","M1","J1","J1","A1"/)
   ; res@tmXBLabels = (/"M","A","M","J","J","A","S","O","N","D","J","F","M","A","M","J","J","A"/)
@@ -429,34 +437,43 @@ do k=0,2
 
 
   if k.eq.0 then 
-   res@trYMinF        = -0.6
-   res@trYMaxF        = 1.6
+   ; res@trYMinF        = -0.6
+   ; res@trYMaxF        = 1.6
 
-   res@tmYLValues := ispan(-6, 16, 2)*0.1
-   res@tmYLLabels := ispan(-6, 16, 2)*0.1
+   res@trYMinF        = -1.0
+   res@trYMaxF        = 2.0
+
+   ; res@tmYLValues := ispan(-6, 16, 2)*0.1
+   ; res@tmYLLabels := ispan(-6, 16, 2)*0.1
   end if 
 
-    if k.eq.1 then 
-   res@trYMinF        = -1.2
-   res@trYMaxF        = 0.4
+  if k.eq.1 then 
+   ; res@trYMinF        = -1.2
+   ; res@trYMaxF        = 0.4
+   res@trYMinF        = -2.0
+   res@trYMaxF        = 1.0
 
-   res@tmYLValues := ispan(-12, 4, 2)*0.1
-   res@tmYLLabels := ispan(-12, 4, 2)*0.1
+   ; res@tmYLValues := ispan(-12, 4, 2)*0.1
+   ; res@tmYLLabels := ispan(-12, 4, 2)*0.1
   end if 
 
-     if k.eq.2 then 
+  if k.eq.2 then 
+
    res@trYMinF        = -0.6
    res@trYMaxF        = 0.6
 
-   res@tmYLValues := ispan(-6, 6, 2)*0.1
-   res@tmYLLabels := ispan(-6, 6, 2)*0.1
+   ; res@tmYLValues := ispan(-6, 6, 2)*0.1
+   ; res@tmYLLabels := ispan(-6, 6, 2)*0.1
   end if 
 
-  res@tiYAxisString = "SST [~S~o~N~C]" 
-  res@tiYAxisFontHeightF=0.02
-
-  res@tiXAxisString = "Month"
-  res@tiXAxisFontHeightF = 0.02
+  if k.eq.0 then 
+  res@tiYAxisString = "SSTA [~S~o~N~C]" 
+  res@tiYAxisFontHeightF=0.025
+  else
+   res@tiYAxisString = "" 
+  end if
+  ; res@tiXAxisString = "Month"
+  ; res@tiXAxisFontHeightF = 0.025
 
 
   res@xyMarkLineModes = (/"MarkLines","MarkLines","MarkLines"/)
@@ -473,8 +490,15 @@ do k=0,2
   res@lgLabelFontHeightF = 0.018
 
   res@gsnLeftString = stringlesft(k)
-  plot(k)  = gsn_csm_xy (wks, ispan(0,15,1), (/ssta_str_evo(0:15),ssta_weak_evo(0:15),ssta_nor_evo(0:15)/), res)
- 
+  res@gsnRightString = "OBS"
+
+  if k.ne.2 then 
+   plot(k)  = gsn_csm_xy (wks, ispan(0,15,1), (/ssta_str_evo(0:15),ssta_weak_evo(0:15),ssta_nor_evo(0:15)/), res)
+  else
+   plot(k)  = gsn_csm_xy (wks, ispan(0,15,1), (/ssta_str_evo(0:15),ssta_weak_evo(0:15)/), res)
+  end if 
+
+
   respl = True
   respl@gsLineColor = "gray"
   respl@gsLineDashPattern = 1.0
@@ -498,26 +522,34 @@ do k=0,2
 
   ;;添加legend 
     gres = True
-    if k.eq.0 then 
+    ; if k.eq.0 then 
     gres@YPosPercent = 95.    ; expressed as %, 0->100, sets position of top border of legend 
-    else
-    gres@YPosPercent = 25.    ; expressed as %, 0->100, sets position of top border of legend 
-    end if
+    ; else
+    ; gres@YPosPercent = 25.    ; expressed as %, 0->100, sets position of top border of legend 
+    ; end if
                 ;  when gres@Position is set to its default setting of "Top" (Default = 95.)
     gres@XPosPercent = 8    ; expressed as %, 0->100, sets position of left border of legend(Default = 5.)
 
     lineres = True
     ; lineres@lgLineColors = (/"black"，/) ; line colors
+
+    if k.ne.2 then 
     lineres@lgLineColors       = res@xyLineColors   ; colors chosen
+    else
+    lineres@lgLineColors := (/"red","blue"/)
+    end if
     lineres@lgLineThicknesses = 4.0                       ; line thicknesses
     lineres@LineLengthPercent = 9.                         ; expressed as %, 0->100, length of line
     lineres@lgDashIndexes = res@xyDashPatterns
     textres = True
-
-    textres@lgLabels = (/"Strong ISMR","Weak ISMR", "Normal ISMR"/)
-    textres@lgLabelFontHeightF = 0.01
+    
+    if k.ne.2 then 
+    textres@lgLabels := (/"Strong monsoon","Weak monsoon", "Normal monsoon"/)
+    else
+    textres@lgLabels := (/"Strong monsoon","Weak monsoon"/)
+    end if
+    textres@lgLabelFontHeightF = 0.015
     ; textres@lgLabelOpacity = (/0/) 
-
     midplot(k) = simple_legend(wks,plot(k),gres,lineres,textres)   
    
 
@@ -525,5 +557,5 @@ end do
 pres = True
 ; pres@gsnPanelLabelBar  = True
 ; pres@lbLabelStride=1
-gsn_panel(wks, plot, (/2,2/), pres)
+gsn_panel(wks, plot, (/1,3/), pres)
 end 
