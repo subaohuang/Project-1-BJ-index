@@ -70,6 +70,8 @@ year2 = 26512
   timeind2 = ind(date.le.year2.and.date.ge.year1)
 
   sst_265 = f1->TEMP(timeind2,0,:,:)  
+
+  sst_wnp = sst_265
 ;;;
 
 
@@ -120,19 +122,26 @@ year2 = 26512
   res@gsnLeftString=""
   res@gsnRightString=""
 
-  res@lbLabelBarOn=True
+
+
+  
+  res@lbLabelBarOn=False
   res@lbOrientation="Vertical"
 
   res@cnFillOn=True
   res@cnFillDrawOrder="PreDraw"
-  res@cnLinesOn=False
-
+  res@cnLinesOn=True
+  res@cnLineLabelsOn = False
   res@cnInfoLabelOn=False
 
-  res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-  res@cnMinLevelValF       = -1              ; min level
-  res@cnMaxLevelValF       =  1.              ; max leve
-  res@cnLevelSpacingF      = 0.1
+  ; res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
+  ; res@cnMinLevelValF       = -1              ; min level
+  ; res@cnMaxLevelValF       =  1.              ; max leve
+  ; res@cnLevelSpacingF      = 0.2
+  
+  res@cnLevelSelectionMode = "ExplicitLevels"
+  res@cnLevels = (/-1.,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+
 
   res@cnFillPalette = "BlueWhiteOrangeRed"
 
@@ -141,36 +150,49 @@ year2 = 26512
   res@tmYUseLeft=True
 
   res@tmYLValues    = ispan(0,11,1)
-  res@tmYLLabels = (/"M","A","M","J","J","A","S","O","N","D","J(+1)","F(+1)"/)
+  res@tmYLLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
   
 
 
-  res@trYMaxF        = 12
-  res@trYMinF        = 1
+  res@trYMaxF        = 11
+  res@trYMinF        = 0
 
 
-  res@tmXTOn=False
-  res@tmYROn=False
+  ; res@tmXTOn=False
+  ; res@tmYROn=False
 
   res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
   res@tmXBValues= ispan(120, 280, 40)
   res@tmXBLabels = (/"120E","160E","160W","120W","80W"/)
-  res@tmXBMinorOn=False
-  res@gsnLeftString = "HC evolution"
+  
+  res@tmXBMinorValues = ispan(120, 280, 10)
+  res@tmXBMinorOn=True
+  
+  res@gsnLeftString = "(a) SST"
+  res@gsnRightString = "Year 265 (Truth)"
 
   res@tmBorderThicknessF = 2.0
-  res@tmXBLabelFontHeightF = 0.02
-  res@tmYLLabelFontHeightF = 0.02
+  res@tmXBLabelFontHeightF = 0.025
+  res@tmYLLabelFontHeightF = 0.025
 
-  res@gsnLeftStringFontHeightF   = 0.02
-  res@gsnRightStringFontHeightF  = 0.02
+  res@gsnLeftStringFontHeightF   = 0.025
+  res@gsnRightStringFontHeightF  = 0.025
 
   ; res@tmXBMinorValues=ispan(0,360,10)
 
+  
+  plot(0) = gsn_csm_hov(wks, sst_diff_hov, res)   ; create plot
+ 
+  res@gsnLeftString = "(b) HC"
+  plot(1) = gsn_csm_hov(wks, hc_diff_hov, res)   ; create plot
+  
 
-  plot = gsn_csm_hov(wks, SST_diff_nino3_4, res)   ; create plot
-  draw(plot)
-  frame(wks)
+
+ pres = True
+ pres@gsnPanelLabelBar=True
+ pres@lbOrientation="Vertical"
+ pres@pmLabelBarHeightF = 0.35
+ gsn_panel(wks, plot, (/1,2/), pres)
 
 end
 
