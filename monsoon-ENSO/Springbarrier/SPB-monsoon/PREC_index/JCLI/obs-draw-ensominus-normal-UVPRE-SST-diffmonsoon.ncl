@@ -516,7 +516,7 @@ do i=0,dimsizes(month)-1
 
   res@mpLimitMode           = "LatLon"
   res@mpMinLatF             = -20
-  res@mpMaxLatF             = 30
+  res@mpMaxLatF             = 40
   res@mpMinLonF             = 30
   res@mpMaxLonF             = 290
 

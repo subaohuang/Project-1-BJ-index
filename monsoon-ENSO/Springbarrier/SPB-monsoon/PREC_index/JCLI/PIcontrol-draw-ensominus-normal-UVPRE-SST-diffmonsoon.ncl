@@ -52,15 +52,16 @@ begin
     startyear = 1
     endyear = 999
 
-    lat1 = -30
-    lat2 = 30
+    lat1 = -50
+    lat2 = 50
     lon1 = -180
     lon2 = 180
 
 ; ;;;读入海温数据
 ;     diri="/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
-;     fils1=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
-  
+;     fils1=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+;     print(fils1)
+
 ;     f1=addfiles(fils1, "r")
 ;     date:=cd_calendar(f1[:]->time, 1)
 
@@ -91,13 +92,13 @@ begin
 ;     ncout = addfile("pre_picontrol.nc", "c")
 ;     ncout->pre = ssta
 ; ;;;
-      f1 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/pre_picontrol.nc", "r")
+      f1 = addfile("pre_picontrol.nc", "r")
       p = f1->pre 
-;;;;;;
+;;;;;
 
 ; ;;读入ua
 ;     diri2 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
-;     fils2 = systemfunc("ls "+diri2+"ua_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
+;     fils2 = systemfunc("ls "+diri2+"ua_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
   
 ;     f2 = addfiles(fils2, "r")
 ;     date:=cd_calendar(f2[:]->time, 1)
@@ -114,7 +115,7 @@ begin
 
 ; ;;读入va
 ;     diri3 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
-;     fils3 = systemfunc("ls "+diri2+"va_Amon_CESM2_piControl_r1i1p1f1_gn_0{0..9}"+"*")
+;     fils3 = systemfunc("ls "+diri2+"va_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
   
 ;     f3 = addfiles(fils3, "r")
 ;     date:=cd_calendar(f3[:]->time, 1)
@@ -138,20 +139,17 @@ begin
 
 ; ; ;;;;
 
-    f2 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/uv_picontrol.nc", "r")
+    f2 = addfile("uv_picontrol.nc", "r")
     u_850 = f2->u_850
     v_850 = f2->v_850
 
-;;;;
+;;;
 
 
     f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol.nc", "r")
     ssta = f3->ssta
     
 
-
-
-  
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
     year_out = addfile("piControl_monsoon_and_ensoyear.nc", "r")
@@ -442,7 +440,7 @@ do i=0,dimsizes(month)-1
 
   res@mpLimitMode           = "LatLon"
   res@mpMinLatF             = -20
-  res@mpMaxLatF             = 30
+  res@mpMaxLatF             =40
   res@mpMinLonF             = 30
   res@mpMaxLonF             = 290
 
