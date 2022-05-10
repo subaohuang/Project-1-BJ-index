@@ -146,7 +146,7 @@ begin
 ;;;
 
 
-    f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol.nc", "r")
+    f3 = addfile("ssta_picontrol.nc", "r")
     ssta = f3->ssta
     
 

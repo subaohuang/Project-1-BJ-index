@@ -40,45 +40,45 @@ begin
     startyear = 1
     endyear = 997
 
-    lat1 = -30
-    lat2 = 30
+    lat1 = -50
+    lat2 = 50
     lon1 = -180
     lon2 = 180
 
-; ; ;;;读入海温数据
-;     diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
-;     fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+; ;;;读入海温数据
+    diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
 
-;     f1=addfiles(fils1, "r")
-;     date:=cd_calendar(f1[:]->time, 1)
+    f1=addfiles(fils1, "r")
+    date:=cd_calendar(f1[:]->time, 1)
 
-;     lat = f1[0]->lat
-;     lon = f1[0]->lon
+    lat = f1[0]->lat
+    lon = f1[0]->lon
 
-;     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+    timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
 
-;     sst=lonFlip(f1[:]->tos(timeind,{lat1:lat2},{lon1:lon2}))
-;     ; sst = (/sst*86400/)
-;     printVarSummary(sst)
+    sst=lonFlip(f1[:]->tos(timeind,{lat1:lat2},{lon1:lon2}))
+    ; sst = (/sst*86400/)
+    printVarSummary(sst)
     
-;     ssta=(/rmMonAnnCycTLL(sst)/)
-;     copy_VarCoords(sst, ssta)
+    ssta=(/rmMonAnnCycTLL(sst)/)
+    copy_VarCoords(sst, ssta)
 
-;     ;;detrend 
-;     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-;     ;;;
-;     delete(date)
-;     delete(timeind)
+    ;;detrend 
+    ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ;;;
+    delete(date)
+    delete(timeind)
     
-;     ; nino34_12_r =  split_12(nino34)
-;     ; nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
-;     ; std_nino = dim_stddev(nino34_djf)
-;     sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
-;     print("************** finish SST data*****************")
+    ; nino34_12_r =  split_12(nino34)
+    ; nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    ; std_nino = dim_stddev(nino34_djf)
+    sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
+    print("************** finish SST data*****************")
 
-;     ncout = addfile("ssta_picontrol.nc", "c")
-;     ncout->ssta = ssta
-;     exit()
+    ncout = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/JCLI/ssta_picontrol.nc", "c")
+    ncout->ssta = ssta
+    exit()
 ; ; ;;;
       f1 = addfile("ssta_picontrol.nc", "r")
       ssta = f1->ssta
