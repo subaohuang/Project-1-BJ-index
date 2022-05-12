@@ -87,24 +87,25 @@ begin
     
 
     ;;; original method
-    wo_his_bot_positive = where(wo_his_bot.le.0, 0, wo_his_bot)
-    copy_VarCoords(wo_his_bot, wo_his_bot_positive)
-    wo_his_bot_anom = calcMonAnomTLL(wo_his_bot_positive, wo_his_bot_CLM)
-    ;;;;
+    ; wo_his_bot_positive = where(wo_his_bot.le.0, 0, wo_his_bot)
+    ; copy_VarCoords(wo_his_bot, wo_his_bot_positive)
+    ; wo_his_bot_anom = calcMonAnomTLL(wo_his_bot_positive, wo_his_bot_CLM)
+    
+    ; ;;;;
 
 
      ;;;testing other method
-    ; wo_his_bot_anom = calcMonAnomTLL(wo_his_bot, wo_his_bot_CLM_org)
-    ; dim_wo_anom = dimsizes(wo_his_bot_anom)
-    ; wo_his_bot_CLM_org_4d = wo_his_bot_anom
-    ; do k = 0, 11
-    ;   do j = 0, dim_wo_anom(0)/12-1
-    ;     wo_his_bot_CLM_org_4d(j*12+k,:,:) = (/wo_his_bot_CLM_org(k,:,:)/)
-    ;   end do
-    ; end do
+    wo_his_bot_anom = calcMonAnomTLL(wo_his_bot, wo_his_bot_CLM_org)
+    dim_wo_anom = dimsizes(wo_his_bot_anom)
+    wo_his_bot_CLM_org_4d = wo_his_bot_anom
+    do k = 0, 11
+      do j = 0, dim_wo_anom(0)/12-1
+        wo_his_bot_CLM_org_4d(j*12+k,:,:) = (/wo_his_bot_CLM_org(k,:,:)/)
+      end do
+    end do
 
-    ; wo_his_bot_anom = where(wo_his_bot_CLM_org_4d.le.0, 0, wo_his_bot_anom)    
-    ; ;;;
+    wo_his_bot_anom = where(wo_his_bot_CLM_org_4d.le.0, 0, wo_his_bot_anom)    
+    ;;;
 
 
     printVarSummary(wo_his_bot_anom)

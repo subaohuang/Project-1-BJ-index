@@ -248,8 +248,6 @@ begin
 
     NLT = UATXA_ct
     NLT = (/UATXA_ct+VATYA_ct+WATZA_ct/)
-
-
 ;;;;
 
 
@@ -346,7 +344,7 @@ begin
 
 do k=0,2 
 
-   case_need:= case[k]
+   case_need:= case[k] ;;;  case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]   ;;;;;
 
    ind_ts1 := get1Dindex(sst_year,case_need[0])
    ind_tw1 :=  get1Dindex(sst_year,case_need[1])
@@ -376,7 +374,8 @@ do k=0,2
                                                             ;;;MAMJJASONDJF
    
    hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,3:8), 2)   ;;JJASON
-   hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,5:8), 2)   ;;JJASON
+   hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,5:8), 2)   ;;JJASON  for ;;;;JASON
+   ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,4:7), 2)   ;;JJASON
 
    ; hb_mean_mamjja = dim_avg_n_Wrap(hb_mean(:,:,0:9), 2)   ;;ASON
    
@@ -389,6 +388,7 @@ do k=0,2
 ;画图
 ;;***************************************************************
      wks = gsn_open_wks("pdf",""+wksstring(k)+"-BAR-sum-JASON-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
+     ; wks = gsn_open_wks("pdf",""+wksstring(k)+"-BAR-sum-JASO-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
      ; wks = gsn_open_wks("pdf",""+wksstring(k)+"-BAR-sum-JJAS-MEAN-HEATBUDGET-TERMS")          ; send graphics to PNG file
 
      sres = True
