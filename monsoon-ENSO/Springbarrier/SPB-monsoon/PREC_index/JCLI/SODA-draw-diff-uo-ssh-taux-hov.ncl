@@ -442,8 +442,9 @@ do k=0,2
   ; res@vpHeightF = 0.4
 
   res@tmXBMode      = "Explicit"                ; Define own tick mark labels.
-  res@tmXBValues= ispan(140, 280, 20)
-  res@tmXBLabels = ispan(140, 280, 20) +"E"
+  res@tmXBValues= fspan(135.25, 270.25, 4)
+  res@tmXBLabels = (/"135E","180","135W","90W"/)
+  res@tmXBMinorValues = fspan(135.25, 270.25, 10)
 
   res@tmXBLabelFontHeightF = 0.023
   res@tmYLLabelFontHeightF = 0.023
@@ -521,7 +522,7 @@ do k=0,2
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+    res_pro@cnLevels = (/0,0.05/)
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
     ; res_pro@cnMonoLineColor =False

@@ -291,10 +291,10 @@ begin
 ; ;   if nino_type(j).eq."Nino3.4" then 
    lat1 = -5
    lat2 = 5
-   lon1 = 190
-   lon2 = 240
-   ; lon1 = 160
-   ; lon2 = 270
+   ; lon1 = 190
+   ; lon2 = 240
+   lon1 = 160
+   lon2 = 270
 ; ;    end if 
 
 ;   if nino_type(j).eq."Nino4" then 
@@ -402,7 +402,7 @@ do k=0,2
 
      ; sres@trYMinF = -1.2
      ; sres@trYMaxF = 1.2
-     sres@trYMinF = -0.25
+     sres@trYMinF = -0.2
      sres@trYMaxF = 0.2
 
      sres@gsnDraw = False
