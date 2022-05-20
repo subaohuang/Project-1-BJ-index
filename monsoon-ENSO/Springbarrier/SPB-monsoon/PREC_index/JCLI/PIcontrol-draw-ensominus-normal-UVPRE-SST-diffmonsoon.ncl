@@ -491,6 +491,7 @@ do i=0,dimsizes(month)-1
   res@vcRefAnnoOrthogonalPosF = 0.3
   res@vcRefAnnoFontHeightF = 0.01
   res@vcRefAnnoPerimOn = False
+  res@vcRefAnnoString1 = "3 m/s"
   else 
   res@vcRefAnnoOn = False
   end if
