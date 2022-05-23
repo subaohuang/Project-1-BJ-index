@@ -51,11 +51,15 @@ begin
     ; endyear = 897
 
    modelname = "FGOALS-g3"
-
-    startmon = 20001
-    endmon = 89912
-    startyear = 200
-    endyear = 899
+    ; startmon = 20001
+    ; endmon = 89912
+    ; startyear = 200
+    ; endyear = 899
+    modelname = "CESM2" 
+    startmon = 101
+    endmon = 99912
+    startyear = 1
+    endyear = 999
 
     lat1=-5
     lat2 = 5

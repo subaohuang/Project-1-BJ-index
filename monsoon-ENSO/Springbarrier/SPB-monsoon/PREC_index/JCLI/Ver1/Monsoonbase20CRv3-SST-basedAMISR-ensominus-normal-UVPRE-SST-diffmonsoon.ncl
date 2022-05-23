@@ -143,7 +143,7 @@ begin
     ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
     nrows=146
     ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("../All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
+    data = asciiread("../../All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
     jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
     
     jjas!0 = "time"
@@ -329,6 +329,25 @@ ntilde  = "n~H-13V2F35~D~FV-2H3~"
 
   case_20cr = [/case1_20cr,case2_20cr,case3_20cr/]
 
+  imsr_inten = new(6,float)
+
+ ;;;;;
+   do j=0,2
+
+    case_test = case[j]
+    ind1 :=  get1Dindex(u_year,case_test[0])
+    ind2 :=  get1Dindex(u_year,case_test[1])
+    ind3 :=  get1Dindex(u_year,case_test[2])
+
+    p_elnino_str =  avg(p_indian_jjas(ind1)) - avg(p_indian_jjas(ind3))
+    p_elnino_weak =  avg(p_indian_jjas(ind2)) - avg(p_indian_jjas(ind3))
+
+    imsr_inten(j*2) = p_elnino_str
+    imsr_inten(j*2+1) = p_elnino_weak
+   end do 
+print(imsr_inten)
+exit()
+
 do k=0,2
 
   case_need:= case[k]
@@ -360,6 +379,7 @@ do k=0,2
   iplot = plot1
   iplot1 = plot
   iplot2 = plot
+
 
   
 
@@ -433,6 +453,9 @@ do i=0,dimsizes(month)-1
     ; p_month_str = where(var_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
     ; p_month_weak = where(var_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
 ;;;;;;
+
+
+
 
 
 ;;;;get data 

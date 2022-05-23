@@ -130,7 +130,7 @@ begin
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
     ;;;
 
-    p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
+    p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:100}), (/1,2/))
     p_indian_jjas = month_to_season(p_indian, "JJA")
     p_indian_12 = split_12(p_indian)
     p_indian_jjas = (/dim_avg_n_Wrap(p_indian_12(5:8,:),0)/)
