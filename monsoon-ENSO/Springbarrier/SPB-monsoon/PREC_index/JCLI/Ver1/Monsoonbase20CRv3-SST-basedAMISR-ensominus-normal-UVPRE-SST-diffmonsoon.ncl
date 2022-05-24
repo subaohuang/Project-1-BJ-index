@@ -339,13 +339,18 @@ ntilde  = "n~H-13V2F35~D~FV-2H3~"
     ind2 :=  get1Dindex(u_year,case_test[1])
     ind3 :=  get1Dindex(u_year,case_test[2])
 
-    p_elnino_str =  avg(p_indian_jjas(ind1)) - avg(p_indian_jjas(ind3))
-    p_elnino_weak =  avg(p_indian_jjas(ind2)) - avg(p_indian_jjas(ind3))
+    p_elnino_str =  avg(pre_jjasa(ind1)) - avg(pre_jjasa (ind3))
+    p_elnino_weak =  avg(pre_jjasa(ind2)) - avg(pre_jjasa (ind3))
 
     imsr_inten(j*2) = p_elnino_str
     imsr_inten(j*2+1) = p_elnino_weak
+    if j.eq.1 then 
+      print(ind2)
+      print(ind3)
+    end if
    end do 
 print(imsr_inten)
+
 exit()
 
 do k=0,2
