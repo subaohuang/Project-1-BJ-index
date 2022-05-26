@@ -122,42 +122,35 @@ year2 = 26512
   res@gsnLeftString=""
   res@gsnRightString=""
 
-
-
-  
   res@lbLabelBarOn=False
   res@lbOrientation="Vertical"
 
   res@cnFillOn=True
   res@cnFillDrawOrder="PreDraw"
-  res@cnLinesOn=True
+  res@cnLinesOn=False
   res@cnLineLabelsOn = False
   res@cnInfoLabelOn=False
 
-  ; res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-  ; res@cnMinLevelValF       = -1              ; min level
-  ; res@cnMaxLevelValF       =  1.              ; max leve
-  ; res@cnLevelSpacingF      = 0.2
+  res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
+  res@cnMinLevelValF       = -1              ; min level
+  res@cnMaxLevelValF       =  1.              ; max leve
+  res@cnLevelSpacingF      = 0.1
   
-  res@cnLevelSelectionMode = "ExplicitLevels"
-  res@cnLevels = (/-1.,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
+  ; res@cnLevelSelectionMode = "ExplicitLevels"
+  ; res@cnLevels = (/-1.,-0.8,-0.6,-0.4,-0.2,0.2,0.4,0.6,0.8,1.0/)
 
 
   res@cnFillPalette = "BlueWhiteOrangeRed"
-
   res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
   ; res@tmYLLabelsOn=True
   res@tmYUseLeft=True
 
   res@tmYLValues    = ispan(0,11,1)
-  res@tmYLLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
+  ; res@tmYLLabels = (/"J","F","M","A","M","J","J","A","S","O","N","D"/)
+  res@tmYLLabels = (/"JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"/)
   
-
-
   res@trYMaxF        = 11
   res@trYMinF        = 0
-
-
   ; res@tmXTOn=False
   ; res@tmYROn=False
 
@@ -172,8 +165,8 @@ year2 = 26512
   res@gsnRightString = "Year 265 (Truth)"
 
   res@tmBorderThicknessF = 2.0
-  res@tmXBLabelFontHeightF = 0.025
-  res@tmYLLabelFontHeightF = 0.025
+  res@tmXBLabelFontHeightF = 0.02
+  res@tmYLLabelFontHeightF = 0.02
 
   res@gsnLeftStringFontHeightF   = 0.025
   res@gsnRightStringFontHeightF  = 0.025
