@@ -247,6 +247,12 @@ begin
 
     DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2014
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
+  
+    mean_wet_rainfall = avg(DMI_ctrl_JJA(ind(DMI_ctrl_JJA.gt.0.43*std)))/30.0
+    print(mean_wet_rainfall)
+    exit()
+
+
 ;;;;
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
