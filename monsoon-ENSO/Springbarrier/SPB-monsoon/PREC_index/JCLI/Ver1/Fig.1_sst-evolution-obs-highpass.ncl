@@ -27,18 +27,48 @@ begin
     end do 
 return data_12
 end 
-function composite_mean(ssta_month_12,ind1)
+function composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind1,ind2,ind3)
 begin 
    lat1 = -5
    lat2 = 5
    lon1 = 190
    lon2 = 240
     ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
+    u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
+    v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
 
-
-return [/ssta_month_str/]
+return [/ssta_month_str,u_month_str,v_month_str/]
 end 
 
+function Lanczos_highpass(var)
+begin
+    month1 = 9*12*1.0
+    ; month2 = 12.0
+    nwt = 49    ;;; loose 24 months each end
+    fca = 1./month1 ;;;通过的频率
+    ; fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
+    nsigma = 1.  ; Lanczos sigma
+
+    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
+
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
+ return var
+ end
+
+ function bw_bandpass(var)
+ begin
+    ca    = 9.0*12.0        ; band start (longer period)
+    cb    = 3.0        ; band end
+
+    fca   = 1.0/ca      ; 'left'  frequency
+    fcb   = 1.0/cb      ; 'right' frequency
+
+    opt   = False       ; use default options (time series of filtered
+                        ; values will be returned)
+    var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
+ return var
+ end 
 
 ;;*************************************************
 ;; main program 
@@ -67,6 +97,12 @@ begin
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
     ;;;
+
+    ;;; high pass 9years, lose each end 2years
+    ssta  = (/Lanczos_highpass(ssta)/)
+    ; ssta  = (/bw_bandpass(ssta)/)
+    ;;;
+
     delete(date)
     delete(timeind)
      
@@ -96,8 +132,28 @@ begin
 ;;;
 
 
+;;;读入ERA wind data
 
-endyear2 = 2012
+    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV2/uwnd.mon.mean.nc"
+    f1 = addfile(fils1, "r")
+    time1 = f1->time
+    date1=cd_calendar(time1, 1)
+
+    endmon = endmon                 ;;; 1900-2019
+    startmon = startmon 
+    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+
+ 
+;;;;U,V
+    u_200  = f1->uwnd(timeind1,{200},:,:)
+    u_850  = f1->uwnd(timeind1,{850},:,:)
+
+    u_850 = (/rmMonAnnCycTLL(u_850)/)
+    u_200 = (/rmMonAnnCycTLL(u_200)/)
+;;;
+
+
 
 ;;;AISMR DATA 
 
@@ -110,18 +166,22 @@ endyear2 = 2012
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    pre_jjas = jjas({startyear:endyear2}) 
+    pre_jjas = jjas({startyear:2012}) 
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,endyear2-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA = pre_jjasa
+
+     ;;; high pass 9years, lose each end 2years
+    DMI_ctrl_JJA  = (/Lanczos_highpass(DMI_ctrl_JJA)/)
+    ; DMI_ctrl_JJA  = (/bw_bandpass(DMI_ctrl_JJA)/)
 ;;;
 
 ;;;strong and weak monsoon year 
-    total_year = ispan(startyear,endyear2,1)
+    total_year = ispan(startyear,2012,1)
     std = dim_stddev_Wrap(DMI_ctrl_JJA)
 
     inds = ind(DMI_ctrl_JJA.gt.0.43*std)
@@ -133,14 +193,10 @@ endyear2 = 2012
     noryear = total_year(indnor)
 ;;;;
 
-
-corr = escorc_n(nino34_djf(0:dimsizes(nino34_djf)-1-(endyear- endyear2)), pre_jjasa,0, 0)
-
-
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
 
 
- nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear- endyear2))
+ nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2012))
 
  wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -164,18 +220,63 @@ corr = escorc_n(nino34_djf(0:dimsizes(nino34_djf)-1-(endyear- endyear2)), pre_jj
 ;;;;
 
 
+
+
+;;;读入ERA wind data
+    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV2/uwnd.mon.mean.nc"
+    f1 = addfile(fils1, "r")
+    time1 = f1->time
+    date1=cd_calendar(time1, 1)
+
+    endmon = endmon                 ;;; 1871-2012
+    startmon = startmon 
+    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+;;;;
+ 
+;;;;U,V
+
+    ; u_200  = short2flt(f1->u(timeind1,{200},:,:))
+    ; u_850  = short2flt(f1->u(timeind1,{850},:,:))
+
+    u_200  = f1->uwnd(timeind1,{200},:,:)
+    u_850  = f1->uwnd(timeind1,{850},:,:)
+
+    u_850 = (/rmMonAnnCycTLL(u_850)/)
+    u_200 = (/rmMonAnnCycTLL(u_200)/)
+;;;
+
+   ; fils2 = "/home/ys17-23/Extension/ERA5-monthly/pressure/v_mon_1x1_1979_2020.nc"
+   ; f2 = addfile(fils2, "r")
+   ; time2 = f2->time
+   ; date2 = cd_calendar(time2, 1)
+   ; timeind2 = ind(date2.ge.197901.and.date2.le.201912)
+;;;;
+
+
+;;;
+    fils2 = "/home/ys17-23/Extension/20thCRV2/vwnd.mon.mean.nc"
+    f2 = addfile(fils2, "r")
+    time2 = f2->time
+    date2 = cd_calendar(time2, 1)
+
+    timeind2 = ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
+
+;;;;U,V
+    v_200  = f2->vwnd(timeind1,{200},:,:)
+    v_850  = f2->vwnd(timeind1,{850},:,:)
+
+    v_850 = (/rmMonAnnCycTLL(v_850)/)
+    v_200 = (/rmMonAnnCycTLL(v_200)/)
+   
+    u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
+    v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
+;;;
+
     yearnum = dimsizes(nino34)/12 -1
     dim_sst = dimsizes(ssta)
+    dim_u = dimsizes(u_850)
 
-print(wet_warm_year)
-print(wet_cold_year)
-print(wet_norm_year)
-print(dry_warm_year)
-print(dry_cold_year)
-print(dry_norm_year)
-print(nor_warm_year)
-print(nor_cold_year)
-print(nor_norm_year)
 
 ;;;;;
    sst_year = ispan(startyear,endyear,1) 
@@ -199,7 +300,7 @@ print(nor_norm_year)
   plot = new(3,graphic)
   midplot = plot
 
-  wks = gsn_open_wks("pdf", "ssta-evolution-during-diffmonsoon")
+  wks = gsn_open_wks("pdf", "highpass-ssta-evolution-during-diffmonsoon")
    
   stss = ispan(1,3,1)+""
 
@@ -213,11 +314,28 @@ do k=0,2
    ind_tw1 :=  get1Dindex(sst_year,case_need[1])
    ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
 
+   u_year = ispan(startyear,endyear,1) 
+
+   ind_us1_or :=  get1Dindex(u_year,case_need[0])
+   ind_uw1_or :=  get1Dindex(u_year,case_need[1])
+   ind_unor1 :=  get1Dindex(u_year,case_need[2])
+   
+
+   ind_uw1 :=  ind_uw1_or(0:dimsizes(ind_uw1_or)-2)  ;;去掉最后一年
+
+   ind_us1 :=  ind_us1_or(0:dimsizes(ind_us1_or)-2)  ;;去掉最后一年
+
+
 
 ;;;split to 12 month 
   dim1  = dimsizes(ssta)
   yearnum = dim1(0)/12 -1
   ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
+
+  dim2  = dimsizes(u_850)
+  yearnum := dim2(0)/12 -1
+  u_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+  v_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
 
 
 
@@ -225,56 +343,77 @@ do k=0,2
   ssta_weak_evo = new((/18/),float)
   ssta_nor_evo = new((/18/),float)
 
+  u_850_str_evo = new((/18/),float)
+  u_850_weak_evo = new((/18/),float)
+  u_850_nor_evo = new((/18/),float)
+
+  v_850_str_evo = new((/18/),float)
+  v_850_weak_evo = new((/18/),float)
+  v_850_nor_evo = new((/18/),float)
+
+
 
  do i=0,11   
      if i.le.9 then
        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1-12:12,:,:)   ;;;3月开始，到次年2月
+       u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1-12:12,:,:)
+       v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1-12:12,:,:)
      else
         ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1:12,:,:)
+        u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1:12,:,:)
+        v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1:12,:,:)
      end if
  end do 
 
 
 
-    com_month_str  = composite_mean(ssta_month_12,ind_ts1)
+    com_month_str  = composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind_ts1,ind_us1,ind_us1)
     
     ssta_str_evo(0:11) = com_month_str[0]
+    u_850_str_evo(0:11) = com_month_str[1]
+    v_850_str_evo(0:11) = com_month_str[2]
 
 
-
-    com_month_weak  = composite_mean(ssta_month_12,ind_tw1)
+    com_month_weak  = composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind_tw1,ind_uw1,ind_uw1)
     
     ssta_weak_evo(0:11) = com_month_weak[0]
-
+    u_850_weak_evo(0:11) = com_month_weak[1]
+    v_850_weak_evo(0:11) = com_month_weak[2]
 
     ; if sst_year(ind_tnor1(dimsizes(ind_tnor1)-1)).eq.141 then 
     ;   ind_tnor1_r = ind_tnor1(0:dimsizes(ind_tnor1)-2)
     ;   ind_unor1_r = ind_unor1(0:dimsizes(ind_unor1)-2)
     ; else 
-    ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
-      ; ind_unor1_r := ind_unor1(0:dimsizes(ind_unor1)-2)
+      ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
+      ind_unor1_r := ind_unor1(0:dimsizes(ind_unor1)-2)
     ; end if
     
-    com_month_nor  = composite_mean(ssta_month_12,ind_tnor1_r)
+    com_month_nor  = composite_mean(ssta_month_12,u_850_month_12,v_850_month_12,ind_tnor1_r,ind_unor1_r,ind_unor1_r)
    
     ssta_nor_evo(0:11) = com_month_nor[0]
+    u_850_nor_evo(0:11) = com_month_nor[1]
+    v_850_nor_evo(0:11) = com_month_nor[2]
    
 
-    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),ind_ts1+1)
+    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),u_850_month_12(0:5,:,:,:),v_850_month_12(0:5,:,:,:),ind_ts1+1,ind_us1+1,ind_us1+1)
     
     ssta_str_evo(12:) = com_month_str[0]
- 
+    u_850_str_evo(12:) = com_month_str[1]
+    v_850_str_evo(12:) = com_month_str[2]
 
 
-    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tw1+1)
+    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),u_850_month_12(0:5,:,:,:),v_850_month_12(0:5,:,:,:),ind_tw1+1,ind_uw1+1,ind_uw1+1)
     
     ssta_weak_evo(12:) = com_month_weak[0]
-  
+    u_850_weak_evo(12:) = com_month_weak[1]
+    v_850_weak_evo(12:) = com_month_weak[2]
 
-    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tnor1_r+1)
+    
+    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),u_850_month_12(0:5,:,:,:),v_850_month_12(0:5,:,:,:),ind_tnor1_r+1,ind_unor1_r+1,ind_unor1_r+1)
     
     ssta_nor_evo(12:) = com_month_nor[0]
-
+    u_850_nor_evo(12:) = com_month_nor[1]
+    v_850_nor_evo(12:) = com_month_nor[2]
    
 
     ; ssta_month_str = where(prob_ssta_str.le.0.1, ssta_month_str, ssta_month_str@_FillValue)
