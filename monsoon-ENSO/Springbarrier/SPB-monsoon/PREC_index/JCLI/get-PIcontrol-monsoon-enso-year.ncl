@@ -127,7 +127,8 @@ begin
 
     prea = (/dtrend_msg_n(ispan(1,dimsizes(prea&time),1),prea,False,True,0)/)
 
-    prea_indian = dim_avg_n_Wrap(prea(:,{10:30},{70:90}), (/1,2/))
+    ; prea_indian = dim_avg_n_Wrap(prea(:,{10:30},{70:90}), (/1,2/))
+    prea_indian = dim_avg_n_Wrap(prea(:,{10:30},{60:100}), (/1,2/))
     delete(prea)
 
     prea_indian_12 = split_12(prea_indian)
@@ -206,8 +207,8 @@ begin
  print(nor_cold_year)
  print(nor_norm_year)
 
-   system("rm piControl_monsoon_and_ensoyear.nc")
-    year_out = addfile("piControl_monsoon_and_ensoyear.nc", "c")
+   system("rm 60-100_piControl_monsoon_and_ensoyear.nc")
+    year_out = addfile("60-100_piControl_monsoon_and_ensoyear.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year
