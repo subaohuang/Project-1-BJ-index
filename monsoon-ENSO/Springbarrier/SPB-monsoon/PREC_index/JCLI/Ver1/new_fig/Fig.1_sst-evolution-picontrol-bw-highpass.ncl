@@ -56,7 +56,7 @@ begin
   plot = new(3,graphic)
   midplot = plot
 
-  wks = gsn_open_wks("pdf", "Highpass-CESM2-picontrol-ssta-evolution-during-diffmonsoon")
+  wks = gsn_open_wks("pdf", "BW-Highpass-CESM2-picontrol-ssta-evolution-during-diffmonsoon")
   
    
   stss = ispan(1,3,1)+""
@@ -72,7 +72,7 @@ do k=0,2
   ; diri = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"
   ; opt1 =diri + str1(k)+""+"diffmonsoon-SSTevolution-highpass.txt"
 
-  opt1 ="highpass_" + str1(k)+""+"diffmonsoon-SSTevolution.txt"
+  opt1 ="highpass_bw_" + str1(k)+""+"diffmonsoon-SSTevolution.txt"
 
   data = asciiread(opt1, -1, "float")
   ssta_str_evo  = data(0:17)

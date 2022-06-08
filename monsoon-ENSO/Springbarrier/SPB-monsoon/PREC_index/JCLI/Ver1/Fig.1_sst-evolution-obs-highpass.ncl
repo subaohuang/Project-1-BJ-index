@@ -56,19 +56,23 @@ begin
  return var
  end
 
- function bw_bandpass(var)
+
+function bw_bandpass(var)
  begin
-    ca    = 9.0*12.0        ; band start (longer period)
-    cb    = 3.0        ; band end
+    ca    = 9.0*12       ; band start (longer period)
+    cb    = 4.0        ; band end
 
     fca   = 1.0/ca      ; 'left'  frequency
     fcb   = 1.0/cb      ; 'right' frequency
 
     opt   = False       ; use default options (time series of filtered
                         ; values will be returned)
+
     var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
  return var
  end 
+
+
 
 ;;*************************************************
 ;; main program 
@@ -99,8 +103,8 @@ begin
     ;;;
 
     ;;; high pass 9years, lose each end 2years
-    ssta  = (/Lanczos_highpass(ssta)/)
-    ; ssta  = (/bw_bandpass(ssta)/)
+    ; ssta  = (/Lanczos_highpass(ssta)/)
+    ssta  = (/bw_bandpass(ssta)/)
     ;;;
 
     delete(date)
@@ -174,10 +178,14 @@ begin
     pre_jjasa = (/dtrend_msg_n(ispan(1,2012-startyear+1,1),pre_jjasa,False,True,0)/)
 ;;;
     DMI_ctrl_JJA = pre_jjasa
-
+   
+   ; DMI_ctrl_JJA = (/bw_bandpass_filter(DMI_ctrl_JJA, 1/9.0, 1/2.1, False, 0)/)
      ;;; high pass 9years, lose each end 2years
-    DMI_ctrl_JJA  = (/Lanczos_highpass(DMI_ctrl_JJA)/)
-    ; DMI_ctrl_JJA  = (/bw_bandpass(DMI_ctrl_JJA)/)
+    ; DMI_ctrl_JJA  = (/Lanczos_highpass_year(DMI_ctrl_JJA)/)
+    ; DMI_ctrl_JJA_11avg = runave_n_Wrap(DMI_ctrl_JJA, 7, 0, 0)
+    ; DMI_ctrl_JJA = (/ DMI_ctrl_JJA - DMI_ctrl_JJA_11avg/)
+
+
 ;;;
 
 ;;;strong and weak monsoon year 
@@ -219,6 +227,15 @@ begin
  nor_norm_year =  total_year(ind(DMI_ctrl_JJA.ge.-0.43*std.and.DMI_ctrl_JJA.le.0.43*std.and.nino34_djf_2.ge.-0.43*std_nino.and.nino34_djf_2.le.0.43*std_nino))
 ;;;;
 
+print(wet_warm_year)
+print(wet_cold_year)
+print(wet_norm_year)
+print(dry_warm_year)
+print(dry_cold_year)
+print(dry_norm_year)
+print(nor_warm_year)
+print(nor_cold_year)
+print(nor_norm_year)
 
 
 
@@ -480,7 +497,7 @@ do k=0,2
    ; res@trYMaxF        = 1.6
 
    res@trYMinF        = -1.0
-   res@trYMaxF        = 2.0
+   res@trYMaxF        = 1.5
 
    ; res@tmYLValues := ispan(-6, 16, 2)*0.1
    ; res@tmYLLabels := ispan(-6, 16, 2)*0.1
@@ -489,7 +506,7 @@ do k=0,2
   if k.eq.1 then 
    ; res@trYMinF        = -1.2
    ; res@trYMaxF        = 0.4
-   res@trYMinF        = -2.0
+   res@trYMinF        = -1.5
    res@trYMaxF        = 1.0
 
    ; res@tmYLValues := ispan(-12, 4, 2)*0.1

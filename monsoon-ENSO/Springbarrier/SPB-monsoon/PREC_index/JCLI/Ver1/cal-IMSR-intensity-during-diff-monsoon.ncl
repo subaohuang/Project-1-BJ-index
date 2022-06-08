@@ -33,9 +33,7 @@ begin
    lat2 = 5
    lon1 = 190
    lon2 = 240
-    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
-
-
+   ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
 return [/ssta_month_str/]
 end 
 

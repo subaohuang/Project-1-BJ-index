@@ -53,7 +53,7 @@ begin
     endyear = 999
    
     ; year_out = addfile("../60-100_piControl_monsoon_and_ensoyear.nc", "r")
-    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_monsoon_and_ensoyear_highpass.nc", "r")
+    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
 
     nino_year = year_out->nino_year 
     lanina_year = year_out->lanina_year 
@@ -76,7 +76,7 @@ begin
     nor_norm_year = year_out->nor_norm_year
 
     ; f3 = addfile("../ssta_picontrol.nc", "r")
-    f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol_highpass.nc", "r")
+    f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol_highpass_bw.nc", "r")
     ssta = f3->ssta
     
 
@@ -158,7 +158,7 @@ do k=0,2
     data := (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/)
     
     ; opt1="60-100_highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
-    opt1="highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
+    opt1="highpass_bw_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
     ; write_matrix(data, "12f7.2",opt1)
     asciiwrite (opt1, data)
 
