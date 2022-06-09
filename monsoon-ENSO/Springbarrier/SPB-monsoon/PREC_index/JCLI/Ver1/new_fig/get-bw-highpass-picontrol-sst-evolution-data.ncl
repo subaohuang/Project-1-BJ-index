@@ -1,7 +1,7 @@
 ;;*************************************************
 ;; draw circulation pattern during monsoon year 
 ;;*************************************************************
-function one_test(pv_ano,east_time)
+function one_bw(pv_ano,east_time)
 begin
     pv_east=dim_avg_n_Wrap(pv_ano(east_time,:,:),0)
     n=dimsizes(east_time)
@@ -74,6 +74,17 @@ begin
     nor_warm_year = year_out->nor_warm_year
     nor_cold_year = year_out->nor_cold_year
     nor_norm_year = year_out->nor_norm_year
+    print(num( wet_warm_year))
+print( num( wet_cold_year))  
+print( num(wet_norm_year))
+print( num(dry_warm_year))
+print( num(dry_cold_year))
+print(num(dry_norm_year))
+print(num(nor_warm_year))
+print(num(nor_cold_year))
+print(num(nor_norm_year))
+
+exit()
 
     ; f3 = addfile("../ssta_picontrol.nc", "r")
     f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol_highpass_bw.nc", "r")

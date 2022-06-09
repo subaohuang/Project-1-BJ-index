@@ -135,7 +135,7 @@ begin
 
     ;;; interannual variance
     ; ssta = (/Lanczos_highpass(ssta)/)
-    ssta = (/bw_bandpass(ssta)/)
+    ; ssta = (/bw_bandpass(ssta)/)
     ;;;
 
     delete(date)
@@ -180,7 +180,7 @@ begin
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
      ;;;;filter 
      ; p = (/Lanczos_highpass(p)/)
-     p = (/bw_bandpass(p)/)
+     ; p = (/bw_bandpass(p)/)
     ;;;
     ;;;
 
@@ -267,8 +267,8 @@ begin
    ; u_850 = (/Lanczos_highpass(u_850)/)
    ; v_850 = (/Lanczos_highpass(v_850)/)
 
-   u_850 = (/bw_bandpass(u_850)/)
-   v_850 = (/bw_bandpass(v_850)/)
+   ; u_850 = (/bw_bandpass(u_850)/)
+   ; v_850 = (/bw_bandpass(v_850)/)
 
 ;;;
 
@@ -430,7 +430,7 @@ do k=0,2
   ind_uw1 :=  get1Dindex(u_year,case_need2[1])
   ind_unor1 :=  get1Dindex(u_year,case_need2[2])
 
-  wks = gsn_open_wks("pdf", "new-bwhighpass-Combinedindex-20CRV3-diff-JJASOND-UVPRE-"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "new-Combinedindex-20CRV3-diff-JJASOND-UVPRE-"+" "+wksstring(k))
 
 
 
@@ -625,10 +625,11 @@ do i=0,dimsizes(month)-1
   end if 
 ;;;;;
 
-
-  ; if i.eq.1 then 
-  ; prob_u_str({0:30},{90:150}) = 0.05
+  
+  ; if k.eq.2.and.i.eq.1 then 
+  ; prob_ssta_weak({0:30},{90:150}) = 0.05
   ; end if
+
   u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
@@ -826,14 +827,12 @@ do i=0,dimsizes(month)-1
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-
-    if k.eq.2.and.i.eq.1 then 
+  
+    if k.eq.1.and.i.eq.1 then 
     res_pro@cnLevels = (/0,0.2/)
     else
     res_pro@cnLevels = (/0,0.1/)
     end if
-
 
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
@@ -852,8 +851,9 @@ do i=0,dimsizes(month)-1
 
     
     iplot(i*2+1) = gsn_csm_contour(wks,prob_ssta_weak,res_pro)
-    res_pro@cnLevels = (/0,0.1/)
     iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
+    
+    res_pro@cnLevels = (/0,0.1/)
 
     iplot(i*2) = gsn_csm_contour(wks,prob_p_weak,res_pro)
     iplot1(i*2) = gsn_csm_contour(wks,prob_p_str,res_pro)

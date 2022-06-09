@@ -12,19 +12,16 @@ begin
     end do 
 return data_12
 end 
-
-
- function bw_bandpass(var)
+function bw_bandpass(var)
  begin
     ca    = 9.0*12.0        ; band start (longer period)
-    cb    = 4.0        ; band end
+    cb    = 12.0        ; band end
 
     fca   = 1.0/ca      ; 'left'  frequency
     fcb   = 1.0/cb      ; 'right' frequency
 
     opt   = False       ; use default options (time series of filtered
                         ; values will be returned)
-
     var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
  return var
  end 
@@ -43,74 +40,74 @@ begin
     lon1 = -180
     lon2 = 180
 
-; ; ;;;读入海温数据
-;     diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
-;     fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+; ;;;读入海温数据
+    diri="/home/ys17-23/CMIP6/1.0x1.0/CESM2/piControl/Omon/"
+    fils1=systemfunc("ls "+diri+"tos_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
 
-;     f1=addfiles(fils1, "r")
-;     date:=cd_calendar(f1[:]->time, 1)
+    f1=addfiles(fils1, "r")
+    date:=cd_calendar(f1[:]->time, 1)
 
-;     lat := f1[0]->lat
-;     lon := f1[0]->lon
+    lat := f1[0]->lat
+    lon := f1[0]->lon
 
-;     timeind:=ind(date.le.endmon.and.date.ge.startmon)
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)
 
-;     sst=lonFlip(f1[:]->tos(timeind,{lat1:lat2},{lon1:lon2}))
-;     ; sst = (/sst*86400/)
-;     printVarSummary(sst)
+    sst=lonFlip(f1[:]->tos(timeind,{lat1:lat2},{lon1:lon2}))
+    ; sst = (/sst*86400/)
+    printVarSummary(sst)
     
-;     ssta=(/rmMonAnnCycTLL(sst)/)
-;     copy_VarCoords(sst, ssta)
+    ssta=(/rmMonAnnCycTLL(sst)/)
+    copy_VarCoords(sst, ssta)
 
-;     ;;detrend 
-;     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
-;     ;;;
-;     delete(date)
-;     delete(timeind)
+    ;;detrend 
+    ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+    ;;;
+    delete(date)
+    delete(timeind)
    
-;     print("************** finish SST data*****************")
+    print("************** finish SST data*****************")
 
-;  ;;; high pass 10years, lose each end 2years
-;     ; ssta  = (/Lanczos_highpass(ssta)/)
-;     ssta = (/bw_bandpass(ssta)/)   ; 
+ ;;; high pass 10years, lose each end 2years
+    ; ssta  = (/Lanczos_highpass(ssta)/)
+    ssta = (/bw_bandpass(ssta)/)   ; 
 
-;     system("rm ssta_picontrol_highpass_bw.nc")
-;     ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
-;     ncout->ssta = ssta
-; ;;
+    system("rm ssta_picontrol_highpass_bw_test.nc")
+    ncout = addfile("ssta_picontrol_highpass_bw_test.nc", "c")
+    ncout->ssta = ssta
+;;
 
-;     ; ncout = addfile("ssta_picontrol_highpass.nc", "r")
-;     ; ssta = ncout->ssta
-;  ;;;
-;     ; ca    = 10.0*12.0        ; band start (longer period)
-;     ; cb    = 12.0        ; band end
+    ; ncout = addfile("ssta_picontrol_highpass.nc", "r")
+    ; ssta = ncout->ssta
+ ;;;
+    ; ca    = 10.0*12.0        ; band start (longer period)
+    ; cb    = 12.0        ; band end
 
-;     ; fca   = 1.0/ca      ; 'left'  frequency
-;     ; fcb   = 1.0/cb      ; 'right' frequency
+    ; fca   = 1.0/ca      ; 'left'  frequency
+    ; fcb   = 1.0/cb      ; 'right' frequency
 
-;     ; opt   = False       ; use default options (time series of filtered
-;     ;                     ; values will be returned)
+    ; opt   = False       ; use default options (time series of filtered
+    ;                     ; values will be returned)
 
-;     ; ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
+    ; ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
 
-;     ; system("rm ssta_picontrol_highpass_bw.nc")
-;     ; ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
-;     ; ncout->ssta = ssta
-;     ; exit()
-; ;;;;;;
+    ; system("rm ssta_picontrol_highpass_bw.nc")
+    ; ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
+    ; ncout->ssta = ssta
+    ; exit()
+;;;;;;
 
 
-; ;;;;;
-;     nino34 = dim_avg_n_Wrap(ssta(:,{-5:5},{190:240}), (/1,2/))
-;     nino34_12_r =  split_12(nino34)
+;;;;;
+    nino34 = dim_avg_n_Wrap(ssta(:,{-5:5},{190:240}), (/1,2/))
+    nino34_12_r =  split_12(nino34)
 
-;     nino34_djf = month_to_season(nino34, "DJF")
-;     nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
-;     std_nino = dim_stddev(nino34_djf)
+    nino34_djf = month_to_season(nino34, "DJF")
+    nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+    std_nino = dim_stddev(nino34_djf)
 
-;     sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
+    sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
 
-; ; ;;;
+; ;;;
 
 ;;读入ua
     diri2 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
@@ -156,11 +153,11 @@ begin
     u_850 = where(u_850.ge.100.0.or.u_850.le.-100.0, u_850@_FillValue, u_850)
     v_850 = where(v_850.ge.100.0.or.v_850.le.-100.0, v_850@_FillValue, v_850) 
 
-    system("rm uv_picontrol_highpass_bw.nc")
-    ncout = addfile("uv_picontrol_highpass_bw.nc", "c")
+    system("rm uv_picontrol_highpass_bw_test.nc")
+    ncout = addfile("uv_picontrol_highpass_bw_test.nc", "c")
     ncout->u_850 = u_850
     ncout->v_850 = v_850
-    exit()
+    
 ;;;;
     ; ncout = addfile("uv_picontrol_highpass.nc", "r")
     ; u_850 = ncout->u_850
@@ -193,8 +190,8 @@ begin
     ; prea = (/Lanczos_highpass(prea)/)
     prea_25 = (/bw_bandpass(prea_25)/)
 
-    system("rm pre_picontrol_highpass_bw.nc")
-    ncout = addfile("pre_picontrol_highpass_bw.nc", "c")
+    system("rm pre_picontrol_highpass_bw_test.nc")
+    ncout = addfile("pre_picontrol_highpass_bw_test.nc", "c")
     ncout->pre = prea_25 
     ; delete(prea)
 ;;;
@@ -220,9 +217,9 @@ begin
     ;;;; write precipitation data 
     ; prea = (/Lanczos_highpass(prea)/)
     prea = (/bw_bandpass(prea)/)
-    system("rm pre_picontrol_highpass_bw_1d1d.nc")
-    ncout = addfile("pre_picontrol_highpass_bw_1d1d.nc", "c")
-    ncout->prea = prea 
+    ; system("rm pre_picontrol_highpass_bw_1d1d.nc")
+    ; ncout = addfile("pre_picontrol_highpass_bw_1d1d.nc", "c")
+    ; ncout->prea = prea 
     ; exit()
 ; ;;;;
  
@@ -312,8 +309,8 @@ begin
  print(nor_norm_year)
 
 
-    system("rm piControl_monsoon_and_ensoyear_highpass_bw.nc")
-    year_out = addfile("piControl_monsoon_and_ensoyear_highpass_bw.nc", "c")
+    system("rm piControl_monsoon_and_ensoyear_highpass_bw_test.nc")
+    year_out = addfile("piControl_monsoon_and_ensoyear_highpass_bw_test.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year

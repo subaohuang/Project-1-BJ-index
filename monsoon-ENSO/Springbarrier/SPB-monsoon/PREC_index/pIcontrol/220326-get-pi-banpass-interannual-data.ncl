@@ -17,14 +17,15 @@ end
 function Lanczos_highpass(var)
 begin
     month1 = 10*12*1.0
-    ; month2 = 12.0
-    nwt = 49     ;;; loose 24 months each end
+    month2 = 4.0
+    nwt = 49*2+1     ;;; loose 24 months each end
     fca = 1./month1 ;;;通过的频率
-    ; fcb = 1./month2
+    fcb = 1./month2
     ihp = 1   ;;;1 high pass  0:low pass         
     nsigma = 1.  ; Lanczos sigma
 
-    wgts = filwgts_lanczos (nwt, ihp, fca, -999, nsigma)  
+    wgts = filwgts_lanczos(nwt, ihp, fca, -999, nsigma) 
+    ; wgts = filwgts_lanczos(nwt, ihp, fca,fcb, nsigma)  
 
     var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
  return var
@@ -40,7 +41,6 @@ begin
 
     opt   = False       ; use default options (time series of filtered
                         ; values will be returned)
-
     var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
  return var
  end 
@@ -90,12 +90,12 @@ begin
     ssta  = (/Lanczos_highpass(ssta)/)
     ; ssta = (/bw_bandpass(ssta)/)   ; 
 
-    system("rm ssta_picontrol_highpass.nc")
-    ncout = addfile("ssta_picontrol_highpass.nc", "c")
+    system("rm ssta_picontrol_highpass_test.nc")
+    ncout = addfile("ssta_picontrol_highpass_test.nc", "c")
     ncout->ssta = ssta
 ;;
 
-    ; ncout = addfile("ssta_picontrol_highpass.nc", "r")
+    ; ncout = addfile("ssta_picontrol_highpass_test.nc", "r")
     ; ssta = ncout->ssta
  ;;;
     ; ca    = 10.0*12.0        ; band start (longer period)
@@ -109,8 +109,8 @@ begin
 
     ; ssta = (/bw_bandpass_filter (ssta,fca,fcb,opt,0)/)   ; 
 
-    ; system("rm ssta_picontrol_highpass_bw.nc")
-    ; ncout = addfile("ssta_picontrol_highpass_bw.nc", "c")
+    ; system("rm ssta_picontrol_highpass_test_bw.nc")
+    ; ncout = addfile("ssta_picontrol_highpass_test_bw.nc", "c")
     ; ncout->ssta = ssta
     ; exit()
 ;;;;;;
@@ -173,12 +173,12 @@ begin
     ; v_850 = (/bw_bandpass(v_850)/)
     
 
-    system("rm uv_picontrol_highpass.nc")
-    ncout = addfile("uv_picontrol_highpass.nc", "c")
+    system("rm uv_picontrol_highpass_test.nc")
+    ncout = addfile("uv_picontrol_highpass_test.nc", "c")
     ncout->u_850 = u_850
     ncout->v_850 = v_850
 ;;;;
-    ; ncout = addfile("uv_picontrol_highpass.nc", "r")
+    ; ncout = addfile("uv_picontrol_highpass_test.nc", "r")
     ; u_850 = ncout->u_850
     ; v_850 = ncout->v_850
 ;;;;
@@ -209,8 +209,8 @@ begin
     prea = (/Lanczos_highpass(prea)/)
     ; prea = (/bw_bandpass(prea)/)
 
-    system("rm pre_picontrol_highpass.nc")
-    ncout = addfile("pre_picontrol_highpass.nc", "c")
+    system("rm pre_picontrol_highpass_test.nc")
+    ncout = addfile("pre_picontrol_highpass_test.nc", "c")
     ncout->pre = prea 
     ; delete(prea)
 ;;;
@@ -235,15 +235,15 @@ begin
 
 ;     ;;;; write precipitation data 
 ;     prea = (/Lanczos_highpass(prea)/)
-    ; system("rm pre_picontrol_highpass_1d1d.nc")
-    ; ncout = addfile("pre_picontrol_highpass_1d1d.nc", "c")
+    ; system("rm pre_picontrol_highpass_test_1d1d.nc")
+    ; ncout = addfile("pre_picontrol_highpass_test_1d1d.nc", "c")
     ; ncout->prea = prea 
     ; exit()
 ; ;;;;
  
-    ; ncout = addfile("pre_picontrol_highpass_1d1d.nc", "r")
+    ; ncout = addfile("pre_picontrol_highpass_test_1d1d.nc", "r")
     ; prea = ncout->prea 
-exit()
+
   
 ;;
 
@@ -327,8 +327,8 @@ exit()
  print(nor_norm_year)
 
 
-    system("rm piControl_monsoon_and_ensoyear_highpass.nc")
-    year_out = addfile("piControl_monsoon_and_ensoyear_highpass.nc", "c")
+    system("rm piControl_monsoon_and_ensoyear_highpass_test.nc")
+    year_out = addfile("piControl_monsoon_and_ensoyear_highpass_test.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year

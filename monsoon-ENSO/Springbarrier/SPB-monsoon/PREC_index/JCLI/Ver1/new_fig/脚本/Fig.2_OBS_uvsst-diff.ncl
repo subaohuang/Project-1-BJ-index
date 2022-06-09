@@ -135,7 +135,7 @@ begin
 
     ;;; interannual variance
     ; ssta = (/Lanczos_highpass(ssta)/)
-    ssta = (/bw_bandpass(ssta)/)
+    ; ssta = (/bw_bandpass(ssta)/)
     ;;;
 
     delete(date)
@@ -180,7 +180,7 @@ begin
     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
      ;;;;filter 
      ; p = (/Lanczos_highpass(p)/)
-     p = (/bw_bandpass(p)/)
+     ; p = (/bw_bandpass(p)/)
     ;;;
     ;;;
 
@@ -198,7 +198,8 @@ begin
     ncols = 18 ;;;":YEAR JAN FEB   MAR   APR   MAY   JUN   JUL   AUG   SEP   OCT   NOV   DEC    JF   MAM  JJAS   OND   ANN"
     nrows=146
     ; data = readAsciiTable("All-indian-monsoon-rainfall-index.txt", ncol, "float", 2)
-    data = asciiread("../../../All-indian-monsoon-rainfall-index.txt", (/nrows,ncols/), "float")
+    data = asciiread("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/All-indian-monsoon-rainfall-index.txt", \
+                     (/nrows,ncols/), "float")
     jjas = data(:,15) ;;sum of jjas precipitation  1871-2016
     
     jjas!0 = "time"
@@ -267,8 +268,8 @@ begin
    ; u_850 = (/Lanczos_highpass(u_850)/)
    ; v_850 = (/Lanczos_highpass(v_850)/)
 
-   u_850 = (/bw_bandpass(u_850)/)
-   v_850 = (/bw_bandpass(v_850)/)
+   ; u_850 = (/bw_bandpass(u_850)/)
+   ; v_850 = (/bw_bandpass(v_850)/)
 
 ;;;
 
@@ -430,7 +431,7 @@ do k=0,2
   ind_uw1 :=  get1Dindex(u_year,case_need2[1])
   ind_unor1 :=  get1Dindex(u_year,case_need2[2])
 
-  wks = gsn_open_wks("pdf", "new-bwhighpass-Combinedindex-20CRV3-diff-JJASOND-UVPRE-"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "new-Combinedindex-20CRV3-diff-JJASOND-UVPRE-"+" "+wksstring(k))
 
 
 
@@ -625,12 +626,15 @@ do i=0,dimsizes(month)-1
   end if 
 ;;;;;
 
-
-  ; if i.eq.1 then 
-  ; prob_u_str({0:30},{90:150}) = 0.05
+  
+  ; if k.eq.2.and.i.eq.1 then 
+  ; prob_ssta_weak({0:30},{90:150}) = 0.05
   ; end if
+  u_month_str_or =  u_month_str
   u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
+
+
 
   ; p_month_str = where(prob_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
   ; p_month_weak = where(prob_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
@@ -776,6 +780,12 @@ do i=0,dimsizes(month)-1
   end if 
   
   plot(i*2) = gsn_csm_vector_scalar_map(wks,u_month_weak, v_month_weak, p_month_weak, res)
+
+
+  if k.eq.0.and.i.eq.0 then 
+  u_month_str = where(prob_u_str.le.0.2.or.prob_v_str.le.0.2, u_month_str_or, u_month_str@_FillValue)
+  end if
+
   plot1(i*2) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res2)
 
   delete(res@cnFillColors)
@@ -826,14 +836,12 @@ do i=0,dimsizes(month)-1
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
-
-    if k.eq.2.and.i.eq.1 then 
+  
+    if k.eq.1.and.i.eq.1 then 
     res_pro@cnLevels = (/0,0.2/)
     else
     res_pro@cnLevels = (/0,0.1/)
     end if
-
 
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
@@ -852,8 +860,9 @@ do i=0,dimsizes(month)-1
 
     
     iplot(i*2+1) = gsn_csm_contour(wks,prob_ssta_weak,res_pro)
-    res_pro@cnLevels = (/0,0.1/)
     iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
+    
+    res_pro@cnLevels = (/0,0.1/)
 
     iplot(i*2) = gsn_csm_contour(wks,prob_p_weak,res_pro)
     iplot1(i*2) = gsn_csm_contour(wks,prob_p_str,res_pro)
@@ -880,7 +889,7 @@ end do
 pres = True
 pres@gsnPanelLabelBar  = False
 pres@pmLabelBarOrthogonalPosF = -0.02
-pres@gsnPanelMainString =  wksstring(k) +" events "
+pres@gsnPanelMainString =  "Observation"
 plot_total = array_append_record(plot, plot1, 0)
 gsn_panel(wks, plot_total, (/4,2/), pres)
 
