@@ -144,7 +144,7 @@ begin
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
 
-    endmonyear = 2016
+    endmonyear = 2015
 
     pre_jjas = jjas({startyear:endmonyear}) 
 
@@ -213,6 +213,7 @@ print(nor_warm_year)
 print(nor_cold_year)
 print(nor_norm_year)
 
+exit()
 
 ;;;
 
