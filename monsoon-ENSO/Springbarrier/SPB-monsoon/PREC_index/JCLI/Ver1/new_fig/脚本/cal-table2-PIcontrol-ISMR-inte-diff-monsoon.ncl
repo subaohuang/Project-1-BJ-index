@@ -364,11 +364,11 @@ if i.eq.1 then
   p_month_str_indian =  avg(p_month_str({10:30},{70:90}))
   p_month_weak_indian =  avg(p_month_weak({10:30},{70:90}))
 
-  ; u_month_str_elnino =  avg(u_month_str({-5:5},{130:160}))
-  ; u_month_weak_elnino   =  avg(u_month_weak({-5:5},{130:160}))
+  u_month_str_elnino =  avg(u_month_str({-10:10},{130:160}))
+  u_month_weak_elnino   =  avg(u_month_weak({-10:10},{130:160}))
 
-  u_month_str_elnino =  avg(u_month_str({0:10},{130:160}))
-  u_month_weak_elnino   =  avg(u_month_weak({0:10},{130:160}))
+  ; u_month_str_elnino =  avg(u_month_str({0:10},{130:160}))
+  ; u_month_weak_elnino   =  avg(u_month_weak({0:10},{130:160}))
   
   ; p_month_str_indian =  avg(p_month_str({10:30},{60:100}))
   ; p_month_weak_indian =  avg(p_month_weak({10:30},{60:100}))
