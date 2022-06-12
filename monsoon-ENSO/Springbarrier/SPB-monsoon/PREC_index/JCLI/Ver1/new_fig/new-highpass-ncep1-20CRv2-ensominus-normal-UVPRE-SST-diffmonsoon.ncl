@@ -109,17 +109,34 @@ begin
     sst=lonFlip(f1->sst(timeind,:,:))
     printVarSummary(sst)
 ;;;;
+
+; ;;;读入ERSST海温数据
+;     diri="/home/ys17-23/Extension/SST/NOAA_ERSST/"
+;     fils1=systemfunc("ls "+diri+"sst.mnmean.v5.nc")
+;     f1=addfile(fils1, "r")
+;     date:=cd_calendar(f1->time, 1)
+;     lat = f1->lat
+;     lon = f1->lon
+;     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
+;     sst=f1->sst(timeind,:,:)
+;     printVarSummary(sst)
+; ;;;;
+
+
+
+
+;;;;;
     ; startmon = 187101
-    ; endmon = 201512
+    ; endmon = endyear212
     ; startyear = 1871
-    ; endyear = 2015
+    ; endyear = endyear2
 
     ; fils1 = "/home/ys17-23/Extension/20thCRV3/air.2m.mon.mean.nc"
     ; f1 = addfile(fils1, "r")
     ; time = f1->time
     ; date=cd_calendar(time, 1)
 
-    ; endmon = endmon                 ;;; 1871-2015
+    ; endmon = endmon                 ;;; 1871-endyear2
     ; startmon = startmon 
     ; timeind=ind(date.ge.startmon.and.date.le.endmon) 
     ; sst :=f1->air(timeind,:,:)
@@ -162,22 +179,32 @@ begin
 
 ;;;读入ERA wind data
     ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV3/prate.mon.mean.nc"
+    fils1 = "/home/ys17-23/Extension/20thCRV2/prate.mon.mean.nc"
+
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)
+   
+    timeind1=ind(date1.ge.startmon.and.date1.le.194712)  
 
-    endmon = endmon                 ;;; 1871-2015
-    startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    fils2 = "/home/ys17-23/Extension/NCEP-NCAR/monthly/prate.sfc.mon.mean.nc"
+    f2 = addfile(fils2, "r")
+    time2 = f2->time
+    date2=cd_calendar(time2, 1)
+    timeind2=ind(date2.ge.194801.and.date2.le.endmon)  
+
+    p_1 =  f1->prate(timeind1,:,:)
+    p_2 =  f2->prate(timeind2,:,:)
+    
+    p = array_append_record(p_1, p_2, 0)
+
 
 ;;;;prate
-    p  = f1->prate(timeind1,:,:)
     p = (/p*86400/) ;; mm/day
     p = (/rmMonAnnCycTLL(p)/)
 
     ;;detrend 
-    p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
+     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
      ;;;;filter 
      ; p = (/Lanczos_highpass(p)/)
      ; p = (/bw_bandpass(p)/)
@@ -203,13 +230,14 @@ begin
     
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
+    endyear2 = 2016
 
-    pre_jjas = jjas({startyear:2015})  ;;;1871-2015
+    pre_jjas = jjas({startyear:endyear2})  ;;;1871-endyear2
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2015-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,endyear2-startyear+1,1),pre_jjasa,False,True,0)/)
 
     ; pre_jjasa = (/Lanczos_highpass(pre_jjasa)/)
     ; pre_jjasa = (/bw_bandpass(pre_jjasa)/)
@@ -221,15 +249,16 @@ begin
  
 
 ;;;读入ERA wind data
-    ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
-    fils1 = "/home/ys17-23/Extension/20thCRV3/uwnd.mon.mean.nc"
-    f1 = addfile(fils1, "r")
-    time1 = f1->time
-    date1=cd_calendar(time1, 1)
+    diri_in = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/JCLI/Ver1/"
 
-    endmon = endmon                 ;;; 1871-2015
+    fils1 = diri_in + "uwnd.merge.nc"
+    f1 = addfile(fils1, "r")
+    time1 := f1->time
+    date1:=cd_calendar(time1, 1)
+
+    endmon = endmon                 ;;; 1871-endyear2
     startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    timeind1:=ind(date1.ge.startmon.and.date1.le.endmon)  
 ;;;;
  
 ;;;;U,V
@@ -242,16 +271,19 @@ begin
 
     u_850 = (/rmMonAnnCycTLL(u_850)/)
     u_200 = (/rmMonAnnCycTLL(u_200)/)
+
+    printVarSummary(u_850)
+   
 ;;;
 
 
 ;;;
-    fils2 = "/home/ys17-23/Extension/20thCRV3/vwnd.mon.mean.nc"
+    fils2 = diri_in + "vwnd.merge.nc"
     f2 = addfile(fils2, "r")
-    time2 = f2->time
-    date2 = cd_calendar(time2, 1)
+    time2 := f2->time
+    date2 := cd_calendar(time2, 1)
 
-    timeind2 = ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
+    timeind2 := ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
 
 ;;;;U,V
     v_200  = f2->vwnd(timeind1,{200},:,:)
@@ -267,8 +299,23 @@ begin
    ; u_850 = (/Lanczos_highpass(u_850)/)
    ; v_850 = (/Lanczos_highpass(v_850)/)
 
-   ; u_850 = (/bw_bandpass(u_850)/)
-   ; v_850 = (/bw_bandpass(v_850)/)
+   u_850 = (/bw_bandpass(u_850)/)
+   v_850 = (/bw_bandpass(v_850)/)
+  
+
+;;;wind index :difference in the 850-hPa zonal winds 
+;;;between a southern region (5–15N, 40–80E) and a northern region (20–30N, 70–90E)
+   
+  u_850_diff = dim_avg_n_Wrap(u_850(:,{5:15},{40:80}), (/1,2/)) - dim_avg_n_Wrap(u_850(:,{20:30},{70:90}), (/1,2/))
+
+  copy_VarCoords(u_850(:,1,1), u_850_diff)
+
+  u_indian_jjas = month_to_season(u_850_diff, "JJA")
+  
+;   ;;;!! alert 
+;   p_indian_jjas = u_indian_jjas
+; ;;;;
+
 
 ;;;
 
@@ -288,7 +335,14 @@ begin
   u_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
   v_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
   
-  p_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+  dim3  = dimsizes(p)
+  yearnum := dim3(0)/12 - 1 
+
+  p_month_12 = new((/12,yearnum,dim3(1),dim3(2)/),float)
+printVarSummary(p_month_12)
+printVarSummary(u_850_month_12)
+printVarSummary(p)
+printVarSummary(ssta)
 
  do i=0,11   
      if i.le.9 then
@@ -305,22 +359,23 @@ begin
      end if
  end do 
 
+
 ;;;;;
     sst_year = ispan(startyear,endyear,1) 
-    u_year = ispan(startyear,2015,1) 
+    u_year = ispan(startyear,endyear2,1) 
 ;;;;;;;
 
 ;;;mon_elnino_years 
 
     DMI_ctrl_JJA_r = pre_jjasa 
-    total_year = ispan(startyear,2014,1)   ;;;1872-2014
+    total_year = ispan(startyear,endyear2,1)   ;;;1872-endyear2-1
 
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2014
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-1)  ;;;1871-endyear2-1
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 ;;;;
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
-    nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-2014))
+    nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-endyear2))
 
     wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -345,8 +400,8 @@ begin
 
 ;;****************************************************************************************************************************************************
   ;;;FOR 20CR based Monsoon Index
-    DMI_ctrl_JJA_r = p_indian_jjas
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-2014
+    DMI_ctrl_JJA_r = p_indian_jjas(0:dimsizes(p_indian_jjas)-1 - (endyear - endyear2) )
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-1)  ;;;1871-endyear2-1
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 ;;;
 
@@ -421,16 +476,19 @@ begin
 do k=0,2
 
   case_need:= case[k]
+  ; case_need:= case_20cr[k]
+
   ind_ts1 :=  get1Dindex(u_year,case_need[0])
   ind_tw1 :=  get1Dindex(u_year,case_need[1])
   ind_tnor1 :=  get1Dindex(u_year,case_need[2])
 
-  case_need2:= case_20cr[k]
+  ; case_need2:= case_20cr[k]
+  case_need2:= case[k]
   ind_us1 :=  get1Dindex(u_year,case_need2[0])
   ind_uw1 :=  get1Dindex(u_year,case_need2[1])
   ind_unor1 :=  get1Dindex(u_year,case_need2[2])
 
-  wks = gsn_open_wks("pdf", "new-Combinedindex-20CRV3-diff-JJASOND-UVPRE-"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "new-necp1-20CRV2-diff-JJASOND-UVPRE-"+" "+wksstring(k))
 
 
 
@@ -625,11 +683,10 @@ do i=0,dimsizes(month)-1
   end if 
 ;;;;;
 
-  
-  ; if k.eq.2.and.i.eq.1 then 
-  ; prob_ssta_weak({0:30},{90:150}) = 0.05
-  ; end if
 
+  ; if i.eq.1 then 
+  ; prob_u_str({0:30},{90:150}) = 0.05
+  ; end if
   u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
   u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
@@ -690,12 +747,12 @@ do i=0,dimsizes(month)-1
   res@gsnScalarContour        = False
 
   ;;;;;;;LineArrow
-  ; res@vcMinDistanceF           = 0.015           ; thin vectors
-  res@vcMinDistanceF           = 0.016          ; thin vectors
+  res@vcMinDistanceF           = 0.015           ; thin vectors
   ; res@vcMinDistanceF           = 0.016          ; thin vectors
-  res@vcMinMagnitudeF          =0.5
+  ; res@vcMinDistanceF           = 0.016          ; thin vectors
+  res@vcMinMagnitudeF          =0.1
   ; res@vcRefMagnitudeF          = 3.0
-  res@vcRefMagnitudeF          = 2.5
+  res@vcRefMagnitudeF          = 2.0
   res@vcRefLengthF             = 0.05     ; define length of v
   ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF = 1.0
@@ -827,12 +884,14 @@ do i=0,dimsizes(month)-1
     res_pro@cnFillOn = True
 
     res_pro@cnLevelSelectionMode = "ExplicitLevels"
-  
-    if k.eq.1.and.i.eq.1 then 
+    res_pro@cnLevels = (/0,0.1/)
+
+    if k.eq.2.and.i.eq.1 then 
     res_pro@cnLevels = (/0,0.2/)
     else
     res_pro@cnLevels = (/0,0.1/)
     end if
+
 
     res_pro@lbLabelBarOn = False
     res_pro@cnLinesOn=False
@@ -851,9 +910,8 @@ do i=0,dimsizes(month)-1
 
     
     iplot(i*2+1) = gsn_csm_contour(wks,prob_ssta_weak,res_pro)
-    iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
-    
     res_pro@cnLevels = (/0,0.1/)
+    iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
 
     iplot(i*2) = gsn_csm_contour(wks,prob_p_weak,res_pro)
     iplot1(i*2) = gsn_csm_contour(wks,prob_p_str,res_pro)
