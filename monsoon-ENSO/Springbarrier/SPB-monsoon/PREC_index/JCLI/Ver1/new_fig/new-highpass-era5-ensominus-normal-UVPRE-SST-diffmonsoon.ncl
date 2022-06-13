@@ -45,12 +45,19 @@ return data_12
 end 
 function composite_mean(ssta_month_12,p_month_12,u_850_month_12,v_850_month_12,ind1,ind2,ind3)
 begin 
+    
+    if dimsizes(ind1).eq.1 then 
 
+    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,:,:),(/0/))
+    p_month_str = dim_avg_n_Wrap(p_month_12(:,ind2,:,:),(/0/))
+    u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,:,:),(/0/))
+    v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,:,:),(/0/))
+  else
     ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,:,:),(/0,1/))
     p_month_str = dim_avg_n_Wrap(p_month_12(:,ind2,:,:),(/0,1/))
     u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,:,:),(/0,1/))
-    v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,:,:),(/0,1/))
-    
+    v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,:,:),(/0,1/)) 
+  end if 
     var_ssta_str = var_get(dim_avg_n_Wrap(ssta_month_12(:,:,:,:),0), ind1)  ;;; get variance
     var_p_str = var_get(dim_avg_n_Wrap(p_month_12(:,:,:,:),0), ind2)
     var_u_str = var_get(dim_avg_n_Wrap(u_850_month_12(:,:,:,:),0), ind2)
@@ -93,22 +100,22 @@ function bw_bandpass(var)
 ;; main program 
 ;;*************************************************************
 begin
-    startmon = 190001
-    endmon = 201012
-    startyear = 1900
-    endyear = 2010
+    startmon = 197901
+    endmon = 202012
+    startyear = 1979
+    endyear = 2020
 
-; ;;;读入HadiSST海温数据
-;     diri="/home/ys17-23/Extension/linshh/data/sst/"
-;     fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
-;     f1=addfile(fils1, "r")
-;     date:=cd_calendar(f1->time, 1)
-;     lat = f1->latitude
-;     lon = f1->longitude
-;     timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
-;     sst=lonFlip(f1->sst(timeind,:,:))
-;     printVarSummary(sst)
-; ;;;;
+;;;读入HadiSST海温数据
+    diri="/home/ys17-23/Extension/linshh/data/sst/"
+    fils1=systemfunc("ls "+diri+"HadISST_sst.nc")
+    f1=addfile(fils1, "r")
+    date:=cd_calendar(f1->time, 1)
+    lat = f1->latitude
+    lon = f1->longitude
+    timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
+    sst=lonFlip(f1->sst(timeind,:,:))
+    printVarSummary(sst)
+;;;;
 
 ; ;;;读入ERSST海温数据
 ;     diri="/home/ys17-23/Extension/SST/NOAA_ERSST/"
@@ -121,34 +128,18 @@ begin
 ;     sst=f1->sst(timeind,:,:)
 ;     printVarSummary(sst)
 ; ;;;;
-
-;;;读入HadiSST海温数据
-    diri="/home/ys17-23/Extension/ERA-20C/surface/sst/double/"
-    fils1=systemfunc("ls "+diri+"sst.20C.1900-2010.nc")
-    f1=addfile(fils1, "r")
-    date:=cd_calendar(f1->time, 1)
-    lat = f1->latitude
-    lon = f1->longitude
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)  ;;; 1900-2019
-    sst_r= f1->sst(timeind,:,:)
-    sst = tofloat(sst_r)
-    copy_VarCoords(sst_r, sst) 
-    printVarSummary(sst)
-;;;;
-
-
 ;;;;;
     ; startmon = 187101
-    ; endmon = 201512
+    ; endmon = endyear212
     ; startyear = 1871
-    ; endyear = 2015
+    ; endyear = endyear2
 
     ; fils1 = "/home/ys17-23/Extension/20thCRV3/air.2m.mon.mean.nc"
     ; f1 = addfile(fils1, "r")
     ; time = f1->time
     ; date=cd_calendar(time, 1)
 
-    ; endmon = endmon                 ;;; 1871-2015
+    ; endmon = endmon                 ;;; 1871-endyear2
     ; startmon = startmon 
     ; timeind=ind(date.ge.startmon.and.date.le.endmon) 
     ; sst :=f1->air(timeind,:,:)
@@ -157,8 +148,6 @@ begin
 
     ssta=(/rmMonAnnCycTLL(sst)/)
     copy_VarCoords(sst, ssta)
-
-
 
     ;;detrend 
     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
@@ -192,31 +181,49 @@ begin
 
 
 ;;;读入ERA wind data
-    fils1 = "/home/ys17-23/Extension/ERA-20C/pressure/total_pre/double/tp.20C.1900-2010.nc"
-    f1 = addfile(fils1, "r")
-    time1 = f1->time
-    date1=cd_calendar(time1, 1)
+    ; ; fils1 = "/home/ys17-23/Extension/ERA5-monthly/pressure/u_mon_1x1_1979_2020.nc"
+    ; fils1 = "/home/ys17-23/Extension/20thCRV2/prate.mon.mean.nc"
 
-    endmon = endmon                 ;;; 1900-2010
-    startmon = startmon 
-    timeind1=ind(date1.ge.startmon.and.date1.le.endmon)  
+    ; f1 = addfile(fils1, "r")
+    ; time1 = f1->time
+    ; date1=cd_calendar(time1, 1)
+   
+    ; timeind1=ind(date1.ge.startmon.and.date1.le.194712)  
 
- 
+    ; fils2 = "/home/ys17-23/Extension/NCEP-NCAR/monthly/prate.sfc.mon.mean.nc"
+    ; f2 = addfile(fils2, "r")
+    ; time2 = f2->time
+    ; date2=cd_calendar(time2, 1)
+    ; timeind2=ind(date2.ge.194801.and.date2.le.endmon)  
+    ; p_1 =  f1->prate(timeind1,:,:)
+    ; p_2 =  f2->prate(timeind2,:,:)
+     ; p = array_append_record(p_1, p_2, 0)
+    
+
+    fils2 = "/home/ys17-23/Extension/ERA5/ERA5-monthly/surface/tp_mon_1x1_1979_2020.nc"
+    f2 = addfile(fils2, "r")
+    time2 = f2->time
+    date2=cd_calendar(time2, 1)
+    timeind2=ind(date2.ge.197901.and.date2.le.endmon)  
+    
+    p  = short2flt(f2->tp(timeind2,:,:))
+
+
+
 ;;;;prate
-    p  = dble2flt(f1->tp(timeind1,:,:))
-    p = (/p*10^3/) ;; mm/day monthly mean of daily mean
+    p = (/p*100.0*10/) ;; mm/day
     p = (/rmMonAnnCycTLL(p)/)
 
-
     ;;detrend 
-    p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
-    ;;;
-
-    ;;;;filter 
+     p = (/dtrend_msg_n(ispan(1,dimsizes(p&time),1),p,False,True,0)/)
+     ;;;;filter 
+     ; p = (/Lanczos_highpass(p)/)
      ; p = (/bw_bandpass(p)/)
     ;;;
+    ;;;
 
-    p_indian = dim_avg_n_Wrap(p(:,{10:30},{70:90}), (/1,2/))
+    p_indian = dim_avg_n_Wrap(p(:,{10:30},{60:100}), (/1,2/))
+
     p_indian_jjas = month_to_season(p_indian, "JJA")
     p_indian_12 = split_12(p_indian)
     p_indian_jjas = (/dim_avg_n_Wrap(p_indian_12(5:8,:),0)/)
@@ -234,15 +241,14 @@ begin
     
     jjas!0 = "time"
     jjas&time = ispan(1871,2016,1)
+    endyear2 = 2016
 
-    endyear2 = 2010
-
-    pre_jjas = jjas({startyear:2010})  ;;;1871-2015
+    pre_jjas = jjas({startyear:endyear2})  ;;;1871-endyear2
 
     pre_jjas = pre_jjas*0.1 ;;convert to mm
     clm = dim_avg_n_Wrap(pre_jjas, 0)
     pre_jjasa = dim_rmvmean(pre_jjas)
-    pre_jjasa = (/dtrend_msg_n(ispan(1,2010-startyear+1,1),pre_jjasa,False,True,0)/)
+    pre_jjasa = (/dtrend_msg_n(ispan(1,endyear2-startyear+1,1),pre_jjasa,False,True,0)/)
 
     ; pre_jjasa = (/Lanczos_highpass(pre_jjasa)/)
     ; pre_jjasa = (/bw_bandpass(pre_jjasa)/)
@@ -254,41 +260,49 @@ begin
  
 
 ;;;读入ERA wind data
-   
-    fils1 := "/home/ys17-23/Extension/ERA-20C/pressure/uwnd/double/uwnd.20C.1900-2010.nc"
+    diri_in = "/home/ys17-23/Extension/ERA5/ERA5-monthly/pressure/"
+    fils1 = diri_in + "u_mon_1x1_1979_2020.nc"
+
     f1 = addfile(fils1, "r")
     time1 := f1->time
     date1:=cd_calendar(time1, 1)
+
+    endmon = endmon                 ;;; 1871-endyear2
+    startmon = startmon 
     timeind1:=ind(date1.ge.startmon.and.date1.le.endmon)  
 ;;;;
  
 ;;;;U,V
-    u_200  = dble2flt(f1->u(timeind1,{200},:,:))
-    u_850  = dble2flt(f1->u(timeind1,{850},:,:))
+
+    u_200  = short2flt(f1->u(timeind1,{200},:,:))
+    u_850  = short2flt(f1->u(timeind1,{850},:,:))
 
     u_850 = (/rmMonAnnCycTLL(u_850)/)
     u_200 = (/rmMonAnnCycTLL(u_200)/)
+
+    printVarSummary(u_850)
+   
 ;;;
 
 
 ;;;
-    fils2 = "/home/ys17-23/Extension/ERA-20C/pressure/vwnd/double/vwnd.20C.1900-2010.nc"
+    fils2 = diri_in + "v_mon_1x1_1979_2020.nc"
     f2 = addfile(fils2, "r")
-    time2 = f2->time
-    date2 = cd_calendar(time2, 1)
+    time2 := f2->time
+    date2 := cd_calendar(time2, 1)
 
-    timeind2 = ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
+    timeind2 := ind(date2.ge.startmon.and.date2.le.endmon)  ;;;风场数据从1979年开始
 
 ;;;;U,V
-    v_200  = dble2flt(f2->v(timeind1,{200},:,:))
-    v_850  = dble2flt(f2->v(timeind1,{850},:,:))
+
+    v_200  = short2flt(f2->v(timeind2,{200},:,:))
+    v_850  = short2flt(f2->v(timeind2,{850},:,:))
 
     v_850 = (/rmMonAnnCycTLL(v_850)/)
     v_200 = (/rmMonAnnCycTLL(v_200)/)
    
     u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
     v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
-;;;
 
   ;;;filter 
    ; u_850 = (/Lanczos_highpass(u_850)/)
@@ -330,7 +344,16 @@ begin
   u_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
   v_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
   
-  p_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+  dim3  = dimsizes(p)
+  yearnum := dim3(0)/12 - 1 
+
+  p_month_12 = new((/12,yearnum,dim3(1),dim3(2)/),float)
+printVarSummary(p_month_12)
+printVarSummary(u_850_month_12)
+printVarSummary(p)
+printVarSummary(ssta)
+
+
 
  do i=0,11   
      if i.le.9 then
@@ -347,26 +370,23 @@ begin
      end if
  end do 
 
+
 ;;;;;
     sst_year = ispan(startyear,endyear,1) 
-    u_year = ispan(startyear,endyear,1) 
+    u_year = ispan(startyear,endyear2,1) 
 ;;;;;;;
 
 ;;;mon_elnino_years 
 
     DMI_ctrl_JJA_r = pre_jjasa 
-    total_year = ispan(startyear,endyear2-1,1)   ;;;1872-endyear2-1
+    total_year = ispan(startyear,endyear2,1)   ;;;1872-endyear2-1
 
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-endyear2-1
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-1)  ;;;1871-endyear2-1
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 ;;;;
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
-    nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-2)
-
-    printVarSummary(nino34_djf_2)
-    printVarSummary(DMI_ctrl_JJA)
-   
+    nino34_djf_2 = nino34_djf(0:dimsizes(nino34_djf)-1-(endyear-endyear2))
 
     wet_warm_year = total_year(ind(DMI_ctrl_JJA.gt.0.43*std.and.nino34_djf_2.gt.0.43*std_nino))
 
@@ -391,8 +411,8 @@ begin
 
 ;;****************************************************************************************************************************************************
   ;;;FOR 20CR based Monsoon Index
-    DMI_ctrl_JJA_r = p_indian_jjas
-    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-2)  ;;;1871-endyear2-1
+    DMI_ctrl_JJA_r = p_indian_jjas(0:dimsizes(p_indian_jjas)-1 - (endyear - endyear2) )
+    DMI_ctrl_JJA = DMI_ctrl_JJA_r(0:dimsizes(DMI_ctrl_JJA_r)-1)  ;;;1871-endyear2-1
     std = dim_stddev_Wrap(DMI_ctrl_JJA_r)
 ;;;
 
@@ -444,6 +464,17 @@ begin
 
   imsr_inten = new(6,float)
 
+print(wet_warm_year)
+print(wet_cold_year)
+print(wet_norm_year)
+print(dry_warm_year)
+print(dry_cold_year)
+print(dry_norm_year)
+print(nor_warm_year)
+print(nor_cold_year)
+print(nor_norm_year)
+
+; exit()
  ;;;;;
    do j=0,2
 
@@ -479,7 +510,7 @@ do k=0,2
   ind_uw1 :=  get1Dindex(u_year,case_need2[1])
   ind_unor1 :=  get1Dindex(u_year,case_need2[2])
 
-  wks = gsn_open_wks("pdf", "ERA20C-diff-JJASOND-UVPRE-"+" "+wksstring(k))
+  wks = gsn_open_wks("pdf", "new-era5-diff-JJASOND-UVPRE-"+" "+wksstring(k))
 
 
 
@@ -536,10 +567,10 @@ do i=0,dimsizes(month)-1
     u_month_str = com_month_str[2]
     v_month_str = com_month_str[3]
     
-    var_ssta_str = com_month_str[4]
-    var_p_str = com_month_str[5]
-    var_u_str = com_month_str[6]
-    var_v_str = com_month_str[7]
+    ; var_ssta_str = com_month_str[4]
+    ; var_p_str = com_month_str[5]
+    ; var_u_str = com_month_str[6]
+    ; var_v_str = com_month_str[7]
 
     com_month_weak  = composite_mean(ssta_month_12(index1:index2,:,:,:),p_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
                                      v_850_month_12(index1:index2,:,:,:),ind_tw1+h,ind_uw1+h,ind_uw1+h)
@@ -550,10 +581,10 @@ do i=0,dimsizes(month)-1
     u_month_weak = com_month_weak[2]
     v_month_weak = com_month_weak[3]
     
-    var_ssta_weak = com_month_weak[4]
-    var_p_weak = com_month_weak[5]
-    var_u_weak = com_month_weak[6]
-    var_v_weak = com_month_weak[7]
+    ; var_ssta_weak = com_month_weak[4]
+    ; var_p_weak = com_month_weak[5]
+    ; var_u_weak = com_month_weak[6]
+    ; var_v_weak = com_month_weak[7]
 
     com_month_nor  = composite_mean(ssta_month_12(index1:index2,:,:,:),p_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
                                     v_850_month_12(index1:index2,:,:,:),ind_tnor1+h,ind_unor1+h,ind_unor1+h)
@@ -563,105 +594,108 @@ do i=0,dimsizes(month)-1
     u_month_nor = com_month_nor[2]
     v_month_nor = com_month_nor[3]
     
-    var_ssta_nor = com_month_nor[4]
-    var_p_nor = com_month_nor[5]
-    var_u_nor = com_month_nor[6]
-    var_v_nor = com_month_nor[7]
+    ; var_ssta_nor = com_month_nor[4]
+    ; var_p_nor = com_month_nor[5]
+    ; var_u_nor = com_month_nor[6]
+    ; var_v_nor = com_month_nor[7]
     ; p_month_str = where(var_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
     ; p_month_weak = where(var_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
 ;;;;;;
 
 ;;;; significant test
   ;;;; p
-  var1 := (/var_p_str/)
-  var2 := (/var_p_nor/)
-  var3 := (/var_p_weak/)
+  ; var1 := (/var_p_str/)
+  ; var2 := (/var_p_nor/)
+  ; var3 := (/var_p_weak/)
 
-  s1 = var_p_str@dim
-  s2 = var_p_nor@dim
-  s3 = var_p_weak@dim
+  ; s1 = var_p_str@dim
+  ; s2 = var_p_nor@dim
+  ; s3 = var_p_weak@dim
 
-  printVarSummary(var1)
+  ; printVarSummary(var1)
   printVarSummary(p_month_str)
 
 
-  if k.ne.2 then 
-  prob_p_str = (/ttest(p_month_str, var1, s1, p_month_nor, var2, s2, False, False)/)
-  prob_p_weak = (/ttest(p_month_weak, var3, s3, p_month_nor, var2, s2, False, False)/)
-  copy_VarCoords(p_month_str,prob_p_str)
-  copy_VarCoords(p_month_str,prob_p_weak)
-  else 
-  prob_p_str = one_test(p_month_str,var1,s1)
-  prob_p_weak = one_test(p_month_weak,var3,s3)
-  printVarSummary(prob_p_str)
+  ; if k.ne.2 then 
+
+  ; prob_p_str = (/ttest(p_month_str, var1, s1, p_month_nor, var2, s2, False, False)/)
+  ; prob_p_weak = (/ttest(p_month_weak, var3, s3, p_month_nor, var2, s2, False, False)/)
+  ; copy_VarCoords(p_month_str,prob_p_str)
+  ; copy_VarCoords(p_month_str,prob_p_weak)
+  ; else 
+  ; prob_p_str = one_test(p_month_str,var1,s1)
+  ; prob_p_weak = one_test(p_month_weak,var3,s3)
+  ; printVarSummary(prob_p_str)
  
-  end if 
+  ; end if 
 
   
-  var1_u := (/var_u_str/)
-  var2_u := (/var_u_nor/)
-  var3_u := (/var_u_weak/)
+  ; var1_u := (/var_u_str/)
+  ; var2_u := (/var_u_nor/)
+  ; var3_u := (/var_u_weak/)
 
-  s1_u = var_u_str@dim
-  s2_u = var_u_nor@dim
-  s3_u = var_u_weak@dim
-
-
-  if k.ne.2 then 
-  prob_u_str = (/ttest(u_month_str, var1_u,s1_u , u_month_nor, var2_u, s2_u, False, False)/)
-  prob_u_weak = (/ttest(u_month_weak, var3_u, s3_u, u_month_nor, var2_u, s2_u, False, False)/)
-  copy_VarCoords(u_month_str,prob_u_str)
-  copy_VarCoords(u_month_str,prob_u_weak)
-  else 
-  prob_u_str = one_test(u_month_str,var1_u,s1_u)
-  prob_u_weak = one_test(u_month_weak,var3_u,s3_u)
-  end if 
+  ; s1_u = var_u_str@dim
+  ; s2_u = var_u_nor@dim
+  ; s3_u = var_u_weak@dim
 
 
+  ; if k.ne.2 then 
+  ; prob_u_str = (/ttest(u_month_str, var1_u,s1_u , u_month_nor, var2_u, s2_u, False, False)/)
+  ; prob_u_weak = (/ttest(u_month_weak, var3_u, s3_u, u_month_nor, var2_u, s2_u, False, False)/)
+  ; copy_VarCoords(u_month_str,prob_u_str)
+  ; copy_VarCoords(u_month_str,prob_u_weak)
+  ; else 
+  ; prob_u_str = one_test(u_month_str,var1_u,s1_u)
+  ; prob_u_weak = one_test(u_month_weak,var3_u,s3_u)
+  ; end if 
 
-  var1_v := (/var_v_str/)
-  var2_v := (/var_v_nor/)
-  var3_v := (/var_v_weak/)
 
-  s1_v = var_v_str@dim
-  s2_v = var_v_nor@dim
-  s3_v = var_v_weak@dim
+
+  ; var1_v := (/var_v_str/)
+  ; var2_v := (/var_v_nor/)
+  ; var3_v := (/var_v_weak/)
+
+  ; s1_v = var_v_str@dim
+  ; s2_v = var_v_nor@dim
+  ; s3_v = var_v_weak@dim
   
-  if k.ne.2 then
-  prob_v_str = (/ttest(v_month_str, var1_v,s1_v , v_month_nor, var2_v, s2_v, False, False)/)
-  prob_v_weak = (/ttest(v_month_weak, var3_v, s3_v, v_month_nor, var2_v, s2_v, False, False)/)
+  ; if k.ne.2 then
+  ; prob_v_str = (/ttest(v_month_str, var1_v,s1_v , v_month_nor, var2_v, s2_v, False, False)/)
+  ; prob_v_weak = (/ttest(v_month_weak, var3_v, s3_v, v_month_nor, var2_v, s2_v, False, False)/)
 
-  copy_VarCoords(v_month_str,prob_v_str)
-  copy_VarCoords(v_month_str,prob_v_weak)
-  else 
-  prob_v_str = one_test(v_month_str,var1_v,s1_v)
-  prob_v_weak = one_test(v_month_weak,var3_v,s3_v)
-  end if 
+  ; copy_VarCoords(v_month_str,prob_v_str)
+  ; copy_VarCoords(v_month_str,prob_v_weak)
+  ; else 
+  ; prob_v_str = one_test(v_month_str,var1_v,s1_v)
+  ; prob_v_weak = one_test(v_month_weak,var3_v,s3_v)
+  ; end if 
 
-  ;;;
+  ; ;;;
 
-  ;;; ssta 
-  var1 := (/var_ssta_str/)
-  var2 := (/var_ssta_nor/)
-  var3 := (/var_ssta_weak/)
+  ; ;;; ssta 
+  ; var1 := (/var_ssta_str/)
+  ; var2 := (/var_ssta_nor/)
+  ; var3 := (/var_ssta_weak/)
 
-  s1 := var_ssta_str@dim
-  s2 := var_ssta_nor@dim
-  s3 := var_ssta_weak@dim
+  ; s1 := var_ssta_str@dim
+  ; s2 := var_ssta_nor@dim
+  ; s3 := var_ssta_weak@dim
   
-  if k.ne.2 then
-  prob_ssta_str = (/ttest(ssta_month_str, var1,s1 , ssta_month_nor, var2, s2, False, False)/)
-  prob_ssta_weak = (/ttest(ssta_month_weak, var3, s3, ssta_month_nor, var2, s2, False, False)/)
-  copy_VarCoords(ssta_month_str,prob_ssta_str)
-  copy_VarCoords(ssta_month_str,prob_ssta_weak)
-  else
-  prob_ssta_str = one_test(ssta_month_str,var1,s1)
-  prob_ssta_weak = one_test(ssta_month_weak,var3,s3)
-  end if 
+  ; if k.ne.2 then
+  ; prob_ssta_str = (/ttest(ssta_month_str, var1,s1 , ssta_month_nor, var2, s2, False, False)/)
+  ; prob_ssta_weak = (/ttest(ssta_month_weak, var3, s3, ssta_month_nor, var2, s2, False, False)/)
+  ; copy_VarCoords(ssta_month_str,prob_ssta_str)
+  ; copy_VarCoords(ssta_month_str,prob_ssta_weak)
+  ; else
+  ; prob_ssta_str = one_test(ssta_month_str,var1,s1)
+  ; prob_ssta_weak = one_test(ssta_month_weak,var3,s3)
+  ; end if 
  
 ;;;;get diff data 
 ;;;;;;
   if k.ne.2 then 
+ 
+ 
   u_month_str = (/u_month_str - u_month_nor/)
   v_month_str = (/v_month_str - v_month_nor/)
   p_month_str = (/p_month_str - p_month_nor/)
@@ -678,8 +712,8 @@ do i=0,dimsizes(month)-1
   ; if i.eq.1 then 
   ; prob_u_str({0:30},{90:150}) = 0.05
   ; end if
-  u_month_str = where(prob_u_str.le.0.3.or.prob_v_str.le.0.3, u_month_str, u_month_str@_FillValue)
-  u_month_weak = where(prob_u_weak.le.0.3.or.prob_v_weak.le.0.3, u_month_weak, u_month_weak@_FillValue)
+  ; u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
+  ; u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
 
   ; p_month_str = where(prob_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
   ; p_month_weak = where(prob_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
@@ -738,12 +772,12 @@ do i=0,dimsizes(month)-1
   res@gsnScalarContour        = False
 
   ;;;;;;;LineArrow
-  ; res@vcMinDistanceF           = 0.015           ; thin vectors
-  res@vcMinDistanceF           = 0.016          ; thin vectors
+  res@vcMinDistanceF           = 0.015           ; thin vectors
   ; res@vcMinDistanceF           = 0.016          ; thin vectors
-  res@vcMinMagnitudeF          =0.5
+  ; res@vcMinDistanceF           = 0.016          ; thin vectors
+  res@vcMinMagnitudeF          =0.1
   ; res@vcRefMagnitudeF          = 3.0
-  res@vcRefMagnitudeF          = 2.5
+  res@vcRefMagnitudeF          = 2.0
   res@vcRefLengthF             = 0.05     ; define length of v
   ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF = 1.0
@@ -867,58 +901,58 @@ do i=0,dimsizes(month)-1
 
    ; str1 = unique_string("dum1")  ; "unique_string" will return a unique    
 
-   ;;;打点
-    res_pro=True
-    res_pro@gsnAddCyclic = False
-    res_pro@gsnDraw=False
-    res_pro@gsnFrame=False
-    res_pro@cnFillOn = True
+   ; ;;;打点
+   ;  res_pro=True
+   ;  res_pro@gsnAddCyclic = False
+   ;  res_pro@gsnDraw=False
+   ;  res_pro@gsnFrame=False
+   ;  res_pro@cnFillOn = True
 
-    res_pro@cnLevelSelectionMode = "ExplicitLevels"
-    res_pro@cnLevels = (/0,0.1/)
+   ;  res_pro@cnLevelSelectionMode = "ExplicitLevels"
+   ;  res_pro@cnLevels = (/0,0.1/)
 
-    if k.eq.2.and.i.eq.1 then 
-    res_pro@cnLevels = (/0,0.2/)
-    else
-    res_pro@cnLevels = (/0,0.1/)
-    end if
+   ;  if k.eq.2.and.i.eq.1 then 
+   ;  res_pro@cnLevels = (/0,0.2/)
+   ;  else
+   ;  res_pro@cnLevels = (/0,0.1/)
+   ;  end if
 
 
-    res_pro@lbLabelBarOn = False
-    res_pro@cnLinesOn=False
-    ; res_pro@cnMonoLineColor =False
-    ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
+   ;  res_pro@lbLabelBarOn = False
+   ;  res_pro@cnLinesOn=False
+   ;  ; res_pro@cnMonoLineColor =False
+   ;  ; res_pro@cnLineColors = ((/"Transparent","White","Transparent"/))
 
-    res_pro@cnMonoFillPattern = True
-    res_pro@cnFillPattern = 17
-    res_pro@cnFillDotSizeF = 0.001
-    res_pro@cnMonoFillColor = False
-    res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
-    ; res_pro@cnLevels = ispan(-6,6,1)
-    res_pro@cnLineLabelsOn=False
-    res_pro@tmYRMode = "Automatic"
-    res_pro@cnInfoLabelOn=False
+   ;  res_pro@cnMonoFillPattern = True
+   ;  res_pro@cnFillPattern = 17
+   ;  res_pro@cnFillDotSizeF = 0.001
+   ;  res_pro@cnMonoFillColor = False
+   ;  res_pro@cnFillColors = (/"Transparent","black","Transparent"/)
+   ;  ; res_pro@cnLevels = ispan(-6,6,1)
+   ;  res_pro@cnLineLabelsOn=False
+   ;  res_pro@tmYRMode = "Automatic"
+   ;  res_pro@cnInfoLabelOn=False
 
     
-    iplot(i*2+1) = gsn_csm_contour(wks,prob_ssta_weak,res_pro)
-    res_pro@cnLevels = (/0,0.1/)
-    iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
+   ;  iplot(i*2+1) = gsn_csm_contour(wks,prob_ssta_weak,res_pro)
+   ;  res_pro@cnLevels = (/0,0.1/)
+   ;  iplot1(i*2+1) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
 
-    iplot(i*2) = gsn_csm_contour(wks,prob_p_weak,res_pro)
-    iplot1(i*2) = gsn_csm_contour(wks,prob_p_str,res_pro)
-    ; iplot2(i) = gsn_csm_contour(wks2,prob_p_nor,res_pro)
+   ;  iplot(i*2) = gsn_csm_contour(wks,prob_p_weak,res_pro)
+   ;  iplot1(i*2) = gsn_csm_contour(wks,prob_p_str,res_pro)
+   ;  ; iplot2(i) = gsn_csm_contour(wks2,prob_p_nor,res_pro)
 
-    overlay(plot(i*2), iplot(i*2))
-    overlay(plot1(i*2), iplot1(i*2))
-    overlay(plot(i*2+1), iplot(i*2+1))
-    overlay(plot1(i*2+1), iplot1(i*2+1))
+   ;  overlay(plot(i*2), iplot(i*2))
+   ;  overlay(plot1(i*2), iplot1(i*2))
+   ;  overlay(plot(i*2+1), iplot(i*2+1))
+   ;  overlay(plot1(i*2+1), iplot1(i*2+1))
     ; overlay(plot2(i), iplot2(i))
-    delete(prob_p_str)
-    delete(prob_p_weak)
-    delete(prob_u_str)
-    delete(prob_u_weak)
-    delete(prob_ssta_str)
-    delete(prob_ssta_weak)
+    ; delete(prob_p_str)
+    ; delete(prob_p_weak)
+    ; delete(prob_u_str)
+    ; delete(prob_u_weak)
+    ; delete(prob_ssta_str)
+    ; delete(prob_ssta_weak)
 
     ;;;;plot for strong monsoon 
     ;;;;plot1 for weak monsoon 
