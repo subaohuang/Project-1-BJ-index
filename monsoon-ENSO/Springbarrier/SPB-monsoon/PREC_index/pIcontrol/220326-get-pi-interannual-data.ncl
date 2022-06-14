@@ -12,19 +12,6 @@ begin
     end do 
 return data_12
 end 
-function bw_bandpass(var)
- begin
-    ca    = 9.0*12.0        ; band start (longer period)
-    cb    = 4.0        ; band end
-
-    fca   = 1.0/ca      ; 'left'  frequency
-    fcb   = 1.0/cb      ; 'right' frequency
-
-    opt   = False       ; use default options (time series of filtered
-                        ; values will be returned)
-    var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
- return var
- end 
 
 ;;*************************************************
 ;; main program 
@@ -72,13 +59,10 @@ begin
     delete(timeind)
    
     print("************** finish SST data*****************")
+ ; 
 
- ;;; high pass 10years, lose each end 2years
-    ; ssta  = (/Lanczos_highpass(ssta)/)
-    ssta = (/bw_bandpass(ssta)/)   ; 
-
-    system("rm ssta_picontrol_highpass_bw_201-1200.nc")
-    ncout = addfile("ssta_picontrol_highpass_bw_201-1200.nc", "c")
+    system("rm ssta_picontrol_201-1200.nc")
+    ncout = addfile("ssta_picontrol_201-1200.nc", "c")
     ncout->ssta = ssta
 ;;
 
@@ -153,16 +137,12 @@ begin
 
     u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
     v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
-    
-
-    u_850 = (/bw_bandpass(u_850)/)
-    v_850 = (/bw_bandpass(v_850)/)
 
     u_850 = where(u_850.ge.100.0.or.u_850.le.-100.0, u_850@_FillValue, u_850)
     v_850 = where(v_850.ge.100.0.or.v_850.le.-100.0, v_850@_FillValue, v_850) 
 
-    system("rm uv_picontrol_highpass_bw_201-1200.nc")
-    ncout = addfile("uv_picontrol_highpass_bw_201-1200.nc", "c")
+    system("rm uv_picontrol_201-1200.nc")
+    ncout = addfile("uv_picontrol_201-1200.nc", "c")
     ncout->u_850 = u_850
     ncout->v_850 = v_850
     
@@ -195,12 +175,8 @@ begin
 ;;;
 
 
-;;;; write precipitation data 
-    ; prea = (/Lanczos_highpass(prea)/)
-    prea_25 = (/bw_bandpass(prea_25)/)
-
-    system("rm pre_picontrol_highpass_bw_201-1200.nc")
-    ncout = addfile("pre_picontrol_highpass_bw_201-1200.nc", "c")
+    system("rm pre_picontrol_201-1200.nc")
+    ncout = addfile("pre_picontrol_201-1200.nc", "c")
     ncout->pre = prea_25 
     ; delete(prea)
 ;;;
@@ -226,7 +202,7 @@ begin
 
     ;;;; write precipitation data 
     ; prea = (/Lanczos_highpass(prea)/)
-    prea = (/bw_bandpass(prea)/)
+    ; prea = (/bw_bandpass(prea)/)
     ; system("rm pre_picontrol_highpass_bw_1d1d.nc")
     ; ncout = addfile("pre_picontrol_highpass_bw_1d1d.nc", "c")
     ; ncout->prea = prea 
@@ -319,8 +295,8 @@ begin
  print(nor_norm_year)
 
 
-    system("rm piControl_monsoon_and_ensoyear_highpass_bw_201-1200.nc")
-    year_out = addfile("piControl_monsoon_and_ensoyear_highpass_bw_201-1200.nc", "c")
+    system("rm piControl_monsoon_and_ensoyear_201-1200.nc")
+    year_out = addfile("piControl_monsoon_and_ensoyear_201-1200.nc", "c")
 
     year_out->nino_year = nino_year
     year_out->lanina_year = lanina_year

@@ -333,15 +333,15 @@ do i=0,dimsizes(month)-1
 ;;;;get data 
 ;;;;;;
 
-  u_month_str = (/u_month_str - u_month_nor/)
-  v_month_str = (/v_month_str - v_month_nor/)
-  p_month_str = (/p_month_str - p_month_nor/)
-  ssta_month_str = (/ssta_month_str - ssta_month_nor/)
+  ; u_month_str = (/u_month_str - u_month_nor/)
+  ; v_month_str = (/v_month_str - v_month_nor/)
+  ; p_month_str = (/p_month_str - p_month_nor/)
+  ; ssta_month_str = (/ssta_month_str - ssta_month_nor/)
 
-  u_month_weak = (/u_month_weak - u_month_nor/)
-  v_month_weak = (/v_month_weak - v_month_nor/)
-  p_month_weak = (/p_month_weak - p_month_nor/)
-  ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
+  ; u_month_weak = (/u_month_weak - u_month_nor/)
+  ; v_month_weak = (/v_month_weak - v_month_nor/)
+  ; p_month_weak = (/p_month_weak - p_month_nor/)
+  ; ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
   
 
   ;;;; p
@@ -541,7 +541,8 @@ do i=0,dimsizes(month)-1
 
   
   plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
-  plot1(i*2+1) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
+  ; plot1(i*2+1) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
+    plot1(i*2+1) = gsn_csm_vector_scalar_map(wks1,u_month_nor, v_month_nor, p_month_nor, res)
 
   delete(res@cnFillColors)
    

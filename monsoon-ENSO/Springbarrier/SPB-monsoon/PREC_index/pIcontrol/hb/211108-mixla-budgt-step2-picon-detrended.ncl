@@ -10,8 +10,11 @@ begin
 
   opt = False
 
-  his_start = 101
-  his_end   = 99912
+  ; his_start = 101
+  ; his_end   = 99912
+
+  his_start = 20101
+  his_end   = 120012
 ;;;
 
 ;;;;clm 1982-2004 
@@ -24,7 +27,7 @@ begin
 ;  Read data
 ;*******************************************
     
-    fin_thetao_his = addfile("./"+var_name(0)+"_mixed_picontrol.nc", "r")
+    fin_thetao_his = addfile("./"+var_name(0)+"_mixed_picontrol_201-1200.nc", "r")
 
     time = fin_thetao_his->time
 
@@ -49,7 +52,7 @@ begin
     printVarSummary(thetao_his_bot_anom)
 
 ;==========================================================
-    fin_uo_his = addfile("./"+var_name(1)+"_mixed_picontrol.nc", "r")
+    fin_uo_his = addfile("./"+var_name(1)+"_mixed_picontrol_201-1200.nc", "r")
     uo_his_mixed = fin_uo_his->UVEL_mixed_avg
     printVarSummary(uo_his_mixed)
 
@@ -59,8 +62,8 @@ begin
     ; uo_his_mixed_anom = (/dtrend_msg_n(ispan(1,dim(0),1),uo_his_mixed_anom, False,True, 0)/)
     printVarSummary(uo_his_mixed_anom)
 
-    system("rm uo_his_mixed_anom.nc")
-    out = addfile("uo_his_mixed_anom.nc", "c")
+    system("rm uo_his_mixed_anom_201-1200.nc")
+    out = addfile("uo_his_mixed_anom_201-1200.nc", "c")
     out->uo_his_mixed_anom  =uo_his_mixed_anom
 
     exit()

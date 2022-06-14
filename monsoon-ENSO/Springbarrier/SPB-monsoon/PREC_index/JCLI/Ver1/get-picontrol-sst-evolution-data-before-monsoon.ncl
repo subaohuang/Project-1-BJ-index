@@ -53,7 +53,7 @@ begin
     endyear = 999
    
     ; year_out = addfile("../60-100_piControl_monsoon_and_ensoyear.nc", "r")
-    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_monsoon_and_ensoyear_highpass.nc", "r")
+    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
 
     nino_year = year_out->nino_year 
     lanina_year = year_out->lanina_year 
@@ -76,7 +76,7 @@ begin
     nor_norm_year = year_out->nor_norm_year
 
     ; f3 = addfile("../ssta_picontrol.nc", "r")
-    f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol_highpass.nc", "r")
+    f3 = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/ssta_picontrol_highpass_bw.nc", "r")
     ssta = f3->ssta
     
 
@@ -103,9 +103,13 @@ do k=0,2
 
    case_need:= case[k]
 
-   ind_ts1 :=  get1Dindex(sst_year,case_need[0])
-   ind_tw1 :=  get1Dindex(sst_year,case_need[1])
-   ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
+   ind_ts1_r :=  get1Dindex(sst_year,case_need[0])
+   ind_tw1_r :=  get1Dindex(sst_year,case_need[1])
+   ind_tnor1_r :=  get1Dindex(sst_year,case_need[2])
+
+   ind_tnor1 := ind_tnor1_r(1:dimsizes(ind_tnor1_r)-1)
+   ind_tw1 := ind_tw1_r(1:dimsizes(ind_tw1_r)-1)
+   ind_ts1 := ind_ts1_r(1:dimsizes(ind_ts1_r)-1)
 
 ;;;split to 12 month 
   dim1  = dimsizes(ssta)
@@ -124,31 +128,31 @@ do k=0,2
      end if
  end do 
 
-    com_month_str  = composite_mean(ssta_month_12,ind_ts1)
+    com_month_str  = composite_mean(ssta_month_12,ind_ts1-1)
     ssta_str_evo(0:11) = com_month_str[0]
   
-    com_month_weak  = composite_mean(ssta_month_12,ind_tw1)
+    com_month_weak  = composite_mean(ssta_month_12,ind_tw1-1)
     ssta_weak_evo(0:11) = com_month_weak[0]
     
-    ; ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
+   
    
 
-    com_month_nor  = composite_mean(ssta_month_12,ind_tnor1_r)
+    com_month_nor  = composite_mean(ssta_month_12,ind_tnor1_r-1)
    
     ssta_nor_evo(0:11) = com_month_nor[0]
 
 
-    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),ind_ts1+1)
+    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),ind_ts1)
     
     ssta_str_evo(12:) = com_month_str[0]
   
 
-    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tw1+1)
+    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tw1)
     
     ssta_weak_evo(12:) = com_month_weak[0]
     
     
-    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tnor1_r+1)
+    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tnor1_r)
     
     ssta_nor_evo(12:) = com_month_nor[0]
 
@@ -158,7 +162,7 @@ do k=0,2
     data := (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/)
     
     ; opt1="60-100_highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
-    opt1="highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
+    opt1="highpass_bw_beforemonsoon_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
     ; write_matrix(data, "12f7.2",opt1)
     asciiwrite (opt1, data)
 

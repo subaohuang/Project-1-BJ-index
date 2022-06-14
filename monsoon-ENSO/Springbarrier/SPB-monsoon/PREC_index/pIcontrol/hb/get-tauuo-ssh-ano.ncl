@@ -16,8 +16,11 @@ begin
 
   opt = False
 
-  his_start = 101
-  his_end   = 99912
+  ; his_start = 101
+  ; his_end   = 99912
+
+  his_start = 20101
+  his_end   = 120012
 
   lat1 = -30.0
   lat2 = 30.0
@@ -46,9 +49,9 @@ begin
  do i = 0, dimsizes(var_name)-1
     
     if var_name(i).ne."thetao" then 
-    f1 := systemfunc("ls " + diri +var_name(i)+"_Omon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+    f1 := systemfunc("ls " + diri +var_name(i)+"_Omon_CESM2_piControl_r1i1p1f1_gn_"+"*")
     else 
-    f1 := systemfunc("ls " + diri +var_name(i)+"_Omon_CESM2_piControl_r1i1p1f1_gr_0[0-9]"+"*")
+    f1 := systemfunc("ls " + diri +var_name(i)+"_Omon_CESM2_piControl_r1i1p1f1_gr_"+"*")
     end if 
 
     fin_thetao_his := addfiles(f1, "r") 
@@ -64,12 +67,12 @@ begin
     printMinMax(thetao_his_org, opt)
 
 
-    thetao_his := thetao_his_org(timeind,:,{lon1:lon2})
+    thetao_his := thetao_his_org(:,:,{lon1:lon2})
     thetao_his_mixed = thetao_his
 
 
-    system("rm ./"+var_name2(i)+"_picontrol.nc")
-    fout_thetao_his = addfile("./"+var_name2(i)+"_picontrol.nc", "c")
+    system("rm ./"+var_name2(i)+"_picontrol_201-1200.nc")
+    fout_thetao_his = addfile("./"+var_name2(i)+"_picontrol_201-1200.nc", "c")
     fout_thetao_his->$var_name_out1(i)$ = thetao_his_mixed
     
 end do

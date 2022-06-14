@@ -41,6 +41,7 @@ begin
   var_ssta_str = var_get(dim_avg_n_Wrap(ssta_month_12(:,:,:,:),2), ind1)  ;;; get variance
   var_uo_str = var_get(dim_avg_n_Wrap(uo_month_12(:,:,:,:),2), ind1)
   var_taux_str = var_get(dim_avg_n_Wrap(taux_month_12(:,:,:,:),2), ind1)
+
 return [/ssta_month_str,uo_month_str,taux_month_str,var_ssta_str,var_uo_str,var_taux_str/]
 end 
 
@@ -64,6 +65,7 @@ begin
   copy_VarCoords(ssh_month_str,prob_ssh_weak)
 return [/prob_ssh_str,prob_ssh_weak/]
 end 
+
 function bw_bandpass(var)
  begin
     ca    = 9.0*12       ; band start (longer period)
@@ -79,21 +81,43 @@ function bw_bandpass(var)
  return var
  end 
 
+function Lanczos_highpass(var)
+begin
+    month1 = 10*12*1.0
+    month2 = 4.0
+    nwt = 49     ;;; loose 24 months each end
+    fca = 1./month1 ;;;通过的频率
+    fcb = 1./month2
+    ihp = 1   ;;;1 high pass  0:low pass         
+    nsigma = 1.  ; Lanczos sigma
+
+    wgts = filwgts_lanczos(nwt, ihp, fca, -999, nsigma) 
+    ; wgts = filwgts_lanczos(nwt, ihp, fca,fcb, nsigma)  
+    var  = (/wgt_runave_n_Wrap(var, wgts,0,0)/)
+ return var
+ end
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
 begin
     startmon = 101
-    ; endmon = 201912
     endmon = 99912
     startyear = 1
     endyear = 999
+
+    ;  startmon = 20101
+    ; endmon = 120012
+    ; startyear = 201
+    ; endyear = 1200
 ;;;;
    diri_in = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
-    year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
-    ; year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_highpass.nc", "r")
+    ; year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_201-1200.nc", "r")
+    ; year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear.nc", "r")
+    year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_highpass.nc", "r")
+    ; year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
+  
 
     nino_year = year_out->nino_year 
     lanina_year = year_out->lanina_year 
@@ -118,21 +142,24 @@ begin
 
 
 ;;;read data 
+    ; fils1 = diri_in + "hb/uo_his_mixed_anom_201-1200.nc"
     fils1 = diri_in + "hb/uo_his_mixed_anom.nc"
     f1 = addfile(fils1, "r")
     time1 = f1->time
     date1=cd_calendar(time1, 1)              
     timeind1=ind(date1.ge.startmon.and.date1.le.endmon)    
 
-    uo = f1->uo_his_mixed_anom(timeind1,:,:)
+    uo = f1->uo_his_mixed_anom(timeind1,:,{130:280})
 
+    ; fils2 = diri_in + "hb/tauuo_picontrol_201-1200.nc"
     fils2 = diri_in + "hb/tauuo_picontrol.nc"
     f2 = addfile(fils2, "r")
-    taux = f2->tauuo_ano(timeind1,:,:)
+    taux = f2->tauuo_ano(timeind1,:,{130:280})
 
-    fils3 = diri_in + "hb/zos_picontrol.nc.nc"
+    ; fils3 = diri_in + "hb/zos_picontrol_201-1200.nc"
+    fils3 = diri_in + "hb/zos_picontrol.nc"
     f3 = addfile(fils3, "r")
-    ssh = f3->zos_ano(timeind1,:,:)
+    ssh = f3->zos_ano(timeind1,:,{130:280})
 ;;;;;
 
 
@@ -156,12 +183,14 @@ begin
 ;;;;
 
 
-;;;;
-   ssha = (/bw_bandpass(ssha)/)
-   tauxa = (/bw_bandpass(tauxa)/)
-   uoa = (/bw_bandpass(uoa)/)
+; ;;;;
+   ; ssha = (/bw_bandpass(ssha)/)
+   ; tauxa = (/bw_bandpass(tauxa)/)
+   ; uoa = (/bw_bandpass(uoa)/)
 
-
+   ssha = (/Lanczos_highpass(ssha)/)
+   tauxa = (/Lanczos_highpass(tauxa)/)
+   uoa = (/Lanczos_highpass(uoa)/)
 
 
 ;;;;;
@@ -218,7 +247,7 @@ printVarSummary(tauxa)
 
 do k=0,2 
 
- wks = gsn_open_wks("pdf", "pIcontrol-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
+ wks = gsn_open_wks("pdf", "201-1200-pIcontrol-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
  ; wks = gsn_open_wks("pdf", "SODASST-"+stringlesft(k)+"-TAUXSSHUO-minusnormal-diffmonsoon")
   print("***********start*********************"+k)
 
@@ -264,7 +293,7 @@ do k=0,2
   var_uo_nor = com_month_nor[4]
   var_taux_nor = com_month_weak[5]
 
-
+  if k.ne.2 then 
   ssh_month_str = (/ssh_month_str - ssh_month_nor/)
   ssh_month_weak = (/ssh_month_weak - ssh_month_nor/)
 
@@ -273,10 +302,13 @@ do k=0,2
 
   taux_month_str = (/taux_month_str - taux_month_nor/)
   taux_month_weak = (/taux_month_weak - taux_month_nor/)
+
+end if 
 ;;;;;
 
 printMinMax(taux_month_str,1)
 printMinMax(taux_month_weak,1)
+
 ; exit()
 ;;;; 
   
@@ -293,6 +325,10 @@ printMinMax(taux_month_weak,1)
   prob_taux_str = prob_taux[0]
   prob_taux_weak = prob_taux[1]
 
+ ; if k.eq.1 then 
+ ;    print(prob_uo_weak)
+ ;    exit()
+ ; end if
 
 
     ; ssta_month_str = where(prob_ssta_str.le.0.1, ssta_month_str, ssta_month_str@_FillValue)
@@ -320,9 +356,14 @@ printMinMax(taux_month_weak,1)
   res@cnInfoLabelOn=False
 
   res@cnLevelSelectionMode = "ManualLevels"     ; manually select contours
-  res@cnMinLevelValF       = -0.01               ; min level
-  res@cnMaxLevelValF       =  0.01           ; max leve
-  res@cnLevelSpacingF      = 0.002
+  res@cnMinLevelValF       = -0.005               ; min level
+  res@cnMaxLevelValF       =  0.005          ; max leve
+  res@cnLevelSpacingF      = 0.001
+
+  ; res@cnMinLevelValF       = -0.01               ; min level
+  ; res@cnMaxLevelValF       =  0.01          ; max leve
+  ; res@cnLevelSpacingF      = 0.002
+
 
 
   res@gsnLeftString = "(b1) TAUX' "
@@ -345,7 +386,8 @@ printMinMax(taux_month_weak,1)
   res@tmYLMode      = "Explicit"                ; Define own tick mark labels.
   ; res@tmYLLabelsOn=True
   res@tmYUseLeft=True
-
+  
+  res@tmYLLabelsOn = True
   res@tmYLValues    = ispan(0,11,1)
   res@tmYLLabels = (/"M","A","M","J","J","A","S","O","N","D","J(+1)","F(+1)"/)
   
@@ -355,9 +397,13 @@ printMinMax(taux_month_weak,1)
  
   plot(0) =  gsn_csm_hov(wks,taux_month_weak, res)  
   res@gsnLeftString = "(b2) UO' "
-  res@cnMinLevelValF       = -0.1               ; min level
-  res@cnMaxLevelValF       =  0.1           ; max leve
-  res@cnLevelSpacingF      = 0.02
+  res@cnMinLevelValF       = -0.05               ; min level
+  res@cnMaxLevelValF       =  0.05           ; max leve
+  res@cnLevelSpacingF      = 0.01
+  ;   res@cnMinLevelValF       = -0.1               ; min level
+  ; res@cnMaxLevelValF       =  0.1          ; max leve
+  ; res@cnLevelSpacingF      = 0.02
+  
   
   res@tmYLLabelsOn = False
 
@@ -367,6 +413,10 @@ printMinMax(taux_month_weak,1)
   res@cnMinLevelValF       = -2.0               ; min level
   res@cnMaxLevelValF       =  2.0           ; max leve
   res@cnLevelSpacingF      = .5
+
+  ;   res@cnMinLevelValF       = -4.0               ; min level
+  ; res@cnMaxLevelValF       =  4.0           ; max leve
+  ; res@cnLevelSpacingF      = 1.
 
   plot(2) =  gsn_csm_hov(wks,ssh_month_weak , res)  
   
@@ -380,18 +430,25 @@ printMinMax(taux_month_weak,1)
   res@lbLabelAutoStride = False
   res@lbLabelStride = 2
 
-  res@cnMinLevelValF       = -0.01               ; min level
-  res@cnMaxLevelValF       =  0.01           ; max leve
-  res@cnLevelSpacingF      = 0.002
-  
+  res@cnMinLevelValF       = -0.01*0.5               ; min level
+  res@cnMaxLevelValF       =  0.01*0.5           ; max leve
+  res@cnLevelSpacingF      = 0.002*0.5
+  ;   res@cnMinLevelValF       = -0.01               ; min level
+  ; res@cnMaxLevelValF       =  0.01          ; max leve
+  ; res@cnLevelSpacingF      = 0.002
+
    res@tmYLLabelsOn = True
    res@tmXBLabelsOn = True
 
   plot(3) =  gsn_csm_hov(wks,taux_month_str, res)  
   res@gsnLeftString = "(c2) UO' "
-  res@cnMinLevelValF       = -0.1               ; min level
-  res@cnMaxLevelValF       =  0.1           ; max leve
-  res@cnLevelSpacingF      = 0.02
+  res@cnMinLevelValF       = -0.05               ; min level
+  res@cnMaxLevelValF       =  0.05           ; max leve
+  res@cnLevelSpacingF      = 0.01
+
+  ;  res@cnMinLevelValF       = -0.1               ; min level
+  ; res@cnMaxLevelValF       =  0.1           ; max leve
+  ; res@cnLevelSpacingF      = 0.02
 
     res@tmYLLabelsOn = False
 
@@ -401,9 +458,12 @@ printMinMax(taux_month_weak,1)
   res@cnMinLevelValF       = -2.0               ; min level
   res@cnMaxLevelValF       =  2.0           ; max leve
   res@cnLevelSpacingF      = .5
+  ;   res@cnMinLevelValF       = -4.0               ; min level
+  ; res@cnMaxLevelValF       =  4.0           ; max leve
+  ; res@cnLevelSpacingF      = 1.
   plot(5) =  gsn_csm_hov(wks,ssh_month_str , res)  
  
-
+  
 ;;;打点
     res_pro=True
     res_pro@gsnAddCyclic = False
