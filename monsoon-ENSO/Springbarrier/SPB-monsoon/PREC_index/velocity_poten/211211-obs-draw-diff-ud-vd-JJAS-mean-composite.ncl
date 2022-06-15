@@ -45,6 +45,20 @@ return [/ssta_month_str,u_month_str,v_month_str,prob_ssta_str,prob_u_str,prob_v_
 end 
 
 
+function bw_bandpass(var)
+ begin
+    ca    = 9.0*12       ; band start (longer period)
+    cb    = 4.0        ; band end
+
+    fca   = 1.0/ca      ; 'left'  frequency
+    fcb   = 1.0/cb      ; 'right' frequency
+
+    opt   = False       ; use default options (time series of filtered
+                        ; values will be returned)
+
+    var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
+ return var
+ end 
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
