@@ -116,20 +116,21 @@ begin
     ; timeind:=ind(date.le.endmon.and.date.ge.startmon)
     ; vp = f1->ta(timeind,{20000.0},{-40:40},:)
     
-    fils1 = systemfunc("ls " + "/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_Amon_CESM2_piControl_r1i1p1f1_gn_"+"*"+".nc")
+    fils1 = systemfunc("ls " + "/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/psl_Amon_CESM2_piControl_r1i1p1f1_gn_"+"*"+".nc")
     f1 = addfiles(fils1, "r")
     ; f1 = addfile(diri_in+"vp_ud_vd_CESM2_1-1200.nc", "r")
     time = f1[:]->time 
     date=cd_calendar(f1[:]->time, 1)
     timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    vp = dim_avg_n_Wrap(f1[:]->ta(timeind,{85000:20000},:,:),1)
+    vp = f1[:]->psl(timeind,:,:)
     printVarSummary(vp)
+
+    vp = (/vp/100.0/)
 
 
     ; system("rm "+"/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_CESM2_1-1200_200-700mean.nc")
     ; ncout = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_CESM2_1-1200_200-700mean.nc", "w")
-  
-    ;  ncout->ta = vp
+    ; ncout->ta = vp
  
    
     f2 = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ua_CESM2_1-1200_200hpa.nc", "r")
@@ -146,6 +147,10 @@ begin
      vd = (/bw_bandpass(vd)/)
      vp = (/bw_bandpass(vp)/)
 ;;;
+;     system("rm "+"/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/psl_picontrol_highpass_bw.nc")
+;     ncout = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/psl_picontrol_highpass_bw.nc", "c")
+;     ncout->psl = vp
+
 
 print("========= finish read data ==============")
 
@@ -179,8 +184,8 @@ do k=0,2
   ind_unor1 :=  get1Dindex(u_year,case_need[2])
 
 
-  wks = gsn_open_wks("pdf", "airtemp-highpass-piControl-diff-9month-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "airtemp-highpass-piControl-diff-9month-Weak-normon-"+" "+wksstring(k))  
+  wks = gsn_open_wks("pdf", "SLP-highpass-piControl-diff-9month-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "SLP-highpass-piControl-diff-9month-Weak-normon-"+" "+wksstring(k))  
 
 
 lv = 0
@@ -323,16 +328,6 @@ do i=0,dimsizes(month)-1
 ;;;;get data 
 ;;;;;;
 
-  u_month_str = (/u_month_str - u_month_nor/)
-  v_month_str = (/v_month_str - v_month_nor/)
-  p_month_str = (/p_month_str - p_month_nor/)
-  ssta_month_str = (/ssta_month_str - ssta_month_nor/)
-
-  u_month_weak = (/u_month_weak - u_month_nor/)
-  v_month_weak = (/v_month_weak - v_month_nor/)
-  p_month_weak = (/p_month_weak - p_month_nor/)
-  ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
-  
 
 
   ;;;; p
@@ -400,6 +395,20 @@ do i=0,dimsizes(month)-1
   copy_VarCoords(ssta_month_str,prob_ssta_weak)
   ;;;;
 
+
+ if k.ne.2 then 
+  u_month_str = (/u_month_str - u_month_nor/)
+  v_month_str = (/v_month_str - v_month_nor/)
+  p_month_str = (/p_month_str - p_month_nor/)
+  ssta_month_str = (/ssta_month_str - ssta_month_nor/)
+
+  u_month_weak = (/u_month_weak - u_month_nor/)
+  v_month_weak = (/v_month_weak - v_month_nor/)
+  p_month_weak = (/p_month_weak - p_month_nor/)
+  ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
+  end if 
+
+
   ; if i.eq.1 then 
   ; prob_u_str({0:30},{90:150}) = 0.05
   ; end if
@@ -430,8 +439,8 @@ do i=0,dimsizes(month)-1
 
 
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             =60
+  res@mpMinLatF             = -40
+  res@mpMaxLatF             =40
   res@mpMinLonF             = 30
   res@mpMaxLonF             = 290
 
@@ -461,24 +470,24 @@ do i=0,dimsizes(month)-1
   ; res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.1
 
   ; if  k.eq.2 then 
-  res@cnLevels := ispan(-10,10,1)*0.05
+  ; res@cnLevels := ispan(-10,10,1)*0.05
   ; else
-   ; res@cnLevels := ispan(-10,10,1)*0.1
+   res@cnLevels := ispan(-10,10,1)*0.1
    ; end if 
   res@gsnScalarContour        = False
 
   ;;;;;;;LineArrow
   ; res@vcMinDistanceF           = 0.015           ; thin vectors
 
-  if k.eq.2 then 
-  res@vcMinDistanceF           = 0.014          ; thin vectors
-    res@vcRefMagnitudeF          = 2.5
-  res@vcRefLengthF             = 0.1    ; define length of v
-  else
+  ; if k.eq.2 then 
+  ; res@vcMinDistanceF           = 0.014          ; thin vectors
+  ;   res@vcRefMagnitudeF          = 2.5
+  ; res@vcRefLengthF             = 0.1    ; define length of v
+  ; else
    res@vcMinDistanceF           = 0.016          ; thin vectors
      res@vcRefMagnitudeF          = 5.0
   res@vcRefLengthF             = 0.1    ; define length of v
-  end if 
+  ; end if 
   ; res@vcMinDistanceF           = 0.016          ; thin vectors
   res@vcMinMagnitudeF          =0.5
   ; res@vcRefMagnitudeF          = 3.0
@@ -527,8 +536,8 @@ do i=0,dimsizes(month)-1
   
   plot(lv*4 +i) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, ssta_month_str, res)
   plot1(lv*4+i) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, ssta_month_weak, res)
+  
 
- 
 
   pgres=True
   pgres@gsLineColor="black"
