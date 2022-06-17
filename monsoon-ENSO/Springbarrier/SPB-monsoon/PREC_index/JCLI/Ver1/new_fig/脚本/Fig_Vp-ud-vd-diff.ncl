@@ -17,6 +17,19 @@ begin
     var@dim = n
  return var
  end
+ function one_test(pv_ano,pv_var,dim)
+ begin
+    pv_east=pv_ano
+    n=dim
+    var_pv_ano_east    =  pv_var
+    var_pv_ano_east  =  sqrt(var_pv_ano_east/n) 
+    var_pv_ano_east  =where(var_pv_ano_east.eq.0, var_pv_ano_east@_FillValue, var_pv_ano_east)
+    
+    t_pv_ano_east = (pv_east)/var_pv_ano_east
+    confi_pv_east=student_t(t_pv_ano_east , n-1)
+    copy_VarCoords(pv_east, confi_pv_east)
+ return confi_pv_east
+end
 function split_12(data)
 begin
     dim = dimsizes(data) 
@@ -326,7 +339,7 @@ do i=0,dimsizes(month)-1
 
 ;;;;get data 
 ;;;;;;
-
+  if k.ne.2 then 
   u_month_str = (/u_month_str - u_month_nor/)
   v_month_str = (/v_month_str - v_month_nor/)
   p_month_str = (/p_month_str - p_month_nor/)
@@ -336,7 +349,7 @@ do i=0,dimsizes(month)-1
   v_month_weak = (/v_month_weak - v_month_nor/)
   p_month_weak = (/p_month_weak - p_month_nor/)
   ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
-  
+ end if 
 
 
   ;;;; p
@@ -351,12 +364,17 @@ do i=0,dimsizes(month)-1
   printVarSummary(var1)
   printVarSummary(p_month_str)
 
-
+    
+  if k.ne.2 then
   prob_p_str = (/ttest(p_month_str, var1, s1, p_month_nor, var2, s2, False, False)/)
   prob_p_weak = (/ttest(p_month_weak, var3, s3, p_month_nor, var2, s2, False, False)/)
-
   copy_VarCoords(p_month_str,prob_p_str)
   copy_VarCoords(p_month_str,prob_p_weak)
+   else 
+  prob_p_str = one_test(p_month_str,var1,s1)
+  prob_p_weak = one_test(p_month_weak,var3,s3)
+  end if 
+
 
   var1_u := (/var_u_str/)
   var2_u := (/var_u_nor/)
@@ -366,11 +384,19 @@ do i=0,dimsizes(month)-1
   s2_u = var_u_nor@dim
   s3_u = var_u_weak@dim
 
+
+
+  if k.ne.2 then 
   prob_u_str = (/ttest(u_month_str, var1_u,s1_u , u_month_nor, var2_u, s2_u, False, False)/)
   prob_u_weak = (/ttest(u_month_weak, var3_u, s3_u, u_month_nor, var2_u, s2_u, False, False)/)
-
   copy_VarCoords(u_month_str,prob_u_str)
   copy_VarCoords(u_month_str,prob_u_weak)
+  else 
+  prob_u_str = one_test(u_month_str,var1_u,s1_u)
+  prob_u_weak = one_test(u_month_weak,var3_u,s3_u)
+  end if 
+
+
 
   var1_v := (/var_v_str/)
   var2_v := (/var_v_nor/)
@@ -380,11 +406,16 @@ do i=0,dimsizes(month)-1
   s2_v = var_v_nor@dim
   s3_v = var_v_weak@dim
 
+  if k.ne.2 then 
   prob_v_str = (/ttest(v_month_str, var1_v,s1_v , v_month_nor, var2_v, s2_v, False, False)/)
   prob_v_weak = (/ttest(v_month_weak, var3_v, s3_v, v_month_nor, var2_v, s2_v, False, False)/)
 
   copy_VarCoords(v_month_str,prob_v_str)
   copy_VarCoords(v_month_str,prob_v_weak)
+  else 
+  prob_v_str = one_test(v_month_str,var1_v,s1_v)
+  prob_v_weak = one_test(v_month_weak,var3_v,s3_v)
+  end if 
   ;;;
 
 
@@ -396,12 +427,16 @@ do i=0,dimsizes(month)-1
   s1 := var_ssta_str@dim
   s2 := var_ssta_nor@dim
   s3 := var_ssta_weak@dim
-
+  if k.ne.2 then
   prob_ssta_str = (/ttest(ssta_month_str, var1,s1 , ssta_month_nor, var2, s2, False, False)/)
   prob_ssta_weak = (/ttest(ssta_month_weak, var3, s3, ssta_month_nor, var2, s2, False, False)/)
-
   copy_VarCoords(ssta_month_str,prob_ssta_str)
   copy_VarCoords(ssta_month_str,prob_ssta_weak)
+  else
+  prob_ssta_str = one_test(ssta_month_str,var1,s1)
+  prob_ssta_weak = one_test(ssta_month_weak,var3,s3)
+  end if 
+
   ;;;;
 
   ; if i.eq.1 then 
@@ -459,8 +494,13 @@ do i=0,dimsizes(month)-1
   res@cnLevelSelectionMode = "ExplicitLevels"
   ; res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.1
   ; res@cnLevels := ispan(-12,12,1)*0.1
-  res@cnLevels := ispan(-20,20,2)*0.1
 
+  if k.ne.2 then 
+  res@cnLevels := ispan(-20,20,2)*0.1
+   else
+  res@cnLevels := ispan(-16,16,2)*0.1
+end if 
+  
   res@gsnScalarContour        = False
 
   ;;;;;;;LineArrow

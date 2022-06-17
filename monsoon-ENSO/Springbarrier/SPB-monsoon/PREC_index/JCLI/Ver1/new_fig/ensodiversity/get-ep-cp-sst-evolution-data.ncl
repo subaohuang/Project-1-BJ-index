@@ -27,12 +27,10 @@ begin
     end do 
 return data_12
 end 
-function composite_mean(ssta_month_12,ind1)
+function composite_mean(ssta_month_12,lon1,lon2,ind1)
 begin 
    lat1 = -5
    lat2 = 5
-   lon1 = 190
-   lon2 = 240
    ssta_month_str = dim_avg_n_Wrap(ssta_month_12(:,ind1,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
     ; u_month_str = dim_avg_n_Wrap(u_850_month_12(:,ind2,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
     ; v_month_str = dim_avg_n_Wrap(v_850_month_12(:,ind3,{lat1:lat2},{lon1:lon2}),(/1,2,3/))
@@ -58,35 +56,54 @@ begin
     ; endyear = 1200
    
     ; year_out = addfile("../60-100_piControl_monsoon_and_ensoyear.nc", "r")
-    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_monsoon_and_ensoyear_highpass_bw_nino4.nc", "r")
+    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_ep-cp_monsoon_and_ensoyear_highpass_bw.nc", "r")
 
-    nino_year = year_out->nino_year 
-    lanina_year = year_out->lanina_year 
-    normal_year = year_out->normal_year 
+    
+    wet_warm_ep_year = year_out->wet_warm_ep_year
+    wet_cold_ep_year = year_out->wet_cold_ep_year
 
-    monstryear = year_out->monstryear 
-    monwekyear = year_out->monwekyear
-    noryear = year_out->noryear
- 
-    wet_warm_year =  year_out->wet_warm_year
-    wet_cold_year = year_out->wet_cold_year
-    wet_norm_year = year_out->wet_norm_year
+    wet_warm_cp_year = year_out->wet_warm_cp_year
+    wet_cold_cp_year = year_out->wet_cold_cp_year
 
-    dry_warm_year = year_out->dry_warm_year
-    dry_cold_year = year_out->dry_cold_year
+    wet_norm_year =  year_out->wet_norm_year
+
+    dry_warm_ep_year = year_out->dry_warm_ep_year
+    dry_cold_ep_year = year_out->dry_cold_ep_year
+    
+    dry_warm_cp_year = year_out->dry_warm_cp_year
+    dry_cold_cp_year = year_out->dry_cold_cp_year
+
     dry_norm_year = year_out->dry_norm_year
 
-    nor_warm_year = year_out->nor_warm_year
-    nor_cold_year = year_out->nor_cold_year
+    nor_warm_ep_year = year_out->nor_warm_ep_year
+    nor_warm_cp_year =  year_out->nor_warm_cp_year
+    nor_cold_ep_year =  year_out->nor_cold_ep_year 
+    nor_cold_cp_year = year_out->nor_cold_cp_year
+    
     nor_norm_year = year_out->nor_norm_year
-    print(num( wet_warm_year))
-    print( num( wet_cold_year))  
+
+
+    print(num( wet_warm_ep_year))
+    print(num( wet_cold_ep_year))
+    
+    print(num( wet_warm_cp_year))
+    print(num( wet_cold_cp_year))
     print( num(wet_norm_year))
-    print( num(dry_warm_year))
-    print( num(dry_cold_year))
-    print(num(dry_norm_year))
-    print(num(nor_warm_year))
-    print(num(nor_cold_year))
+   
+    print(num( dry_warm_ep_year))
+    print(num( dry_cold_ep_year))
+    
+    print(num( dry_warm_cp_year))
+    print(num( dry_cold_cp_year))
+    print( num(dry_norm_year))
+
+
+    print(num(nor_warm_ep_year))
+    print(num(nor_cold_ep_year))
+
+    print(num(nor_warm_cp_year))
+    print(num(nor_cold_cp_year))
+
     print(num(nor_norm_year))
 
 
@@ -100,37 +117,46 @@ begin
    sst_year = ispan(startyear,endyear,1) 
 ;;;;
 
+  elninotype = (/"EP elnino","CP elnino"/)
 
-  case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]
+do m=0,1 
 
-  case2 = [/wet_cold_year,dry_cold_year,nor_cold_year/]
+ if m.eq.0 then 
+  lon1=210
+  lon2 = 270 
+  case1 = [/wet_warm_ep_year,dry_warm_ep_year,nor_warm_ep_year/]
+  case2 = [/wet_cold_ep_year,dry_cold_ep_year,nor_cold_ep_year/]
+  else 
+   lon1=160
+  lon2 = 210
+  case1 = [/wet_warm_cp_year,dry_warm_cp_year,nor_warm_cp_year/]
+  case2 = [/wet_cold_cp_year,dry_cold_cp_year,nor_cold_cp_year/]
+ end if 
 
   case3 = [/wet_norm_year,dry_norm_year,nor_norm_year/]
-
   case = [/case1,case2,case3/]
 
   stringlesft = (/"(a) El Nino","(b) La Nina","(c) Normal"/)
-   str1= (/"El Nino","La Nina","Normal"/)
-
-
+  str1= (/"El Nino","La Nina","Normal"/)
 
 do k=0,2 
   print("***********start*********************"+k)
 
-   case_need:= case[k]
+    case_need:= case[k]
 
-   ind_ts1 :=  get1Dindex(sst_year,case_need[0])
-   ind_tw1 :=  get1Dindex(sst_year,case_need[1])
-   ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
+    ind_ts1 :=  get1Dindex(sst_year,case_need[0])
+    ind_tw1 :=  get1Dindex(sst_year,case_need[1])
+    ind_tnor1 :=  get1Dindex(sst_year,case_need[2])
+   
 
-;;;split to 12 month 
-  dim1  = dimsizes(ssta)
-  yearnum = dim1(0)/12 -1
-  ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
+    ;;;split to 12 month 
+    dim1  = dimsizes(ssta)
+    yearnum = dim1(0)/12 -1
+    ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
 
-  ssta_str_evo = new((/18/),float)
-  ssta_weak_evo = new((/18/),float)
-  ssta_nor_evo = new((/18/),float)
+    ssta_str_evo = new((/18/),float)
+    ssta_weak_evo = new((/18/),float)
+    ssta_nor_evo = new((/18/),float)
 
  do i=0,11   
      if i.le.9 then
@@ -140,31 +166,31 @@ do k=0,2
      end if
  end do 
 
-    com_month_str  = composite_mean(ssta_month_12,ind_ts1)
+    com_month_str  = composite_mean(ssta_month_12,lon1,lon2,ind_ts1)
     ssta_str_evo(0:11) = com_month_str[0]
   
-    com_month_weak  = composite_mean(ssta_month_12,ind_tw1)
+    com_month_weak  = composite_mean(ssta_month_12,lon1,lon2,ind_tw1)
     ssta_weak_evo(0:11) = com_month_weak[0]
     
-    ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
+    ; ind_tnor1_r := ind_tnor1(0:dimsizes(ind_tnor1)-2)
    
 
-    com_month_nor  = composite_mean(ssta_month_12,ind_tnor1_r)
+    com_month_nor  = composite_mean(ssta_month_12,lon1,lon2,ind_tnor1)
    
     ssta_nor_evo(0:11) = com_month_nor[0]
 
 
-    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),ind_ts1+1)
+    com_month_str  = composite_mean(ssta_month_12(0:5,:,:,:),lon1,lon2,ind_ts1+1)
     
     ssta_str_evo(12:) = com_month_str[0]
   
 
-    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tw1+1)
+    com_month_weak  = composite_mean(ssta_month_12(0:5,:,:,:),lon1,lon2,ind_tw1+1)
     
     ssta_weak_evo(12:) = com_month_weak[0]
     
     
-    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),ind_tnor1_r+1)
+    com_month_nor  = composite_mean(ssta_month_12(0:5,:,:,:),lon1,lon2,ind_tnor1+1)
     
     ssta_nor_evo(12:) = com_month_nor[0]
 
@@ -174,11 +200,11 @@ do k=0,2
     data := (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/)
     
     ; opt1="60-100_highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
-    opt1="highpass_bw_nino4-"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
+    opt1="highpass_bw_"+elninotype(m)+"-"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
     ; write_matrix(data, "12f7.2",opt1)
     asciiwrite (opt1, data)
 
     
 end do 
-
+end do 
 end 
