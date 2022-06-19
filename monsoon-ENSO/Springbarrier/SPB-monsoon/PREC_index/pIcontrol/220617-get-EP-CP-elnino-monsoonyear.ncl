@@ -47,7 +47,11 @@ begin
     nino34 = dim_avg_n_Wrap(ssta(:,{lat1:lat2},{lon1:lon2}), (/1,2/))
     nino34_12_r =  split_12(nino34)
     nino34_djf = month_to_season(nino34, "DJF")
-    nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)  ;;;; JJAS 
+
+    nino34_djf(0:dimsizes(nino34_djf)-2) = nino34_djf(1:) 
+    nino34_djf(dimsizes(nino34_djf)-1) = nino34(dimsizes(nino34)-1) 
+
+    ; nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)  ;;;; JJAS 
 
     std_nino = dim_stddev(nino34_djf)   
     sst_total_year = ispan(startyear, endyear, 1) ;;;0-199
@@ -57,14 +61,22 @@ begin
     nino3 = dim_avg_n_Wrap(ssta(:,{-5:5},{210:270}), (/1,2/))
     nino3_12_r =  split_12(nino3)
     nino3_djf = month_to_season(nino3, "DJF")
-    nino3_djf = (/dim_avg_n_Wrap(nino3_12_r(5:8,:), 0)/)  ;;;; JJAS 
+
+    nino3_djf(0:dimsizes(nino3_djf)-2) = nino3_djf(1:) 
+    nino3_djf(dimsizes(nino3_djf)-1) = nino3(dimsizes(nino3)-1) 
+
+    ; nino3_djf = (/dim_avg_n_Wrap(nino3_12_r(5:8,:), 0)/)  ;;;; JJAS 
 ;;;;
 
 ;;;;;
     nino4 = dim_avg_n_Wrap(ssta(:,{-5:5},{160:210}), (/1,2/))
     nino4_12_r =  split_12(nino4)
     nino4_djf = month_to_season(nino4, "DJF")
-    nino4_djf = (/dim_avg_n_Wrap(nino4_12_r(5:8,:), 0)/)  ;;;; JJAS 
+
+    nino4_djf(0:dimsizes(nino4_djf)-2) = nino4_djf(1:) 
+    nino4_djf(dimsizes(nino4_djf)-1) = nino4(dimsizes(nino4)-1) 
+
+    ; nino4_djf = (/dim_avg_n_Wrap(nino4_12_r(5:8,:), 0)/)  ;;;; JJAS 
 ;;;;
 
 
@@ -179,8 +191,8 @@ begin
  print(nor_cold_cp_year)
 
 
-    system("rm piControl_ep-cp_monsoon_and_ensoyear_highpass_bw.nc")
-    year_out = addfile("piControl_ep-cp_monsoon_and_ensoyear_highpass_bw.nc", "c")
+    system("rm piControl_ep-cp_monsoon_and_ensoyear_highpass_bw_djf.nc")
+    year_out = addfile("piControl_ep-cp_monsoon_and_ensoyear_highpass_bw_djf.nc", "c")
 
     year_out->nino_ep_year = nino_ep_year
     year_out->nino_cp_year = nino_cp_year

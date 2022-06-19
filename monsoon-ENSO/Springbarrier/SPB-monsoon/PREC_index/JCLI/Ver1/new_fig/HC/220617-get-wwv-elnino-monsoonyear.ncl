@@ -136,8 +136,8 @@ diri_in = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC
     en_year = nino34_djf_2
     la_year = en_year
 
-    en_year = where(hca_djf_2.ge.0.43*std_hc, 1,0)
-    la_year = where(hca_djf_2.le.-0.43*std_hc, 1,0)
+    en_year = where(hca_djf_2.ge.1.0*std_hc, 1,0)
+    la_year = where(hca_djf_2.le.-1.0*std_hc, 1,0)
     mid_year = where(hca_djf_2.gt.-0.43*std_hc.and.hca_djf_2.lt.0.43*std_hc,1,0)
 
     nino_hhc_year = total_year(ind(nino34_djf_2.gt.0.43*std_nino.and.en_year.eq.1))
