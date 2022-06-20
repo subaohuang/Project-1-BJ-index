@@ -56,7 +56,7 @@ begin
     ; endyear = 1200
    
     ; year_out = addfile("../60-100_piControl_monsoon_and_ensoyear.nc", "r")
-    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_ep-cp_monsoon_and_ensoyear_highpass_bw.nc", "r")
+    year_out = addfile("/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/piControl_ep-cp_monsoon_and_ensoyear_highpass_bw_djf.nc", "r")
 
     
     wet_warm_ep_year = year_out->wet_warm_ep_year
@@ -200,7 +200,7 @@ do k=0,2
     data := (/ssta_str_evo,ssta_weak_evo,ssta_nor_evo/)
     
     ; opt1="60-100_highpass_"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
-    opt1="highpass_bw_"+elninotype(m)+"-"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
+    opt1="highpass_bw_djf_"+elninotype(m)+"-"+str1(k)+""+"diffmonsoon-SSTevolution.txt"
     ; write_matrix(data, "12f7.2",opt1)
     asciiwrite (opt1, data)
 

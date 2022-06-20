@@ -43,22 +43,6 @@ begin
 
 return [/ssta_month_str,p_month_str,u_month_str,v_month_str,var_ssta_str,var_p_str,var_u_str,var_v_str/]
 end 
-
-
-function bw_bandpass(var)
- begin
-    ca    = 9.0*12       ; band start (longer period)
-    cb    = 4.0        ; band end
-
-    fca   = 1.0/ca      ; 'left'  frequency
-    fcb   = 1.0/cb      ; 'right' frequency
-
-    opt   = False       ; use default options (time series of filtered
-                        ; values will be returned)
-
-    var = (/bw_bandpass_filter (var,fca,fcb,opt,0)/)  
- return var
- end 
 ;;*************************************************
 ;; main program 
 ;;*************************************************************
@@ -73,16 +57,105 @@ begin
     lon1 = -180
     lon2 = 180
 
+diri_in = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"
+; ;;;读入海温数据
+;     diri="/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
+;     fils1=systemfunc("ls "+diri+"pr_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+;     print(fils1)
+
+;     f1=addfiles(fils1, "r")
+;     date:=cd_calendar(f1[:]->time, 1)
+
+;     lat = f1[0]->lat
+;     lon = f1[0]->lon
+
+;     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+
+;     sst=lonFlip(f1[:]->pr(timeind,{lat1:lat2},{lon1:lon2}))
+;     sst = (/sst*86400/)
+;     printVarSummary(sst)
+    
+;     ssta=(/rmMonAnnCycTLL(sst)/)
+;     copy_VarCoords(sst, ssta)
+
+;     ;;detrend 
+;     ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
+;     ;;;
+;     delete(date)
+;     delete(timeind)
+    
+;     ; nino34_12_r =  split_12(nino34)
+;     ; nino34_djf = (/dim_avg_n_Wrap(nino34_12_r(5:8,:), 0)/)
+;     ; std_nino = dim_stddev(nino34_djf)
+;     sst_total_year = ispan(startyear, endyear+2, 1) ;;;0-199
+;     print("************** finish SST data*****************")
+
+;     ncout = addfile("pre_picontrol.nc", "c")
+;     ncout->pre = ssta
 ; ;;;
-  diri_in = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"
+      f1 = addfile(diri_in+"pre_picontrol_highpass_bw.nc", "r")
+      p = f1->pre(:,{-40:40},:)
+
+
+;;;;;
+
+; ;;读入ua
+;     diri2 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
+;     fils2 = systemfunc("ls "+diri2+"ua_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+  
+;     f2 = addfiles(fils2, "r")
+;     date:=cd_calendar(f2[:]->time, 1)
+
+;     lat = f2[0]->lat
+;     lon = f2[0]->lon
+
+;     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+
+;     u_850 = lonFlip(f2[:]->ua(timeind,{85000},{lat1:lat2},{lon1:lon2}))
+;     printVarSummary(u_850)
+ 
+; ;;;;
+
+; ;;读入va
+;     diri3 = "/home/yangsong3/CMIP6/2.5x2.5/CESM2/piControl/"
+;     fils3 = systemfunc("ls "+diri2+"va_Amon_CESM2_piControl_r1i1p1f1_gn_0[0-9]"+"*")
+  
+;     f3 = addfiles(fils3, "r")
+;     date:=cd_calendar(f3[:]->time, 1)
+
+;     lat = f3[0]->lat
+;     lon = f3[0]->lon
+
+;     timeind:=ind(date.le.endmon+200.and.date.ge.startmon)
+
+;     v_850 = lonFlip(f3[:]->va(timeind,{85000},{lat1:lat2},{lon1:lon2}))
+;     printVarSummary(v_850)
+; ;;;;
+;     u_850 = (/rmMonAnnCycTLL(u_850)/)
+;     v_850 = (/rmMonAnnCycTLL(v_850)/)
+
+;     u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
+;     v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
+;     ncout = addfile("uv_picontrol.nc", "c")
+;     ncout->u_850 = u_850
+;     ncout->v_850 = v_850
+
+; ; ;;;;
+
+    f2 = addfile(diri_in+"uv_picontrol_highpass_bw.nc", "r")
+    u_850 = f2->u_850
+    v_850 = f2->v_850
+
 ;;;
 
 
+    f3 = addfile(diri_in + "ssta_picontrol_highpass_bw.nc", "r")
+    ssta = f3->ssta
+    
+
+
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
-    year_out = addfile( "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"+\
-                       "piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
-      ; year_out = addfile( "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"+\
-      ;                  "piControl_monsoon_and_ensoyear.nc", "r")
+    year_out = addfile(diri_in+"piControl_monsoon_and_ensoyear_highpass_bw.nc", "r")
 
     nino_year = year_out->nino_year 
     lanina_year = year_out->lanina_year 
@@ -103,121 +176,40 @@ begin
     nor_warm_year = year_out->nor_warm_year
     nor_cold_year = year_out->nor_cold_year
     nor_norm_year = year_out->nor_norm_year
-;;;;
 
-
-
-
-;read data========================================================
-    ; f1 = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_CESM2_1-1200_200hpa.nc", "r")
-    ; ; f1 = addfile(diri_in+"vp_ud_vd_CESM2_1-1200.nc", "r")
-    ; time = f1->time 
-    ; date=cd_calendar(f1->time, 1)
-    ; timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    ; vp = f1->ta(timeind,{20000.0},{-40:40},:)
-    
-    fils1 = systemfunc("ls " + "/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_Amon_CESM2_piControl_r1i1p1f1_gn_"+"*"+".nc")
-    f1 = addfiles(fils1, "r")
-    ; f1 = addfile(diri_in+"vp_ud_vd_CESM2_1-1200.nc", "r")
-    time = f1[:]->time 
-    date=cd_calendar(f1[:]->time, 1)
-    timeind:=ind(date.le.endmon.and.date.ge.startmon)
-    vp = dim_avg_n_Wrap(f1[:]->ta(timeind,{85000:20000},:,:),1)
-    printVarSummary(vp)
-
-
-    ; system("rm "+"/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_CESM2_1-1200_200-700mean.nc")
-    ; ncout = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ta_CESM2_1-1200_200-700mean.nc", "w")
-  
-    ;  ncout->ta = vp
- 
-   
-    f2 = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/ua_CESM2_1-1200_200hpa.nc", "r")
-    f3 = addfile("/home/ys17-23/CMIP6/2.5x2.5/CESM2/piControl/va_CESM2_1-1200_200hpa.nc", "r")
-
-    ud = f2->ua(timeind,:,{-40:40},:)
-    vd = f3->va(timeind,:,{-40:40},:)
-;;;;
-
-
-
-;;; band pass 
-     ud = (/bw_bandpass(ud)/)
-     vd = (/bw_bandpass(vd)/)
-     vp = (/bw_bandpass(vp)/)
-;;;
-
-print("========= finish read data ==============")
-
-
-;;;;
-  levs = (/20000.0/)
-
-  wksstring = (/"El Nino","La Nina","Normal"/)
- 
-  u_year = ispan(startyear,endyear,1) 
-;;;;
-
-;;
-
-  case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]   ;;;;;
-
-  case2 = [/wet_cold_year,dry_cold_year,nor_cold_year/]
-
-  case3 = [/wet_norm_year,dry_norm_year,nor_norm_year/]
-
-  case = [/case1,case2,case3/]
-
-print("=========================Draw plot==================================")
-
-
-do k=0,2
-
-  case_need:= case[k]
-  ind_us1 :=  get1Dindex(u_year,case_need[0])
-  ind_uw1 :=  get1Dindex(u_year,case_need[1])
-  ind_unor1 :=  get1Dindex(u_year,case_need[2])
-
-
-  wks = gsn_open_wks("pdf", "airtemp-highpass-piControl-diff-9month-Str-normon-"+" "+wksstring(k))
-  wks1 = gsn_open_wks("pdf", "airtemp-highpass-piControl-diff-9month-Weak-normon-"+" "+wksstring(k))  
-
-
-lv = 0
-;========================================================
-    lev = levs(lv)
-    u_850 = ud(:,{lev},:,:)
-    v_850 = vd(:,{lev},:,:)
-    ssta  = vp(:,:,:)
-
-    u_850 = (/rmMonAnnCycTLL(u_850)/)
-    v_850 = (/rmMonAnnCycTLL(v_850)/)
-    ssta= (/rmMonAnnCycTLL(ssta)/)
-
-    u_850 = (/dtrend_msg_n(ispan(1,dimsizes(u_850&time),1),u_850,False,True,0)/)
-    v_850 = (/dtrend_msg_n(ispan(1,dimsizes(v_850&time),1),v_850,False,True,0)/)
-    ssta = (/dtrend_msg_n(ispan(1,dimsizes(ssta&time),1),ssta,False,True,0)/)
 
     yearnum = endyear - startyear +1 -1
+    dim_sst = dimsizes(ssta)
     dim_u = dimsizes(u_850)
 
-    ;;;split to 12 month    3月开始，第一年是1900年
-    dim1  = dimsizes(ssta)
-    yearnum = dim1(0)/12 - 1
-    ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
 
-    dim2  = dimsizes(u_850)
-    yearnum := dim2(0)/12 - 1 
-    u_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
-    v_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+;;;;;
+   sst_year = ispan(startyear,endyear,1) 
+   u_year = sst_year
+;;;;
 
+;;;split to 12 month    3月开始，第一年是1900年
+  dim1  = dimsizes(ssta)
+  yearnum = dim1(0)/12 - 1
+  ssta_month_12 = new((/12,yearnum,dim1(1),dim1(2)/),float)
+
+  dim2  = dimsizes(u_850)
+  yearnum := dim2(0)/12 - 1 
+  u_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+  v_850_month_12 = new((/12,yearnum,dim2(1),dim2(2)/),float)
+  
+
+  dim3  = dimsizes(p)
+  p_month_12 = new((/12,yearnum,dim3(1),dim3(2)/),float)
 
  do i=0,11   
      if i.le.9 then
+       p_month_12(i,:,:,:) = p(i+2:dimsizes(p&time)-1-12:12,:,:)
        ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1-12:12,:,:) 
        u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1-12:12,:,:)
        v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1-12:12,:,:)
      else
+        p_month_12(i,:,:,:) = p(i+2:dimsizes(p&time)-1:12,:,:)
         ssta_month_12(i,:,:,:) = ssta(i+2:dimsizes(ssta&time)-1:12,:,:) 
         u_850_month_12(i,:,:,:) = u_850(i+2:dimsizes(u_850&time)-1:12,:,:)
         v_850_month_12(i,:,:,:) = v_850(i+2:dimsizes(v_850&time)-1:12,:,:)
@@ -230,7 +222,32 @@ lv = 0
 ;;;;;开始画图
 ;;;******************************************************************
 
+  wksstring = (/"El Nino","La Nina","Normal"/)
+;;;;
 
+
+  case1 = [/wet_warm_year,dry_warm_year,nor_warm_year/]   ;;;;;
+
+  case2 = [/wet_cold_year,dry_cold_year,nor_cold_year/]
+
+  case3 = [/wet_norm_year,dry_norm_year,nor_norm_year/]
+
+  case = [/case1,case2,case3/]
+
+
+do k=0,2
+
+  case_need:= case[k]
+  ind_us1 :=  get1Dindex(u_year,case_need[0])
+  ind_uw1 :=  get1Dindex(u_year,case_need[1])
+  ind_unor1 :=  get1Dindex(u_year,case_need[2])
+
+
+  wks = gsn_open_wks("pdf", "bwhighpass-piControl-diff-9month-seasonalmean-UVPRE-Str-normon-"+" "+wksstring(k))
+  wks1 = gsn_open_wks("pdf", "bwhighpass-piControl-diff-9month-seasonalmean-UVPRE-Weak-normon-"+" "+wksstring(k))  
+
+ ; month = (/"JJA","SON","DJF(+1)","MAM(+1)"/)  
+  ; month = (/"MAM","JJA","SON","DJF(+1)","MAM(+1)","JJA(+1)"/) 
 
   month = (/"MAM","JJAS","OND","JF(+1)"/) 
 
@@ -245,8 +262,6 @@ lv = 0
   iplot = plot1
   iplot1 = plot
   iplot2 = plot
-
-
 
 
 do i=0,dimsizes(month)-1
@@ -276,7 +291,7 @@ do i=0,dimsizes(month)-1
    end if
 
 
-    com_month_str  = composite_mean(ssta_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
+    com_month_str  = composite_mean(ssta_month_12(index1:index2,:,:,:),p_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
                                     v_850_month_12(index1:index2,:,:,:),ind_us1+h,ind_us1+h,ind_us1+h)
     
     ssta_month_str = com_month_str[0]
@@ -289,7 +304,7 @@ do i=0,dimsizes(month)-1
     var_u_str = com_month_str[6]
     var_v_str = com_month_str[7]
 
-    com_month_weak  = composite_mean(ssta_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
+    com_month_weak  = composite_mean(ssta_month_12(index1:index2,:,:,:),p_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
                                      v_850_month_12(index1:index2,:,:,:),ind_uw1+h,ind_uw1+h,ind_uw1+h)
     
 
@@ -303,7 +318,7 @@ do i=0,dimsizes(month)-1
     var_u_weak = com_month_weak[6]
     var_v_weak = com_month_weak[7]
 
-    com_month_nor  = composite_mean(ssta_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
+    com_month_nor  = composite_mean(ssta_month_12(index1:index2,:,:,:),p_month_12(index1:index2,:,:,:),u_850_month_12(index1:index2,:,:,:),\
                                     v_850_month_12(index1:index2,:,:,:),ind_unor1+h,ind_unor1+h,ind_unor1+h)
     
     ssta_month_nor = com_month_nor[0]
@@ -333,7 +348,6 @@ do i=0,dimsizes(month)-1
   p_month_weak = (/p_month_weak - p_month_nor/)
   ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
   
-
 
   ;;;; p
   var1 := (/var_p_str/)
@@ -402,9 +416,9 @@ do i=0,dimsizes(month)-1
 
   ; if i.eq.1 then 
   ; prob_u_str({0:30},{90:150}) = 0.05
-  ; ; end if
-  ; u_month_str = where(prob_u_str.le.0.1.or.prob_v_str.le.0.1, u_month_str, u_month_str@_FillValue)
-  ; u_month_weak = where(prob_u_weak.le.0.1.or.prob_v_weak.le.0.1, u_month_weak, u_month_weak@_FillValue)
+  ; end if
+  u_month_str = where(prob_u_str.le.0.05.or.prob_v_str.le.0.05, u_month_str, u_month_str@_FillValue)
+  u_month_weak = where(prob_u_weak.le.0.05.or.prob_v_weak.le.0.05, u_month_weak, u_month_weak@_FillValue)
 
   ; p_month_str = where(prob_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
   ; p_month_weak = where(prob_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
@@ -430,8 +444,8 @@ do i=0,dimsizes(month)-1
 
 
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             =60
+  res@mpMinLatF             = -50
+  res@mpMaxLatF             =50
   res@mpMinLonF             = 0
   res@mpMaxLonF             = 360
 
@@ -458,31 +472,17 @@ do i=0,dimsizes(month)-1
   res@tmBorderThicknessF=1.5
 
   res@cnLevelSelectionMode = "ExplicitLevels"
-  ; res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.1
+  res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.1
 
-  ; if  k.eq.2 then 
-  res@cnLevels := ispan(-10,10,1)*0.05
-  ; else
-   ; res@cnLevels := ispan(-10,10,1)*0.1
-   ; end if 
   res@gsnScalarContour        = False
 
   ;;;;;;;LineArrow
   ; res@vcMinDistanceF           = 0.015           ; thin vectors
-
-  if k.eq.2 then 
-  res@vcMinDistanceF           = 0.014          ; thin vectors
-    res@vcRefMagnitudeF          = 2.5
-  res@vcRefLengthF             = 0.1    ; define length of v
-  else
-   res@vcMinDistanceF           = 0.016          ; thin vectors
-     res@vcRefMagnitudeF          = 5.0
-  res@vcRefLengthF             = 0.1    ; define length of v
-  end if 
+  res@vcMinDistanceF           = 0.016          ; thin vectors
   ; res@vcMinDistanceF           = 0.016          ; thin vectors
-  res@vcMinMagnitudeF          =0.1
-  ; res@vcRefMagnitudeF          = 3.0
-
+  res@vcMinMagnitudeF          =0.5
+  res@vcRefMagnitudeF          = 3.0
+  res@vcRefLengthF             = 0.05     ; define length of v
   ; res@vcRefAnnoOrthogonalPosF  = -1.0              ; move ref vector down -1.0在图的右上
   res@vcLineArrowThicknessF = 1.0
   ; res@vcLineArrowHeadMaxSizeF=0.008
@@ -496,39 +496,60 @@ do i=0,dimsizes(month)-1
   res@vcRefAnnoOrthogonalPosF = 0.3
   res@vcRefAnnoFontHeightF = 0.01
   res@vcRefAnnoPerimOn = False
-  res@vcRefAnnoString1 = "5 m/s"
+  res@vcRefAnnoString1 = "3 m/s"
   else 
   res@vcRefAnnoOn = False
   end if
 
 
-  res@gsnLeftString = order(lv*4+i)+" "+month(i)
+  res@gsnLeftString = order(i*2)+" "+month(i)
   res@gsnLeftStringFontHeightF = 0.02
   res@gsnRightStringFontHeightF = 0.02
-  res@gsnRightString = "VP" 
+  res@gsnRightString = "SST" 
 
   res@tmYLLabelsOn  = True
 
-  ; if i.eq.3 then 
-   ; res@lbLabelBarOn=True
-   ; res@lbOrientation="Horizontal"
-   ; res@pmLabelBarWidthF = 0.6
-   ; res@pmLabelBarHeightF =0.05
-   ; res@pmLabelBarOrthogonalPosF = 0.35
-   ; res@lbLabelStride = 1
-   ; res@lbLabelAutoStride = False
-   ; res@lbAutoManage = False
-  ; end if 
+  if i.eq.3 then 
+   res@lbLabelBarOn=True
+   res@lbOrientation="Horizontal"
+   res@pmLabelBarWidthF = 0.6
+   res@pmLabelBarHeightF =0.05
+   res@pmLabelBarOrthogonalPosF = 0.35
+   res@lbLabelStride = 1
+   res@lbLabelAutoStride = False
+   res@lbAutoManage = False
+
+  end if 
    
+  
+  ;;;; for SST
+  plot(i*2) = gsn_csm_contour_map(wks,ssta_month_str,res)
+  plot1(i*2) = gsn_csm_contour_map(wks1,ssta_month_weak,res)
+
+
+  ;;;; for PRE
+  res@gsnLeftString = order(i*2+1)+" "+month(i)
+  res@gsnRightString = "PRE&UV850" 
+  res@tmYLLabelsOn  = False
 
   res@gsnScalarContour        = True
  
+  res@cnFillPalette = "precip_diff_12lev"
+  ; res@cnMinLevelValF       =   -2.
+  ; res@cnMaxLevelValF       =   2.
+  ; res@cnLevelSpacingF      =  0.4
+  ; res@cnLevels := (/-2.0,-1.6,-1.2,-0.8,-0.1,0.1,0.8,1.2,1.6,2.0/)
+  res@cnLevels := (/-2.0,-1.6,-1.2,-0.8,-0.4,0.4,0.8,1.2,1.6,2.0/)
+  ; res@cnLevels := (/-2.5,-2.0,-1.5,-1.0,-0.5,0.5,1.0,1.5,2.0,2.5/)
+
+  res@cnFillColors = (/2,3,4,5,6,8,9,10,11,13,14/) - 2 
 
   
-  plot(lv*4 +i) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, ssta_month_str, res)
-  plot1(lv*4+i) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, ssta_month_weak, res)
+  plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
+  plot1(i*2+1) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
 
- 
+  delete(res@cnFillColors)
+   
 
   pgres=True
   pgres@gsLineColor="black"
@@ -545,8 +566,8 @@ do i=0,dimsizes(month)-1
   pgy_pool=(/lat1,lat1,lat2,lat2,lat1/)
   ;;;
 
-   plot@$month_str(lv*4 +i)$ = gsn_add_polyline(wks, plot(lv*4+i) , pgx_pool, pgy_pool, pgres)
-   plot1@$month_str(lv*4 +i)$ = gsn_add_polyline(wks1, plot1(lv*4+i) , pgx_pool, pgy_pool, pgres)
+   plot@$month_str(i*2)$ = gsn_add_polyline(wks, plot(i*2), pgx_pool, pgy_pool, pgres)
+   plot1@$month_str(i*2)$ = gsn_add_polyline(wks1, plot1(i*2), pgx_pool, pgy_pool, pgres)
    ; plot2@$month(i)$ = gsn_add_polyline(wks2, plot2(i), pgx_pool, pgy_pool, pgres)
 
    ; str1 = unique_string("dum1")  ; "unique_string" will return a unique    
@@ -576,15 +597,17 @@ do i=0,dimsizes(month)-1
     res_pro@cnInfoLabelOn=False
 
     
-    iplot(lv*4+i)  = gsn_csm_contour(wks,prob_ssta_str,res_pro)
-    iplot1(lv*4+i) = gsn_csm_contour(wks1,prob_ssta_weak,res_pro)
+    iplot(i*2) = gsn_csm_contour(wks,prob_ssta_str,res_pro)
+    iplot1(i*2) = gsn_csm_contour(wks1,prob_ssta_weak,res_pro)
 
-   
+    iplot(i*2+1) = gsn_csm_contour(wks,prob_p_str,res_pro)
+    iplot1(i*2+1) = gsn_csm_contour(wks1,prob_p_weak,res_pro)
     ; iplot2(i) = gsn_csm_contour(wks2,prob_p_nor,res_pro)
 
-    overlay(plot(lv*4+i), iplot(lv*4+i))
-    overlay(plot1(lv*4+i), iplot1(lv*4+i))
-
+    overlay(plot(i*2), iplot(i*2))
+    overlay(plot1(i*2), iplot1(i*2))
+    overlay(plot(i*2+1), iplot(i*2+1))
+    overlay(plot1(i*2+1), iplot1(i*2+1))
     ; overlay(plot2(i), iplot2(i))
     delete(prob_p_str)
     delete(prob_p_weak)
@@ -592,22 +615,18 @@ do i=0,dimsizes(month)-1
     delete(prob_u_weak)
     delete(prob_ssta_str)
     delete(prob_ssta_weak)
-end do
 
+end do
 pres = True
-pres@gsnPanelLabelBar  = True
+pres@gsnPanelLabelBar  = False
 pres@pmLabelBarOrthogonalPosF = -0.02
 pres@gsnPanelMainString =  wksstring(k) +" events (Str Mon - Normal Mon)"
 
-; gsn_panel(wks, plot, (/4,2/), pres)
-; pres@gsnPanelMainString =  wksstring(k) +" events (Weak Mon - Normal Mon)"
-; gsn_panel(wks1, plot1, (/4,2/), pres)
-
-gsn_panel(wks, (/plot/), (/2,2/), pres)
-; gsn_panel(wks, (/plot(0),plot(4),plot(1),plot(5)/), (/2,2/), pres)
+gsn_panel(wks, plot, (/4,2/), pres)
 pres@gsnPanelMainString =  wksstring(k) +" events (Weak Mon - Normal Mon)"
-gsn_panel(wks1, (/plot1/), (/2,2/), pres)
+gsn_panel(wks1, plot1, (/4,2/), pres)
 
-end do 
 
-end  
+end do
+
+end 

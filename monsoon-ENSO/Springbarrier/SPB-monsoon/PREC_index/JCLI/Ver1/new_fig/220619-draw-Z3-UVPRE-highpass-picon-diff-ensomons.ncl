@@ -408,8 +408,8 @@ do i=0,dimsizes(month)-1
   ; if i.eq.1 then 
   ; prob_u_str({0:30},{90:150}) = 0.05
   ; end if
-  u_month_str = where(prob_u_str.le.0.05.or.prob_v_str.le.0.05, u_month_str, u_month_str@_FillValue)
-  u_month_weak = where(prob_u_weak.le.0.05.or.prob_v_weak.le.0.05, u_month_weak, u_month_weak@_FillValue)
+  ; u_month_str = where(prob_u_str.le.0.05.or.prob_v_str.le.0.05, u_month_str, u_month_str@_FillValue)
+  ; u_month_weak = where(prob_u_weak.le.0.05.or.prob_v_weak.le.0.05, u_month_weak, u_month_weak@_FillValue)
 
   ; p_month_str = where(prob_p_str.le.0.1, p_month_str, p_month_str@_FillValue)
   ; p_month_weak = where(prob_p_weak.le.0.1, p_month_weak, p_month_weak@_FillValue)
@@ -435,10 +435,10 @@ do i=0,dimsizes(month)-1
 
 
   res@mpLimitMode           = "LatLon"
-  res@mpMinLatF             = -60
-  res@mpMaxLatF             =60
-  res@mpMinLonF             = 30
-  res@mpMaxLonF             = 290
+  res@mpMinLatF             = -90
+  res@mpMaxLatF             =90
+  res@mpMinLonF             = 0
+  res@mpMaxLonF             = 360
 
   res@mpCenterLonF          = (res@mpMinLonF+res@mpMaxLonF)/2.0
 
