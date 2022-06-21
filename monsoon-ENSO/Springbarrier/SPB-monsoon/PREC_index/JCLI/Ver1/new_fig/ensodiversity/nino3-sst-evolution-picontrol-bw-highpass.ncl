@@ -77,7 +77,7 @@ do k=0,2
   ; diri = "/home/ys17-23/lsh/Project/monsoon-ENSO/Springbarrier/SPB-monsoon/PREC_index/pIcontrol/"
   ; opt1 =diri + str1(k)+""+"diffmonsoon-SSTevolution-highpass.txt"
 
-  opt1 ="highpass_bw_"+elninotype(m) +"-"+ str1(k)+""+"diffmonsoon-SSTevolution.txt"
+  opt1 ="highpass_bw_eof_"+elninotype(m) +"-"+ str1(k)+""+"diffmonsoon-SSTevolution.txt"
 
   data = asciiread(opt1, -1, "float")
   ssta_str_evo  = data(0:17)

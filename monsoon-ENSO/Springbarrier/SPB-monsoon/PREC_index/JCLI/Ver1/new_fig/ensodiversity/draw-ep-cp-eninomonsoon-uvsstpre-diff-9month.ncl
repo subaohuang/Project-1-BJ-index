@@ -161,7 +161,7 @@ begin
 
 ;;;nine composite  wet-warm, wet-cold, wet-normal, dry-warm, dry-cold, dry-normal, normal-warm, normal-cold, normal-normal
     year_out = addfile(diri_in+  \
-                       "piControl_ep-cp_monsoon_and_ensoyear_highpass_bw.nc", "r")
+                       "piControl_ep-cp_monsoon_and_ensoyear_highpass_bw_eof.nc", "r")
 
     ; nino_year = year_out->nino_year 
     ; lanina_year = year_out->lanina_year 
@@ -365,19 +365,34 @@ do i=0,dimsizes(month)-1
 ;;;;;;
 
 
-;;;;get data 
-;;;;;;
-; if k.ne.2 then 
-;   u_month_str = (/u_month_str - u_month_nor/)
-;   v_month_str = (/v_month_str - v_month_nor/)
-;   p_month_str = (/p_month_str - p_month_nor/)
-;   ssta_month_str = (/ssta_month_str - ssta_month_nor/)
+;;;get data 
+;;;;;
+if k.ne.2 then 
+  u_month_str = (/u_month_str - u_month_nor/)
+  v_month_str = (/v_month_str - v_month_nor/)
+  p_month_str = (/p_month_str - p_month_nor/)
+  ssta_month_str = (/ssta_month_str - ssta_month_nor/)
 
-;   u_month_weak = (/u_month_weak - u_month_nor/)
-;   v_month_weak = (/v_month_weak - v_month_nor/)
-;   p_month_weak = (/p_month_weak - p_month_nor/)
-;   ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
-; end if   
+  u_month_weak = (/u_month_weak - u_month_nor/)
+  v_month_weak = (/v_month_weak - v_month_nor/)
+  p_month_weak = (/p_month_weak - p_month_nor/)
+  ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
+end if   
+
+
+
+; if k.ne.2 then 
+;   u_month_str = (/u_month_str - u_month_weak/)*0.5
+;   v_month_str = (/v_month_str - v_month_weak/)*0.5
+;   p_month_str = (/p_month_str - p_month_weak/)*0.5
+;   ssta_month_str = (/ssta_month_str - ssta_month_weak/)*0.5
+
+;   u_month_weak = (/u_month_str/)
+;   v_month_weak = (/ v_month_str/)
+;   p_month_weak = (/ p_month_str/)
+;   ssta_month_weak = (/ssta_month_str/)
+; end if 
+
 
   ;;;; p
   var1 := (/var_p_str/)
@@ -503,6 +518,7 @@ do i=0,dimsizes(month)-1
 
   res@cnLevelSelectionMode = "ExplicitLevels"
   res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.1
+  ; res@cnLevels := (/-5,-4,-3,-2,-1,1,2,3,4,5/)*0.2
 
   res@gsnScalarContour        = False
 
