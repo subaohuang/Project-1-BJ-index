@@ -367,17 +367,17 @@ do i=0,dimsizes(month)-1
 
 ;;;get data 
 ;;;;;
-if k.ne.2 then 
-  u_month_str = (/u_month_str - u_month_nor/)
-  v_month_str = (/v_month_str - v_month_nor/)
-  p_month_str = (/p_month_str - p_month_nor/)
-  ssta_month_str = (/ssta_month_str - ssta_month_nor/)
+; if k.ne.2 then 
+;   u_month_str = (/u_month_str - u_month_nor/)
+;   v_month_str = (/v_month_str - v_month_nor/)
+;   p_month_str = (/p_month_str - p_month_nor/)
+;   ssta_month_str = (/ssta_month_str - ssta_month_nor/)
 
-  u_month_weak = (/u_month_weak - u_month_nor/)
-  v_month_weak = (/v_month_weak - v_month_nor/)
-  p_month_weak = (/p_month_weak - p_month_nor/)
-  ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
-end if   
+;   u_month_weak = (/u_month_weak - u_month_nor/)
+;   v_month_weak = (/v_month_weak - v_month_nor/)
+;   p_month_weak = (/p_month_weak - p_month_nor/)
+;   ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
+; end if   
 
 
 
@@ -592,8 +592,8 @@ end if
   res@cnFillColors = (/2,3,4,5,6,8,9,10,11,13,14/) - 2 
 
   
-  plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
-  ; plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_nor, v_month_nor, p_month_nor, res)
+  ; plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_str, v_month_str, p_month_str, res)
+  plot(i*2+1) = gsn_csm_vector_scalar_map(wks,u_month_nor, v_month_nor, p_month_nor, res)
   plot1(i*2+1) = gsn_csm_vector_scalar_map(wks1,u_month_weak, v_month_weak, p_month_weak, res)
 
   delete(res@cnFillColors)
