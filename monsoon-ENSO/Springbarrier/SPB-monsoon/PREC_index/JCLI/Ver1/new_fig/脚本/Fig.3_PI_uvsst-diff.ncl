@@ -409,7 +409,7 @@ do i=0,dimsizes(month)-1
   prob_p_str = one_test(p_month_str,var1,s1)
   prob_p_weak = one_test(p_month_weak,var3,s3)
   printVarSummary(prob_p_str)
- 
+
   end if 
 
   
@@ -488,7 +488,7 @@ do i=0,dimsizes(month)-1
   ssta_month_weak = (/ssta_month_weak - ssta_month_nor/)
   end if 
 ;;;;;
-
+  printMinMax(p_month_weak, opt)
 
   ; if i.eq.1 then 
   ; prob_u_str({0:30},{90:150}) = 0.05
